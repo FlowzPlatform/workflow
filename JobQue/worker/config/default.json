@@ -1,0 +1,33 @@
+{
+  "rethinkdb": {
+    "host": "172.16.160.117",
+    "port": 28015,
+    "db": "FlowzEngine"
+  },
+  "qOptions": {
+    "name": "scheduler",
+    "masterInterval": 60000,
+    "changeFeed": true,
+    "concurrency": 1,
+    "removeFinishedJobs": false
+  },
+  "jOptions": {
+    "masterInterval": 60000,
+    "changeFeed": true,
+    "concurrency": 100,
+    "removeFinishedJobs": false
+  },
+  "flowz_table": "flowzinstance",
+  "scheduler_table": "scheduler",
+  "qJobTimeout": 3600000,
+  "qJobRetryMax": 0,
+  "pinoDB": {
+    "timestamp": "pino.stdTimeFunctions.slowTime"
+  },
+  "pinoConsole": {
+    "timestamp": false,
+    "prettyPrint": {
+      "forceColor": true
+    }
+  }
+}

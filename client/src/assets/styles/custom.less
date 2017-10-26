@@ -1,0 +1,123 @@
+// Prefix
+@css-prefix: f-;
+
+.@{css-prefix}{
+  &logo{
+    width: 140px;
+    height: 30px;
+    /*background: #5b6270;*/
+    border-radius: 3px;
+    float: left;
+    position: relative;
+    top: 10px;
+    left: 20px;
+    > img{
+        width: 100%;
+    }
+  }
+  &layout-content{
+    min-height: 200px;
+    margin: 15px;
+    /*overflow: hidden;*/
+    background: #fff;
+    border-radius: 4px;
+    position: relative;
+    }
+  // &layout-content-main{
+  //   padding: 10px;
+  // }
+  &layout-copy{
+    text-align: center;
+    padding: 10px 0 10px;
+    color: #9ea7b4;
+    // border-top: 1px solid #ccc;
+  }
+}
+.layout-nav{
+  > li.ivu-menu-item{
+    > a{
+      color: #fff;
+    }
+  }
+}
+.vue-input-tag-wrapper{
+  border: 1px solid #dddee1 !important;
+  border-radius: 3px;
+  padding-top: 0px !important;
+  margin-bottom: 4px;
+  margin-top: 4px;
+  width: 300px;
+  > .input-tag{
+    background-color: #2d8cf0 !important;
+    border: 1px solid #2d8cf0 !important;  
+    color: #fff !important;
+    padding: 0px 3px !important;
+    line-height: 20px;
+    margin-top: 4px;
+    float: left;
+    > .remove {
+      color: #fff !important;
+    }
+  }
+  > .new-tag{
+    line-height: 20px !important;
+    margin-bottom: 0px !important; 
+    float: left;
+  }
+}
+.spin-icon-load{
+  animation: ani-demo-spin 1s linear infinite;
+}
+@keyframes ani-demo-spin {
+  from { transform: rotate(0deg);}
+  50%  { transform: rotate(180deg);}
+  to   { transform: rotate(360deg);}
+}
+
+/* Spliter */
+
+.split {
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: inherit;
+  width: inherit;
+}
+.gutter {
+  background-color: #eee;
+
+  background-repeat: no-repeat;
+  background-position: 50%;
+}
+.gutter.gutter-horizontal {
+  cursor: col-resize;
+  background-image: url('../../../node_modules/split.js/grips/vertical.png');
+}
+.gutter.gutter-vertical {
+  cursor: row-resize;
+  background-image: url('../../../node_modules/split.js/grips/horizontal.png');
+}
+.split.split-horizontal, .gutter.gutter-horizontal {
+  height: 100%;
+  float: left;
+}
+.created:not(.djs-connection) .djs-visual > :nth-child(1) {
+  fill: rgba(255, 251, 0, 0.56) !important;
+}
+
+.processing:not(.djs-connection) .djs-visual > :nth-child(1) {
+  fill: #1DA8D3 !important;
+}
+
+.completed:not(.djs-connection) .djs-visual > :nth-child(1) {
+  fill: #1AE75E !important;
+}
+
+.inputRequired:not(.djs-connection) .djs-visual > :nth-child(1) {
+  fill: #E71A24 !important;
+}
+
+
+@import '//cdnjs.cloudflare.com/ajax/libs/tinymce/4.6.3/skins/lightgray/skin.min.css';

@@ -1,0 +1,28 @@
+{
+    "mongo": {
+        "dbinstance": []
+    },
+    "rethink": {
+        "dbinstance": [
+            {
+                "isenable": true,
+                "connection_name": "Default Connection",
+                "host": "localhost",
+                "port": "28015",
+                "dbname": "schema_builder",
+                "username": "",
+                "password": "",
+                "upldIcn": "",
+                "notes": "By default",
+                "isdefault": true,
+                "id": "95ee201d-3ff0-48a4-42d1-5aeb70afe8e9"
+            }
+        ]
+    },
+    "elastic": {
+        "dbinstance": []
+    },
+    "nedb": {
+        "dbinstance": []
+    }
+}

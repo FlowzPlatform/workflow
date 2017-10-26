@@ -1,0 +1,74 @@
+{
+  "name": "service",
+  "description": "",
+  "version": "0.0.0",
+  "homepage": "",
+  "main": "src",
+  "keywords": [
+    "feathers"
+  ],
+  "author": {
+    "name": "nikitam",
+    "email": "nikitam@officebrain.com"
+  },
+  "contributors": [],
+  "bugs": {},
+  "directories": {
+    "lib": "src",
+    "test": "test/"
+  },
+  "engines": {
+    "node": ">= 6.0.0",
+    "npm": ">= 3.0.0"
+  },
+  "scripts": {
+    "test": "npm run eslint && npm run mocha",
+    "eslint": "eslint src/. test/. --config .eslintrc.json",
+    "start": "node src/",
+    "mocha": "mocha test/ --recursive"
+  },
+  "dependencies": {
+    "asyncawait": "^1.0.6",
+    "axios": "^0.16.2",
+    "body-parser": "^1.18.2",
+    "chokidar": "^1.7.0",
+    "compression": "^1.7.0",
+    "cors": "^2.8.4",
+    "crypto": "^1.0.1",
+    "crypto-js": "^3.1.9-1",
+    "elasticsearch": "^13.3.1",
+    "express": "^4.15.5",
+    "feathers": "^2.2.1",
+    "feathers-configuration": "^0.4.1",
+    "feathers-errors": "^2.9.2",
+    "feathers-hooks": "^2.0.4",
+    "feathers-hooks-common": "^3.7.3",
+    "feathers-mongodb": "^2.9.0",
+    "feathers-rest": "^1.8.0",
+    "feathers-rethinkdb": "^0.4.3",
+    "feathers-socketio": "^2.0.0",
+    "feathers-swagger": "^0.5.0",
+    "fibers": "^2.0.0",
+    "fs": "0.0.1-security",
+    "get-json": "^1.0.0",
+    "helmet": "^3.8.1",
+    "jsonfile": "^3.0.1",
+    "mongodb": "^2.2.31",
+    "mongoose": "^4.11.13",
+    "nedb": "^1.8.0",
+    "nedb-promise": "^2.0.1",
+    "path": "^0.12.7",
+    "require_optional": "^1.0.1",
+    "rethinkdb": "^2.3.3",
+    "rethinkdb-job-queue": "^3.1.4",
+    "rethinkdbdash": "^2.3.31",
+    "serve-favicon": "^2.4.4",
+    "winston": "^2.3.1"
+  },
+  "devDependencies": {
+    "eslint": "^4.7.2",
+    "mocha": "^3.5.3",
+    "request": "^2.82.0",
+    "request-promise": "^4.2.2"
+  }
+}

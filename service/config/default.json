@@ -1,0 +1,43 @@
+{
+  "host": "localhost",
+  "port": 3030,
+  "public": "../public/",
+  "paginate": {
+    "default": 10,
+    "max": 50
+  },
+  "rethinkdb": {
+    "db": "FlowzEngine",
+    "servers": [{
+      "host": "localhost", // 139.59.35.45
+      "port": "28015"
+    }]
+  },
+  "scheduler_table": "scheduler",
+  "qJobTimeout": 3600000,
+  "qJobRetryMax": 0,
+  "instance_table": "flowzinstance",
+  "approvar_table": "approvalClass",
+  "system_logs_table": "system_logs"
+}
+// {
+//   "host": "localhost",
+//   "port": 3030,
+//   "public": "../public/",
+//   "paginate": {
+//     "default": 10,
+//     "max": 50
+//   },
+//   "rethinkdb": {
+//     "db": "FlowzEngine",
+//     "servers": [{
+//       "host": "172.16.230.179",  // 139.59.35.45
+//       "port": "28015"
+//     }]
+//   },
+//   "scheduler_table": "scheduler",
+//   "qJobTimeout": 3600000,
+//   "qJobRetryMax": 0,
+//   "instance_table": "flowzinstance",
+//   "approvar_table": "approvalClass"
+// }
