@@ -13,7 +13,6 @@
     "chokidar": "^1.7.0",
     "config": "^1.26.2",
     "fs": "0.0.1-security",
-    "json-daex": "0.0.13",
     "lodash": "^4.17.4",
     "pino": "^4.7.2",
     "rethinkdb": "^2.3.3",
