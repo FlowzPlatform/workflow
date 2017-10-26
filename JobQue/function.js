@@ -445,7 +445,7 @@ module.exports.mapExternalInputs = async function (externalInput, targetJobs, nu
 }
 
 // -------- // -------- mapOutputsToChildInputs -------- // -------- //
-module.exports.mapOutputsToChildInputs = async function (targetJobs, sourceTargetMapping, sourceOutput, capacity, numberOfNewDataAvailable, fillFrom, sourceName, notifyingProcessSchema) {
+module.exports.mapOutputsToChildInputs = async function (targetJobs, sourceTargetMapping, sourceOutput, capacity, numberOfNewDataAvailable, fillFrom, sourceName, notifyingProcessSchema, outputPropertyIndex) {
 
   //to keep track of as to how much of new data got mapped
   var outputsMapped = 0
@@ -484,7 +484,7 @@ module.exports.mapOutputsToChildInputs = async function (targetJobs, sourceTarge
             //it will be equal to 1 if transform function is used instead of producerField
             // valueToAssign = await this.getValue(sourceTargetMapping[k].producerField, sourceOutput[outputsMapped])
 
-            this.map(sourceTargetMapping[k].producerField, sourceTargetMapping[k].consumerField, sourceOutput[outputsMapped], targetJobs[i].data.input[j], targetJobs[i].data.inputProperty[0].entityschema.entity, notifyingProcessSchema.outputProperty[0].entityschema.entity)
+            this.map(sourceTargetMapping[k].producerField, sourceTargetMapping[k].consumerField, sourceOutput[outputsMapped], targetJobs[i].data.input[j], targetJobs[i].data.inputProperty[0].entityschema.entity, notifyingProcessSchema.outputProperty[outputPropertyIndex].entityschema.entity)
           }
           else {
             //if transform function is used, execute the transform function and get value to be assigned
@@ -595,12 +595,14 @@ module.exports.performExternalOperation = async function (flowInstance, jobData,
 }
 
 // -------- // -------- performTargetOperation -------- // -------- //
-module.exports.performTargetOperation = async function (processList, targetId, jobData, flowInstance, notifyingProcessSchema) {
+module.exports.performTargetOperation = async function (processList, target, jobData, flowInstance, notifyingProcessSchema) {
+  let targetId = target.id
   let fId = flowInstance.id //get database id of flowInstance to which it belongs
   let targetSchema = _.find(processList,{'id': targetId}) //get process block from processList based on targetId
   let targetSchemaIndex = _.findIndex(processList,{'id': targetId}) //get index of process block from processList based on targetId
   //if output of previous data is single object, convert it to array
-  let sourceOutput = (jobData.output instanceof Array) ? jobData.output : [jobData.output]
+  let sourceOutput = (jobData.output instanceof Array) ? jobData.output : target.outputid ? jobData.output[target.outputid] : [jobData.output]
+  let outputPropertyIndex = target.outputid ? _.findIndex(notifyingProcessSchema.outputProperty, {id: target.outputid}) : 0
   let sourceName = jobData.currentProcess //variable to store id of process which got completed
 
   //get all child jobs from the respective child type queue whose status is `parameterMapping`
@@ -645,7 +647,7 @@ module.exports.performTargetOperation = async function (processList, targetId, j
   }
 
   //map the source output to target input based on the mapping defined
-  await this.mapOutputsToChildInputs(targetJobs, sourceTargetMapping, sourceOutput, capacity, numberOfNewDataAvailable, fillFrom, sourceName, notifyingProcessSchema)
+  await this.mapOutputsToChildInputs(targetJobs, sourceTargetMapping, sourceOutput, capacity, numberOfNewDataAvailable, fillFrom, sourceName, notifyingProcessSchema, outputPropertyIndex)
 
   //get number of updated jobs
   let numberOfUpdatedJobs = capacity ? Math.ceil(numberOfNewDataAvailable / capacity) : 1
