@@ -64,7 +64,7 @@
             <!-- <a @click="handleEdit(item)"><Icon type="edit" size="20"></Icon></Icon></a> -->
         </Form-item>
         <Form-item>
-            <a @click="handleRemove(index)"><Icon type="close-circled" style="color:#e74c3c" size="20"></Icon></a>
+            <a @click="handleRemove(index)"><Icon type="trash-a" style="color:#e74c3c" size="20"></Icon></a>
         </Form-item>
       </Form>
     </Form-item>
