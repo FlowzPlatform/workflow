@@ -46,12 +46,12 @@ q.process(async (job, next) => {
 
             //if condition verified, call performTargetOperation
             if (isConditionSatisfied) {
-              let tmp = await func.performTargetOperation(processList, targetProcess.id, job.data, flowInstance, notifyingProcessSchema)
+              let tmp = await func.performTargetOperation(processList, targetProcess, job.data, flowInstance, notifyingProcessSchema)
             }
           }
           else {
             //i.e. no condition for this next state, so call performTargetOperation anyway
-            let tmp = await func.performTargetOperation(processList, targetProcess.id, job.data, flowInstance, notifyingProcessSchema)
+            let tmp = await func.performTargetOperation(processList, targetProcess, job.data, flowInstance, notifyingProcessSchema)
           }
         }
         return next(null, 'success')
