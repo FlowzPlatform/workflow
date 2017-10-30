@@ -69,32 +69,6 @@ module.exports.allProcessMappingDone = async function (targetJob, capacity, targ
   }
 }
 
-// -------- // -------- anyMatchFound -------- // -------- //
-module.exports.anyMatchFound = async function (input, externalInput) {
-  if (input instanceof Array && externalInput instanceof Array) {
-    let len = Math.min(input.length, externalInput.length)
-    for (let i=0; i<len; i++) {
-      let tmpR = await this.anyMatchFound(input[i], externalInput[i])
-      if(tmpR) return true
-    }
-    return false
-  }
-  else if (input instanceof Array || externalInput instanceof Array) {
-    return true
-  }
-  else if (typeof input == 'object' && typeof externalInput == 'object') {
-    for (field in externalInput) {
-      if (input[field]) {
-        let tmpR = await this.anyMatchFound(input[field], externalInput[field])
-        if(tmpR) return true
-      }
-    }
-    return false
-  }
-  else if (input) return true
-  else return false
-}
-
 // -------- // -------- areAllInputsAvailable -------- // -------- //
 module.exports.areAllInputsAvailable = async function (targetJob, targetSchemaIndex, fId, externalCheck) {
 
@@ -229,27 +203,6 @@ module.exports.getCapacity = async function (targetSchema) {
   return targetSchema.capacity
 }
 
-// -------- // -------- getExternalSlotsAvailable -------- // -------- //
-module.exports.getExternalSlotsAvailable = async function (targetJob, capacity, externalInput) {
-  let input = targetJob.data.input
-  let j = 0
-
-  for (; j<input.length; j++) {
-    let anyMatch = await this.anyMatchFound(input[j], externalInput)
-    if (!anyMatch) break
-  }
-
-  return capacity ? capacity - j : 1
-}
-
-// -------- // -------- getExternalStartPoint -------- // -------- //
-module.exports.getExternalStartPoint = async function (targetJobs, capacity, externalInput) {
-  for (let i=0; i<targetJobs.length; i++) {
-    let externalSlotsAvailable = await this.getExternalSlotsAvailable(targetJobs[i], capacity, externalInput)
-    if (externalSlotsAvailable > 0) return i
-  }
-}
-
 // -------- // -------- getFillFromStartPoint -------- // -------- //
 module.exports.getFillFromStartPoint = async function (targetJobs, capacity, sourceName) {
   for (let i=0; i<targetJobs.length; i++) {
@@ -349,30 +302,6 @@ module.exports.getRequiredFieldsSkeleton = async function (targetEntitySchema) {
   return obj
 }
 
-// -------- // -------- getValue -------- // -------- //
-module.exports.getValue = async function (producerField, sourceOutput) {
-  if (sourceOutput instanceof Array) {
-    let sourceArray = []
-    for (let i=0; i<sourceOutput.length; i++) {
-      let ithSource = await this.getValue(producerField, sourceOutput[i])
-      if (ithSource instanceof Array) {
-        sourceArray = sourceArray.concat(ithSource)
-      }
-      else {
-        sourceArray.push(ithSource)
-      }
-    }
-    return sourceArray
-  }
-	else if (typeof producerField == 'object') {
-		var field = Object.keys(producerField)[0]
-		return this.getValue(producerField[field], sourceOutput[field])
-	}
-	else {
-		return sourceOutput[producerField]
-	}
-}
-
 // -------- // -------- map -------- // -------- //
 module.exports.map = function (producerField, consumerField, previousOutput, input, cFields, pFields) {
   if (typeof consumerField == 'object') {
@@ -407,29 +336,16 @@ module.exports.mapExternalInputs = async function (externalInput, targetJobs, nu
 
   for (let i=fillFrom; i<targetJobs.length; i++) {
 
-    //get number of free slots in available target process which can completely consume the provided external input
-    //----- let slotsAvailable = await this.getExternalSlotsAvailable(targetJobs[i], capacity, externalInput[outputsMapped])
-
-    //find index from which the mapping should be done
-    //----- let mapFromIndex = capacity ? capacity - slotsAvailable : 0
-    let mapFromIndex = 0
-
     //get number of new data remaining available for mapping
     let numberOfNewDataRemaining = numberOfExternalInputs - outputsMapped
 
-    //if number of new data remaining is less than slots to be filled, loop should end after all
-    //----- let loopEnd = slotsAvailable > numberOfNewDataRemaining && capacity ? mapFromIndex + numberOfNewDataRemaining : capacity ? capacity : 1
     let loopEnd = capacity ? capacity : 1
     //e.g.
     //if process has max capacity of 5 and currently requires 2 more slots to be filled,
     //i.e. its first 3 slots are already filled, we will start mapping from index 5-2 (i.e. 3),
     //as slots 0, 1 and 2 are already occupied
-    for (let j=mapFromIndex; j<loopEnd; j++) {
+    for (let j=0; j<loopEnd; j++) {
       if (capacity) {
-        // targetJobs[i].data.input[j] = await targetJobs[i].data.input[j] ? targetJobs[i].data.input[j] : {}
-
-        //merge the external input to target input
-        // _.merge(targetJobs[i].data.input[j], externalInput[outputsMapped])
         targetJobs[i].data.input[j] = externalInput[outputsMapped]
 
         //increment the new data consumed in mapping
@@ -482,7 +398,6 @@ module.exports.mapOutputsToChildInputs = async function (targetJobs, sourceTarge
           if (sourceTargetMapping[k].producerField != -1) {
             //get value from source to be mapped if producerField is not equal to 1
             //it will be equal to 1 if transform function is used instead of producerField
-            // valueToAssign = await this.getValue(sourceTargetMapping[k].producerField, sourceOutput[outputsMapped])
 
             this.map(sourceTargetMapping[k].producerField, sourceTargetMapping[k].consumerField, sourceOutput[outputsMapped], targetJobs[i].data.input[j], targetJobs[i].data.inputProperty[0].entityschema.entity, notifyingProcessSchema.outputProperty[outputPropertyIndex].entityschema.entity)
           }
@@ -511,7 +426,6 @@ module.exports.mapOutputsToChildInputs = async function (targetJobs, sourceTarge
             if (sourceTargetMapping[k].producerField != -1) {
               // get value from source to be mapped if producerField is not equal to 1
               // it will be equal to 1 if transform function is used instead of producerField
-              // valueToAssign = await this.getValue(sourceTargetMapping[k].producerField, sourceOutput[outputsMapped])
               this.map(sourceTargetMapping[k].producerField, sourceTargetMapping[k].consumerField, sourceOutput[outputsMapped], obj.inputs[outputsMapped], targetJobs[i].data.inputProperty[0].entityschema.entity)
             }
             else {
@@ -532,6 +446,80 @@ module.exports.mapOutputsToChildInputs = async function (targetJobs, sourceTarge
     }
     //check if all new data are mapped and if they are, break the loop and stop mapping
     if (outputsMapped == numberOfNewDataAvailable) break
+  }
+}
+
+// -------- // -------- newInstance -------- // -------- //
+module.exports.newInstance = async function (flowInstance, fId) {
+  for (let i=0; i<flowInstance.start_states.length; i++) {
+
+    let startStateId = flowInstance.start_states[i]
+    //get process object and process index from the processlist
+    //for the start type process
+    let startProcess = _.find(flowInstance.processList,{'id':startStateId})
+    let startProcessIndex = _.findIndex(flowInstance.processList,{'id':startStateId})
+
+    //create job for the start type process in it's respective worker
+    let startJob = await this.createJob(startProcess, startProcessIndex, flowInstance)
+
+    //get boolean to check if all input required to begin this start type process are available or not
+    let inputAvailability = await this.areAllInputsAvailable(startJob, startProcessIndex, fId, false)
+
+    //if all inputs are available to begin the process, call begin process function
+    if (inputAvailability) {
+      pino(PINO_DB_OPTION,fs.createWriteStream('./worker/mylog')).info({'fId': fId, 'jobId': startStateId}, 'next job')
+      pino(PINO_C_OPTION).info({'fId': fId, 'jobId': startStateId}, 'next job')
+      await func.beginProcess(startJob)
+    }
+    else {
+      pino(PINO_DB_OPTION,fs.createWriteStream('./worker/mylog')).warn({'fId': fId, 'jobId': startStateId}, 'all inputs not available')
+      pino(PINO_C_OPTION).warn({'fId': fId, 'jobId': startStateId}, 'all inputs not available')
+    }
+  }
+}
+
+// -------- // -------- notificationACK -------- // -------- //
+module.exports.notificationACK = async function (flowInstance, fId, jobData, next) {
+  //get all next states of the completed process
+  let forProcess = jobData.forProcess
+  let targetProcesses = await func.getNextStates(flowInstance, forProcess)
+
+  //if process has next state, the condition will be satisfied
+  //in case of end process, there will be no next states
+  if (targetProcesses.length > 0) {
+
+    let notifyingProcessSchema = flowInstance.processList[forProcess]
+    let processList = flowInstance.processList
+    //loop over each possible next state of the finished process, verify if that next state
+    //satisfies the condition to be executed(if any), and if does call performTargetOperation
+    for (let i=0; i<targetProcesses.length; i++) {
+      let targetProcess = targetProcesses[i]
+
+      let goToTargetCondition = targetProcess.condition //get the condition for the next state if any
+      if (goToTargetCondition) {
+
+        //verify the condition
+        let isConditionSatisfied = await this.verifyCondition(targetProcess.condition, jobData.input, jobData.output)
+
+        //if condition verified, call performTargetOperation
+        if (isConditionSatisfied) {
+          let tmp = await this.performTargetOperation(processList, targetProcess, jobData, flowInstance, notifyingProcessSchema)
+        }
+      }
+      else {
+        //i.e. no condition for this next state, so call performTargetOperation anyway
+        let tmp = await this.performTargetOperation(processList, targetProcess, jobData, flowInstance, notifyingProcessSchema)
+      }
+    }
+    return next(null, 'success')
+  }
+  else {
+  //i.e. the process completed has no next state
+  //in ideal scenerio, this will happen only if the process completed is of `end` type
+
+    pino(PINO_DB_OPTION,fs.createWriteStream('./worker/mylog')).info({'fId': fId, 'jobId': jobData.currentProcess}, 'End Process')
+    pino(PINO_C_OPTION).info({'fId': fId, 'jobId': jobData.currentProcess}, 'end process')
+    return next(null, 'success')
   }
 }
 
@@ -558,7 +546,6 @@ module.exports.performExternalOperation = async function (flowInstance, jobData,
     let capacity = await this.getCapacity(targetSchema)
 
     //get start point from where external inputs mapping will start_start
-    //----- let fillFrom = await this.getExternalStartPoint(targetJobs, capacity, externalInput[0])
     let fillFrom = 0
 
     //map supplied external inputs
