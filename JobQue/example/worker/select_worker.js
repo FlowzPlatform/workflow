@@ -3,7 +3,7 @@ const cxnOptions = app.get('rethinkdb')
 var qOptions = app.get('jOptions')
 qOptions.name = 'select_worker'
 
-const worker = require('../../worker/worker')
+const worker = require('flowz-worker')
 const select_worker = new worker({
     cxnOptions: cxnOptions,
     qOptions: qOptions
