@@ -196,7 +196,7 @@ export default {
     flowz.get()
     .then(response => {
       this.flowzList = response.data.data
-      console.log('this.flowzList', this.flowzList)
+      // console.log('this.flowzList', this.flowzList)
     })
     .catch(error => {
       console.log(error)
@@ -338,7 +338,8 @@ export default {
           return ftr._id === targetMap.__text
         }).map((m) => {
           return {
-            id: m._targetRef
+            id: m._targetRef,
+            outputid: m.extensionElements !== undefined ? m.extensionElements.myIOMapping.mapping._producer : ''
           }
         }).value()[0]
         // return { id: targetMap.__text }

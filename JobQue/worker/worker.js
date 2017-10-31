@@ -1,13 +1,47 @@
 const Queue = require('rethinkdb-job-queue')
-const func = require('./function')
-const app = require('config')
+const app = require('./config.json')
 const pino = require('pino')
+const chokidar = require('chokidar')
 const fs = require('fs')
-const PINO_DB_OPTION = app.get('pinoDB')
-const PINO_C_OPTION = app.get('pinoConsole')
 
-module.exports = (cxnOptions, qOptions, user_function) => {
+module.exports = function (options, user_function) {
+
+  options = options ? options : {}
+  const cxnOptions = options.cxnOptions ? options.cxnOptions : app.rethinkdb
+  const qOptions = options.qOptions ? options.qOptions : app.qOptions
+  var PINO_DB_OPTION = app.pinoDB
+  var PINO_C_OPTION = app.pinoConsole
+  const worker_functions = require('./function')
   const q = new Queue(cxnOptions, qOptions)
+
+  if (options.logs) {
+    if (options.logs.console == false) PINO_C_OPTION.level = 'silent'
+    if (options.logs.db == false) {
+      PINO_DB_OPTION.level = 'silent'
+    }
+    else {
+      const SYSTEM_LOGS_TABLE = options.logs.table ? options.logs.table : app.system_logs_table
+
+      //watcher
+      const CHOKIDAR_OPTION = app.chokidar
+      var watcher = chokidar.watch('./logs', CHOKIDAR_OPTION)
+
+      watcher.on('change', path =>
+        fs.readFile('./logs','utf8', function (err, data) {
+          if (err) throw err
+          let parsedData = JSON.parse(data)
+          rdash.table(SYSTEM_LOGS_TABLE).insert(parsedData).run(function(err , result){
+            if (err) {
+              pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).error({},err)
+              pino(PINO_C_OPTION).error({},err)
+            }
+          })
+        })
+      )
+    }
+  }
+
+  const func = new worker_functions(options, PINO_DB_OPTION, PINO_C_OPTION)
 
   q.process(async(job, next) => {
     try {
@@ -29,7 +63,7 @@ module.exports = (cxnOptions, qOptions, user_function) => {
       return next(null, 'success')
     } catch (err) {
       pino(PINO_C_OPTION).error(new Error('... error in process'))
-      pino(PINO_DB_OPTION, fs.createWriteStream('./mylog')).error({ "error": err }, 'error in process')
+      pino(PINO_DB_OPTION, fs.createWriteStream('./logs')).error({ "error": err }, 'error in process')
       return next(new Error('error'))
     }
   })
@@ -38,10 +72,10 @@ module.exports = (cxnOptions, qOptions, user_function) => {
     q.getJob(jobId).then((job) => {
       func.processError(job[0].data, job[0].id)
       pino(PINO_C_OPTION).info({ 'jobId': job[0].data.id }, 'job terminated');
-      pino(PINO_DB_OPTION, fs.createWriteStream('./mylog')).info({ 'fId': job[0].data.fId, 'jobId': job[0].data.id }, 'job terminated')
+      pino(PINO_DB_OPTION, fs.createWriteStream('./logs')).info({ 'fId': job[0].data.fId, 'jobId': job[0].data.id }, 'job terminated')
     }).catch(err => {
       pino(PINO_C_OPTION).error(new Error(err));
-      pino(PINO_DB_OPTION, fs.createWriteStream('./mylog')).error({ "error": err }, 'job terminated')
+      pino(PINO_DB_OPTION, fs.createWriteStream('./logs')).error({ "error": err }, 'job terminated')
     })
   })
 
@@ -49,10 +83,10 @@ module.exports = (cxnOptions, qOptions, user_function) => {
     q.getJob(jobId).then((job) => {
       func.processSuccess(job[0].data, job[0].id)
       pino(PINO_C_OPTION).info({ 'jobId': job[0].data.id }, 'job completed')
-      pino(PINO_DB_OPTION, fs.createWriteStream('./mylog')).info({ 'fId': job[0].data.fId, 'jobId': job[0].data.id }, 'job completed')
+      pino(PINO_DB_OPTION, fs.createWriteStream('./logs')).info({ 'fId': job[0].data.fId, 'jobId': job[0].data.id }, 'job completed')
     }).catch(err => {
       pino(PINO_C_OPTION).error(new Error(err));
-      pino(PINO_DB_OPTION, fs.createWriteStream('./mylog')).error({ "error": err }, 'job compleated')
+      pino(PINO_DB_OPTION, fs.createWriteStream('./logs')).error({ "error": err }, 'job compleated')
     })
   })
 }
