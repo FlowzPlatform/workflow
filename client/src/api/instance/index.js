@@ -1,8 +1,7 @@
 import api from '../../api'
-// let model = 'instance'
-let model = 'instance-test'
+let model = 'instance'
+// let model = 'instance-test'
 export default {
-
   // let gets = async function (id) {
   //     return true;
   //   },
@@ -13,6 +12,7 @@ export default {
     return api.request('get', '/' + model + '/' + id)
   },
   post: (data) => {
+    console.log('data', data)
     return api.request('post', '/' + model, data)
   },
   put: (id, data) => {

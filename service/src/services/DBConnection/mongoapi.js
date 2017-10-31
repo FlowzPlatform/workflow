@@ -181,14 +181,14 @@ module.exports = {
     // console.log(schema)
     return schema.ops;
   }),
-  postflowsInstance: async(function (data) {
+  postflowsInstance: async(function (data, dbid) {
     console.log('...................mongo post flowsInstance...................');
     // data.Schemaid = data._id
     // delete data._id
     // delete data.id
     // console.log('guid', data.database[1])
     var selectedDB = _.find(db, async(function(d){
-        return d.id == data.database[1]
+        return d.id == dbid
       }))
       // console.log(selectedDB)
     var schema = await (selectedDB.conn.collection('flows-instance').insert(data));

@@ -104,8 +104,8 @@ import SchemaForm from './SchemaForm'
             var _res = response.data
             var obj = {}
             // obj.id = self.getGuid();  // for guid for perticular row
-            obj.database = _res.database
-            obj.Schemaid = _res._id
+            // obj.database = _res.database
+            // obj.Schemaid = _res._id
             _.forEach(_res.entity, function(v) {
               if (v.customtype) {
                 console.log('child', self.getChildData(v.type))
@@ -151,8 +151,8 @@ import SchemaForm from './SchemaForm'
         var obj = {}
         // obj.id = this.getGuid();
         // alert(ent.database)
-        obj.database = ent.database
-        obj.Schemaid = ent._id
+        // obj.database = ent.database
+        // obj.Schemaid = ent._id
         _.forEach(ent.entity, function(v) {
           if (v.customtype) {
             obj[v.name] = self.getChildData(v.type)
