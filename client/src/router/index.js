@@ -19,6 +19,7 @@ import SchemaMappingList from '@/pages/schema/mapping/List'
 import FlowzList from '@/pages/flow/List'
 import FlowNew from '@/pages/flow/New'
 import flowInstance from '@/pages/flow/instance/New'
+import flowLog from '@/pages/flow/systemLog'
 
 // DbSettings area
 import DbSettingsList from '@/pages/dbSettings/List'
@@ -124,6 +125,11 @@ const routes = [{
         id: Number,
         required: false
       }
+    }, {
+      path: 'instance/log/:id',
+      component: flowLog,
+      name: 'flow/systemlog',
+      meta: { description: 'Flowz Instance systemlog' }
     }]
   }, { // DB Settings
     path: 'DbSettings',
