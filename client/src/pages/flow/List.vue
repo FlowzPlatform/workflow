@@ -3,11 +3,12 @@
     <row>
       <Button type="primary" style="float: right;margin-bottom: 2px;" @click="addNewFlow"><Icon type="plus" size="16"></Icon> Add</Button>
     </row>
-    <div slot="content">
+    <!-- <div slot="content">
         <div class="schema-form ivu-table-wrapper">
             <div class="ivu-table ivu-table-border">
-                <div class="ivu-table-body">
-                    <table cellspacing="0" cellpadding="0" border="0" style="width: 100%;">
+                <div class="ivu-table-body"> -->
+                    <Table :columns="columns10" :data="flowzList"></Table>
+                    <!-- <table cellspacing="0" cellpadding="0" border="0" style="width: 100%;">
                         <thead>
                             <tr>
                                 <th class="">
@@ -29,6 +30,11 @@
                         <tbody class="ivu-table-tbody">
                             <template v-if="flowzList.length > 0">
                             <tr class="ivu-table-row" v-for="(item, index) in flowzList">
+                                <td>
+                                <div class="ivu-table-cell">
+                                 {{columns10}}
+                                </div>
+                                </td>
                                 <td>
                                 <div class="ivu-table-cell">
                                     {{item.ProcessName}}
@@ -59,27 +65,131 @@
                               </tr>
                             </template>
                         </tbody>
-                    </table>
-                </div>
+                    </table> -->
+                <!-- </div>
             </div>
-        </div>
-    </div>
+        </div> -->
+    <!-- </div> -->
   </div>
 </template>
 <script>
 import flowz from '@/api/flowz'
 import _ from 'lodash'
-
 const X2JS = require('x2js')
 import schemamappingModel from '@/api/schemamapping'
 import schemaModel from '@/api/schema'
 import approvalModel from '@/api/approval'
 import instanceModel from '@/api/flowzinstance'
+import expandRow from './table-expand.vue'
 export default {
   name: 'Flowz',
+  components: { expandRow },
   data () {
     return {
-      flowzList: []
+      flowzList: [],
+      columns10: [
+        {
+          type: 'expand',
+          width: 50,
+          render: (h, params) => {
+            return h(expandRow, {
+              props: {
+                row: params.row
+              }
+            })
+          }
+        },
+        {
+          title: 'Name',
+          key: 'ProcessName'
+        },
+        {
+          title: 'Notes',
+          key: 'notes'
+        },
+        {
+          title: 'Action',
+          key: 'action',
+          width: 400,
+          align: 'center',
+          render: (h, params) => {
+            return h('div', [
+              h('Button', {
+                props: {
+                  type: 'text',
+                  size: 'large',
+                  icon: 'arrow-right-b'
+                },
+                style: {
+                  marginRight: '3px',
+                  padding: '0px',
+                  fontSize: '20px',
+                  color: '#2411c5'
+                },
+                on: {
+                  click: () => {
+                    this.createNewInstance(params.index, this.flowzList[params.index].id)
+                  }
+                }
+              }, ''),
+              h('Button', {
+                props: {
+                  type: 'text',
+                  size: 'large',
+                  icon: 'edit'
+                },
+                style: {
+                  color: '#CC0000',
+                  marginRight: '3px',
+                  padding: '0px',
+                  fontSize: '20px'
+                },
+                on: {
+                  click: () => {
+                    this.$router.push('flow/edit/' + this.flowzList[params.index].id)
+                  }
+                }
+              }, ''),
+              h('Button', {
+                props: {
+                  type: 'text',
+                  size: 'large',
+                  icon: 'android-delete'
+                },
+                style: {
+                  marginRight: '3px',
+                  padding: '0px',
+                  fontSize: '20px',
+                  color: '#e74c3c'
+                },
+                on: {
+                  click: () => {
+                    this.deleteFlow(this.flowzList[params.index].id)
+                  }
+                }
+              }, ''),
+              h('Button', {
+                props: {
+                  type: 'text',
+                  size: 'large',
+                  icon: 'navicon-round'
+                },
+                style: {
+                  marginRight: '3px',
+                  padding: '0px',
+                  fontSize: '20px',
+                  color: '#00C851'
+                },
+                on: {
+                  click: () => {
+                    this.deleteFlow(this.flowzList[params.index].id)
+                  }
+                }
+              }, '')
+            ])
+          }
+        }
+      ]
     }
   },
   mounted () {
