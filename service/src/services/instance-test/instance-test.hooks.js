@@ -40,7 +40,7 @@ var aftercreateInstance = async(function(hook) {
   console.log('........................................................hook')
     //console.log('inserted id', hook.data.id)
   if (hook.data.id != undefined) {
-    //console.log('hook.data.id', hook.data)
+    console.log('hook.data.id', hook.data)
     let inputData = hook.data.data
       // console.log('inputData', inputData)
     let instanceTable = app.get('instance_table')
@@ -73,41 +73,41 @@ var aftercreateInstance = async(function(hook) {
         //--------------- Add job -----------------
       q.addJob(job).then((savedJobs) => {}).catch(err => console.error(err))
     } else {
-      if (_.isArray(inputData)) {
-        for (let arr in processlog.input) {}
-      } else {
-        // var newObject = _.reduce(inputData, function(result, value, key) {
-        //   if (!_.has(processlog.input[0], key)) {
-        //     result[key] = value;
-        //   }
-        //   return result
-        // }, {});
-        console.log('newObject', inputData)
-        const Queue = require('rethinkdb-job-queue')
-          //--------------- Connection Options -----------------
-        const cxnOptions = config
-          //--------------- Queue Options -----------------
-        const qOptions = {
-          name: app.get('scheduler_table')
-        }
-        const q = new Queue(cxnOptions, qOptions)
-        var jobOptions = {}
-        jobOptions.data = {}
-          // jobOptions.data.fId = id
-        jobOptions.data = {
-          "fId": hook.data.instanceid,
-          "input": inputData,
-          "isExternalInput": true,
-          "jobId": hook.data.processid,
-        }
-        jobOptions.timeout = app.get('qJobTimeout')
-        jobOptions.retryMax = app.get('qJobRetryMax')
-        console.log('jobOptions', jobOptions)
-          //--------------- Create new job -----------------
-        const job = q.createJob(jobOptions)
-          //--------------- Add job -----------------
-        q.addJob(job).then((savedJobs) => {}).catch(err => console.error(err))
+      // if (_.isArray(inputData)) {
+      //   for (let arr in processlog.input) {}
+      // } else {
+      // var newObject = _.reduce(inputData, function(result, value, key) {
+      //   if (!_.has(processlog.input[0], key)) {
+      //     result[key] = value;
+      //   }
+      //   return result
+      // }, {});
+      console.log('newObject', inputData)
+      const Queue = require('rethinkdb-job-queue')
+        //--------------- Connection Options -----------------
+      const cxnOptions = config
+        //--------------- Queue Options -----------------
+      const qOptions = {
+        name: app.get('scheduler_table')
       }
+      const q = new Queue(cxnOptions, qOptions)
+      var jobOptions = {}
+      jobOptions.data = {}
+        // jobOptions.data.fId = id
+      jobOptions.data = {
+        "fId": hook.data.instanceid,
+        "input": inputData,
+        "isExternalInput": true,
+        "jobId": hook.data.processid,
+      }
+      jobOptions.timeout = app.get('qJobTimeout')
+      jobOptions.retryMax = app.get('qJobRetryMax')
+      console.log('jobOptions', jobOptions)
+        //--------------- Create new job -----------------
+      const job = q.createJob(jobOptions)
+        //--------------- Add job -----------------
+      q.addJob(job).then((savedJobs) => {}).catch(err => console.error(err))
+        //}
     }
   }
   // if (hook.data.id != undefined) {

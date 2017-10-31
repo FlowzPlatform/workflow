@@ -217,11 +217,11 @@ module.exports = {
     // return schema;
   }),
   
-  postflowsInstance: async(function (data) {
+  postflowsInstance: async(function (data, dbid) {
     console.log('....................rethink post flowsInstance........................');
-    console.log('guid', data.database[1])
+    console.log('guid', dbid)
     var selectedDB = _.find(r, (d) => {
-        return d.id == data.database[1]
+        return d.id == dbid
     })
     // var _data = JSON.parse(data);
     // console.log('data:',_data);
