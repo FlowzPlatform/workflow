@@ -13,6 +13,7 @@ module.exports = function (options, user_function) {
   var PINO_C_OPTION = app.pinoConsole
   const worker_functions = require('./function')
   const q = new Queue(cxnOptions, qOptions)
+  const rdash = require('rethinkdbdash')(cxnOptions)
 
   if (options.logs) {
     if (options.logs.console == false) PINO_C_OPTION.level = 'silent'
@@ -20,25 +21,31 @@ module.exports = function (options, user_function) {
       PINO_DB_OPTION.level = 'silent'
     }
     else {
-      const SYSTEM_LOGS_TABLE = options.logs.table ? options.logs.table : app.system_logs_table
-
-      //watcher
-      const CHOKIDAR_OPTION = app.chokidar
-      var watcher = chokidar.watch('./logs', CHOKIDAR_OPTION)
-
-      watcher.on('change', path =>
-        fs.readFile('./logs','utf8', function (err, data) {
-          if (err) throw err
-          let parsedData = JSON.parse(data)
-          rdash.table(SYSTEM_LOGS_TABLE).insert(parsedData).run(function(err , result){
-            if (err) {
-              pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).error({},err)
-              pino(PINO_C_OPTION).error({},err)
-            }
-          })
-        })
-      )
+      var logs_table = options.logs.table ? options.logs.table : app.system_logs_table
+      enableWatcher(logs_table)
     }
+  }
+  else {
+    enableWatcher(app.system_logs_table)
+  }
+
+  function enableWatcher(SYSTEM_LOGS_TABLE) {
+    //watcher
+    const CHOKIDAR_OPTION = app.chokidar
+    var watcher = chokidar.watch('./logs', CHOKIDAR_OPTION)
+
+    watcher.on('change', path =>
+      fs.readFile('./logs','utf8', function (err, data) {
+        if (err) throw err
+        let parsedData = JSON.parse(data)
+        rdash.table(SYSTEM_LOGS_TABLE).insert(parsedData).run(function(err , result){
+          if (err) {
+            pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).error({},err)
+            pino(PINO_C_OPTION).error({},err)
+          }
+        })
+      })
+    )
   }
 
   const func = new worker_functions(options, PINO_DB_OPTION, PINO_C_OPTION)

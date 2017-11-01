@@ -23,25 +23,32 @@ module.exports = function (options) {
     }
     else {
       const SYSTEM_LOGS_TABLE = options.logs.table ? options.logs.table : app.system_logs_table
-
-      //watcher
-      const CHOKIDAR_OPTION = app.chokidar
-      var watcher = chokidar.watch('./logs', CHOKIDAR_OPTION)
-
-      watcher.on('change', path =>
-        fs.readFile('./logs','utf8', function (err, data) {
-          if (err) throw err
-          let parsedData = JSON.parse(data)
-          rdash.table(SYSTEM_LOGS_TABLE).insert(parsedData).run(function(err , result){
-            if (err) {
-              pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).error({},err)
-              pino(PINO_C_OPTION).error({},err)
-            }
-          })
-        })
-      )
+      enableWatcher(logs_table)
     }
   }
+  else {
+    enableWatcher(app.system_logs_table)
+  }
+
+  function enableWatcher(SYSTEM_LOGS_TABLE) {
+    //watcher
+    const CHOKIDAR_OPTION = app.chokidar
+    var watcher = chokidar.watch('./logs', CHOKIDAR_OPTION)
+
+    watcher.on('change', path =>
+      fs.readFile('./logs','utf8', function (err, data) {
+        if (err) throw err
+        let parsedData = JSON.parse(data)
+        rdash.table(SYSTEM_LOGS_TABLE).insert(parsedData).run(function(err , result){
+          if (err) {
+            pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).error({},err)
+            pino(PINO_C_OPTION).error({},err)
+          }
+        })
+      })
+    )
+  }
+
   const func = new scheduler_functions(options, PINO_DB_OPTION, PINO_C_OPTION)
 
   q.process(async (job, next) => {
