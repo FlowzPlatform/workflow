@@ -44,17 +44,19 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
     await checkConnection(false, 20000)
     sourceCount = sourceCount ? sourceCount : []
     let tmp = await rdash.table(FLOWZ_TABLE).get(fId).update({'process_log': rdash.row('process_log').append({job: current, jobType: type.toLowerCase(), jobId: jobId, input: input, sourceCount: sourceCount, output: output, status: newStatus, lastModified: new Date()})}).run()
-    pino(PINO_C_OPTION).info('process in flow instance updated')
-    pino(PINO_DB_OPTION, fs.createWriteStream('./logs')).info('process in flow instance updated')
+    pino(PINO_C_OPTION).info({ 'fId': fId, 'jobId': jobId },'process in flow instance updated')
+    pino(PINO_DB_OPTION, fs.createWriteStream('./logs')).info({ 'fId': fId, 'jobId': jobId },'process in flow instance updated')
   }
 
   async function checkConnection (crash, delay){
     var r = require('rethinkdb')
     r.connect(cxnOptions, function (err, conn) {
       if (err) {
-        pino().error('\x1b[31m%s\x1b[0m','... rethinkdb error')
+        pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).error({}, 'rethinkdb error')
+        pino(PINO_C_OPTION).error({}, 'rethinkdb error')
         setTimeout(function(){
-          pino().info('\x1b[33m%s\x1b[0m','... retrying connection')
+          pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).info({}, 'retrying connection')
+          pino(PINO_C_OPTION).info({}, 'retrying connection')
           this.checkConnection(true, delay)
         },5000)
       } else {
