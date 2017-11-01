@@ -33,7 +33,6 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
 
   // -------- // -------- allProcessMappingDone -------- // -------- //
   this.constructor.prototype.allProcessMappingDone = async function (targetJob, capacity, targetSchemaIndex, fId, externalCheck) {
-    // let logAt = await targetJob.data.log_position
     let numberOfExternalSchema = (targetJob.data.mapping instanceof Array) ? targetJob.data.mapping.length : 1
 
     if (targetJob.data.input.length < capacity && numberOfExternalSchema != 0 && !externalCheck) {
@@ -42,7 +41,7 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
     }
     else {
       let requiredFieldsSkeleton = await this.getRequiredFieldsSkeleton(targetJob.data.inputProperty[0].entityschema)
-      if (numberOfExternalSchema != 0 && !externalCheck){
+      if (numberOfExternalSchema != 0 && !externalCheck) {
 
         let sourceCounts = targetJob.data.sourceCount ? Object.values(targetJob.data.sourceCount) : []
 
@@ -50,7 +49,7 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
           let tmp = await this.updateLog(targetJob, 'created', false)
           if (tmp) return 'done'
         }
-        else if (capacity){
+        else if (capacity) {
           let tmp = await this.updateLog(targetJob, 'inputRequired', requiredFieldsSkeleton)
           if (tmp) return 'done'
         }
@@ -190,6 +189,18 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
 
     return this.addJob(processJob, processQueue, flowInstance)
 
+  }
+
+  // -------- // -------- externalMappingRequired -------- // -------- //
+  this.constructor.prototype.externalMappingRequired = async function (targetJob) {
+    let numberOfExternalSchema = (targetJob.data.mapping instanceof Array) ? targetJob.data.mapping.length : 1
+
+    if (numberOfExternalSchema != 0) {
+      let sourceCounts = targetJob.data.sourceCount ? Object.values(targetJob.data.sourceCount) : []
+      if (sourceCounts.length < numberOfExternalSchema) return false
+      else return true
+    }
+    else return false
   }
 
   // -------- // -------- getCapacity -------- // -------- //
@@ -653,8 +664,15 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
       else {
         //i.e. all inputs are still not available so just update the latest mapping done
         //(it's status in it's respective worker queue will not be changed)
-        pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).warn({'fId': fId, 'jobId': targetId}, 'all inputs not available')
-        pino(PINO_C_OPTION).warn({'fId': fId, 'jobId': targetId}, 'all inputs not available')
+        var mappingRequired = capacity ? false : this.externalMappingRequired(targetJobs[i])
+        if (mappingRequired) {
+          pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).warn({'fId': fId, 'jobId': targetId}, 'mapping required')
+          pino(PINO_C_OPTION).warn({'fId': fId, 'jobId': targetId}, 'mapping required')
+        }
+        else {
+          pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).warn({'fId': fId, 'jobId': targetId}, 'all inputs not available')
+          pino(PINO_C_OPTION).warn({'fId': fId, 'jobId': targetId}, 'all inputs not available')
+        }
         let tmp = await this.updateProcess(targetJobs[i])
       }
     }

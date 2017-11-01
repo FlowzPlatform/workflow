@@ -38,7 +38,7 @@ module.exports = function (options, user_function) {
       fs.readFile('./logs','utf8', function (err, data) {
         if (err) throw err
         let parsedData = JSON.parse(data)
-        rdash.table(SYSTEM_LOGS_TABLE).insert(parsedData).run(function(err , result){
+        rdash.table(SYSTEM_LOGS_TABLE).insert(parsedData).run(function (err , result) {
           if (err) {
             pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).error({},err)
             pino(PINO_C_OPTION).error({},err)
