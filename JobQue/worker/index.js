@@ -53,7 +53,7 @@ module.exports = function (options, user_function) {
   q.process(async(job, next) => {
     try {
       if (!user_function) {
-        for (let i = 0; i < job.data.capacity; i++) {
+        for (let i = 0; i < job.data.input.length; i++) {
           job.data.output[i] = {}
           for (key in job.data.input[i]) {
             job.data.output[i][key] = job.data.input[i][key]
@@ -78,7 +78,7 @@ module.exports = function (options, user_function) {
   q.on('terminated', (queueId, jobId) => {
     q.getJob(jobId).then((job) => {
       func.processError(job[0].data, job[0].id)
-      pino(PINO_C_OPTION).info({ 'jobId': job[0].data.id }, 'job terminated');
+      pino(PINO_C_OPTION).info({ 'fId': job[0].data.fId, 'jobId': job[0].data.id }, 'job terminated');
       pino(PINO_DB_OPTION, fs.createWriteStream('./logs')).info({ 'fId': job[0].data.fId, 'jobId': job[0].data.id }, 'job terminated')
     }).catch(err => {
       pino(PINO_C_OPTION).error(new Error(err));
@@ -89,7 +89,7 @@ module.exports = function (options, user_function) {
   q.on('completed', (queueId, jobId, isRepeating) => {
     q.getJob(jobId).then((job) => {
       func.processSuccess(job[0].data, job[0].id)
-      pino(PINO_C_OPTION).info({ 'jobId': job[0].data.id }, 'job completed')
+      pino(PINO_C_OPTION).info({ 'fId': job[0].data.fId, 'jobId': job[0].data.id }, 'job completed')
       pino(PINO_DB_OPTION, fs.createWriteStream('./logs')).info({ 'fId': job[0].data.fId, 'jobId': job[0].data.id }, 'job completed')
     }).catch(err => {
       pino(PINO_C_OPTION).error(new Error(err));

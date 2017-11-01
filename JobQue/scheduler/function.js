@@ -76,7 +76,6 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
     let capacity = await this.getCapacity(data)
 
     let allInputsAvailable = await this.checkAllInputsAvailable(targetJob, capacity, externalCheck)
-
     if (allInputsAvailable) return true
     else {
       let tmp = await this.allProcessMappingDone(targetJob, capacity, targetSchemaIndex, fId, externalCheck)
@@ -115,7 +114,7 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
   // -------- // -------- checkAllInputsAvailable -------- // -------- //
   this.constructor.prototype.checkAllInputsAvailable = async function (targetJob, capacity, externalCheck) {
     if (targetJob.data.inputProperty.length == 0) return true
-    else if (capacity == targetJob.data.input.length || externalCheck) {
+    else if ((capacity == targetJob.data.input.length && targetJob.data.input.length != 0)|| externalCheck) {
       let targetEntitySchema = targetJob.data.inputProperty[0].entityschema
       for (let j=0; j<targetJob.data.input.length; j++) {
 
