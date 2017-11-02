@@ -21,8 +21,8 @@
      <!--  <Form-item>
         <Row>
           <Col span="24"> -->
-            <!-- <Button type="dashed" long @click="handleAdd" icon="plus-round">Add</Button>
-            </Col>
+            <Button type="dashed" long @click="handleAdd" icon="plus-round">Add</Button>
+            <!-- </Col>
           </Row>
         </Form-item> -->
       <Form-item>
@@ -169,9 +169,12 @@ export default {
       var self = this
       var obj = {}
       if (this.lastLog !== undefined && this.lastLog.input.length !== 0) {
-        obj = this.lastLog.input[0]
-        // obj.database = this.schema.database
-        obj.Schemaid = this.schema._id
+        _.forEach(self.lastLog.input, (obj) => {
+          // obj = this.lastLog.input[0]
+          // obj.database = this.schema.database
+          obj.Schemaid = self.schema._id
+          self.formSchemaInstance.data.push(obj)
+        })
       } else {
         // obj.database = this.schema.database
         obj.Schemaid = this.schema._id
@@ -189,9 +192,9 @@ export default {
             }
           }
         })
+        this.formSchemaInstance.data.push(obj)
       }
       // console.log('obj', obj)
-      this.formSchemaInstance.data.push(obj)
     },
     makeObj () {
       var obj = this.schema

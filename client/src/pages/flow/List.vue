@@ -299,7 +299,7 @@ export default {
           let _mapping = await self.getMapping(m, mergeModules)
           return {
             id: m._id,
-            capacity: 1,
+            capacity: false,
             name: m._name,
             type: m.outgoing ? (m._name === 'recruiter' ? 'select' : 'task') : 'end',
             target: m.outgoing ? self.getTargetId(m, jsonXML) : [],
@@ -319,7 +319,7 @@ export default {
       .map(async (m) => {
         return {
           id: m._id,
-          capacity: 1,
+          capacity: false,
           name: m._name,
           type: 'start',
           target: self.getTargetId(m, process),
