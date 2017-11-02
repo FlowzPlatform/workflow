@@ -250,6 +250,10 @@ export default {
         }
         this.entitySchema = item.inputProperty[0].entityschema
       }
+      import('../../../../static/js/form.js')
+      import('../../../../static/js/checkbox.js')
+      import('../../../../static/js/radiobutton.js')
+      import('../../../../static/js/selectValue.js')
       this.showProp = true
       this.propData = item
     },
