@@ -11,6 +11,7 @@ export default {
   schema: [],
   settings: [],
   tabdata: [],
+  flowz: [],
   activetab: '',
   editTemplate: null,
   sidenavtoggle: true,

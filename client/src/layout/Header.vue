@@ -17,18 +17,24 @@
             <Row type="flex" justify="end">
                 <div class="layout-nav">
                     <Menu-item name="1">
+                        <router-link to="/schema">
+                            <Icon type="filing" :size="14"></Icon>
+                            Schema
+                        </router-link>
+                    </Menu-item>
+                    <Menu-item name="2">
                         <router-link to="/flow">
                             <Icon type="network" :size="14"></Icon>
                             Flow
                         </router-link>
                     </Menu-item>
-                    <Menu-item name="2">
+                    <Menu-item name="3">
                         <router-link to="/DbSettings">
                             <Icon type="gear-b" :size="14"></Icon>
                             Db-settings
                         </router-link>
                     </Menu-item>
-                    <Menu-item name="3">
+                    <Menu-item name="4">
                       <Submenu name="1">
                         <template slot="title">
                           <Icon type="person" :size="16"></Icon>
