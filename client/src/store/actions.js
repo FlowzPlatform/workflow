@@ -28,6 +28,17 @@ export default {
     commit('SET_TABDATA', text)
     // console.log('getTabdata', text)
   },
+  getFlowzdata ({ commit }) {
+    commit('SET_FLOWZDATA', [])
+    api.request('get', '/flowz')
+      .then(response => {
+        commit('SET_FLOWZDATA', response.data.data)
+      })
+      .catch(error => {
+        console.log(error)
+        commit('SET_FLOWZDATA', [])
+      })
+  },
   setMapTemp ({commit}, text) {
     // console.log('getMapTempflag', text)
     commit('SET_MAPTEMP', text)

@@ -19,6 +19,9 @@ export default {
     // console.log('SET_TABDATA', tabdata)
     state.tabdata.push(tabdata)
   },
+  SET_FLOWZDATA (state, flowz) {
+    state.flowz = flowz
+  },
   SET_MAPTEMP (state, data) {
     // console.log(_.find(state.mappingTemp, { 'producer': data.producer }))
     var status = _.find(state.mappingTemp, { 'producer': data.producer })

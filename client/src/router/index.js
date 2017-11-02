@@ -14,6 +14,7 @@ import Approval from '@/area/Approval'
 import SchemaMapping from '@/pages/schema/Mapping'
 import SchemaMappingNew from '@/pages/schema/mapping/New'
 import SchemaMappingList from '@/pages/schema/mapping/List'
+import SchemaList from '@/pages/schema/schemaList'
 
 // Flow area
 import FlowzList from '@/pages/flow/List'
@@ -59,6 +60,10 @@ const routes = [{
         id: String,
         required: true
       }
+    }, {
+      path: '',
+      component: SchemaList,
+      meta: { description: 'Schema' }
     }, {
       path: 'new',
       component: SchemaNew,
