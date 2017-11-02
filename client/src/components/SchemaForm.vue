@@ -1,6 +1,6 @@
 <template>
   <div class="schema-form"   style="border-left:3px solid rgb(147, 180, 216);">
-  <!-- {{schemainstance.data}} -->
+    <!-- {{schemainstance.data}} -->
     <Form-item v-for="(item, index) in schemainstance.data" :key="index" style="padding-left:2px">
       <!-- {{schemainstance.data}} -->
       <Form ref="formSchema" :model="schemainstance" inline>

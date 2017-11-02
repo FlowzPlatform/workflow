@@ -4,7 +4,7 @@ let axios = require('axios')
 const app = require('config');
 const config = app.get('rethinkdb')
 const rdash = require('rethinkdbdash')(config)
-  // const _ = require('lodash')
+const _ = require('lodash')
 module.exports = {
   before: {
     all: [],
@@ -37,17 +37,17 @@ module.exports = {
   }
 };
 var aftercreateInstance = async(function(hook) {
-  console.log('hook', hook.data)
-  let instanceid = hook.data.data[0].refid;
-  console.log('instanceid', hook.data.data[0].refid);
-  axios.get('http://localhost:3030/instance/' + instanceid)
-    .then(function(response) {
-      console.log('response', response.data);
-      AddValueToJobQue(hook.data.instanceid, response.data, hook.data.processid)
-    })
-    .catch(function(error) {
-      console.log(error);
-    });
+  let outputObject = [];
+  for (var element in hook.result) {
+    let object = await (getinstancevalue(hook.result[element].refid))
+    outputObject.push(object);
+  }
+  AddValueToJobQue(hook.data.instanceid, outputObject, hook.data.processid)
+});
+var getinstancevalue = async(function(id) {
+  var response = await (axios.get('http://localhost:3030/instance/' + id))
+    // console.log('response', response)
+  return response.data
 });
 
 function AddValueToJobQue(flowid, data, processid) {

@@ -129,6 +129,7 @@ import _ from 'lodash'
 import BpmnViewer from 'bpmn-js/lib/NavigatedViewer.js'
 import flowz from '@/api/flowz'
 import axios from 'axios'
+import config from '../../../config'
 // socket
 let viewer, canvas
 export default {
@@ -163,7 +164,6 @@ export default {
     // console.log(this.$route.params.id)
     await instance.getThis(this.$route.params.id)
     .then(response => {
-      // console.log('response instance', response)
       this.flowInstance = response.data.processList
       this.flowInstanceLog = response.data.process_log
       this.flowid = response.data.fid
@@ -181,10 +181,12 @@ export default {
   feathers: {
     'flowz-instance': {
       updated (data) { // update status using socket
-        this.flowInstance = data.processList
-        this.flowInstanceLog = data.process_log
-        document.getElementById('canvas').innerHTML = ''
-        this.initBPMN()
+        if (data.id === this.$route.params.id) {
+          this.flowInstance = data.processList
+          this.flowInstanceLog = data.process_log
+          document.getElementById('canvas').innerHTML = ''
+          this.initBPMN()
+        }
       }
     }
   },
@@ -264,6 +266,10 @@ export default {
       if (status === 'inputRequired') {
         this.setProperties(item)
       }
+      if (status === 'mappingRequired') {
+        console.log('mappingRequired-status', status)
+        this.forwardmappingdata()
+      }
       return status
     },
     getLastLog (item) {
@@ -281,7 +287,7 @@ export default {
         if (err) {
           console.log('error rendering', err)
         } else {
-          console.log('self', self)
+          // console.log('self', self)
           _.forEach(self.flowInstanceLog, function (process) {
             canvas = viewer.get('canvas')
             canvas.addMarker(process.job, _.chain(self.flowInstanceLog).orderBy(['lastModified'], ['asc']).findLast((f) => { return f.job === process.job }).value().status)
@@ -305,6 +311,31 @@ export default {
           // e.gfx = the graphical element
           console.log(event, 'on', e.element.id)
         })
+      })
+    },
+    forwardmappingdata () {
+      // console.log('config.serverURI', config.serverURI)
+      let self = this
+      _.forEach(self.flowInstance, (v, k) => {
+        let lastLog = self.getLastLog(v)
+        if (lastLog !== undefined && lastLog.status === 'mappingRequired') {
+          // console.log('forwadamapping', lastLog)
+          let dataObject = {
+            'fId': self.$route.params.id,
+            'input': lastLog.input[0].inputs,
+            'isExternalInput': true,
+            'jobId': lastLog.job
+          }
+          let uri = config.serverURI + '/addInputToJobQue'
+          console.log('dataObject', dataObject)
+          axios.post(uri, dataObject)
+          .then(function (response) {
+            console.log(response)
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
+        }
       })
     }
   }

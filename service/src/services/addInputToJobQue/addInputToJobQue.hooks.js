@@ -20,9 +20,7 @@ module.exports = {
     all: [],
     find: [],
     get: [],
-    create: [
-      hook => aftercreateInstance(hook)
-    ],
+    create: [],
     update: [],
     patch: [],
     remove: []
@@ -39,16 +37,17 @@ module.exports = {
 };
 
 function beforeCreate(hook) {
+  // Create Job Que Scheduler Entry
   const Queue = require('rethinkdb-job-queue')
   const cxnOptions = config
   const qOptions = {
-    name: app.get('import')
+    name: app.get('scheduler_table')
   }
   const q = new Queue(cxnOptions, qOptions)
   var jobOptions = {}
   jobOptions.data = {}
-    // jobOptions.data.fId = id
   jobOptions.data = hook.data
+  console.log('jobOptions.data--Hook', jobOptions.data)
   jobOptions.timeout = app.get('qJobTimeout')
   jobOptions.retryMax = app.get('qJobRetryMax')
   const job = q.createJob(jobOptions)
