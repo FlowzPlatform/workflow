@@ -14,7 +14,6 @@
     <Table border :columns="columns5" :data="data5"></Table>
   </div>
 </template>
-
 <script>
 /*eslint-disable*/
 import api from '@/api'
@@ -22,11 +21,10 @@ import Schema from '@/api/schema'
 import schemamapping from '@/api/schemamapping'
 // import Tab from './Tab'
 import expandRow from '@/components/erow_mappinglist.vue'
-
 export default {
   name: 'instancelist',
   components: {
-    // 'f-Tab': Tab,  
+    // 'f-Tab': Tab,
     'expandRow': expandRow
   },
   computed: {
@@ -86,7 +84,7 @@ export default {
                 },
                 on: {
                   click: () => {
-                    this.show(params.index)
+                    this.show(this.$route.params.id,params.row.id)
                   }
                 }
               }, ''),
@@ -141,9 +139,8 @@ export default {
         console.log(error)
       })
     },
-    show (index) {
-    	console.log(this.data5[index].id)
-    	// this.$router.push('/schema-instance/edit/'+this.data5[index]._id)
+    show (schemaId,mappingId) {
+    	 this.$router.push('/schema/'+ schemaId + '/mapping/edit/' + mappingId)
     },
     remove (index) {
       this.$Modal.confirm({
@@ -190,4 +187,3 @@ export default {
     color: #fff;
 }
 </style>
-  
