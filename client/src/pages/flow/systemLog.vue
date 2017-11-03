@@ -1,5 +1,6 @@
 <template>
   <div class="flow">
+      <Button type="primary" @click="back()" icon="chevron-left" style="float:right;">Back</Button>
       <CheckboxGroup v-model="loglevel" @on-change="SetData">
         <Checkbox label="Error" style="color:red;"></Checkbox>
         <Checkbox label="Info" style="color:blue;"></Checkbox>
@@ -41,6 +42,9 @@ export default {
     })
   },
   methods: {
+    back () {
+      this.$router.go(-1)
+    },
     SetData: function () {
       var self = this
       console.log('loglevel', this.loglevel)
@@ -63,3 +67,8 @@ export default {
   }
 }
 </script>
+<style type="text/css">
+.ivu-table-wrapper{
+  margin-top: 10px
+}
+</style>

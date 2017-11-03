@@ -57,8 +57,8 @@
       </Row>
       <Menu theme="dark" width="auto" style="overflow: auto;height: calc(100% - 104px);">
         <Menu-item :name="index" v-for="(item, index) in flowz" :key="index">
-              <!-- <img v-if="item.iconpath === 'mongo'" :src="mongo" class="schema-icon">
-              <img v-else-if="item.iconpath === 'rethink'" :src="rethink" class="schema-icon">
+              <img :src="rethink" class="schema-icon">
+              <!-- <img v-else-if="item.iconpath === 'rethink'" :src="rethink" class="schema-icon">
               <img v-else-if="item.iconpath === 'elastic'" :src="elastic" class="schema-icon">
               <img v-else-if="item.iconpath === 'nedb'" :src="nedb" class="schema-icon">
               <img v-else :src="item.iconpath" class="schema-icon"> -->
@@ -68,7 +68,7 @@
               <div class="menu-action-icon">
                 <Tooltip content="Create instance" placement="top">
                   <a @click="createNewInstance(index, item.id)" style="margin-right:8px">
-                    <Icon type="arrow-right-b" size="21" color="#2411c5"></Icon>
+                    <Icon type="arrow-right-b" size="21" color="#003399"></Icon>
                   </a>
                  <!--  <router-link :to="{name: 'schema/edit', params: {id: item._id}}" exact>
                       <Icon type="ios-compose-outline" class="ficon edit"></Icon>
@@ -77,7 +77,7 @@
                 <Tooltip content="Edit" placement="top">
                   <a style="margin-right:8px">
                     <router-link :to="{name: 'flow/edit', params: {id: item.id}}">
-                    <Icon type="edit" size="17"></Icon>
+                    <Icon type="edit" size="17" color="#00cc00"></Icon>
                     </router-link>
                   </a>
                   <!-- <router-link :to="{name: 'schema/mapping/list', params: {id: item._id}}">

@@ -30,6 +30,9 @@
 </style>
 <template>
   <div class="schema">
+    <Row>
+      <Button type="primary" @click="back()" icon="chevron-left" style="float:right;">Back</Button>
+    </Row>
     <Row v-if="isGridManager">
       <grid-manager></grid-manager>
     </Row>
@@ -536,6 +539,9 @@ export default {
       // }
   },
   methods: {
+    back () {
+      this.$router.go(-1)
+    },
     checktype (type, index) {
       var val = _.find(this.defaultType, {value: type})
       if (val === undefined) {

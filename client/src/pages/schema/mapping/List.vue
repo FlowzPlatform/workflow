@@ -6,6 +6,7 @@
           <h5>Schema Mapping List</h5>
         </Col>
         <Col span="4">
+          <Button type="primary" size="small" @click="back()" icon="chevron-left" style="float:right; margin-left: 2px; margin-bottom: 2px;">Back</Button>
           <router-link :to="{name: 'schema/mapping/new', params: {id: $route.params.id}}">
             <Button type="primary" style="float:right" size="small" icon="plus-round">Add</Button>
           </router-link>
@@ -114,6 +115,9 @@ export default {
     }
   },
   methods: {
+    back () {
+      this.$router.go(-1)
+    },
     fetch (id) {
       var self = this
       // alert(id)
