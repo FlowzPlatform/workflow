@@ -21,9 +21,7 @@
   "scheduler_table": "scheduler",
   "qJobTimeout": 3600000,
   "qJobRetryMax": 0,
-  "pinoDB": {
-    "timestamp": "pino.stdTimeFunctions.slowTime"
-  },
+  "pinoDB": {},
   "pinoConsole": {
     "timestamp": false,
     "prettyPrint": {
