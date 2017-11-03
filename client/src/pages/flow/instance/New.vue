@@ -2,6 +2,7 @@
   <div>
     <row>
       <div style="float:right">
+        <Button type="primary" @click="back()" icon="chevron-left">Back</Button>
         <ButtonGroup>
           <Button type="primary" @click="graph = true, list = false" icon="pie-graph"></Button>
           <Button type="primary" @click="graph = false, list = true" icon="navicon-round"></Button>
@@ -189,6 +190,9 @@ export default {
     }
   },
   methods: {
+    back () {
+      this.$router.go(-1)
+    },
     getLogColumns (propData) {
       var log = this.getLastLog(propData)
       var cols = []

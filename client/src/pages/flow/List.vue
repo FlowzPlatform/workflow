@@ -139,7 +139,7 @@ export default {
                   icon: 'edit'
                 },
                 style: {
-                  color: '#CC0000',
+                  color: '#7DE144',
                   marginRight: '3px',
                   padding: '0px',
                   fontSize: '20px'
