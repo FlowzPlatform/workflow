@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 let async = require('asyncawait/async');
 let await = require('asyncawait/await');
+let config = require('config');
 var axios = require('axios');
 var fs = require('fs');
 var path = require('path');
@@ -8,18 +9,22 @@ var _ = require('lodash');
 var db = '../DBConnection/db.json';
 var file = require(db);
 var dbapi = []; 
+let postSchemaData;
+let putSchemaData;
 
+// console.log('config', config.get('host'))
 _.forEach(file, function (dbs, i) {
-  // console.log('dbs', dbs)
+  var flag = false
   _.forEach(dbs.dbinstance, function(instance) {
-    // console.log(instance)
     if (instance.isenable) {
-      // console.log('qqqq', instance.connection_name)
-      var api = require('../DBConnection/' + i + 'api')
-      dbapi.push({ db: i, api: api });
-      api.choose()
+      flag = true
     }
   })
+  if(flag) {
+    var api = require('../DBConnection/' + i + 'api')
+    dbapi.push({ db: i, api: api });
+    api.choose()
+  }
 })
 
 var chokidar = require('chokidar');
@@ -35,13 +40,17 @@ let readfile = async(function () {
     file = data;
     dbapi = [];
     _.forEach(file, function (dbs, i) {
+      var flag = false
       _.forEach(dbs.dbinstance, function(instance) {
         if (instance.isenable) {
-          var api = require('../DBConnection/' + i + 'api')
-          dbapi.push({ db: i, api: api });
-          api.choose()
+          flag = true
         }
       })
+      if(flag) {
+        var api = require('../DBConnection/' + i + 'api')
+        dbapi.push({ db: i, api: api });
+        api.choose()
+      }
     })
   });
 })
@@ -53,6 +62,7 @@ chokidar.watch(path.join(__dirname, '../DBConnection/db.json'), { ignored: /(^|[
   delete require.cache[require.resolve('../DBConnection/mongoapi')];
   delete require.cache[require.resolve('../DBConnection/rethinkapi')];
   delete require.cache[require.resolve('../DBConnection/elasticapi')];
+  delete require.cache[require.resolve('../DBConnection/mysqlapi')];    
 
   var checking = await(readfile);
   if(checking == 'nodata'){
@@ -104,24 +114,58 @@ var checkFlagforGet = async (function(mObj) {
     return flag
 })
 
-var checkDataObj = async (function(data) {
+var checkDataObj = async (function(data, id, res) {
     console.log("calling >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-    
     for(let [dIndex, dObj] of data.entries()){
+        // if(dObj.hasOwnProperty('Schemaid')) {
+        //   // console.log('{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{')
+        //   var a = await (setSchemaData(dObj.Schemaid))
+        //   // console.log('}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}', a)
+        // }
         // console.log('.......', dIndex, dObj)
         for(let sKey in dObj){
             // console.log('.....', sObj)
-            if (sKey == 'database') {
-            }
-            else {
+            // console.log('.....................................................................')
+            // console.log('obj', dObj, sKey, dObj[sKey], dIndex)
+            // console.log('.....................................................................')
+            // if (sKey == 'database') {
+            // }
+            // else {
                 if (Array.isArray(dObj[sKey])) {
                     var status = await (checkFlag(dObj[sKey]))
+                    // console.log('...................................................')
+                    // console.log('dObj[sKey]', dObj[sKey], 'sKey', sKey, 'dObj', dObj, 'res', res)
+                    // console.log('...................................................')
                     // console.log('Status of Array.............................', status)
                     if (!status) {
+                        // console.log('postSchemaData', postSchemaData)
+                        // var entityType = await(FindEntitytype(sKey, postSchemaData))
+                        // console.log('}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}')
+                        // console.log('entityType', entityType)
+                        // var Database = await (giveDatabase(entityType))
+                        // console.log('|||||||||||||||||||||||||||||||||||||', entityType, Database)
                         // console.log('Val....not contain any array.......')
+                        var entityType = await(FindEntitytype(sKey, res))
+                        var _res = await (getSchemaData(entityType))
+                        // console.log('_res', _res, '\nres...', res)
                         for(let [inx , obj] of dObj[sKey].entries()){
-                            // console.log('........', dObj[sKey][inx], inx, obj)
-                            var objid = await (saveData(obj))
+                          // console.log('?????????????????????????', sKey)
+                          var s = false
+                          for(let k in obj) {
+                            if(Array.isArray(obj[k])){
+                              s = true
+                            }
+                          }
+                          if(!s) {
+                            console.log('<<<<<<<<<<<<<', _res)
+                            objid = await (saveData(obj, _res.database))
+                          }
+                          else {
+                            console.log('@@@@.............', res)
+                            objid = await (saveData(obj, res.database))
+                          }
+                          // console.log('res=====================================', res)
+                            // var objid = await (saveData(obj, res.database))
                             // console.log('jjksjdfkldsssssssssssssssssss', typeof objid, objid)
                             objid = objid.toString()
                             // console.log('?????????????????????????/////', objid, typeof objid)
@@ -132,34 +176,102 @@ var checkDataObj = async (function(data) {
                         }
                     }
                     else {
-                        // console.log('....', dObj[Key]) 
-                        var resp = await (checkDataObj(dObj[sKey]))
+                        // console.log('..::::::::::::::::::..', dObj[sKey], sKey, dObj) 
+                        var entityType = await(FindEntitytype(sKey, res))
+                        // console.log('........', entityType)
+                        var _res = await (getSchemaData(entityType))
+                        // console.log('_res', _res)
+                        // var entityType = await(FindEntitytype(sKey, postSchemaData))
+                        // var res = await (setSchemaData(entityType))
+                        // console.log('entityType,,, ', entityType)
+                        var resp = await (checkDataObj(dObj[sKey], entityType, _res))
                         dObj[sKey] = resp
                         // console.log('contain array...............recursive.....', resp)
                     }
                 }
-            }
+            // }
         }
     }  
 
     for(let [inxx, object] of data.entries()){
-        // console.log('qqqqqqqqqqqqqqqqqqqqqqq', object)
-        var id = await (saveData(object))
+      // console.log('>>>>>>>>>>>>>>> ', res)
+        var id = await (saveData(object, res.database))
         id = id.toString()
         for(let okey in object) {
             delete object[okey]
         }
         object.refid = id
+        // console.log('qqqqqqqqqqqqqqqqqqqqqqq', object)
     }
     return data
 })
 
-var saveData = async (function(data) {
-    console.log('save calling...................')
-    var _dbindex = _.findIndex(dbapi, { 'db': data.database[0]});
-    var dbdata = await (dbapi[_dbindex].api.postflowsInstance(data));
+var FindEntitytype = async(function(fieldname, data) {
+  // console.log('FindEntitytype :::::::::::', fieldname)
+  for(let [inxx, object] of data.entity.entries()) {
+      // console.log('?///////////////', object)
+    
+    if (object.name == fieldname) {
+      return object.type
+    }
+    // console.log('...', object, inxx)
+  }
+})
+
+var setSchemaData = async(function(id) {
+  // console.log('setSchemaData calling >>>>>>>>>>>')
+  var res = await (axios.get('http://'+config.get('host')+':'+config.get('port')+'/schema/'+id))
+  postSchemaData = res.data 
+  return 'set'
+})
+
+var getSchemaData = async(function(id) {
+  // console.log('setSchemaData calling >>>>>>>>>>>')
+  var res = await (axios.get('http://'+config.get('host')+':'+config.get('port')+'/schema/'+id))
+  // console.log('res', res)
+  // postSchemaData = res.data 
+  return res.data
+})
+
+var giveDatabase = async(function(schemaid) {
+  var res = await (axios.get('http://'+config.get('host')+':'+config.get('port')+'/schema/'+schemaid))
+  console.log('response from giveDatabase', res.data)
+  // postSchemaData = res.data 
+  return res.data.database
+})
+
+var saveData = async (function(data, database) {
+    console.log('save calling...................', data, database)
+    // var database;
+    // if(data.Schemaid != undefined) {
+      // database = await (giveDatabase(data.Schemaid))
+      // console.log('??????????????????????????', database)
+      // console.log('Database not undefined found....', database)
+    // } else {
+      /////////////////////// 
+      // database = yes
+      // console.log('Database undefined found.......', database)
+    // }
+    // console.log('data', data, 'yes', yes)
+    // if(database == 'single') {
+    //   var id = data.Schemaid
+    //   var res = await (getSchemaData(id))
+    //   database = res.database
+    // }
+    var _dbindex = _.findIndex(dbapi, { 'db': database[0]});
+    var dbdata = await (dbapi[_dbindex].api.postflowsInstance(data, database[1]));
     console.log('Return Instance id .........', dbdata)
     return dbdata;
+})
+
+var setData = async(function(data) {
+  // console.log('????????????????????????????????????????')
+  var id = data[0].Schemaid
+  var res = await (getSchemaData(id))
+  // console.log('entity???????????', res)
+  // console.log('id.............', id)
+  var res = await (checkDataObj(data, id, res))
+  return res
 })
 
 var getInstance = async( function(id) {
@@ -182,7 +294,7 @@ var getInstance = async( function(id) {
         })
         // console.log('????????????????????', obj)
         var flag = await (checkFlagforGet(obj))
-        console.log(flag)
+        // console.log(flag)
         if(!flag) {
             return obj
         }
@@ -224,6 +336,120 @@ var getallInstance = async(function(data) {
       return data
 })
 
+var getActualInstance = async(function(id) {
+    var instance = []
+    dbapi.forEach(function (db) {
+        let _promise = new Promise((resolve, reject) => {
+            db.api.getThisflowsInstance(id).then((data) => {
+                resolve(data);
+            })
+        });
+        instance.push(_promise)
+      });
+    // }
+    var _data = Promise.all(instance).then(async (function (response) {
+        var obj;
+        response.forEach(function (item) {
+            if (item[0] != undefined) {
+                obj = item[0]
+            }
+        })
+        // console.log('????????????????????', obj)
+        // var flag = await (checkFlagforGet(obj))
+        // console.log(flag)
+        // if(!flag) {
+        //     return obj
+        // }
+        // else {
+        //     for(let okey in obj) {
+        //         // console.log(okey, '=', obj[okey])
+        //         if (okey == 'database') {
+        //         }
+        //         else {
+        //             if (Array.isArray(obj[okey])) {
+        //                 for(let [index, insideObj] of obj[okey].entries()) {
+        //                     // console.log('111111111111111111111111111111111', insideObj)
+        //                     obj[okey][index] = await (getInstance(insideObj.refid))
+        //                     // console.log('222222222222222222222222222222222', obj[okey][index], insideObj)
+        //                 }
+        //             }
+        //         } 
+        //     }
+        //     return obj
+        return obj
+        // }
+    }))
+    return _data;
+})
+
+var updateData = async (function(id, data, dbid) {
+})
+
+var checkUpdateData = async(function(id, new_data) {
+  // console.log('updateData,,,,', id, data)
+  // if(new_data[0].hasOwnProperty(Schemaid)) {
+    var res = await (axios.get('http://'+config.get('host')+':'+config.get('port')+'/schema/'+new_data[0].Schemaid))
+    putSchemaData = res.data
+  // }
+  // console.log('putSchemaData', putSchemaData.data)
+  var old_data = await (getActualInstance(id))
+  // console.log('getActualInstance old_data', old_data)
+  var res = await (compareData(id, old_data, new_data))
+  return res
+})
+
+var compareData = async(function(id, old_data, new_data) {
+  var new_status = await (checkFlagforGet(old_data))
+  console.log('new_status', new_status, old_data)
+  if(!new_status) {
+    // console.log('Here..................')
+    var _dbindex = _.findIndex(dbapi, { 'db': putSchemaData.database[0]});
+    var dbdata = await (dbapi[_dbindex].api.putflowsInstance(new_data[0], id, putSchemaData.database[1]));
+    return dbdata
+  } else {
+    // for(let [inxx, object] of new_data.entries()) {
+      for(let sKey in old_data) {
+        // console.log(object, sKey)
+        if(Array.isArray(old_data[sKey])) {
+          console.log('....................')
+          console.log(old_data[sKey], sKey)
+          var entityType = await(FindEntitytype(sKey, putSchemaData))
+          var database = await (giveDatabase(entityType))
+          console.log('Database', database)
+          for(let [i, sObj] of old_data[sKey].entries()) {
+            var _dbindex = _.findIndex(dbapi, { 'db': database[0]});
+            var dbdata = await (dbapi[_dbindex].api.putflowsInstance(new_data[0][sKey][i], sObj.refid, database[1]))
+          }
+          // var status = await (checkFlagforGet(object[sKey]))
+          // if(!status) {
+          //   console.log('Hieeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee')
+          //   for (let sObj in object[sKey]) {
+          //     console.log('sKey', sKey)
+          //     // var _dbindex = _.findIndex(dbapi, { 'db': putSchemaData.database[0]});
+          //     // var dbdata = await (dbapi[_dbindex].api.putflowsInstance(new_data[0], sObj.refid, putSchemaData.database[1]));
+          //   }
+          // } else {
+
+          // }
+        }
+      }
+    // }
+    return 'refid'
+  }
+})
+
+var singleLevelsave = async(function(data) {
+  var id = data[0].Schemaid
+  var res = await (getSchemaData(id))
+  var arr = []
+  for(let [inx, sObj] of data.entries()) {
+    var _res = await (saveData(sObj, res.database))
+    arr.push({refid: _res})
+  }
+  return arr
+}) 
+
+
 class Service {
   constructor(options) {
     this.options = options || {};
@@ -263,10 +489,10 @@ class Service {
       //       }
       //   }
       // }
-      console.log('Extract', Extract)
+      // console.log('Extract', Extract)
       Extract = getallInstance(Extract)
       return Promise.resolve(Extract).then(function(d){
-        console.log('Hieeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee')
+        // console.log('Hieeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee')
         return d
       })
     })
@@ -332,20 +558,39 @@ class Service {
     var flag = false
     //var mainDt = data.data
     for(let value in data.data[0]) {
-          if (value == 'database') {
-          }
-          else {
-                if(Array.isArray(data.data[0][value])){
-                    // console.log(data[0][value])
-                    flag = true
-                }
-          }
+        // console.log(value)
+        if(Array.isArray(data.data[0][value])){
+            // console.log(data[0][value])
+            flag = true
+        }
     }
+    // console.log('Flag create', flag)
     if(!flag) {
-        return saveData(data.data[0])
+        // var response = saveData(data.data[0], 'single')
+        // var _data = Promise.resolve(response).then(function(d) {
+        //     console.log('response... ', d)
+        //     var arr = []
+        //     arr.push({refid: d})
+        //     return arr
+        // })
+        // .catch(function(err){
+        //     console.log('Error', err)
+        // }) 
+        // return _data
+        // return saveData(data.data[0])
+        var response = singleLevelsave(data.data)
+        return Promise.resolve(response)
     }
     else {
-        var response = checkDataObj(data.data)
+        // var id = data.data[0].Schemaid
+        // console.log('.............id ', id)
+        // let _promise = new Promise((resolve, reject) => {
+        //     getSchemaDataEnt(id).then((data) => {
+        //         resolve(data);
+        //     })
+        // });
+        var response = setData(data.data)
+        // var response = checkDataObj(data.data)
         return Promise.resolve(response)
         // .then(function(d) {
         //     console.log('response... ', d)
@@ -366,8 +611,12 @@ class Service {
   // }
 
   update(id, data, params) {
-    var dbdata = dbapi.putflowsInstance(data, id);
-    return Promise.resolve(dbdata);
+    console.log('-------------------------- Update Feathers Instacne ----------------------')
+    // console.log('update ...', id, data)
+    var response = checkUpdateData(id, data.data)
+    return Promise.resolve(response)
+    // var dbdata = dbapi.putflowsInstance(data, id);
+    // return Promise.resolve(dbdata);
   }
 
   patch(id, data, params) {

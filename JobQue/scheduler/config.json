@@ -1,8 +1,8 @@
 {
   "rethinkdb": {
-    "host": "172.16.160.117",
+    "host": "localhost",
     "port": 28015,
-    "db": "FlowzEngine"
+    "db": "workers"
   },
   "qOptions": {
     "name": "scheduler",

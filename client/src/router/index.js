@@ -96,6 +96,15 @@ const routes = [{
           id: Number,
           required: false
         }
+      }, {
+        path: 'edit/:mappingid',
+        component: SchemaMappingNew,
+        name: 'schema/mapping/edit',
+        meta: { description: 'SchemaMappingEdit' },
+        props: {
+          id: Number,
+          required: false
+        }
       }]
     }]
   }, { // Flow

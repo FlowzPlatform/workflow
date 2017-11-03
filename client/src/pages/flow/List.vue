@@ -167,25 +167,25 @@ export default {
                     this.deleteFlow(this.flowzList[params.index].id)
                   }
                 }
-              }, ''),
-              h('Button', {
-                props: {
-                  type: 'text',
-                  size: 'large',
-                  icon: 'navicon-round'
-                },
-                style: {
-                  marginRight: '3px',
-                  padding: '0px',
-                  fontSize: '20px',
-                  color: '#00C851'
-                },
-                on: {
-                  click: () => {
-                    this.deleteFlow(this.flowzList[params.index].id)
-                  }
-                }
               }, '')
+              // h('Button', {
+              //   props: {
+              //     type: 'text',
+              //     size: 'large',
+              //     icon: 'navicon-round'
+              //   },
+              //   style: {
+              //     marginRight: '3px',
+              //     padding: '0px',
+              //     fontSize: '20px',
+              //     color: '#00C851'
+              //   },
+              //   on: {
+              //     click: () => {
+              //       this.deleteFlow(this.flowzList[params.index].id)
+              //     }
+              //   }
+              // }, '')
             ])
           }
         }
@@ -196,7 +196,7 @@ export default {
     flowz.get()
     .then(response => {
       this.flowzList = response.data.data
-      console.log('this.flowzList', this.flowzList)
+      // console.log('this.flowzList', this.flowzList)
     })
     .catch(error => {
       console.log(error)
@@ -208,6 +208,7 @@ export default {
       // console.log('generatedJson', JSON.stringify(generatedJson))
       // console.log('generatedJson', generatedJson)
       generatedJson.fid = id
+      generatedJson.createdOn = Date()
       instanceModel.post(generatedJson)
       .then(response => {
         // console.log('response.data', response.data)
@@ -299,7 +300,7 @@ export default {
           let _mapping = await self.getMapping(m, mergeModules)
           return {
             id: m._id,
-            capacity: 1,
+            capacity: false,
             name: m._name,
             type: m.outgoing ? (m._name === 'recruiter' ? 'select' : 'task') : 'end',
             target: m.outgoing ? self.getTargetId(m, jsonXML) : [],
@@ -319,7 +320,7 @@ export default {
       .map(async (m) => {
         return {
           id: m._id,
-          capacity: 1,
+          capacity: false,
           name: m._name,
           type: 'start',
           target: self.getTargetId(m, process),
@@ -338,7 +339,8 @@ export default {
           return ftr._id === targetMap.__text
         }).map((m) => {
           return {
-            id: m._targetRef
+            id: m._targetRef,
+            outputid: m.extensionElements !== undefined ? m.extensionElements.myIOMapping.mapping._producer : ''
           }
         }).value()[0]
         // return { id: targetMap.__text }

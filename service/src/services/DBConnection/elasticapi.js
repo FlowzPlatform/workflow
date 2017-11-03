@@ -305,13 +305,13 @@ module.exports = {
     // }))
     // return result;
   }),
-  postflowsInstance: async(function (data) {
+  postflowsInstance: async(function (data, dbid) {
     console.log('........................elastic post flowsInstance....................');
     // data.Schemaid = data._id
     // delete data._id
     // delete data.id
     var selectedDB = _.find(client, (d) => {
-      return d.id == data.database[1]
+      return d.id == dbid
     })
     var result = await (
       selectedDB.conn.index({

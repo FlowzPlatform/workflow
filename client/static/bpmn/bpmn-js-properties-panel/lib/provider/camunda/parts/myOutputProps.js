@@ -29,13 +29,13 @@ function formFieldTextField(options, getSelectedFormField) {
     id: id,
     label: label,
     modelProperty: modelProperty,
-    get: function(element, node) {
+    get: function (element, node) {
       var selectedFormField = getSelectedFormField(element, node) || {},
         values = {};
       values[modelProperty] = selectedFormField[modelProperty];
       return values;
     },
-    set: function(element, values, node) {
+    set: function (element, values, node) {
       var commands = [];
       if (typeof options.set === 'function') {
         var cmd = options.set(element, values, node);
@@ -49,7 +49,7 @@ function formFieldTextField(options, getSelectedFormField) {
       commands.push(cmdHelper.updateBusinessObject(element, formField, properties));
       return commands;
     },
-    hidden: function(element, node) {
+    hidden: function (element, node) {
       return !getSelectedFormField(element, node);
     },
     validate: validate
@@ -76,13 +76,13 @@ function formFieldSelectBox(options, getSelectedFormField) {
     label: label,
     modelProperty: modelProperty,
     selectOptions: selectOptions,
-    get: function(element, node) {
+    get: function (element, node) {
       var selectedFormField = getSelectedFormField(element, node) || {},
         values = {};
       values[modelProperty] = selectedFormField[modelProperty];
       return values;
     },
-    set: function(element, values, node) {
+    set: function (element, values, node) {
       var commands = [];
       if (typeof options.set === 'function') {
         var cmd = options.set(element, values, node);
@@ -96,7 +96,7 @@ function formFieldSelectBox(options, getSelectedFormField) {
       commands.push(cmdHelper.updateBusinessObject(element, formField, properties));
       return commands;
     },
-    hidden: function(element, node) {
+    hidden: function (element, node) {
       return !getSelectedFormField(element, node);
     },
     validate: validate
@@ -107,14 +107,14 @@ function ensureFormKeyAndDataSupported(element) {
   // return is(element, 'bpmn:ExclusiveGateway') || is(element, 'bpmn:InclusiveGateway') ||
   //   is(element, 'bpmn:ParallelGateway') || is(element, 'bpmn:ComplexGateway') ||
   //   is(element, 'bpmn:EventBasedGateway');
-  return is(element, 'bpmn:Task') || is(element, 'bpmn:StartEvent')
+  return is(element, 'bpmn:Task') || is(element, 'bpmn:StartEvent') || (element.type).match(/flowz:/gi)
 }
 
 function getChoice(bo) {
   return bo.get('camunda:choice');
 }
 // Camunda Properties Provider /////////////////////////////////////
-module.exports = function(group, element, bpmnFactory, translate, options) {
+module.exports = function (group, element, bpmnFactory, translate, options) {
   if (!ensureFormKeyAndDataSupported(element)) {
     return;
   }
@@ -132,7 +132,7 @@ module.exports = function(group, element, bpmnFactory, translate, options) {
     label: translate('Add'),
     modelProperty: 'id',
     prefix: 'Output',
-    createExtensionElement: function(element, extensionElements, value) {
+    createExtensionElement: function (element, extensionElements, value) {
       var bo = getBusinessObject(element),
         commands = [];
       if (!extensionElements) {
@@ -159,17 +159,17 @@ module.exports = function(group, element, bpmnFactory, translate, options) {
       }
       return commands;
     },
-    removeExtensionElement: function(element, extensionElements, value, idx) {
+    removeExtensionElement: function (element, extensionElements, value, idx) {
       var myOutputs = getExtensionElements(getBusinessObject(element), 'camunda:MyOutputs')[0],
         entry = myOutputs.fields[idx],
         commands = [];
       commands.push(cmdHelper.removeElementsFromList(element, myOutputs, 'fields', null, [entry]));
       return commands;
     },
-    getExtensionElements: function(element) {
+    getExtensionElements: function (element) {
       return myOutputsHelper.getFormFields(element);
     },
-    hideExtensionElements: function(element, node) {
+    hideExtensionElements: function (element, node) {
       return false;
     }
   });
@@ -179,18 +179,18 @@ module.exports = function(group, element, bpmnFactory, translate, options) {
     id: 'my-output-id',
     label: translate('Name'),
     modelProperty: 'id',
-    getProperty: function(element, node) {
+    getProperty: function (element, node) {
       var selectedFormField = getSelectedFormField(element, node) || {};
       return selectedFormField.id;
     },
-    setProperty: function(element, properties, node) {
+    setProperty: function (element, properties, node) {
       var formField = getSelectedFormField(element, node);
       return cmdHelper.updateBusinessObject(element, formField, properties);
     },
-    hidden: function(element, node) {
+    hidden: function (element, node) {
       return !getSelectedFormField(element, node);
     },
-    validate: function(element, values, node) {
+    validate: function (element, values, node) {
       var formField = getSelectedFormField(element, node);
       if (formField) {
         var idValue = values.id;
@@ -198,7 +198,7 @@ module.exports = function(group, element, bpmnFactory, translate, options) {
           return { id: 'Form field id must not be empty' };
         }
         var formFields = myOutputsHelper.getFormFields(element);
-        var existingFormField = find(formFields, function(f) {
+        var existingFormField = find(formFields, function (f) {
           return f !== formField && f.id === idValue;
         });
         if (existingFormField) {
@@ -221,10 +221,10 @@ module.exports = function(group, element, bpmnFactory, translate, options) {
   group.entries.push(entryFactory.link({
     id: 'my-output-Add_Schema',
     label: 'Add Schema',
-    getClickableElement: function(element, node) {
+    getClickableElement: function (element, node) {
       options.AddEntity()
     },
-    hideLink: function(element, node) {
+    hideLink: function (element, node) {
       return !getSelectedFormField(element, node);
     }
   }));

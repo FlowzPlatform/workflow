@@ -1,5 +1,5 @@
 {
-  "name": "generic_worker",
+  "name": "example_worker",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -9,9 +9,9 @@
   "author": "bhumilsarvaiya",
   "license": "ISC",
   "dependencies": {
-    "asyncawait": "^1.0.6",
     "chokidar": "^1.7.0",
     "config": "^1.26.2",
+    "flowz-worker": "file:../../worker",
     "fs": "0.0.1-security",
     "lodash": "^4.17.4",
     "pino": "^4.7.2",
