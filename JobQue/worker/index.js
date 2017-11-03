@@ -3,9 +3,7 @@ const app = require('./config.json')
 const pino = require('pino')
 const chokidar = require('chokidar')
 const fs = require('fs')
-
-module.exports = function (options, user_function) {
-
+module.exports = function(options, user_function) {
   options = options ? options : {}
   const cxnOptions = options.cxnOptions ? options.cxnOptions : app.rethinkdb
   const qOptions = options.qOptions ? options.qOptions : app.qOptions
@@ -14,18 +12,17 @@ module.exports = function (options, user_function) {
   const worker_functions = require('./function')
   const q = new Queue(cxnOptions, qOptions)
   const rdash = require('rethinkdbdash')(cxnOptions)
-
   if (options.logs) {
-    if (options.logs.console == false) PINO_C_OPTION.level = 'silent'
+    if (options.logs.console == false) {
+      PINO_C_OPTION.level = 'silent'
+    }
     if (options.logs.db == false) {
       PINO_DB_OPTION.level = 'silent'
-    }
-    else {
+    } else {
       var logs_table = options.logs.table ? options.logs.table : app.system_logs_table
       enableWatcher(logs_table)
     }
-  }
-  else {
+  } else {
     enableWatcher(app.system_logs_table)
   }
 
@@ -33,23 +30,39 @@ module.exports = function (options, user_function) {
     //watcher
     const CHOKIDAR_OPTION = app.chokidar
     var watcher = chokidar.watch('./logs', CHOKIDAR_OPTION)
-
     watcher.on('change', path =>
-      fs.readFile('./logs','utf8', function (err, data) {
+      fs.readFile('./logs', 'utf8', function(err, data) {
         if (err) throw err
         let parsedData = JSON.parse(data)
-        rdash.table(SYSTEM_LOGS_TABLE).insert(parsedData).run(function (err , result) {
+        rdash.table(SYSTEM_LOGS_TABLE).insert(parsedData).run(function(err, result) {
           if (err) {
-            pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).error({},err)
-            pino(PINO_C_OPTION).error({},err)
+            pino(PINO_DB_OPTION, fs.createWriteStream('./logs')).error({}, err)
+            pino(PINO_C_OPTION).error({}, err)
+          }
+        })
+      })
+    )
+  } else {
+    const SYSTEM_LOGS_TABLE = app.system_logs_table
+    //watcher
+    const CHOKIDAR_OPTION = app.chokidar
+    var watcher = chokidar.watch('./logs', CHOKIDAR_OPTION)
+    console.log(SYSTEM_LOGS_TABLE, CHOKIDAR_OPTION)
+    watcher.on('change', path =>
+      fs.readFile('./logs', 'utf8', function(err, data) {
+        if (err) throw err
+        console.log('changes')
+        let parsedData = JSON.parse(data)
+        rdash.table(SYSTEM_LOGS_TABLE).insert(parsedData).run(function(err, result) {
+          if (err) {
+            pino(PINO_DB_OPTION, fs.createWriteStream('./logs')).error({}, err)
+            pino(PINO_C_OPTION).error({}, err)
           }
         })
       })
     )
   }
-
   const func = new worker_functions(options, PINO_DB_OPTION, PINO_C_OPTION)
-
   q.process(async(job, next) => {
     try {
       if (!user_function) {
@@ -60,10 +73,9 @@ module.exports = function (options, user_function) {
           }
         }
         await job.update()
-      }
-      else if (typeof user_function == 'function') {
+      } else if (typeof user_function == 'function') {
         var output = user_function.call(null, job.data.input)
-        // output = output instanceof Array ? output : [output]
+          // output = output instanceof Array ? output : [output]
         job.data.output = output
         await job.update()
       }
@@ -74,7 +86,6 @@ module.exports = function (options, user_function) {
       return next(new Error('error'))
     }
   })
-
   q.on('terminated', (queueId, jobId) => {
     q.getJob(jobId).then((job) => {
       func.processError(job[0].data, job[0].id)
@@ -85,7 +96,6 @@ module.exports = function (options, user_function) {
       pino(PINO_DB_OPTION, fs.createWriteStream('./logs')).error({ "error": err }, 'job terminated')
     })
   })
-
   q.on('completed', (queueId, jobId, isRepeating) => {
     q.getJob(jobId).then((job) => {
       func.processSuccess(job[0].data, job[0].id)

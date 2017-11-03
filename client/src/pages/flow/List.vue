@@ -167,25 +167,25 @@ export default {
                     this.deleteFlow(this.flowzList[params.index].id)
                   }
                 }
-              }, ''),
-              h('Button', {
-                props: {
-                  type: 'text',
-                  size: 'large',
-                  icon: 'navicon-round'
-                },
-                style: {
-                  marginRight: '3px',
-                  padding: '0px',
-                  fontSize: '20px',
-                  color: '#00C851'
-                },
-                on: {
-                  click: () => {
-                    this.deleteFlow(this.flowzList[params.index].id)
-                  }
-                }
               }, '')
+              // h('Button', {
+              //   props: {
+              //     type: 'text',
+              //     size: 'large',
+              //     icon: 'navicon-round'
+              //   },
+              //   style: {
+              //     marginRight: '3px',
+              //     padding: '0px',
+              //     fontSize: '20px',
+              //     color: '#00C851'
+              //   },
+              //   on: {
+              //     click: () => {
+              //       this.deleteFlow(this.flowzList[params.index].id)
+              //     }
+              //   }
+              // }, '')
             ])
           }
         }
@@ -208,6 +208,7 @@ export default {
       // console.log('generatedJson', JSON.stringify(generatedJson))
       // console.log('generatedJson', generatedJson)
       generatedJson.fid = id
+      generatedJson.createdOn = Date()
       instanceModel.post(generatedJson)
       .then(response => {
         // console.log('response.data', response.data)

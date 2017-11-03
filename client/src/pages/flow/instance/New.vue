@@ -1,7 +1,7 @@
 <template>
   <div>
     <row>
-      <div style="float:right">
+      <div style="float:right;margin-bottom:5px">
         <ButtonGroup>
           <Button type="primary" @click="graph = true, list = false" icon="pie-graph"></Button>
           <Button type="primary" @click="graph = false, list = true" icon="navicon-round"></Button>
@@ -9,9 +9,11 @@
       </div>
     </row>
     <row>
-      <div v-show="graph" id="canvas" style="width: 100%;height: calc(90vh - 130px);position: relative;">
+      <div class="split" style="height: calc(100vh - 110px);">
+      <div v-show="graph" id="canvas" style="height: calc(80vh - 350px);border: 1px solid rgb(233, 234, 236);">
       </div>
-      <div  v-if="list" style="height: calc(90vh - 130px);position: relative; margin-top:10px">
+      <!-- <div id="vertical-split" class="split split-horizontal"> -->
+        <div  v-if="list || graph" id="vertical-split" style="height: calc(90vh - 130px);position: relative; margin-top:10px">
           <Col :span="spanTable">
             <div class="schema-form ivu-table-wrapper" >
                   <div class="ivu-table ivu-table-border">
@@ -106,6 +108,9 @@
                                     </span>
                                 </div>
                             </div>
+                            <div v-else>
+                              <Table stripe :columns="getLogColumnsFormData(propData)" :data="getLogDataFormData(propData)"></Table>
+                            </div>
                           </TabPane>
                           <TabPane label="Logs"  name="logtab">
                             <Table stripe :columns="getLogColumns(propData)" :data="getLogData(propData)"></Table>
@@ -115,7 +120,9 @@
                   </div>
               </div>
           </Col>
-      </div>
+        </div>
+      <!-- </div> -->
+    </div>
       <!-- <Table :columns="columns" :data="flowInstance"></Table> -->
       <!-- {{showProp}} -->
     </row>
@@ -126,6 +133,7 @@ import expandRow from '@/components/expand-process.vue'
 import instance from '@/api/flowzinstance'
 import schemaTemplate from '@/components/SchemaTemplate.vue'
 import _ from 'lodash'
+import Split from 'split.js'
 import BpmnViewer from 'bpmn-js/lib/NavigatedViewer.js'
 import flowz from '@/api/flowz'
 import axios from 'axios'
@@ -160,6 +168,10 @@ export default {
     }
   },
   async mounted () {
+    Split(['#canvas', '#vertical-split'], {
+      direction: 'vertical'
+    })
+
     let self = this
     // console.log(this.$route.params.id)
     await instance.getThis(this.$route.params.id)
@@ -220,6 +232,51 @@ export default {
         dt.push(obj)
       })
       return dt
+    },
+    getLogColumnsFormData (propData) {
+      var log = this.getLastLog(propData)
+      // var obj = log.input[0].candidates[0]
+      var cols = []
+      _.forEach(log, (v, k) => {
+        if (k === 'Name' || k === 'Email' || k === 'id') {
+          cols.push({title: k, key: k})
+        }
+      })
+      console.log('@@@@@@@@@@@@@@', log)
+      return cols
+    },
+    getLogDataFormData (propData) {
+      var log = this.getLastLog(propData)
+      // var obj = log.input[0].candidates[0]
+      var data = log.input[0].candidates
+      // _.forEach(obj, (v, k) => {
+      //   // if (k === 'Name' || k === 'Email' || k === 'id') {
+      //   //   console.log('title', k)
+      //   //   console.log('key', v)
+      //   //   data.push({title: v, key: v})
+      //   // }
+      // })
+      console.log('@@@@@@@@@@@@@@', data)
+      return data
+
+      // var dt = []
+      // // var obj = {}
+      // var logs = this.getLastLogs(propData)
+      // _.forEach(logs, (log, i) => {
+      //   let obj = {
+      //     'job': log.job,
+      //     'jobType': log.jobType,
+      //     'lastModified': log.lastModified,
+      //     'status': log.status
+      //   }
+      //   // _.forEach(log, (v, k) => {
+      //   //   // if (k === 'job' || k === 'jobType' || k === 'lastModified' || k === 'status') {
+      //   //   //   obj[k] = v
+      //   //   // }
+      //   // })
+      //   dt.push(obj)
+      // })
+      // return dt
     },
     getIcon (item) {
       var result = this.getStatus(item)
