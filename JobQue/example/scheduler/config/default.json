@@ -34,9 +34,7 @@
     "ignorePermissionErrors": false,
     "atomic": true
   },
-  "pinoDB": {
-    "timestamp": "pino.stdTimeFunctions.slowTime"
-  },
+  "pinoDB": {},
   "pinoConsole": {
     "timestamp": false,
     "prettyPrint": {
