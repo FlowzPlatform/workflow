@@ -29,13 +29,13 @@ function formFieldTextField(options, getSelectedFormField) {
     id: id,
     label: label,
     modelProperty: modelProperty,
-    get: function(element, node) {
+    get: function (element, node) {
       var selectedFormField = getSelectedFormField(element, node) || {},
         values = {};
       values[modelProperty] = selectedFormField[modelProperty];
       return values;
     },
-    set: function(element, values, node) {
+    set: function (element, values, node) {
       var commands = [];
       if (typeof options.set === 'function') {
         var cmd = options.set(element, values, node);
@@ -49,7 +49,7 @@ function formFieldTextField(options, getSelectedFormField) {
       commands.push(cmdHelper.updateBusinessObject(element, formField, properties));
       return commands;
     },
-    hidden: function(element, node) {
+    hidden: function (element, node) {
       return !getSelectedFormField(element, node);
     },
     validate: validate
@@ -76,13 +76,13 @@ function formFieldSelectBox(options, getSelectedFormField) {
     label: label,
     modelProperty: modelProperty,
     selectOptions: selectOptions,
-    get: function(element, node) {
+    get: function (element, node) {
       var selectedFormField = getSelectedFormField(element, node) || {},
         values = {};
       values[modelProperty] = selectedFormField[modelProperty];
       return values;
     },
-    set: function(element, values, node) {
+    set: function (element, values, node) {
       var commands = [];
       if (typeof options.set === 'function') {
         var cmd = options.set(element, values, node);
@@ -96,7 +96,7 @@ function formFieldSelectBox(options, getSelectedFormField) {
       commands.push(cmdHelper.updateBusinessObject(element, formField, properties));
       return commands;
     },
-    hidden: function(element, node) {
+    hidden: function (element, node) {
       return !getSelectedFormField(element, node);
     },
     validate: validate
@@ -104,14 +104,14 @@ function formFieldSelectBox(options, getSelectedFormField) {
 }
 
 function ensureFormKeyAndDataSupported(element) {
-  return is(element, 'bpmn:Task') || is(element, 'bpmn:StartEvent');
+  return is(element, 'bpmn:Task') || is(element, 'bpmn:StartEvent') || (element.type).match(/flowz:/gi);
 }
 
 function getChoice(bo) {
   return bo.get('camunda:choice');
 }
 // Camunda Properties Provider /////////////////////////////////////
-module.exports = function(group, element, bpmnFactory, translate, options) {
+module.exports = function (group, element, bpmnFactory, translate, options) {
   if (!ensureFormKeyAndDataSupported(element)) {
     return;
   }
@@ -223,7 +223,7 @@ module.exports = function(group, element, bpmnFactory, translate, options) {
     label: translate('Entity'),
     modelProperty: 'id',
     prefix: 'Property',
-    createExtensionElement: function(element, extensionElements, value) {
+    createExtensionElement: function (element, extensionElements, value) {
       var bo = getBusinessObject(element),
         commands = [];
       if (!extensionElements) {
@@ -250,17 +250,17 @@ module.exports = function(group, element, bpmnFactory, translate, options) {
       }
       return commands;
     },
-    removeExtensionElement: function(element, extensionElements, value, idx) {
+    removeExtensionElement: function (element, extensionElements, value, idx) {
       var myProperty = getExtensionElements(getBusinessObject(element), 'camunda:MyProperty')[0],
         entry = myProperty.fields[idx],
         commands = [];
       commands.push(cmdHelper.removeElementsFromList(element, myProperty, 'fields', null, [entry]));
       return commands;
     },
-    getExtensionElements: function(element) {
+    getExtensionElements: function (element) {
       return myPropetiesHelper.getFormFields(element);
     },
-    hideExtensionElements: function(element, node) {
+    hideExtensionElements: function (element, node) {
       return false;
     }
   });
@@ -270,18 +270,18 @@ module.exports = function(group, element, bpmnFactory, translate, options) {
     id: 'my-property-id',
     label: translate('ID'),
     modelProperty: 'id',
-    getProperty: function(element, node) {
+    getProperty: function (element, node) {
       var selectedFormField = getSelectedFormField(element, node) || {};
       return selectedFormField.id;
     },
-    setProperty: function(element, properties, node) {
+    setProperty: function (element, properties, node) {
       var formField = getSelectedFormField(element, node);
       return cmdHelper.updateBusinessObject(element, formField, properties);
     },
-    hidden: function(element, node) {
+    hidden: function (element, node) {
       return !getSelectedFormField(element, node);
     },
-    validate: function(element, values, node) {
+    validate: function (element, values, node) {
       var formField = getSelectedFormField(element, node);
       if (formField) {
         var idValue = values.id;
@@ -289,7 +289,7 @@ module.exports = function(group, element, bpmnFactory, translate, options) {
           return { id: 'Form field id must not be empty' };
         }
         var formFields = myPropetiesHelper.getFormFields(element);
-        var existingFormField = find(formFields, function(f) {
+        var existingFormField = find(formFields, function (f) {
           return f !== formField && f.id === idValue;
         });
         if (existingFormField) {
@@ -312,10 +312,10 @@ module.exports = function(group, element, bpmnFactory, translate, options) {
   group.entries.push(entryFactory.link({
     id: 'my-property-Add_Schema',
     label: 'Add New',
-    getClickableElement: function(element, node) {
+    getClickableElement: function (element, node) {
       options.AddEntity()
     },
-    hideLink: function(element, node) {
+    hideLink: function (element, node) {
       return !getSelectedFormField(element, node);
     }
   }));
@@ -323,13 +323,13 @@ module.exports = function(group, element, bpmnFactory, translate, options) {
     id: 'my-property-createTemplate',
     label: translate('Create Template'),
     // selectOptions: [],
-    selectOptions: function(element, inputNode) {
+    selectOptions: function (element, inputNode) {
       var selectOptions = [{ name: '--Select--', value: '' }];
       var selected = formFieldsEntry.getSelected(element, inputNode.parentNode);
       var formField = myPropetiesHelper.getFormField(element, selected.idx);
       if (formField && formField.entityschema) {
-        var selectedEntity = _.find(options.schema, function(d) { return d.id == formField.entityschema })
-        _.each(selectedEntity.createTemplate, function(field) {
+        var selectedEntity = _.find(options.schema, function (d) { return d.id == formField.entityschema })
+        _.each(selectedEntity.createTemplate, function (field) {
           selectOptions.push({ name: field.filename, value: field.filename });
         });
       }
@@ -340,13 +340,13 @@ module.exports = function(group, element, bpmnFactory, translate, options) {
   group.entries.push(entryFactory.link({
     id: 'my-property-Create_template',
     label: 'Add/View',
-    getClickableElement: function(element, node) {
+    getClickableElement: function (element, node) {
       let selectedEntity = element.businessObject.extensionElements.values[0].fields[0].entityschema
       if (selectedEntity != undefined) {
         options.openTemplate(selectedEntity)
       }
     },
-    hideLink: function(element, node) {
+    hideLink: function (element, node) {
       return !getSelectedFormField(element, node);
     }
   }));
@@ -355,13 +355,13 @@ module.exports = function(group, element, bpmnFactory, translate, options) {
     id: 'my-property-viewTemplate',
     label: translate('View Template'),
     //selectOptions: [],
-    selectOptions: function(element, inputNode) {
+    selectOptions: function (element, inputNode) {
       var selectOptions = [{ name: '--Select--', value: '' }];
       var selected = formFieldsEntry.getSelected(element, inputNode.parentNode);
       var formField = myPropetiesHelper.getFormField(element, selected.idx);
       if (formField && formField.entityschema) {
-        var selectedEntity = _.find(options.schema, function(d) { return d.id == formField.entityschema })
-        _.each(selectedEntity.viewTemplate, function(field) {
+        var selectedEntity = _.find(options.schema, function (d) { return d.id == formField.entityschema })
+        _.each(selectedEntity.viewTemplate, function (field) {
           selectOptions.push({ name: field.filename, value: field.filename });
         });
       }
@@ -372,13 +372,13 @@ module.exports = function(group, element, bpmnFactory, translate, options) {
   group.entries.push(entryFactory.link({
     id: 'my-property-View_template',
     label: 'Add/View',
-    getClickableElement: function(element, node) {
+    getClickableElement: function (element, node) {
       let selectedEntity = element.businessObject.extensionElements.values[0].fields[0].entityschema
       if (selectedEntity != undefined) {
         options.openTemplate(selectedEntity)
       }
     },
-    hideLink: function(element, node) {
+    hideLink: function (element, node) {
       return !getSelectedFormField(element, node);
     }
   }));
@@ -386,13 +386,13 @@ module.exports = function(group, element, bpmnFactory, translate, options) {
     id: 'my-property-emailTemplate',
     label: translate('Email Template'),
     // selectOptions: [],
-    selectOptions: function(element, inputNode) {
+    selectOptions: function (element, inputNode) {
       var selectOptions = [{ name: '--Select--', value: '' }];
       var selected = formFieldsEntry.getSelected(element, inputNode.parentNode);
       var formField = myPropetiesHelper.getFormField(element, selected.idx);
       if (formField && formField.entityschema) {
-        var selectedEntity = _.find(options.schema, function(d) { return d.id == formField.entityschema })
-        _.each(selectedEntity.emailTemplate, function(field) {
+        var selectedEntity = _.find(options.schema, function (d) { return d.id == formField.entityschema })
+        _.each(selectedEntity.emailTemplate, function (field) {
           selectOptions.push({ name: field.filename, value: field.filename });
         });
       }
@@ -403,13 +403,13 @@ module.exports = function(group, element, bpmnFactory, translate, options) {
   group.entries.push(entryFactory.link({
     id: 'my-property-Email_template',
     label: 'Add/View',
-    getClickableElement: function(element, node) {
+    getClickableElement: function (element, node) {
       let selectedEntity = element.businessObject.extensionElements.values[0].fields[0].entityschema
       if (selectedEntity != undefined) {
         options.openTemplate(selectedEntity)
       }
     },
-    hideLink: function(element, node) {
+    hideLink: function (element, node) {
       return !getSelectedFormField(element, node);
     }
   }));
@@ -432,11 +432,11 @@ module.exports = function(group, element, bpmnFactory, translate, options) {
   group.entries.push(entryFactory.link({
     id: 'my-property-Approval',
     label: 'Add/View',
-    getClickableElement: function(element, node) {
+    getClickableElement: function (element, node) {
       let selectedEntity = element.businessObject.extensionElements.values[0].fields[0].entityschema
       options.openApprovalClass()
     },
-    hideLink: function(element, node) {
+    hideLink: function (element, node) {
       return !getSelectedFormField(element, node);
     }
   }));
