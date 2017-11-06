@@ -7,7 +7,7 @@ var entryFactory = require('../../../factory/EntryFactory'),
   extensionElements = require('./implementation/ExtensionElements');
 // extensionElements = require('./implementation/MappingElements');
 var cmdHelper = require('../../../helper/CmdHelper'),
-  myPropetiesHelper = require('../../../helper/MyPropertyHelper');
+  myInputsHelper = require('../../../helper/MyInputsHelper');
 // formHelper = require('../../../helper/FormHelper');
 var _ = require('lodash')
   /**
@@ -105,7 +105,7 @@ function formFieldSelectBox(options, getSelectedFormField) {
 }
 
 function ensureFormKeyAndDataSupported(element) {
-  return is(element, 'bpmn:Task') || is(element, 'bpmn:StartEvent') || (element.type).match(/flowz:/gi);
+  return is(element, 'bpmn:Task') || is(element, 'bpmn:StartEvent') || (element.type).match(/camunda:/gi);
 }
 
 function getChoice(bo) {
@@ -122,17 +122,17 @@ module.exports = function (group, element, bpmnFactory, translate, options) {
     if (selected.idx === -1) {
       return;
     }
-    return myPropetiesHelper.getFormField(element, selected.idx);
+    return myInputsHelper.getFormField(element, selected.idx);
   }
 
   var entitySchemaOptions = options.schema.map(f => ({ value: f.id, name: f.title }))
 
-  // [MyProperty] form field select box
+  // [MyInputs] form field select box
   var formFieldsEntry = extensionElements(element, bpmnFactory, {
     id: 'my-propeties',
     label: translate('Entity'),
     modelProperty: 'id',
-    prefix: 'Property',
+    prefix: 'Input',
     createExtensionElement: function (element, extensionElements, value) {
       var bo = getBusinessObject(element),
         commands = [];
@@ -140,44 +140,44 @@ module.exports = function (group, element, bpmnFactory, translate, options) {
         extensionElements = elementHelper.createElement('bpmn:ExtensionElements', { values: [] }, bo, bpmnFactory);
         commands.push(cmdHelper.updateProperties(element, { extensionElements: extensionElements }));
       }
-      var myProperty = myPropetiesHelper.getMyProperty(element);
-      if (!myProperty) {
-        myProperty = elementHelper.createElement('camunda:MyProperty', { fields: [] }, extensionElements, bpmnFactory);
+      var myInputs = myInputsHelper.getMyInputs(element);
+      if (!myInputs) {
+        myInputs = elementHelper.createElement('camunda:MyInputs', { fields: [] }, extensionElements, bpmnFactory);
         commands.push(cmdHelper.addAndRemoveElementsFromList(
           element,
           extensionElements,
           'values',
-          'extensionElements', [myProperty], []
+          'extensionElements', [myInputs], []
         ));
       }
-      var field = elementHelper.createElement('camunda:Property', { id: value }, myProperty, bpmnFactory);
-      if (typeof myProperty.fields !== 'undefined') {
-        commands.push(cmdHelper.addElementsTolist(element, myProperty, 'fields', [field]));
+      var field = elementHelper.createElement('camunda:Input', { id: value }, myInputs, bpmnFactory);
+      if (typeof myInputs.fields !== 'undefined') {
+        commands.push(cmdHelper.addElementsTolist(element, myInputs, 'fields', [field]));
       } else {
-        commands.push(cmdHelper.updateBusinessObject(element, myProperty, {
+        commands.push(cmdHelper.updateBusinessObject(element, myInputs, {
           fields: [field]
         }));
       }
       return commands;
     },
     removeExtensionElement: function (element, extensionElements, value, idx) {
-      var myProperty = getExtensionElements(getBusinessObject(element), 'camunda:MyProperty')[0],
-        entry = myProperty.fields[idx],
+      var myInputs = getExtensionElements(getBusinessObject(element), 'camunda:MyInputs')[0],
+        entry = myInputs.fields[idx],
         commands = [];
-      commands.push(cmdHelper.removeElementsFromList(element, myProperty, 'fields', null, [entry]));
+      commands.push(cmdHelper.removeElementsFromList(element, myInputs, 'fields', null, [entry]));
       return commands;
     },
     getExtensionElements: function (element) {
-      return myPropetiesHelper.getFormFields(element);
+      return myInputsHelper.getFormFields(element);
     },
     hideExtensionElements: function (element, node) {
       return false;
     }
   });
   group.entries.push(formFieldsEntry);
-  // [MyProperty] form field id text input field
+  // [MyInputs] form field id text input field
   group.entries.push(entryFactory.validationAwareTextField({
-    id: 'my-property-id',
+    id: 'my-input-id',
     label: translate('ID'),
     modelProperty: 'id',
     getProperty: function (element, node) {
@@ -198,7 +198,7 @@ module.exports = function (group, element, bpmnFactory, translate, options) {
         if (!idValue || idValue.trim() === '') {
           return { id: 'Form field id must not be empty' };
         }
-        var formFields = myPropetiesHelper.getFormFields(element);
+        var formFields = myInputsHelper.getFormFields(element);
         var existingFormField = find(formFields, function (f) {
           return f !== formField && f.id === idValue;
         });
@@ -209,18 +209,18 @@ module.exports = function (group, element, bpmnFactory, translate, options) {
     }
   }));
   group.entries.push(formFieldTextField({
-    id: 'my-property-notes',
+    id: 'my-input-notes',
     label: 'Notes',
     modelProperty: 'notes'
   }, getSelectedFormField));
   group.entries.push(formFieldSelectBox({
-    id: 'my-property-entityschema',
+    id: 'my-input-entityschema',
     label: translate('Entity schema'),
     selectOptions: entitySchemaOptions,
     modelProperty: 'entityschema'
   }, getSelectedFormField));
   group.entries.push(entryFactory.link({
-    id: 'my-property-Add_Schema',
+    id: 'my-input-Add_Schema',
     label: 'Add New',
     getClickableElement: function (element, node) {
       options.AddEntity()
@@ -230,13 +230,13 @@ module.exports = function (group, element, bpmnFactory, translate, options) {
     }
   }));
   group.entries.push(formFieldSelectBox({
-    id: 'my-property-createTemplate',
+    id: 'my-input-createTemplate',
     label: translate('Create Template'),
     // selectOptions: [],
     selectOptions: function (element, inputNode) {
       var selectOptions = [{ name: '--Select--', value: '' }];
       var selected = formFieldsEntry.getSelected(element, inputNode.parentNode);
-      var formField = myPropetiesHelper.getFormField(element, selected.idx);
+      var formField = myInputsHelper.getFormField(element, selected.idx);
       if (formField && formField.entityschema) {
         var selectedEntity = _.find(options.schema, function (d) { return d.id == formField.entityschema })
         _.each(selectedEntity.createTemplate, function (field) {
@@ -248,7 +248,7 @@ module.exports = function (group, element, bpmnFactory, translate, options) {
     modelProperty: 'createTemplate'
   }, getSelectedFormField));
   group.entries.push(entryFactory.link({
-    id: 'my-property-Create_template',
+    id: 'my-input-Create_template',
     label: 'Add/View',
     getClickableElement: function (element, node) {
       let selectedEntity = element.businessObject.extensionElements.values[0].fields[0].entityschema
@@ -262,13 +262,13 @@ module.exports = function (group, element, bpmnFactory, translate, options) {
   }));
   var entitySchemaViewTemplate = []
   group.entries.push(formFieldSelectBox({
-    id: 'my-property-viewTemplate',
+    id: 'my-input-viewTemplate',
     label: translate('View Template'),
     //selectOptions: [],
     selectOptions: function (element, inputNode) {
       var selectOptions = [{ name: '--Select--', value: '' }];
       var selected = formFieldsEntry.getSelected(element, inputNode.parentNode);
-      var formField = myPropetiesHelper.getFormField(element, selected.idx);
+      var formField = myInputsHelper.getFormField(element, selected.idx);
       if (formField && formField.entityschema) {
         var selectedEntity = _.find(options.schema, function (d) { return d.id == formField.entityschema })
         _.each(selectedEntity.viewTemplate, function (field) {
@@ -280,7 +280,7 @@ module.exports = function (group, element, bpmnFactory, translate, options) {
     modelProperty: 'viewTemplate'
   }, getSelectedFormField));
   group.entries.push(entryFactory.link({
-    id: 'my-property-View_template',
+    id: 'my-input-View_template',
     label: 'Add/View',
     getClickableElement: function (element, node) {
       let selectedEntity = element.businessObject.extensionElements.values[0].fields[0].entityschema
@@ -293,13 +293,13 @@ module.exports = function (group, element, bpmnFactory, translate, options) {
     }
   }));
   group.entries.push(formFieldSelectBox({
-    id: 'my-property-emailTemplate',
+    id: 'my-input-emailTemplate',
     label: translate('Email Template'),
     // selectOptions: [],
     selectOptions: function (element, inputNode) {
       var selectOptions = [{ name: '--Select--', value: '' }];
       var selected = formFieldsEntry.getSelected(element, inputNode.parentNode);
-      var formField = myPropetiesHelper.getFormField(element, selected.idx);
+      var formField = myInputsHelper.getFormField(element, selected.idx);
       if (formField && formField.entityschema) {
         var selectedEntity = _.find(options.schema, function (d) { return d.id == formField.entityschema })
         _.each(selectedEntity.emailTemplate, function (field) {
@@ -311,7 +311,7 @@ module.exports = function (group, element, bpmnFactory, translate, options) {
     modelProperty: 'emailTemplate'
   }, getSelectedFormField));
   group.entries.push(entryFactory.link({
-    id: 'my-property-Email_template',
+    id: 'my-input-Email_template',
     label: 'Add/View',
     getClickableElement: function (element, node) {
       let selectedEntity = element.businessObject.extensionElements.values[0].fields[0].entityschema
@@ -324,7 +324,7 @@ module.exports = function (group, element, bpmnFactory, translate, options) {
     }
   }));
   group.entries.push(formFieldSelectBox({
-    id: 'my-property-choice',
+    id: 'my-input-choice',
     label: translate('Choice'),
     selectOptions: [{ name: '---select---', value: 0 },
       { name: 'Plain Request', value: 1 },
@@ -334,13 +334,13 @@ module.exports = function (group, element, bpmnFactory, translate, options) {
     modelProperty: 'choice'
   }, getSelectedFormField));
   group.entries.push(formFieldSelectBox({
-    id: 'my-property-approvalClass',
+    id: 'my-input-approvalClass',
     label: translate('Approval Class'),
     selectOptions: options.approval,
     modelProperty: 'approvalClass'
   }, getSelectedFormField));
   group.entries.push(entryFactory.link({
-    id: 'my-property-Approval',
+    id: 'my-input-Approval',
     label: 'Add/View',
     getClickableElement: function (element, node) {
       let selectedEntity = element.businessObject.extensionElements.values[0].fields[0].entityschema
@@ -350,20 +350,20 @@ module.exports = function (group, element, bpmnFactory, translate, options) {
       return !getSelectedFormField(element, node);
     }
   }));
-  // [MyProperty] form field label text input field
+  // [MyInputs] form field label text input field
   group.entries.push(formFieldTextField({
-    id: 'my-property-cancelLabel',
+    id: 'my-input-cancelLabel',
     label: translate('Cancel label'),
     modelProperty: 'cancelLabel'
   }, getSelectedFormField));
   group.entries.push(formFieldTextField({
-    id: 'my-property-submitLabel',
+    id: 'my-input-submitLabel',
     label: 'Submit label',
     modelProperty: 'submitLabel'
   }, getSelectedFormField));
 
   group.entries.push(entryFactory.checkbox({
-    id: 'my-property-is-form-input',
+    id: 'my-input-is-form-input',
     label: translate('Is Form Input'),
     modelProperty: 'isFormInput',
     get: function (element, node) {
@@ -392,7 +392,7 @@ module.exports = function (group, element, bpmnFactory, translate, options) {
   }));
 
   group.entries.push(formFieldTextField({
-    id: 'my-property-capacity',
+    id: 'my-input-capacity',
     label: 'Capacity',
     modelProperty: 'capacity',
     hidden: function (element, node) {

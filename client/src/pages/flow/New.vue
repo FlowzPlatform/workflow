@@ -58,6 +58,7 @@
           })
         // console.log('xmlData', xmlData)
         let x2js = new X2JS()
+        // console.log('x2js', x2js)
         let data = x2js.xml2js(xmlData)
         if (data.definitions.process._name !== undefined) {
           // console.log(data.name)
@@ -126,20 +127,19 @@
             customPaletteModule
           ],
           moddleExtensions: {
-            camunda: camundaModdleDescriptor,
             flowz: {
-              'name': 'flowz',
+              'name': 'Camunda',
               'uri': 'http://camunda.org/schema/1.0/bpmn',
-              'prefix': 'flowz',
+              'prefix': 'camunda',
               'xml': {
                 'tagAlias': 'lowerCase'
               },
               'associations': [],
               'types': types
-            }
+            },
+            camunda: camundaModdleDescriptor
           }
         })
-
         this.bpmnModeler.importXML(this.bpmnXML, function (err) {
           if (err) {
             console.error(err)

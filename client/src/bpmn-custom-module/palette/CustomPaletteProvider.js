@@ -26,13 +26,19 @@ CustomPaletteProvider.prototype.getPaletteEntries = function () {
     element.$parent = shape.businessObject;
 
     //// Render  Input
-    var myProperty = elementFactory._bpmnFactory.create('camunda:MyProperty', { fields: [] });
-    myProperty.$parent = element.businessObject
+    var myInputs = elementFactory._bpmnFactory.create('camunda:MyInputs', { fields: [] });
+    myInputs.$parent = element.businessObject
 
     _.forEach(input, (fields) => {
-      var field = elementFactory._bpmnFactory.create('camunda:Property', fields);
-      field.$parent = myProperty.businessObject
-      myProperty.fields.push(field)
+      fields = _.reduce(fields, function (result, value, key) {
+        if (_.indexOf(['id', 'isFormInput', 'capacity', 'cancelLabel', 'submitLabel', 'createTemplate', 'emailTemplate', 'viewTemplate', 'approvalClass', 'choice', 'label', 'notes', 'entityschema'], key.toLowerCase()) != -1) {
+          result[key.toLowerCase()] = value
+        }
+        return result;
+      }, {});
+      var field = elementFactory._bpmnFactory.create('camunda:Input', fields);
+      field.$parent = myInputs.businessObject
+      myInputs.fields.push(field)
     })
 
     //// Render output
@@ -40,19 +46,25 @@ CustomPaletteProvider.prototype.getPaletteEntries = function () {
     myOutputs.$parent = element.businessObject
 
     _.forEach(output, (fields) => {
+      fields = _.reduce(fields, function (result, value, key) {
+        if (_.indexOf(['id', 'notes', 'entityschema'], key.toLowerCase()) != -1) {
+          result[key.toLowerCase()] = value
+        }
+        return result;
+      }, {});
       var outputfield = elementFactory._bpmnFactory.create('camunda:Output', fields);
       outputfield.$parent = myOutputs.businessObject
       myOutputs.fields.push(outputfield)
     })
 
-    element.values.push(myProperty)
+    element.values.push(myInputs)
     element.values.push(myOutputs)
     return element
   }
 
   function createAction(type, group, className, title, imageUrl, options) {
     function createListener(event) {
-      // create('shape', { type: 'flowz:Filter' })
+      // create('shape', { type: 'camunda:Filter' })
       var shape = elementFactory.createShape(assign({ type: type }, options))
 
       shape.businessObject['extensionElements'] = renderInputOutput(shape, options.input, options.output)
@@ -63,7 +75,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function () {
       create.start(event, shape)
     }
 
-    var shortType = type.replace(/^flowz\:/, '')
+    var shortType = type.replace(/^camunda\:/, '')
 
     return {
       group: group,
@@ -106,7 +118,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function () {
       }
     });
 
-    pallets['create.' + plug.type] = createAction('flowz:' + plug.type, 'activity', 'palette-img', plug.title, plug.imageStr, { input: plug.input, output: plug.output })
+    pallets['create.' + plug.type] = createAction('camunda:' + plug.type, 'activity', 'palette-img', plug.title, plug.imageStr, { input: plug.input, output: plug.output })
       // {
       //   group: 'activity',
       //   title: plug.title, // 'Create Plugin',

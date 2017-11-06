@@ -937,7 +937,7 @@
       ]
     },
     {
-      "name": "MyProperty",
+      "name": "MyInputs",
       "superClass": ["Element"],
       "meta": {
         "allowedIn": [
@@ -947,12 +947,12 @@
       },
       "properties": [{
         "name": "fields",
-        "type": "Property",
+        "type": "Input",
         "isMany": true
       }]
     },
     {
-      "name": "Property",
+      "name": "Input",
       "superClass": ["Element"],
       "properties": [{
           "name": "id",
@@ -1041,6 +1041,11 @@
       "superClass": ["Element"],
       "properties": [{
           "name": "id",
+          "type": "String",
+          "isAttr": true
+        },
+        {
+          "name": "notes",
           "type": "String",
           "isAttr": true
         },

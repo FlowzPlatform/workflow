@@ -79,7 +79,7 @@ const X2JS = require('x2js')
 import schemamappingModel from '@/api/schemamapping'
 import schemaModel from '@/api/schema'
 import approvalModel from '@/api/approval'
-// import instanceModel from '@/api/flowzinstance'
+import instanceModel from '@/api/flowzinstance'
 import expandRow from './table-expand.vue'
 export default {
   name: 'Flowz',
@@ -209,14 +209,14 @@ export default {
       // console.log('generatedJson', generatedJson)
       generatedJson.fid = id
       generatedJson.createdOn = Date()
-      // instanceModel.post(generatedJson)
-      // .then(response => {
-      //   // console.log('response.data', response.data)
-      //   this.$router.push('/flow/instance/' + response.data.id)
-      // })
-      // .catch(error => {
-      //   console.log(error)
-      // })
+      instanceModel.post(generatedJson)
+      .then(response => {
+        // console.log('response.data', response.data)
+        this.$router.push('/flow/instance/' + response.data.id)
+      })
+      .catch(error => {
+        console.log(error)
+      })
     },
     addNewFlow () {
       this.$store.dispatch('removeXMLtoLocalStorage')
@@ -318,7 +318,7 @@ export default {
             type: m.workerType, // m.outgoing ? (m._name === 'recruiter' ? 'select' : 'task') : 'end',
             target: m.outgoing ? self.getTargetId(m, jsonXML) : [],
             mapping: (_.union(..._mapping)),
-            inputProperty: await self.getProperties(m),
+            inputProperty: await self.getInputProperties(m),
             outputProperty: await self.getOutputProperties(m)
           }
         }).head()
@@ -338,7 +338,7 @@ export default {
           type: 'start',
           target: self.getTargetId(m, process),
           mapping: [],
-          inputProperty: await self.getProperties(m),
+          inputProperty: await self.getInputProperties(m),
           outputProperty: await self.getOutputProperties(m)
         }
       }).value())
@@ -359,12 +359,12 @@ export default {
         // return { id: targetMap.__text }
       })
     },
-    async getProperties (proccess) {
-      if (proccess.extensionElements && proccess.extensionElements.myProperty) {
-        if (!_.isArray(proccess.extensionElements.myProperty.property)) {
-          proccess.extensionElements.myProperty.property = [proccess.extensionElements.myProperty.property]
+    async getInputProperties (proccess) {
+      if (proccess.extensionElements && proccess.extensionElements.myInputs) {
+        if (!_.isArray(proccess.extensionElements.myInputs.input)) {
+          proccess.extensionElements.myInputs.input = [proccess.extensionElements.myInputs.input]
         }
-        return await Promise.all(_.map(proccess.extensionElements.myProperty.property, async (m) => {
+        return await Promise.all(_.map(proccess.extensionElements.myInputs.input, async (m) => {
           return {
             id: m._id,
             entityschema: await schemaModel.getAll(m._entityschema),
