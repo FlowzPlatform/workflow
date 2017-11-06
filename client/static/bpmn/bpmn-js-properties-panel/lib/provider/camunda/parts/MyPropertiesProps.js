@@ -24,7 +24,8 @@ function formFieldTextField(options, getSelectedFormField) {
   var id = options.id,
     label = options.label,
     modelProperty = options.modelProperty,
-    validate = options.validate;
+    validate = options.validate,
+    hidden = options.hidden;
   return entryFactory.textField({
     id: id,
     label: label,
@@ -49,7 +50,7 @@ function formFieldTextField(options, getSelectedFormField) {
       commands.push(cmdHelper.updateBusinessObject(element, formField, properties));
       return commands;
     },
-    hidden: function (element, node) {
+    hidden: hidden || function (element, node) {
       return !getSelectedFormField(element, node);
     },
     validate: validate
@@ -123,101 +124,10 @@ module.exports = function (group, element, bpmnFactory, translate, options) {
     }
     return myPropetiesHelper.getFormField(element, selected.idx);
   }
-  // let entitySchemaModel = await getSchema()
-  // console.log(entitySchemaModel)
-  // options = options || {};
-  //   var getSelectedListener = options.getSelectedListener;
-  // group.entries.push(entryFactory.textBox({
-  //   id: 'Notes',
-  //   label: translate('Notes'),
-  //   modelProperty: 'notes',
-  // }));
-  // group.entries.push(entryFactory.selectBox({
-  //   id: 'Choice',
-  //   label: translate('Choice'),
-  //   selectOptions: [{ name: '---select---', value: 0 },
-  //     { name: 'Plain Request', value: 1 },
-  //     { name: 'Single Choice', value: 2 },
-  //     { name: 'Multi Choice', value: 3 }
-  //   ],
-  //   modelProperty: 'choice',
-  //   // get: function (element, node) {
-  //   //   var bo = getBusinessObject(element);
-  //   //   return {
-  //   //     choice: bo.get('camunda:choice')
-  //   //   };
-  //   // },
-  //   // set: function (element, values) {
-  //   //   var bo = getBusinessObject(element);
-  //   //   var choice = values.choice;
-  //   //   var props = {
-  //   //     'camunda:choice': choice
-  //   //   };
-  //   //   var commands = [];
-  //   //   commands.push(cmdHelper.updateBusinessObject(element, bo, props));
-  //   //   return commands;
-  //   // },
-  //   validate: function (element, values) {
-  //     var value = values.choice,
-  //       validate = {};
-  //     if (!value || value == 0) {
-  //       validate.choice = translate('Must provide a value');
-  //     }
-  //     return validate;
-  //   }
-  // }));
+
   var entitySchemaOptions = options.schema.map(f => ({ value: f.id, name: f.title }))
-    // group.entries.push(entryFactory.selectBox({
-    //   id: 'Entity_Schema',
-    //   label: 'Entity Schema',
-    //   // [{ name: "Schema-FinalDiscussion", value: "35dfea15-baf9-4322-9bce-486e9f436555" }]
-    //   selectOptions: entitySchemaOptions, // [{ name: '---select---', value: 0 }],
-    //   modelProperty: 'entityschema',
-    //   hidden: function (element, node) {
-    //     var bo = getBusinessObject(element);
-    //     if (bo && !getChoice(bo)) {
-    //       return true
-    //     } else {
-    //       return Boolean(!(getChoice(bo) > 1));
-    //     }
-    //   }
-    // }));
-    // group.entries.push(entryFactory.link({
-    //   id: 'list_schema',
-    //   label: 'List Schema',
-    //   // getClickableElement: list_schema,         
-    //   modelProperty: 'list_schema'
-    // }));
-    // group.entries.push(entryFactory.selectBox({
-    //   id: 'Approval_class',
-    //   label: 'Approval class',
-    //   selectOptions: options.approval, // [{ name: '---select---', value: 0 }],
-    //   modelProperty: 'approvalClass'
-    // }));
-    // group.entries.push(entryFactory.link({
-    //   id: 'list_approval',
-    //   label: 'List Approval',
-    //   // getClickableElement: list_approval,       
-    //   modelProperty: 'list_approval',
-    // }));
-    // group.entries.push(entryFactory.selectBox({
-    //   id: 'Email_Template',
-    //   label: 'Email Template',
-    //   selectOptions: options.emailtemplate, //[{ name: '---select---', value: 0 }],
-    //   modelProperty: 'emailTemplate'
-    // }));
-    // group.entries.push(entryFactory.link({
-    //   id: 'list_emailTemplate',
-    //   label: 'List EmailTemplate',
-    //   modelProperty: 'list_emailTemplate',
-    //   // getClickableElement : list_emailTemplate     
-    // }));
-    // group.entries.push(entryFactory.textField({
-    //   id: 'Submit_label',
-    //   label: 'Submit label',
-    //   modelProperty: 'submitLabel',
-    // }));
-    // [MyProperty] form field select box
+
+  // [MyProperty] form field select box
   var formFieldsEntry = extensionElements(element, bpmnFactory, {
     id: 'my-propeties',
     label: translate('Entity'),
@@ -450,5 +360,48 @@ module.exports = function (group, element, bpmnFactory, translate, options) {
     id: 'my-property-submitLabel',
     label: 'Submit label',
     modelProperty: 'submitLabel'
+  }, getSelectedFormField));
+
+  group.entries.push(entryFactory.checkbox({
+    id: 'my-property-is-form-input',
+    label: translate('Is Form Input'),
+    modelProperty: 'isFormInput',
+    get: function (element, node) {
+      var selectedFormField = getSelectedFormField(element, node) || {},
+        values = {};
+      values['isFormInput'] = selectedFormField['isFormInput'];
+      return values;
+    },
+    set: function (element, values, node) {
+      var commands = [];
+      if (typeof options.set === 'function') {
+        var cmd = options.set(element, values, node);
+        if (cmd) {
+          commands.push(cmd);
+        }
+      }
+      var formField = getSelectedFormField(element, node),
+        properties = {};
+      properties['isFormInput'] = values['isFormInput'] || undefined;
+      commands.push(cmdHelper.updateBusinessObject(element, formField, properties));
+      return commands;
+    },
+    hidden: function (element, node) {
+      return !getSelectedFormField(element, node);
+    }
+  }));
+
+  group.entries.push(formFieldTextField({
+    id: 'my-property-capacity',
+    label: 'Capacity',
+    modelProperty: 'capacity',
+    hidden: function (element, node) {
+      var formField = getSelectedFormField(element, node);
+      if (formField) {
+        return !formField.isFormInput
+      } else {
+        return !getSelectedFormField(element, node)
+      }
+    }
   }, getSelectedFormField));
 };

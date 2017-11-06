@@ -960,6 +960,16 @@
           "isAttr": true
         },
         {
+          "name": "isFormInput",
+          "type": "Boolean",
+          "isAttr": true
+        },
+        {
+          "name": "capacity",
+          "type": "String",
+          "isAttr": true
+        },
+        {
           "name": "cancelLabel",
           "type": "String",
           "isAttr": true
