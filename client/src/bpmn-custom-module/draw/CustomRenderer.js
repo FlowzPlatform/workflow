@@ -94,7 +94,7 @@ var CustomRender = function (eventBus, pathMap, styles) {
   }
 
   this.drawTriangle = function (parentGfx, element, type) {
-    type = type.replace(/^flowz:/, '')
+    type = type.replace(/^camunda:/, '')
     var plugin = [] // require('../../../bpmnPlugin/config.json') // ['Filter', 'sendRFQ']
     $.ajax({
       url: 'https://s3-us-west-2.amazonaws.com/airflowbucket1/bpmnplugin/config.json',
@@ -152,7 +152,7 @@ CustomRender.$inject = ['eventBus', 'pathMap', 'styles']
 CustomRender.prototype.drawShape = function (p, element) {
   var type = element.type
 
-  if (type.match(/flowz:/gi)) {
+  if (type.match(/camunda:/gi)) {
     return this.drawTriangle(p, element, type)
   }
 }

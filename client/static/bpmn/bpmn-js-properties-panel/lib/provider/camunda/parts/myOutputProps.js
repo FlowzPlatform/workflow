@@ -107,7 +107,7 @@ function ensureFormKeyAndDataSupported(element) {
   // return is(element, 'bpmn:ExclusiveGateway') || is(element, 'bpmn:InclusiveGateway') ||
   //   is(element, 'bpmn:ParallelGateway') || is(element, 'bpmn:ComplexGateway') ||
   //   is(element, 'bpmn:EventBasedGateway');
-  return is(element, 'bpmn:Task') || is(element, 'bpmn:StartEvent') || (element.type).match(/flowz:/gi)
+  return is(element, 'bpmn:Task') || is(element, 'bpmn:StartEvent') || (element.type).match(/camunda:/gi)
 }
 
 function getChoice(bo) {

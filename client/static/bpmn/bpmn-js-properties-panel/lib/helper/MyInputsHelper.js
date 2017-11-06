@@ -3,24 +3,24 @@
 var getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject,
   getExtensionElements = require('./ExtensionElementsHelper').getExtensionElements;
 
-var MyPropetiesHelper = {};
+var myInputsHelper = {};
 
-module.exports = MyPropetiesHelper;
+module.exports = myInputsHelper;
 
 /**
  * Return form data from business object or undefined if none exist
  *
  * @param  {djs.model.Base} element
  *
- * @return {ModdleElement|undefined} MyProperty
+ * @return {ModdleElement|undefined} MyInputs
  */
-MyPropetiesHelper.getMyProperty = function (element) {
+myInputsHelper.getMyInputs = function (element) {
   var bo = getBusinessObject(element);
 
-  var myProperty = getExtensionElements(bo, 'camunda:MyProperty');
+  var myInputs = getExtensionElements(bo, 'camunda:MyInputs');
 
-  if (typeof myProperty !== 'undefined') {
-    return myProperty[0];
+  if (typeof myInputs !== 'undefined') {
+    return myInputs[0];
   }
 };
 
@@ -33,14 +33,14 @@ MyPropetiesHelper.getMyProperty = function (element) {
  *
  * @return {Array} a list of form field objects
  */
-MyPropetiesHelper.getFormFields = function (element) {
-  var myProperty = this.getMyProperty(element);
+myInputsHelper.getFormFields = function (element) {
+  var myInputs = this.getMyInputs(element);
 
-  if (typeof myProperty === 'undefined') {
+  if (typeof myInputs === 'undefined') {
     return [];
   }
 
-  return myProperty.fields;
+  return myInputs.fields;
 };
 
 
@@ -52,7 +52,7 @@ MyPropetiesHelper.getFormFields = function (element) {
  *
  * @return {ModdleElement} the form field
  */
-MyPropetiesHelper.getFormField = function (element, idx) {
+myInputsHelper.getFormField = function (element, idx) {
 
   var formFields = this.getFormFields(element);
 
@@ -67,7 +67,7 @@ MyPropetiesHelper.getFormField = function (element, idx) {
  *
  * @return {Array<ModdleElement>} a list of constraint objects
  */
-MyPropetiesHelper.getConstraints = function (formField) {
+myInputsHelper.getConstraints = function (formField) {
   if (formField && formField.validation && formField.validation.constraints) {
     return formField.validation.constraints;
   }
@@ -82,7 +82,7 @@ MyPropetiesHelper.getConstraints = function (formField) {
  *
  * @return {Array<ModdleElement>} a list of camunda:value objects
  */
-MyPropetiesHelper.getEnumValues = function (formField) {
+myInputsHelper.getEnumValues = function (formField) {
   if (formField && formField.values) {
     return formField.values;
   }

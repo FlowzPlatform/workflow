@@ -140,6 +140,12 @@ import flowz from '@/api/flowz'
 import axios from 'axios'
 import config from '../../../config'
 // socket
+import $ from 'jquery'
+// import propertiesPanelModule from '../../../../static/bpmn/bpmn-js-properties-panel'
+// import propertiesProviderModule from '../../../../static/bpmn/bpmn-js-properties-panel/lib/provider/camunda'
+import camundaModdleDescriptor from '../../../../static/bpmn/camunda-bpmn-moddle/resources/camunda'
+import customPaletteModule from '@/bpmn-custom-module'
+
 let viewer, canvas
 export default {
   components: { expandRow, schemaTemplate },
@@ -347,7 +353,58 @@ export default {
     },
     initBPMN () {
       let self = this
-      viewer = new BpmnViewer({container: '#canvas'})
+
+      let plugin = [] // require('../../../bpmnPlugin/config.json') // ['Filter', 'sendRFQ']
+      $.ajax({
+        url: 'https://s3-us-west-2.amazonaws.com/airflowbucket1/bpmnplugin/config.json',
+        dataType: 'json',
+        async: false,
+        success: function (data) {
+          plugin = data
+        }
+      })
+      let types = _.chain(plugin).map(f => {
+        // delete require.cache[require.resolve(`../../../bpmnPlugin/${f}/index.js`)]
+        // let plug = require(`../../../bpmnPlugin/${f}/index.js`)
+        let plug = {}
+        $.ajax({
+          url: f.url, // 'https://s3-us-west-2.amazonaws.com/airflowbucket1/bpmnplugin/Filter/index.json',
+          dataType: 'json',
+          async: false,
+          success: function (data) {
+            plug = data
+          }
+        })
+        return {
+          'name': plug.type,
+          'isAbstract': true,
+          'superClass': [
+            'bpmn:FlowNode'
+          ]
+        }
+      }).value()
+      console.log('customPaletteModule', customPaletteModule)
+      console.log('types', camundaModdleDescriptor)
+      console.log('types', types)
+      viewer = new BpmnViewer({
+        container: '#canvas',
+        additionalModules: [
+          require('@/bpmn-custom-module/viewindex')
+        ],
+        moddleExtensions: {
+          flowz: {
+            'name': 'Camunda',
+            'uri': 'http://camunda.org/schema/1.0/bpmn',
+            'prefix': 'camunda',
+            'xml': {
+              'tagAlias': 'lowerCase'
+            },
+            'associations': [],
+            'types': types
+          },
+          camunda: camundaModdleDescriptor
+        }
+      })
       viewer.importXML(this.bpmnXML, function (err) {
         if (err) {
           console.log('error rendering', err)
