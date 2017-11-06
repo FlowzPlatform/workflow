@@ -79,7 +79,7 @@ const X2JS = require('x2js')
 import schemamappingModel from '@/api/schemamapping'
 import schemaModel from '@/api/schema'
 import approvalModel from '@/api/approval'
-import instanceModel from '@/api/flowzinstance'
+// import instanceModel from '@/api/flowzinstance'
 import expandRow from './table-expand.vue'
 export default {
   name: 'Flowz',
@@ -205,18 +205,18 @@ export default {
   methods: {
     async createNewInstance (index, id) {
       let generatedJson = await this.generateJson(this.flowzList[index].xml)
-      // console.log('generatedJson', JSON.stringify(generatedJson))
+      console.log('generatedJson', JSON.stringify(generatedJson))
       // console.log('generatedJson', generatedJson)
       generatedJson.fid = id
       generatedJson.createdOn = Date()
-      instanceModel.post(generatedJson)
-      .then(response => {
-        // console.log('response.data', response.data)
-        this.$router.push('/flow/instance/' + response.data.id)
-      })
-      .catch(error => {
-        console.log(error)
-      })
+      // instanceModel.post(generatedJson)
+      // .then(response => {
+      //   // console.log('response.data', response.data)
+      //   this.$router.push('/flow/instance/' + response.data.id)
+      // })
+      // .catch(error => {
+      //   console.log(error)
+      // })
     },
     addNewFlow () {
       this.$store.dispatch('removeXMLtoLocalStorage')
@@ -284,25 +284,38 @@ export default {
       for (let d of process.target) {
       // _.forEach(process.target, (d) => {
         // merge all module
-        var mergeModules = _.chain(jsonXML).filter((m) => {
+        console.log('jsonXML', jsonXML)
+        var mergeModules = _.chain(jsonXML).map((m, k) => {
+          if (typeof m === 'object') {
+            m = _.isArray(m) ? m : [m]
+            m = _.map(m, im => {
+              im.workerType = k
+              return im
+            })
+          }
+          return m
+        }).filter((m, i) => {
           return typeof m === 'object'
         })
-        .map((m) => {
-          return _.isArray(m) ? m : [m]
-        })
+        // .map((m, i) => {
+        //   return _.isArray(m) ? m : [m]
+        // })
         .value()
+        // console.log('mergeModules', mergeModules)
         // generate process
         let result = await _.chain(_.union(...mergeModules))
-        .filter((f) => {
+        .filter((f, i, k) => {
+          // console.log('k', k)
           return f._id === d.id
         })
         .map(async (m) => {
+          // console.log('m', m)
           let _mapping = await self.getMapping(m, mergeModules)
           return {
             id: m._id,
             capacity: false,
             name: m._name,
-            type: m.outgoing ? (m._name === 'recruiter' ? 'select' : 'task') : 'end',
+            type: m.workerType, // m.outgoing ? (m._name === 'recruiter' ? 'select' : 'task') : 'end',
             target: m.outgoing ? self.getTargetId(m, jsonXML) : [],
             mapping: (_.union(..._mapping)),
             inputProperty: await self.getProperties(m),

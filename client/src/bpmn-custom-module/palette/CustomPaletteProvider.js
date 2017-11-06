@@ -20,7 +20,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function () {
   var elementFactory = this._elementFactory
   var create = this._create
   var translate = this._translate
-  console.log('this._plugin', this._plugin)
+    // console.log('this._plugin', this._plugin)
   var renderInputOutput = function (shape, input, output) {
     var element = elementFactory._bpmnFactory.create('bpmn:ExtensionElements', { values: [] });
     element.$parent = shape.businessObject;
@@ -89,7 +89,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function () {
   });
 
   // await axios.get('http://172.16.160.117:3030/plugin')
-  console.log('plugin', plugin)
+  // console.log('plugin', plugin)
 
   var pallets = {}
   _.each(plugin, (f) => {
