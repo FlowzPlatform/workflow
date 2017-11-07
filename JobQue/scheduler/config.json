@@ -42,5 +42,10 @@
     "prettyPrint": {
       "forceColor": true
     }
+  },
+  "service": {
+    "find": "http://localhost:5000/job/find/",
+    "update": "http://localhost:5000/job/update/",
+    "create": "http://localhost:5000/job/create/"
   }
 }

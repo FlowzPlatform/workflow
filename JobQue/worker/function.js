@@ -72,7 +72,7 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
     await updateFlowInstance('completed', job.fId, job.forProcess, job.id, job.output, job.type, job.input, jobId, job.sourceCount)
   }
 
-  this.constructor.prototype.processError = async function (job) {
+  this.constructor.prototype.processError = async function (job, jobId) {
     await updateFlowInstance('terminated', job.fId, job.forProcess, job.id, job.output, job.type, job.input, jobId, job.sourceCount)
   }
 }
