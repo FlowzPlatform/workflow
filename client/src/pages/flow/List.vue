@@ -205,19 +205,19 @@ export default {
   methods: {
     async createNewInstance (index, id) {
       let generatedJson = await this.generateJson(this.flowzList[index].xml)
-      console.log('generatedJson', JSON.stringify(generatedJson))
+      // console.log('generatedJson', JSON.stringify(generatedJson))
       // console.log('generatedJson', generatedJson)
       generatedJson.fid = id
       generatedJson.createdOn = Date()
-      console.log('instanceModel', instanceModel)
-      // instanceModel.post(generatedJson)
-      // .then(response => {
-      //   // console.log('response.data', response.data)
-      //   this.$router.push('/flow/instance/' + response.data.id)
-      // })
-      // .catch(error => {
-      //   console.log(error)
-      // })
+      // console.log('instanceModel', instanceModel)
+      instanceModel.post(generatedJson)
+      .then(response => {
+        // console.log('response.data', response.data)
+        this.$router.push('/flow/instance/' + response.data.id)
+      })
+      .catch(error => {
+        console.log(error)
+      })
     },
     addNewFlow () {
       this.$store.dispatch('removeXMLtoLocalStorage')

@@ -65,7 +65,7 @@
           let flowObject = {}
           flowObject.ProcessName = data.definitions.process._name
           flowObject.xml = xmlData
-          console.log('xmlData', xmlData)
+          // console.log('xmlData', xmlData)
           let result = null
           if (this.$route.params.id !== undefined) {
             result = flowz.put(this.$route.params.id, flowObject)
