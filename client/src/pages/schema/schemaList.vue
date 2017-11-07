@@ -1,31 +1,69 @@
 <template>
-  <div>
-  <row>
-    <router-link to="/schema/new">
-      <Button type="primary" style="float: right;margin-bottom: 2px;"><Icon type="plus" size="16"></Icon> Add</Button>
-    </router-link>
-  </row>
-    <Table :columns="schemaCol" :data="schemaData"></Table>
+  <div id="app">
+          <row>
+            <router-link to="/schema/new">
+              <Button type="primary" style="float: right;margin-bottom: 2px;"><Icon type="plus" size="16"></Icon> Add</Button>
+            </router-link>
+          </row>
+          <row>
+          <Col :span="spanTable">
+              <Table :columns="schemaCol" :data="schemaData"></Table>
+          </Col>
+          <Col span="16" v-if="inst">
+              <div>
+                  <Table :columns="instanceCol" :data="instanceData"></Table>
+              </div>
+              <div v-if="viewTemplate" v-html="viewTemplate">
+              </div>
+          </Col>
+          </row>
   </div>
 </template>
 <script type="text/javascript">
-  import schema from '@/api/schema'
-import api from '@/api'
-import _ from 'lodash'
+  import Schema from '@/api/schema'
+  import instance from '@/api/schema/instance'
+  import api from '@/api'
+  import axios from 'axios'
+  import expandRowView from './expandInstance.vue'
+  import _ from 'lodash'
   export default {
     data () {
       return {
+        viewTemplate: '',
+        schema: true,
+        inst: false,
+        instId: '',
         schemaName: [],
+        instanceData: [],
         schemaData: [],
+        instanceCol: [
+          {
+            title: 'Id',
+            key: 'id'
+          },
+          {
+            type: 'expand',
+            width: 20,
+            render: (h, params) => {
+              return h(expandRowView, {
+                props: {
+                  row: this.instanceData[params.index]
+                }
+              })
+            }
+          }
+        ],
         deleteSchemaValue: 'softdel',
         schemaCol: [
           {
             title: 'Title',
             key: 'title'
+            // width: '50%'
           },
           {
             title: 'Action',
             key: 'action',
+            // width: '50%',
             align: 'center',
             render: (h, params) => {
               return h('div', [
@@ -86,6 +124,26 @@ import _ from 'lodash'
                       this.handleRemove(params.index)
                     }
                   }
+                }, ''),
+                h('Button', {
+                  props: {
+                    type: 'text',
+                    size: 'large',
+                    icon: 'android-menu'
+                  },
+                  style: {
+                    color: '#CC0000',
+                    marginRight: '3px',
+                    padding: '0px',
+                    fontSize: '20px'
+                  },
+                  on: {
+                    click: () => {
+                      this.instId = this.schemaName[params.index]._id
+                      console.log('this.instId', this.instId)
+                      this.instList(this.schemaName[params.index]._id)
+                    }
+                  }
                 }, '')
               ])
             }
@@ -93,7 +151,41 @@ import _ from 'lodash'
         ]
       }
     },
+    computed: {
+      spanTable () {
+        return this.inst ? 8 : 24
+      }
+    },
     methods: {
+      viewdataInstance (id) {
+        var self = this
+        instance.getThis(id).then(response => {
+          console.log('RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR', response)
+          Schema.getThis(response.data.Schemaid).then(res => {
+            console.log('res.viewTemplate.url', res)
+            if (res.data.viewTemplate.length !== 0) {
+              var urlViewtemplate = res.data.viewTemplate[0].url
+              console.log('FFFFFFFFFFFFFFFFFFFFFFF', urlViewtemplate)
+              axios.get(res.data.viewTemplate[0].url).then(html => {
+                self.viewTemplate = html.data
+              })
+            }
+          })
+        })
+      },
+      instList (id) {
+        let self = this
+        this.schema = false
+        this.inst = true
+        this.instanceData = []
+        instance.get().then(response => {
+          _.forEach(response.data, (obj) => {
+            if (id === obj.Schemaid) {
+              self.instanceData.push({ 'id': obj.id })
+            }
+          })
+        })
+      },
       handleRemove (index) {
         this.$Modal.confirm({
           title: 'Confirm, Are you sure you want to delete?',
@@ -178,7 +270,7 @@ import _ from 'lodash'
       }
     },
     mounted () {
-      schema.get().then(response => {
+      Schema.get().then(response => {
         console.log(response.data)
         this.schemaName = _.reject(response.data, { 'isdeleted': true })
         this.schemaData = _.map(this.schemaName, m => {
