@@ -24,6 +24,7 @@ var serviceTaskDelegateProps = require('./parts/ServiceTaskDelegateProps'),
   myInputProps = require('./parts/MyInputProps'),
   myPropertiesIOProps = require('./parts/myPropertiesIOProps'),
   myOutputProps = require('./parts/myOutputProps'),
+  capacityProps = require('./parts/capacityProps'),
   startEventInitiator = require('./parts/StartEventInitiator'),
   variableMapping = require('./parts/VariableMappingProps'),
   versionTag = require('./parts/VersionTagProps');
@@ -107,6 +108,7 @@ function createGeneralTabGroups(element, bpmnFactory, elementRegistry, elementTe
   };
   idProps(generalGroup, element, translate);
   nameProps(generalGroup, element, translate);
+  capacityProps(generalGroup, element, translate);
   processProps(generalGroup, element, translate);
   versionTag(generalGroup, element, translate);
   executableProps(generalGroup, element, translate);

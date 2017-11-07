@@ -937,6 +937,22 @@
       ]
     },
     {
+      "name": "Capacity",
+      "isAbstract": true,
+      "extends": [
+        "bpmn:FlowElement"
+      ],
+      "properties": [{
+        "name": "isFormInput",
+        "isAttr": true,
+        "type": "Boolean"
+      }, {
+        "name": "capacity",
+        "type": "String",
+        "isAttr": true
+      }]
+    },
+    {
       "name": "MyInputs",
       "superClass": ["Element"],
       "meta": {
@@ -956,16 +972,6 @@
       "superClass": ["Element"],
       "properties": [{
           "name": "id",
-          "type": "String",
-          "isAttr": true
-        },
-        {
-          "name": "isFormInput",
-          "type": "Boolean",
-          "isAttr": true
-        },
-        {
-          "name": "capacity",
           "type": "String",
           "isAttr": true
         },

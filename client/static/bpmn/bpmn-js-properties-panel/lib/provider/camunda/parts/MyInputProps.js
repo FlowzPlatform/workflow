@@ -362,46 +362,46 @@ module.exports = function (group, element, bpmnFactory, translate, options) {
     modelProperty: 'submitLabel'
   }, getSelectedFormField));
 
-  group.entries.push(entryFactory.checkbox({
-    id: 'my-input-is-form-input',
-    label: translate('Is Form Input'),
-    modelProperty: 'isFormInput',
-    get: function (element, node) {
-      var selectedFormField = getSelectedFormField(element, node) || {},
-        values = {};
-      values['isFormInput'] = selectedFormField['isFormInput'];
-      return values;
-    },
-    set: function (element, values, node) {
-      var commands = [];
-      if (typeof options.set === 'function') {
-        var cmd = options.set(element, values, node);
-        if (cmd) {
-          commands.push(cmd);
-        }
-      }
-      var formField = getSelectedFormField(element, node),
-        properties = {};
-      properties['isFormInput'] = values['isFormInput'] || undefined;
-      commands.push(cmdHelper.updateBusinessObject(element, formField, properties));
-      return commands;
-    },
-    hidden: function (element, node) {
-      return !getSelectedFormField(element, node);
-    }
-  }));
+  // group.entries.push(entryFactory.checkbox({
+  //   id: 'my-input-is-form-input',
+  //   label: translate('Is Form Input'),
+  //   modelProperty: 'isFormInput',
+  //   get: function (element, node) {
+  //     var selectedFormField = getSelectedFormField(element, node) || {},
+  //       values = {};
+  //     values['isFormInput'] = selectedFormField['isFormInput'];
+  //     return values;
+  //   },
+  //   set: function (element, values, node) {
+  //     var commands = [];
+  //     if (typeof options.set === 'function') {
+  //       var cmd = options.set(element, values, node);
+  //       if (cmd) {
+  //         commands.push(cmd);
+  //       }
+  //     }
+  //     var formField = getSelectedFormField(element, node),
+  //       properties = {};
+  //     properties['isFormInput'] = values['isFormInput'] || undefined;
+  //     commands.push(cmdHelper.updateBusinessObject(element, formField, properties));
+  //     return commands;
+  //   },
+  //   hidden: function (element, node) {
+  //     return !getSelectedFormField(element, node);
+  //   }
+  // }));
 
-  group.entries.push(formFieldTextField({
-    id: 'my-input-capacity',
-    label: 'Capacity',
-    modelProperty: 'capacity',
-    hidden: function (element, node) {
-      var formField = getSelectedFormField(element, node);
-      if (formField) {
-        return !formField.isFormInput
-      } else {
-        return !getSelectedFormField(element, node)
-      }
-    }
-  }, getSelectedFormField));
+  // group.entries.push(formFieldTextField({
+  //   id: 'my-input-capacity',
+  //   label: 'Capacity',
+  //   modelProperty: 'capacity',
+  //   hidden: function (element, node) {
+  //     var formField = getSelectedFormField(element, node);
+  //     if (formField) {
+  //       return !formField.isFormInput
+  //     } else {
+  //       return !getSelectedFormField(element, node)
+  //     }
+  //   }
+  // }, getSelectedFormField));
 };
