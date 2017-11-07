@@ -44,8 +44,8 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
     await checkConnection(false, 20000)
     sourceCount = sourceCount ? sourceCount : []
     let tmp = await rdash.table(FLOWZ_TABLE).get(fId).update({'process_log': rdash.row('process_log').append({job: current, jobType: type.toLowerCase(), jobId: jobId, input: input, sourceCount: sourceCount, output: output, status: newStatus, lastModified: new Date()})}).run()
-    pino(PINO_C_OPTION).info({ 'fId': fId, 'jobId': jobId },'process in flow instance updated')
-    pino(PINO_DB_OPTION, fs.createWriteStream('./logs')).info({ 'fId': fId, 'jobId': jobId },'process in flow instance updated')
+    pino(PINO_C_OPTION).info({ 'fId': fId, 'jobId': current },'process in flow instance updated')
+    pino(PINO_DB_OPTION, fs.createWriteStream('./logs')).info({ 'fId': fId, 'jobId': current },'process in flow instance updated')
   }
 
   async function checkConnection (crash, delay){

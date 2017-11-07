@@ -1,8 +1,10 @@
 <template>
   <div class="layout">
     <div class="layout-header">
-        <div><h4>Approval</h4></div>
-        <Button type="primary" align="right" icon="plus" @click="addApproval" size="small" slot="extra">Add</Button>
+        <Button type="primary" icon="plus" @click="addApproval" size="small" slot="extra" class="pull-right">Add</Button>
+        <div>
+          <h4>Approval</h4>
+        </div>
     </div>
     <div>
       <Table :columns="approvalCol" :data="approvalData"></Table>

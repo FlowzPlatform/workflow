@@ -433,7 +433,7 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
               if (sourceTargetMapping[k].producerField != -1) {
                 // get value from source to be mapped if producerField is not equal to 1
                 // it will be equal to 1 if transform function is used instead of producerField
-                this.map(sourceTargetMapping[k].producerField, sourceTargetMapping[k].consumerField, sourceOutput[outputsMapped], obj.inputs[outputsMapped], targetJobs[i].data.inputProperty[0].entityschema.entity)
+                this.map(sourceTargetMapping[k].producerField, sourceTargetMapping[k].consumerField, sourceOutput[outputsMapped], obj.inputs[outputsMapped], targetJobs[i].data.inputProperty[0].entityschema.entity, notifyingProcessSchema.outputProperty[outputPropertyIndex].entityschema.entity)
               }
               else {
                 //if transform function is used, execute the transform function and get value to be assigned
