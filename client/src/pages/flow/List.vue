@@ -209,14 +209,15 @@ export default {
       // console.log('generatedJson', generatedJson)
       generatedJson.fid = id
       generatedJson.createdOn = Date()
-      instanceModel.post(generatedJson)
-      .then(response => {
-        // console.log('response.data', response.data)
-        this.$router.push('/flow/instance/' + response.data.id)
-      })
-      .catch(error => {
-        console.log(error)
-      })
+      console.log('instanceModel', instanceModel)
+      // instanceModel.post(generatedJson)
+      // .then(response => {
+      //   // console.log('response.data', response.data)
+      //   this.$router.push('/flow/instance/' + response.data.id)
+      // })
+      // .catch(error => {
+      //   console.log(error)
+      // })
     },
     addNewFlow () {
       this.$store.dispatch('removeXMLtoLocalStorage')
@@ -311,9 +312,10 @@ export default {
         .map(async (m) => {
           // console.log('m', m)
           let _mapping = await self.getMapping(m, mergeModules)
+          console.log('m', m)
           return {
             id: m._id,
-            capacity: false,
+            capacity: (m._isFormInput) ? m._capacity : false,
             name: m._name,
             type: m.workerType, // m.outgoing ? (m._name === 'recruiter' ? 'select' : 'task') : 'end',
             target: m.outgoing ? self.getTargetId(m, jsonXML) : [],
@@ -333,7 +335,7 @@ export default {
       .map(async (m) => {
         return {
           id: m._id,
-          capacity: false,
+          capacity: (m._isFormInput) ? m._capacity : false,
           name: m._name,
           type: 'start',
           target: self.getTargetId(m, process),
