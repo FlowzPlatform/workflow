@@ -34,10 +34,9 @@ module.exports = {
 
 function aftercreateInstance(hook) {
   let id = hook.data.id;
-  console.log('hook.data.id', hook.data.id)
-  console.log('config', config)
+  // console.log('hook.data.id', hook.data)
   if (hook.data.id != undefined) {
-    console.log('Called', id)
+    console.log('hook.data.id', hook.data.id)
     const Queue = require('rethinkdb-job-queue')
       //--------------- Connection Options -----------------
     const cxnOptions = config
@@ -54,6 +53,6 @@ function aftercreateInstance(hook) {
       //--------------- Create new job -----------------
     const job = q.createJob(jobOptions)
       //--------------- Add job -----------------
-    q.addJob(job).then((savedJobs) => {}).catch(err => console.error(err))
+    q.addJob(job).then((savedJobs) => {}).catch(err => console.error('Hook Errors', err))
   }
 }

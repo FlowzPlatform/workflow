@@ -19,6 +19,8 @@
 </template>
 
 <script>
+  import _ from 'lodash'
+
   import schema from '@/api/schema'
   import approval from '@/api/approval'
   import emailtemplate from '@/api/emailtemplate'
@@ -34,8 +36,9 @@
   import propertiesPanelModule from '../../../static/bpmn/bpmn-js-properties-panel'
   import propertiesProviderModule from '../../../static/bpmn/bpmn-js-properties-panel/lib/provider/camunda'
   import camundaModdleDescriptor from '../../../static/bpmn/camunda-bpmn-moddle/resources/camunda'
-
+  import customPaletteModule from '@/bpmn-custom-module'
   const X2JS = require('x2js')
+  import $ from 'jquery'
 
   // let bpmnModeler = null
   export default {
@@ -55,13 +58,14 @@
           })
         // console.log('xmlData', xmlData)
         let x2js = new X2JS()
+        // console.log('x2js', x2js)
         let data = x2js.xml2js(xmlData)
         if (data.definitions.process._name !== undefined) {
           // console.log(data.name)
           let flowObject = {}
           flowObject.ProcessName = data.definitions.process._name
           flowObject.xml = xmlData
-          console.log('xmlData', xmlData)
+          // console.log('xmlData', xmlData)
           let result = null
           if (this.$route.params.id !== undefined) {
             result = flowz.put(this.$route.params.id, flowObject)
@@ -81,6 +85,36 @@
         }
       },
       initBPMN (data) {
+        let plugin = [] // require('../../../bpmnPlugin/config.json') // ['Filter', 'sendRFQ']
+        $.ajax({
+          url: 'https://s3-us-west-2.amazonaws.com/airflowbucket1/bpmnplugin/config.json',
+          dataType: 'json',
+          async: false,
+          success: function (data) {
+            plugin = data
+          }
+        })
+        let types = _.chain(plugin).map(f => {
+          // delete require.cache[require.resolve(`../../../bpmnPlugin/${f}/index.js`)]
+          // let plug = require(`../../../bpmnPlugin/${f}/index.js`)
+          let plug = {}
+          $.ajax({
+            url: f.url, // 'https://s3-us-west-2.amazonaws.com/airflowbucket1/bpmnplugin/Filter/index.json',
+            dataType: 'json',
+            async: false,
+            success: function (data) {
+              plug = data
+            }
+          })
+          return {
+            'name': plug.type,
+            'isAbstract': true,
+            'superClass': [
+              'bpmn:FlowNode'
+            ]
+          }
+        }).value()
+
         this.bpmnModeler = new BpmnModeler({
           container: '#js-canvas',
           propertiesPanel: {
@@ -89,13 +123,23 @@
           },
           additionalModules: [
             propertiesPanelModule,
-            propertiesProviderModule
+            propertiesProviderModule,
+            customPaletteModule
           ],
           moddleExtensions: {
+            flowz: {
+              'name': 'Camunda',
+              'uri': 'http://camunda.org/schema/1.0/bpmn',
+              'prefix': 'camunda',
+              'xml': {
+                'tagAlias': 'lowerCase'
+              },
+              'associations': [],
+              'types': types
+            },
             camunda: camundaModdleDescriptor
           }
         })
-
         this.bpmnModeler.importXML(this.bpmnXML, function (err) {
           if (err) {
             console.error(err)
@@ -212,6 +256,9 @@
     right: 16px;
     font-size: 20px;
     float: right;
+  }
+  .palette-img > img {
+    padding: 10px;
   }
   // #js-properties-panel {
   //   position: absolute;

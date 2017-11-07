@@ -411,7 +411,93 @@ grapesjs.plugins.add('product-plugin', function(editor, options){
 	    category: 'Static Components'
 	});
 
+//Custom Form Components
+bm.add('mainForm', {
+  label: 'Main Form',
+  content: '<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"><style>.btn-danger{margin-left:10%;}.input-group .form-control {position: relative;z-index: 2;float: left;width: 100%;margin-bottom: 0;}.input-group {position: relative;display: table;border-collapse: separate;width: 30%;margin-left: 10%;margin-top:1%}</style><body><form name="form" action="" id="form"><fieldset id="exercises"><div class="exercise"><div class="input-group"><span class="input-group-addon">Text</span><input type="text" id="custom_input_default" class="form-control" name="text" placeholder="Please enter text"></div><div class="input-group"><span class="input-group-addon">Text</span><input type="text" name="input" class="form-control" placeholder="Please enter text" id="custom_input_default"></div><br><button class="remove btn btn-danger btn-sm"><i class="glyphicon glyphicon-trash"></i></button></div></fieldset></form><div id="hello"></div><button id="add_exercise" class="btn btn-primary btn-md">ADD</button></body>',
+  attributes: {
+      class: 'fa fa-list-alt',
+      title: 'Main Form',
+  },
+  category: 'Custom Form'
+});
 
+//Custom Form Input Component
+bm.add('Input', {
+  label: 'Input',
+  content: '<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"><style>.form-group{width:30%;margin-left:10%;}</style></head><body><div class="form-group"> <input type="text" id="custom_input"  name="" class="form-control" placeholder=""></div></body>',
+  attributes: {
+      class: 'fa fa-text-width',
+      title: 'Input',
+  },
+  category: 'Custom Form'
+});
+
+//Custom Form Textarea Component
+bm.add('Textarea', {
+  label: 'Textarea',
+  content: '<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"><style>.form-group{width:30%;margin-left:10%;margin-top:1%}</style></head><body><div class="form-group"><textarea class="form-control" rows="5" id="custom_textarea" name="" placeholder=""></textarea></div></body>',
+  attributes: {
+      class: 'fa fa-square',
+      title: 'Textarea',
+  },
+  category: 'Custom Form'
+});
+
+//Custom Form Select Component
+bm.add('Select', {
+  label: 'Select',
+  content: '<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"><style>.form-group{width:30%;margin-left:10%;margin-top:1%}</style></head><body><div class="form-group"> <select class="form-control" id="select1" name=""><option selected disabled>Please Select</option></select></div>',
+  attributes: {
+      class: 'fa fa-caret-square-o-down',
+      title: 'Select',
+  },
+  category: 'Custom Form'
+});
+
+//Custom Form Radio Button Component
+bm.add('RadioButton', {
+  label: 'RadioButton',
+  content: '<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"><RadioButton id="custom_radio" style="display: block; width: 30%;margin-left:10%"><style>.form-group{width:30%;margin-left:10%;margin-top:1%}</style></head><body><div class="form-group"><p class="radiobutton"> <input type="radio" id="radio1" value="radio1" checked> <label for="radio1">Radio1</label></p></div></body></RadioButton>',
+  attributes: {
+      class: 'fa fa-dot-circle-o',
+      title: 'RadioButton',
+  },
+  category: 'Custom Form'
+});
+
+//Custom Form Checkbox Component
+bm.add('CheckBox', {
+  label: 'CheckBox',
+  content: '<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"><CheckBox style="display: block; width: 30%;margin-left:10%"><style>.form-group{width:30%;margin-left:10%}</style><div class="form-group"><div class="checkbox"> <label><input type="checkbox" id="checkbox1" value="option1">Option 1</label></div></div></CheckBox>',
+  attributes: {
+      class: 'fa fa-check-circle-o',
+      title: 'CheckBox',
+  },
+  category: 'Custom Form'
+});
+
+//Custom Form Label Component
+bm.add('Label', {
+  label: 'Label',
+  content: '<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"><Label  id="label1" name="" style="display: block; width: 30%;margin-left:10%"><style>.form-group{width:30%;margin-left:10%}</style><body><div class="form-group"><h4><span class="label label-default">Label</span></h4></div></body></Label>',
+  attributes: {
+      class: 'fa fa-square-o',
+      title: 'Label',
+  },
+  category: 'Custom Form'
+});
+
+//Custom Form Button Component
+bm.add('Button', {
+  label: 'Button',
+  content: '<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"><style>.form-group{width:30%;margin-left:10%}</style><button type="button" class="btn btn-primary btn-md">Submit</button>',
+  attributes: {
+      class: 'fa fa-minus-square-o',
+      title: 'Button',
+  },
+  category: 'Custom Form'
+});
 	
 
   // Get DomComponents module
@@ -422,6 +508,195 @@ grapesjs.plugins.add('product-plugin', function(editor, options){
   var defaultModel = defaultType.model;
   var defaultView = defaultType.view;
   var traits;
+
+  comps.addType('Input', {
+    // Define the Model
+    model: defaultModel.extend({
+        // Extend default properties
+        defaults: Object.assign({}, defaultModel.prototype.defaults, {
+            editable: true,
+            droppable: true,
+            traits: [
+                {
+                    label: 'Name',
+                    name: 'name',
+                    type: 'text'
+                },
+                {
+                    label: 'Placeholder',
+                    name: 'placeholder',
+                    type: 'text'
+                },
+                {
+                    label: 'Type',
+                    name: 'type',
+                    type: 'select',
+                    options: [{value: 'text', name: 'Text'},{value: 'email', name: 'Email'},{value: 'password', name: 'Password'},{value: 'number', name: 'Number'}]
+                },
+                {
+                  label: 'Required',
+                  name: 'required',
+                  type: 'checkbox'
+                },
+            ],
+        }),
+
+    }, {
+        isComponent: function(el) {
+            if (el.tagName == 'INPUT') {
+                return {
+                    type: 'Input'
+                };
+            }
+        },
+    }),
+
+    view: defaultType.view,
+
+    // The render() should return 'this'
+    render: function() {
+        // Extend the original render method
+        defaultType.view.prototype.render.apply(this, arguments);
+        this.el.placeholder = 'Text here'; // <- Doesn't affect the final HTML code
+        return this;
+    },
+});
+
+comps.addType('Select', {
+  // Define the Model
+  model: defaultModel.extend({
+      // Extend default properties
+      defaults: Object.assign({}, defaultModel.prototype.defaults, {
+          editable: true,
+          droppable: true,
+          traits: [
+              {
+                  label: 'Name',
+                  name: 'name',
+                  type: 'text'
+              },
+              {
+                  label: 'NumberOfOptions',
+                  name: 'NumberOfOptions',
+                  type: 'text'
+              }
+          ],
+      }),
+  }, {
+      isComponent: function(el) {
+          if (el.tagName == 'SELECT') {
+              return {
+                  type: 'Select'
+              };
+          }
+      },
+  }),
+
+  view: defaultType.view,
+
+  // The render() should return 'this'
+  render: function() {
+      // Extend the original render method
+      defaultType.view.prototype.render.apply(this, arguments);
+      this.el.placeholder = 'Text here'; // <- Doesn't affect the final HTML code
+      return this;
+  },
+});
+
+comps.addType('CheckBox', {
+  // Define the Model
+  model: defaultModel.extend({
+      // Extend default properties
+      defaults: Object.assign({}, defaultModel.prototype.defaults, {
+          editable: true,
+          droppable: true,
+          traits: [
+              {
+                  label: 'Name',
+                  name: 'name',
+                  type: 'text'
+              },
+              {
+                label: 'Id',
+                name: 'id',
+                type: 'text'
+              },
+              {
+                label: 'Label & Value',
+                name: 'value',
+                type: 'text'
+              }
+          ],
+      }),
+
+  }, {
+      isComponent: function(el) {
+          if (el.tagName == 'CHECKBOX') {
+              return {
+                  type: 'CheckBox'
+              };
+          }
+      },
+  }),
+
+  view: defaultType.view,
+
+  // The render() should return 'this'
+  render: function() {
+      // Extend the original render method
+      defaultType.view.prototype.render.apply(this, arguments);
+      this.el.placeholder = 'Text here'; // <- Doesn't affect the final HTML code
+      return this;
+  },
+});
+
+
+comps.addType('RadioButton', {
+  // Define the Model
+  model: defaultModel.extend({
+      // Extend default properties
+      defaults: Object.assign({}, defaultModel.prototype.defaults, {
+          editable: true,
+          droppable: true,
+          traits: [
+              {
+                  label: 'Name',
+                  name: 'name',
+                  type: 'text'
+              },
+              {
+                  label: 'Id',
+                  name: 'id',
+                  type: 'text'
+              },
+              {
+                label: 'Label & Value',
+                name: 'value',
+                type: 'text'
+            },
+          ],
+      }),
+
+  }, {
+      isComponent: function(el) {
+          if (el.tagName == 'RADIOBUTTON') {
+              return {
+                  type: 'RadioButton'
+              };
+          }
+      },
+  }),
+
+  view: defaultType.view,
+
+  // The render() should return 'this'
+  render: function() {
+      // Extend the original render method
+      defaultType.view.prototype.render.apply(this, arguments);
+      this.el.placeholder = 'Text here'; // <- Doesn't affect the final HTML code
+      return this;
+  },
+});
 
   // The `input` will be the Component type ID
   comps.addType('productListing', {

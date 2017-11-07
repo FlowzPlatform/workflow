@@ -22,6 +22,10 @@ export default {
           key: 'id'
         },
         {
+          title: 'Created On',
+          key: 'createdOn'
+        },
+        {
           title: 'Action',
           key: 'action',
           align: 'center',
@@ -63,6 +67,24 @@ export default {
                     this.$router.push('/flow/instance/log/' + params.row.id)
                   }
                 }
+              }, ''),
+              h('Button', {
+                props: {
+                  type: 'text',
+                  size: 'large',
+                  icon: 'android-delete'
+                },
+                style: {
+                  marginRight: '3px',
+                  padding: '0px',
+                  fontSize: '20px',
+                  color: '#e74c3c'
+                }
+                // on: {
+                //   click: () => {
+                //     this.deleteFlow(this.flowzList[params.index].id)
+                //   }
+                // }
               }, '')
             ])
           }

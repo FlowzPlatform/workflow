@@ -8,7 +8,9 @@ const flowz = require('./flowz/flowz.service.js');
 const flowzinstance = require('./flowz-instance/flowz-instance.service.js');
 const instancetest = require('./instance-test/instance-test.service.js');
 const scheduler = require('./scheduler/scheduler.service.js');
-// const logs = require('./logs/logs.service.js');
+const logs = require('./logs/logs.service.js');
+const addInputToJobQue = require('./addInputToJobQue/addInputToJobQue.service.js');
+const plugin = require('./plugin/plugin.service.js');
 module.exports = function() {
   const app = this; // eslint-disable-line no-unused-vars
   app.configure(schema);
@@ -20,6 +22,8 @@ module.exports = function() {
   app.configure(flowz);
   app.configure(flowzinstance);
   app.configure(instancetest);
-  // app.configure(logs);
+  app.configure(logs);
+  app.configure(addInputToJobQue);
+  app.configure(plugin);
   //app.configure(scheduler);
 };

@@ -6,13 +6,15 @@
         <ButtonGroup>
           <Button type="primary" @click="graph = true, list = false" icon="pie-graph"></Button>
           <Button type="primary" @click="graph = false, list = true" icon="navicon-round"></Button>
-      </ButtonGroup>
+         </ButtonGroup>
       </div>
     </row>
     <row>
-      <div v-show="graph" id="canvas" style="width: 100%;height: calc(90vh - 130px);position: relative;">
+      <div class="split" style="height: calc(100vh - 110px);">
+      <div v-show="graph" id="canvas" style="height: calc(80vh - 350px);border: 1px solid rgb(233, 234, 236);">
       </div>
-      <div  v-if="list" style="height: calc(90vh - 130px);position: relative; margin-top:10px">
+      <!-- <div id="vertical-split" class="split split-horizontal"> -->
+        <div  v-if="list || graph" id="vertical-split" style="height: calc(90vh - 130px);position: relative; margin-top:10px">
           <Col :span="spanTable">
             <div class="schema-form ivu-table-wrapper" >
                   <div class="ivu-table ivu-table-border">
@@ -101,22 +103,30 @@
                                                     </div>
                                                   </td>
                                                 </tr>
-                                              </template> 
+                                              </template>
                                             </tbody>
                                         </table>
                                     </span>
                                 </div>
                             </div>
+                            <div v-else>
+                              <Table stripe :columns="getLogColumnsFormData(propData)" :data="getLogDataFormData(propData)"></Table>
+                            </div>
                           </TabPane>
                           <TabPane label="Logs"  name="logtab">
                             <Table stripe :columns="getLogColumns(propData)" :data="getLogData(propData)"></Table>
+                            <!-- <div v-if="yes" style="margin-top:15px">
+                              <Table stripe :columns="getLogColumnsFormData(propData)" :data="getLogDataFormData(propData)"></Table>
+                            </div> -->
                           </TabPane>
                           <Button type="primary" slot="extra" size="small" icon="close" @click="showProp = false"></Button>
                       </Tabs>
                   </div>
               </div>
           </Col>
-      </div>
+        </div>
+      <!-- </div> -->
+    </div>
       <!-- <Table :columns="columns" :data="flowInstance"></Table> -->
       <!-- {{showProp}} -->
     </row>
@@ -126,16 +136,26 @@
 import expandRow from '@/components/expand-process.vue'
 import instance from '@/api/flowzinstance'
 import schemaTemplate from '@/components/SchemaTemplate.vue'
+import expandRow1 from './formdata-expand.vue'
 import _ from 'lodash'
+import Split from 'split.js'
 import BpmnViewer from 'bpmn-js/lib/NavigatedViewer.js'
 import flowz from '@/api/flowz'
 import axios from 'axios'
+import config from '../../../config'
 // socket
+import $ from 'jquery'
+// import propertiesPanelModule from '../../../../static/bpmn/bpmn-js-properties-panel'
+// import propertiesProviderModule from '../../../../static/bpmn/bpmn-js-properties-panel/lib/provider/camunda'
+import camundaModdleDescriptor from '../../../../static/bpmn/camunda-bpmn-moddle/resources/camunda'
+import customPaletteModule from '@/bpmn-custom-module'
+
 let viewer, canvas
 export default {
   components: { expandRow, schemaTemplate },
   data () {
     return {
+      yes: false,
       flowInstance: [],
       flowInstanceLog: [],
       flowid: 0,
@@ -160,11 +180,14 @@ export default {
     }
   },
   async mounted () {
+    Split(['#canvas', '#vertical-split'], {
+      direction: 'vertical'
+    })
+
     let self = this
     // console.log(this.$route.params.id)
     await instance.getThis(this.$route.params.id)
     .then(response => {
-      // console.log('response instance', response)
       this.flowInstance = response.data.processList
       this.flowInstanceLog = response.data.process_log
       this.flowid = response.data.fid
@@ -182,10 +205,12 @@ export default {
   feathers: {
     'flowz-instance': {
       updated (data) { // update status using socket
-        this.flowInstance = data.processList
-        this.flowInstanceLog = data.process_log
-        document.getElementById('canvas').innerHTML = ''
-        this.initBPMN()
+        if (data.id === this.$route.params.id) {
+          this.flowInstance = data.processList
+          this.flowInstanceLog = data.process_log
+          document.getElementById('canvas').innerHTML = ''
+          this.initBPMN()
+        }
       }
     }
   },
@@ -196,19 +221,58 @@ export default {
     getLogColumns (propData) {
       var log = this.getLastLog(propData)
       var cols = []
+      var obj = {cols: this.getLogColumnsFormData(propData), formdata: this.getLogDataFormData(propData)}
+      cols.push({type: 'expand',
+        width: 50,
+        render: (h, params) => {
+          return h(expandRow1, {
+            props: {
+              row: obj
+            }
+          })
+        }
+      })
       _.forEach(log, (v, k) => {
         if (k === 'job' || k === 'jobType' || k === 'lastModified' || k === 'status') {
           cols.push({title: k, key: k})
         }
       })
+      // cols.push({title: 'icon',
+      //   key: 'icon',
+      //   render: (h, params) => {
+      //     return h('div', [
+      //       h('Button', {
+      //         props: {
+      //           type: 'text',
+      //           size: 'large',
+      //           icon: 'eye'
+      //         },
+      //         style: {
+      //           // color: '#CC0000',
+      //           marginRight: '3px',
+      //           padding: '0px',
+      //           fontSize: '20px'
+      //         },
+      //         on: {
+      //           click: () => {
+      //             // alert(11)
+      //             this.yes = true
+      //             // this.edit(params.row.id)
+      //           }
+      //         }
+      //       }, '')
+      //     ])
+      //   }
+      // })
       return cols
     },
     getLogData (propData) {
       var dt = []
       // var obj = {}
+      let obj
       var logs = this.getLastLogs(propData)
       _.forEach(logs, (log, i) => {
-        let obj = {
+        obj = {
           'job': log.job,
           'jobType': log.jobType,
           'lastModified': log.lastModified,
@@ -221,7 +285,71 @@ export default {
         // })
         dt.push(obj)
       })
+      console.log('@@@@@@@@@@@@@@', dt)
       return dt
+    },
+    getLogColumnsFormData (propData) {
+      var cols = []
+      var log = this.getLastLog(propData)
+      var obj = log.input
+      var data = []
+      _.forEach(obj, function (v, k) {
+        data = Object.keys(v)
+        // console.log('!!!!!!!!!', v['candidate name'])
+      })
+      _.forEach(data, function (value) {
+        if (value === 'candidate name' || value === 'contact number' || value === 'id') {
+          console.log('@@@@@@@@@@@@@@ee', value)
+          cols.push({title: value, key: value})
+        }
+      })
+      // _.forEach(log, (v, k) => {
+      //   if (v === 'Name' || v === 'Email' || v === 'id') {
+      //   }
+      // })
+      return cols
+    },
+    getLogDataFormData (propData) {
+      var log = this.getLastLog(propData)
+      var obj = log.input
+      var data
+      var dt = []
+      _.forEach(obj, (v, k) => {
+        // console.log('############', v.id, k)
+      //   // if (k === 'Name' || k === 'Email' || k === 'id') {
+      //   //   console.log('title', k)
+      //   //   console.log('key', v)
+        // data.push(v)
+        data = {
+          'candidate name': v['candidate name'],
+          'contact number': v['contact number'],
+          'id': v.id
+        }
+
+        dt.push(data)
+      //   // }
+      })
+      console.log('@@@@@@@@@@@@@@', dt)
+      return dt
+
+      // var dt = []
+      // // var obj = {}
+      // var logs = this.getLastLogs(propData)
+      // _.forEach(logs, (log, i) => {
+      //   let obj = {
+      //     'job': log.job,
+      //     'jobType': log.jobType,
+      //     'lastModified': log.lastModified,
+      //     'status': log.status
+      //   }
+      //   // _.forEach(log, (v, k) => {
+      //   //   // if (k === 'job' || k === 'jobType' || k === 'lastModified' || k === 'status') {
+      //   //   //   obj[k] = v
+      //   //   // }
+      //   // })
+      //   dt.push(obj)
+      // })
+      // return dt
     },
     getIcon (item) {
       var result = this.getStatus(item)
@@ -254,6 +382,10 @@ export default {
         }
         this.entitySchema = item.inputProperty[0].entityschema
       }
+      import('../../../../static/js/form.js')
+      import('../../../../static/js/checkbox.js')
+      import('../../../../static/js/radiobutton.js')
+      import('../../../../static/js/selectValue.js')
       this.showProp = true
       this.propData = item
     },
@@ -268,6 +400,10 @@ export default {
       if (status === 'inputRequired') {
         this.setProperties(item)
       }
+      if (status === 'mappingRequired') {
+        console.log('mappingRequired-status', status)
+        this.forwardmappingdata()
+      }
       return status
     },
     getLastLog (item) {
@@ -280,12 +416,63 @@ export default {
     },
     initBPMN () {
       let self = this
-      viewer = new BpmnViewer({container: '#canvas'})
+
+      let plugin = [] // require('../../../bpmnPlugin/config.json') // ['Filter', 'sendRFQ']
+      $.ajax({
+        url: 'https://s3-us-west-2.amazonaws.com/airflowbucket1/bpmnplugin/config.json',
+        dataType: 'json',
+        async: false,
+        success: function (data) {
+          plugin = data
+        }
+      })
+      let types = _.chain(plugin).map(f => {
+        // delete require.cache[require.resolve(`../../../bpmnPlugin/${f}/index.js`)]
+        // let plug = require(`../../../bpmnPlugin/${f}/index.js`)
+        let plug = {}
+        $.ajax({
+          url: f.url, // 'https://s3-us-west-2.amazonaws.com/airflowbucket1/bpmnplugin/Filter/index.json',
+          dataType: 'json',
+          async: false,
+          success: function (data) {
+            plug = data
+          }
+        })
+        return {
+          'name': plug.type,
+          'isAbstract': true,
+          'superClass': [
+            'bpmn:FlowNode'
+          ]
+        }
+      }).value()
+      console.log('customPaletteModule', customPaletteModule)
+      console.log('types', camundaModdleDescriptor)
+      console.log('types', types)
+      viewer = new BpmnViewer({
+        container: '#canvas',
+        additionalModules: [
+          require('@/bpmn-custom-module/viewindex')
+        ],
+        moddleExtensions: {
+          flowz: {
+            'name': 'Camunda',
+            'uri': 'http://camunda.org/schema/1.0/bpmn',
+            'prefix': 'camunda',
+            'xml': {
+              'tagAlias': 'lowerCase'
+            },
+            'associations': [],
+            'types': types
+          },
+          camunda: camundaModdleDescriptor
+        }
+      })
       viewer.importXML(this.bpmnXML, function (err) {
         if (err) {
           console.log('error rendering', err)
         } else {
-          console.log('self', self)
+          // console.log('self', self)
           _.forEach(self.flowInstanceLog, function (process) {
             canvas = viewer.get('canvas')
             canvas.addMarker(process.job, _.chain(self.flowInstanceLog).orderBy(['lastModified'], ['asc']).findLast((f) => { return f.job === process.job }).value().status)
@@ -309,6 +496,31 @@ export default {
           // e.gfx = the graphical element
           console.log(event, 'on', e.element.id)
         })
+      })
+    },
+    forwardmappingdata () {
+      // console.log('config.serverURI', config.serverURI)
+      let self = this
+      _.forEach(self.flowInstance, (v, k) => {
+        let lastLog = self.getLastLog(v)
+        if (lastLog !== undefined && lastLog.status === 'mappingRequired') {
+          // console.log('forwadamapping', lastLog)
+          let dataObject = {
+            'fId': self.$route.params.id,
+            'input': lastLog.input[0].inputs,
+            'isExternalInput': true,
+            'jobId': lastLog.job
+          }
+          let uri = config.serverURI + '/addInputToJobQue'
+          console.log('dataObject', dataObject)
+          axios.post(uri, dataObject)
+          .then(function (response) {
+            console.log(response)
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
+        }
       })
     }
   }
@@ -371,5 +583,9 @@ export default {
 
     .inputRequired {
       color: #E71A24 !important;
+    }
+    .ivu-table-cell-expand i {
+      font-size: 17px !important;
+      margin-right: 0px !important;
     }
 </style>

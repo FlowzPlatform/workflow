@@ -1,6 +1,6 @@
 <template>
   <div class="schema-form"   style="border-left:3px solid rgb(147, 180, 216);">
-  <!-- {{schemainstance.data}} -->
+    <!-- {{schemainstance.data}} -->
     <Form-item v-for="(item, index) in schemainstance.data" :key="index" style="padding-left:2px">
       <!-- {{schemainstance.data}} -->
       <Form ref="formSchema" :model="schemainstance" inline>
@@ -64,7 +64,7 @@
             <!-- <a @click="handleEdit(item)"><Icon type="edit" size="20"></Icon></Icon></a> -->
         </Form-item>
         <Form-item>
-            <a @click="handleRemove(index)"><Icon type="close-circled" style="color:#e74c3c" size="20"></Icon></a>
+            <a @click="handleRemove(index)"><Icon type="trash-a" style="color:#e74c3c" size="20"></Icon></a>
         </Form-item>
       </Form>
     </Form-item>
@@ -104,8 +104,8 @@ import SchemaForm from './SchemaForm'
             var _res = response.data
             var obj = {}
             // obj.id = self.getGuid();  // for guid for perticular row
-            obj.database = _res.database
-            obj.Schemaid = _res._id
+            // obj.database = _res.database
+            // obj.Schemaid = _res._id
             _.forEach(_res.entity, function(v) {
               if (v.customtype) {
                 console.log('child', self.getChildData(v.type))
@@ -151,8 +151,8 @@ import SchemaForm from './SchemaForm'
         var obj = {}
         // obj.id = this.getGuid();
         // alert(ent.database)
-        obj.database = ent.database
-        obj.Schemaid = ent._id
+        // obj.database = ent.database
+        // obj.Schemaid = ent._id
         _.forEach(ent.entity, function(v) {
           if (v.customtype) {
             obj[v.name] = self.getChildData(v.type)

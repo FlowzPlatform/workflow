@@ -937,7 +937,23 @@
       ]
     },
     {
-      "name": "MyProperty",
+      "name": "Capacity",
+      "isAbstract": true,
+      "extends": [
+        "bpmn:FlowElement"
+      ],
+      "properties": [{
+        "name": "isFormInput",
+        "isAttr": true,
+        "type": "Boolean"
+      }, {
+        "name": "capacity",
+        "type": "String",
+        "isAttr": true
+      }]
+    },
+    {
+      "name": "MyInputs",
       "superClass": ["Element"],
       "meta": {
         "allowedIn": [
@@ -947,12 +963,12 @@
       },
       "properties": [{
         "name": "fields",
-        "type": "Property",
+        "type": "Input",
         "isMany": true
       }]
     },
     {
-      "name": "Property",
+      "name": "Input",
       "superClass": ["Element"],
       "properties": [{
           "name": "id",
@@ -1031,6 +1047,11 @@
       "superClass": ["Element"],
       "properties": [{
           "name": "id",
+          "type": "String",
+          "isAttr": true
+        },
+        {
+          "name": "notes",
           "type": "String",
           "isAttr": true
         },
