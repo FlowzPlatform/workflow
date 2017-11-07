@@ -4,32 +4,17 @@ const TIMEOUT = 60000*60
 const _ = require('lodash')
 const fs = require("fs")
 const pino = require('pino')
+const axios = require('axios')
 
 module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
 
+  const FIND_URL = options.service && options.service.find ? options.service.find : app.service.find
+  const UPDATE_URL = options.service && options.service.update ? options.service.update : app.service.update
+  const CREATE_URL = options.service && options.service.create ? options.service.create : app.service.create
   const cxnOptions = options.cxnOptions ? options.cxnOptions : app.rethinkdb
   const SCHEDULER_TABLE = options.scheduler ? options.scheduler : app.scheduler_table
   const FLOWZ_TABLE = options.fTable ? options.fTable : app.flowz_table
   const rdash = require('rethinkdbdash')(cxnOptions)
-
-  // -------- // -------- addJob -------- // -------- //
-  this.constructor.prototype.addJob = async function (processJob, processQueue, flowInstance) {
-    //--------------- Add process job -----------------
-    flowInstance.process_log = flowInstance.process_log ? flowInstance.process_log : []
-    let newJob = await processQueue.addJob(processJob)
-    flowInstance.process_log.push({job: processJob.data.id, jobType: processJob.data.type.toLowerCase(), jobId: newJob[0].id, input: processJob.data.input, status: 'created', lastModified: new Date()})
-    let logAt = flowInstance.process_log.length - 1
-    if (logAt != 0) {
-      let tmp = await rdash.table(FLOWZ_TABLE).get(flowInstance.id).update({process_log: rdash.row('process_log').append(flowInstance.process_log[logAt])}).run()
-    }
-    else {
-      let tmp = await rdash.table(FLOWZ_TABLE).get(flowInstance.id).update({process_log:flowInstance.process_log}).run()
-    }
-    // newJob[0].data.log_position = logAt
-    newJob[0].status = 'created'
-    newJob[0].update()
-    return newJob[0]
-  }
 
   // -------- // -------- allProcessMappingDone -------- // -------- //
   this.constructor.prototype.allProcessMappingDone = async function (targetJob, capacity, targetSchemaIndex, fId, externalCheck) {
@@ -103,11 +88,26 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
 
   // -------- // -------- beginProcess -------- // -------- //
   this.constructor.prototype.beginProcess = async function (childJob) {
-    childJob.status = 'waiting'
-    childJob.dateEnable = new Date()
-    childJob.update()
-    let tmp = await this.updateLog(childJob, 'processing', false)
-    if (tmp) return 'done'
+    try {
+      var response = await axios.post(UPDATE_URL, {
+        "connection": cxnOptions,
+        "queue": {
+          "name": childJob.data.type.toLowerCase() + '_worker'
+        },
+        "findVal": {
+      		"id": childJob.id
+      	},
+      	"data": childJob.data,
+        "status": "waiting"
+      })
+
+      let tmp = await this.updateLog(childJob, 'processing', false)
+      if (tmp) return 'done'
+    }
+    catch (error) {
+      pino(PINO_C_OPTION).error(error)
+      pino(PINO_DB_OPTION).error(error)
+    }
   }
 
   // -------- // -------- checkAllInputsAvailable -------- // -------- //
@@ -166,29 +166,46 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
 
   // -------- // -------- createJobs -------- // -------- //
   this.constructor.prototype.createJob = async function (currentProcess, forProcess, flowInstance) {
-    await this.checkConnection(false, 10000)
     //--------------- Process Queue Options -----------------
-    const processQueueOptions = {
-      name: currentProcess.type.toLowerCase() + '_worker'
-    }
-    var jobOptions = {}
-    jobOptions.data = currentProcess
-    jobOptions.retryMax = 0
-    jobOptions.data.fId = flowInstance.id
-    jobOptions.data.input = jobOptions.data.input ? jobOptions.data.input : []
-    jobOptions.data.output = []
-    jobOptions.data.forProcess = forProcess
-    jobOptions.timeout = TIMEOUT
+    var jobData = currentProcess
+    jobData.input = jobData.input ? jobData.input : []
+    jobData.fId = flowInstance.id
+    jobData.output = []
+    jobData.forProcess = forProcess
     let delay = (currentProcess.start_delay) ? currentProcess.start_delay : 0
     let startAt = (currentProcess.start_at) ? currentProcess.start_at : new Date().getTime()
-    jobOptions.dateEnable =  new Date(new Date().getTime() + 10000)
-    const processQueue = new Queue(cxnOptions, processQueueOptions)
+    let dateEnable =  new Date(new Date().getTime() + 10000)
 
-    //--------------- Create new process job -----------------
-    const processJob = processQueue.createJob(jobOptions)
+    try {
+      var response = await axios.post(CREATE_URL, {
+        "connection": cxnOptions,
+        "queue": {
+          "name": jobData.type.toLowerCase() + '_worker'
+        },
+        "options" : {
+          "timeout": TIMEOUT,
+          "retrymax": 0,
+          "dateEnable": dateEnable
+        },
+        "jobs":[jobData]
+      })
 
-    return this.addJob(processJob, processQueue, flowInstance)
-
+      response = response.data
+      flowInstance.process_log = flowInstance.process_log ? flowInstance.process_log : []
+      flowInstance.process_log.push({job: jobData.id, jobType: jobData.type.toLowerCase(), jobId: response[0].id, input: jobData.input, status: 'created', lastModified: new Date()})
+      let logAt = flowInstance.process_log.length - 1
+      if (logAt != 0) {
+        let tmp = await rdash.table(FLOWZ_TABLE).get(flowInstance.id).update({process_log: rdash.row('process_log').append(flowInstance.process_log[logAt])}).run()
+      }
+      else {
+        let tmp = await rdash.table(FLOWZ_TABLE).get(flowInstance.id).update({process_log:flowInstance.process_log}).run()
+      }
+      return response[0]
+    }
+    catch (error) {
+      pino(PINO_C_OPTION).error(error)
+      pino(PINO_DB_OPTION).error(error)
+    }
   }
 
   // -------- // -------- externalMappingRequired -------- // -------- //
@@ -239,16 +256,27 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
 
   // -------- // -------- getJobFromQueue -------- // -------- //
   this.constructor.prototype.getJobFromQueue = async function (targetSchema, fId) {
-    const qOptions = {
-      name: targetSchema.type.toLowerCase() + '_worker'
-    }
-    const q = new Queue(cxnOptions, qOptions)
 
-    let result = await q.findJob({ data : { id : targetSchema.id, fId : fId }, status : 'created' })
-    if (result.length > 0) {
-      return _.sortBy(result,['dateCreated'])
-    } else {
-      return false
+    try {
+      var response = await axios.post(FIND_URL, {
+        "connection": cxnOptions,
+        "queue": {
+          "name": targetSchema.type.toLowerCase() + '_worker'
+        },
+        "findVal": { data : { id : targetSchema.id, fId : fId }, status : 'created' }
+      })
+
+      console.log(response)
+      response = response.data
+      if (response.length > 0) {
+        return _.sortBy(response,['dateCreated'])
+      } else {
+        return false
+      }
+    }
+    catch (error) {
+      pino(PINO_C_OPTION).error(error)
+      pino(PINO_DB_OPTION).error(error)
     }
   }
 
@@ -546,6 +574,7 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
       //get job from its respective worker
       let targetJobs = await this.getJobFromQueue(targetSchema, fId)
 
+      console.log(targetSchema, fId)
       //get array size of external inputs
       let numberOfExternalInputs = externalInput.length
 
@@ -693,8 +722,24 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
 
   // -------- // -------- updateProcess -------- // -------- //
   this.constructor.prototype.updateProcess = async function (childJob) {
-    await childJob.update()
-    return 'done'
+    try {
+      var response = await axios.post(UPDATE_URL, {
+        "connection": cxnOptions,
+        "queue": {
+          "name": childJob.data.type.toLowerCase() + '_worker'
+        },
+        "findVal": {
+      		"id": childJob.id
+      	},
+      	"data": childJob.data
+      })
+
+      return 'done'
+    }
+    catch (error) {
+      pino(PINO_C_OPTION).error(error)
+      pino(PINO_DB_OPTION).error(error)
+    }
   }
 
   // -------- // -------- validate -------- // -------- //

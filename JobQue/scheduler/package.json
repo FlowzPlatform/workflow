@@ -8,6 +8,7 @@
   "author": "bhumilsarvaiya",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.17.0",
     "chokidar": "^1.7.0",
     "fs": "0.0.1-security",
     "lodash": "^4.17.4",
