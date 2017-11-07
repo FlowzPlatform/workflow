@@ -7,7 +7,6 @@
         <Checkbox label="warning" style="color:orange;"></Checkbox>
     </CheckboxGroup>
     <Table :columns="logsCols" :data="logsData"></Table>
-    {{loglevel}}
   </div>
 </template>
 <script>

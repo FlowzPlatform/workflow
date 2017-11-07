@@ -110,6 +110,7 @@
   import rethink from '../assets/images/rethink.png'
   import elastic from '../assets/images/elasticsearch.png'
   import nedb from '../assets/images/nedb.png'
+  import flowz from '@/api/flowz'
   const _ = require('lodash')
   export default {
     data () {

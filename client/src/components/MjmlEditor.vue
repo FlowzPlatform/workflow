@@ -36,8 +36,8 @@
 /*eslint-disable*/
 var AWS = require('aws-sdk')
 AWS.config.update({
-  accessKeyId: 'AKIAIPFZEFM5QMKVKC2A', // process.env.accesskey,
-  secretAccessKey: '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', // process.env.secretkey
+  accessKeyId: process.env.accesskey,
+  secretAccessKey: process.env.secretkey
 })
 AWS.config.region = 'us-west-2'
 
