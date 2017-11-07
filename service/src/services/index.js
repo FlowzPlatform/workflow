@@ -10,7 +10,7 @@ const instancetest = require('./instance-test/instance-test.service.js');
 const scheduler = require('./scheduler/scheduler.service.js');
 const logs = require('./logs/logs.service.js');
 const addInputToJobQue = require('./addInputToJobQue/addInputToJobQue.service.js');
-
+const plugin = require('./plugin/plugin.service.js');
 module.exports = function() {
   const app = this; // eslint-disable-line no-unused-vars
   app.configure(schema);
@@ -24,5 +24,6 @@ module.exports = function() {
   app.configure(instancetest);
   app.configure(logs);
   app.configure(addInputToJobQue);
+  app.configure(plugin);
   //app.configure(scheduler);
 };
