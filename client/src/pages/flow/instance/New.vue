@@ -103,7 +103,7 @@
                                                     </div>
                                                   </td>
                                                 </tr>
-                                              </template> 
+                                              </template>
                                             </tbody>
                                         </table>
                                     </span>
@@ -115,6 +115,9 @@
                           </TabPane>
                           <TabPane label="Logs"  name="logtab">
                             <Table stripe :columns="getLogColumns(propData)" :data="getLogData(propData)"></Table>
+                            <!-- <div v-if="yes" style="margin-top:15px">
+                              <Table stripe :columns="getLogColumnsFormData(propData)" :data="getLogDataFormData(propData)"></Table>
+                            </div> -->
                           </TabPane>
                           <Button type="primary" slot="extra" size="small" icon="close" @click="showProp = false"></Button>
                       </Tabs>
@@ -133,6 +136,7 @@
 import expandRow from '@/components/expand-process.vue'
 import instance from '@/api/flowzinstance'
 import schemaTemplate from '@/components/SchemaTemplate.vue'
+import expandRow1 from './formdata-expand.vue'
 import _ from 'lodash'
 import Split from 'split.js'
 import BpmnViewer from 'bpmn-js/lib/NavigatedViewer.js'
@@ -145,6 +149,7 @@ export default {
   components: { expandRow, schemaTemplate },
   data () {
     return {
+      yes: false,
       flowInstance: [],
       flowInstanceLog: [],
       flowid: 0,
@@ -210,19 +215,58 @@ export default {
     getLogColumns (propData) {
       var log = this.getLastLog(propData)
       var cols = []
+      var obj = {cols: this.getLogColumnsFormData(propData), formdata: this.getLogDataFormData(propData)}
+      cols.push({type: 'expand',
+        width: 50,
+        render: (h, params) => {
+          return h(expandRow1, {
+            props: {
+              row: obj
+            }
+          })
+        }
+      })
       _.forEach(log, (v, k) => {
         if (k === 'job' || k === 'jobType' || k === 'lastModified' || k === 'status') {
           cols.push({title: k, key: k})
         }
       })
+      // cols.push({title: 'icon',
+      //   key: 'icon',
+      //   render: (h, params) => {
+      //     return h('div', [
+      //       h('Button', {
+      //         props: {
+      //           type: 'text',
+      //           size: 'large',
+      //           icon: 'eye'
+      //         },
+      //         style: {
+      //           // color: '#CC0000',
+      //           marginRight: '3px',
+      //           padding: '0px',
+      //           fontSize: '20px'
+      //         },
+      //         on: {
+      //           click: () => {
+      //             // alert(11)
+      //             this.yes = true
+      //             // this.edit(params.row.id)
+      //           }
+      //         }
+      //       }, '')
+      //     ])
+      //   }
+      // })
       return cols
     },
     getLogData (propData) {
       var dt = []
       // var obj = {}
+      let obj
       var logs = this.getLastLogs(propData)
       _.forEach(logs, (log, i) => {
-        let obj = {
+        obj = {
           'job': log.job,
           'jobType': log.jobType,
           'lastModified': log.lastModified,
@@ -235,33 +279,52 @@ export default {
         // })
         dt.push(obj)
       })
+      console.log('@@@@@@@@@@@@@@', dt)
       return dt
     },
     getLogColumnsFormData (propData) {
-      var log = this.getLastLog(propData)
-      // var obj = log.input[0].candidates[0]
       var cols = []
-      _.forEach(log, (v, k) => {
-        if (k === 'Name' || k === 'Email' || k === 'id') {
-          cols.push({title: k, key: k})
+      var log = this.getLastLog(propData)
+      var obj = log.input
+      var data = []
+      _.forEach(obj, function (v, k) {
+        data = Object.keys(v)
+        // console.log('!!!!!!!!!', v['candidate name'])
+      })
+      _.forEach(data, function (value) {
+        if (value === 'candidate name' || value === 'contact number' || value === 'id') {
+          console.log('@@@@@@@@@@@@@@ee', value)
+          cols.push({title: value, key: value})
         }
       })
-      console.log('@@@@@@@@@@@@@@', log)
+      // _.forEach(log, (v, k) => {
+      //   if (v === 'Name' || v === 'Email' || v === 'id') {
+      //   }
+      // })
       return cols
     },
     getLogDataFormData (propData) {
       var log = this.getLastLog(propData)
-      // var obj = log.input[0].candidates[0]
-      var data = log.input[0].candidates
-      // _.forEach(obj, (v, k) => {
+      var obj = log.input
+      var data
+      var dt = []
+      _.forEach(obj, (v, k) => {
+        // console.log('############', v.id, k)
       //   // if (k === 'Name' || k === 'Email' || k === 'id') {
       //   //   console.log('title', k)
       //   //   console.log('key', v)
-      //   //   data.push({title: v, key: v})
+        // data.push(v)
+        data = {
+          'candidate name': v['candidate name'],
+          'contact number': v['contact number'],
+          'id': v.id
+        }
+
+        dt.push(data)
       //   // }
-      // })
-      console.log('@@@@@@@@@@@@@@', data)
-      return data
+      })
+      console.log('@@@@@@@@@@@@@@', dt)
+      return dt
 
       // var dt = []
       // // var obj = {}
@@ -463,5 +526,9 @@ export default {
 
     .inputRequired {
       color: #E71A24 !important;
+    }
+    .ivu-table-cell-expand i {
+      font-size: 17px !important;
+      margin-right: 0px !important;
     }
 </style>
