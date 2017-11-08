@@ -206,6 +206,7 @@ module.exports = {
 
     var _id = schema.generated_keys[0];
     selectedDB.conn.table("schema").get(_id).update({ '_id': _id }).run();
+    console.log('postSchema............................................................., ', schema.generated_keys[0])
     return schema;
 
 

@@ -9,7 +9,7 @@
   "license": "ISC",
   "dependencies": {
     "chokidar": "^1.7.0",
-    "config": "^1.27.0",
+    "config": "^1.26.2",
     "flowz-scheduler": "file:../../scheduler",
     "fs": "0.0.1-security",
     "lodash": "^4.17.4",

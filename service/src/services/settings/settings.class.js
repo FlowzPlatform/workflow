@@ -77,7 +77,7 @@ class Service {
       //check connection alredy exist or not
       var check = ''
       _.map(res[selectDB].dbinstance, function(instance) { 
-        if(instance.connection_name == data.connection_name && instance.host == data.host && instance.port == data.port && instance.dbname == data.dbname){
+        if(instance.host == data.host && instance.port == data.port && instance.dbname == data.dbname){
             check = 'Exist'
         }
       })
