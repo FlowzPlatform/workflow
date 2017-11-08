@@ -29,7 +29,9 @@ export default {
   mounted () {
     console.log('form expand............', this.row)
     this.formCol = this.row.cols
-    this.formData = this.row.formdata
+    if (this.row.rData.status === 'processing' || this.row.rData.status === 'completed') {
+      this.formData = this.row.formdata
+    }
   }
 }
 </script>

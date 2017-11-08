@@ -214,14 +214,15 @@ export default {
     },
     getLogColumns (propData) {
       var log = this.getLastLog(propData)
+      var logs = this.getLastLogs(propData)
       var cols = []
-      var obj = {cols: this.getLogColumnsFormData(propData), formdata: this.getLogDataFormData(propData)}
+      // var obj = {cols: this.getLogColumnsFormData(propData), formdata: this.getLogDataFormData(propData), rData: logs[params.index]}
       cols.push({type: 'expand',
         width: 50,
         render: (h, params) => {
           return h(expandRow1, {
             props: {
-              row: obj
+              row: {cols: this.getLogColumnsFormData(propData), formdata: this.getLogDataFormData(propData), rData: logs[params.index]}
             }
           })
         }
