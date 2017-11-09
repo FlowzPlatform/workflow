@@ -7,6 +7,8 @@ const pino = require('pino')
 
 module.exports = function (options) {
 
+  process.setMaxListeners(0)
+  
   options = options ? options : {}
   const cxnOptions = options.cxnOptions ? options.cxnOptions : app.rethinkdb
   const qOptions = options.qOptions ? options.qOptions : app.qOptions
@@ -78,7 +80,6 @@ module.exports = function (options) {
     } catch (err) {
       pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).error({},'... error in process\n'+err)
       pino(PINO_C_OPTION).error({},'... error in process '+err)
-      console.error(err)
       return next(err)
     }
   })

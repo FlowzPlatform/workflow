@@ -1,6 +1,7 @@
 const Queue = require('rethinkdb-job-queue')
 const config = require('config')
-
+const pino = require('pino')
+const PINO = config.get('pino')
 const pluginSubscriptionCreate = config.get('plugins.subscriptionCreatePattern')
 const pluginCreate = config.get('plugins.createPattern')
 const pluginFind = config.get('plugins.findPattern')
@@ -24,6 +25,7 @@ module.exports = function job (options) {
   let rethinkDBInfo, newoptions
   let plugin = this
   let priority = ['lowest', 'low', 'normal', 'medium', 'high', 'highest']
+  let allowedStatus = ['created']
 
   options = mergeOptions(defaultOption, options)
 
@@ -134,7 +136,7 @@ module.exports = function job (options) {
     }
   })
 
-  this.add(pluginUpdate, async function (msg, response) {
+  plugin.add(pluginUpdate, async function (msg, response) {
     try {
       // validate parameter
       let validParamErr
@@ -150,6 +152,7 @@ module.exports = function job (options) {
         connection: msg.connection,
         options: msg.options
       }
+
       // Merge Options
       newoptions = mergeOptions(options, newoption)
 
@@ -173,8 +176,13 @@ module.exports = function job (options) {
         await queueObj.addJob(job)
         .then(async result => {
           for (i=0;i<result.length;i++) {
-            result[i].status = 'created'
-            await result[i].update()
+            if (result[i].manualStatus && allowedStatus.includes(result[i].manualStatus)) {
+              result[i].status = result[i].manualStatus
+              delete result[i].manualStatus
+              await result[i].update()
+            } else if (result[i].manualStatus) {
+              delete result[i].manualStatus
+            }
           }
           result = result.map(function (a) { delete a.q; return a })
           resolve(result)
@@ -320,48 +328,24 @@ module.exports = function job (options) {
   function singleCreateJobObj (queueObj, jData) {
     return new Promise(async (resolve, reject) => {
       // if any option pass as parameter it will create jobs
-      let newCreateJoboption = {
-        options: jData.options
-      }
+      let newCreateJoboption = jData.options
+
+      delete jData.options
+
       // Merge Options
       try {
-        newCreateJoboption = plugin.util.deepextend({
-          options: newoptions.options
-        }, newCreateJoboption)
+        newCreateJoboption = plugin.util.deepextend(newoptions.options, newCreateJoboption)
       } catch (err) {}
 
-      let qObj = await queueObj.createJob({data: jData})
-      // set job queue priority options
+      let job = {}
+      job.data = jData
+      for (key in newCreateJoboption) {
+        if (newCreateJoboption[key]) {
+          job[key] = newCreateJoboption[key]
+        }
+      }
 
-      if (newCreateJoboption.options.priority !== 'undefined'
-          && newCreateJoboption.options.priority !== ''
-          && priority.includes(newCreateJoboption.options.priority)) {
-        qObj.setPriority(newCreateJoboption.options.priority)
-      }
-      // set job queue Timeout options
-      if (newCreateJoboption.options.timeout !== 'undefined' &&
-          newCreateJoboption.options.timeout !== '' &&
-          typeof (newCreateJoboption.options.timeout) === 'number') {
-        qObj.setTimeout(newCreateJoboption.options.timeout)
-      }
-      // set job queue RetryMax options
-      if (newCreateJoboption.options.retrymax !== 'undefined' &&
-        newCreateJoboption.options.retrymax !== '' &&
-        typeof (newCreateJoboption.options.retrymax) === 'number') {
-        qObj.setRetryMax(newCreateJoboption.options.retrymax)
-      }
-      // set job queue RetryDelay options
-      if (newCreateJoboption.options.retrydelay !== 'undefined' &&
-          newCreateJoboption.options.retrydelay !== '' &&
-          typeof newCreateJoboption.options.retrydelay === 'number') {
-        qObj.setRetryDelay(newCreateJoboption.options.retrydelay)
-      }
-      // set job queue RetryDelay options
-      if (newCreateJoboption.options.name !== 'undefined' &&
-          newCreateJoboption.options.name !== '' &&
-          typeof newCreateJoboption.options.name === 'string') {
-        qObj.setName(newCreateJoboption.options.name)
-      }
+      let qObj = await queueObj.createJob(job)
       resolve(qObj)
     })
   }
@@ -378,7 +362,7 @@ module.exports = function job (options) {
             reject(customError(err))
           })
 
-          await updateJob(queueObj, qdata.findVal, qdata.data, qdata.status)
+          await updateJob(queueObj, qdata.findVal, qdata.data, qdata.options)
             .then(result => {
               resolve(result)
             })
@@ -396,12 +380,14 @@ module.exports = function job (options) {
     })
   }
 
-  async function updateJob (queueObj, val, jobData, newStatus) {
+  async function updateJob (queueObj, val, jobData, options) {
     return new Promise(async (resolve, reject) => {
       try {
         queueObj.getJob(val, true).then(async (jobs) => {
-          if(newStatus) {
-            jobs[0].status = newStatus
+          if(options) {
+            for (key in options) {
+              jobs[0][key] = options[key]
+            }
           }
           jobs[0].data = jobData
           await jobs[0].update()
@@ -452,8 +438,10 @@ function checkPortNumber (port) {
 
 function customError (err, errorCode) {
   let errorKey = 'ERR_SERVICE_UNAVAIALBLE'
-  if (err['ReqlDriverError'] !== '') {
+  if (err.name === 'ReqlDriverError') {
     errorKey = 'ERR_REQLDRIVERERROR'
+  } else if (err.name === 'Error'){
+    errorKey = 'ERR_INVALID_PRAMATER'
   }
   let errRes = {}
   errRes['error'] = {

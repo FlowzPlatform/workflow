@@ -7,9 +7,9 @@
     "subscriptionCreatePattern": "role:subscription,cmd:created"
   },
   "cxnOptions" : {
-    "host": "172.16.160.117",
+    "host": "localhost",
     "port": 28015,
-    "db": "FlowzEngine"
+    "db": "seneca"
   },
   "symmetricWorker": {
     "port" : 9000,

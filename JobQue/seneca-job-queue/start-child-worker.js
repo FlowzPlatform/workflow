@@ -1,46 +1,16 @@
+var common = require('./common')
 const config = require('config')
-let registerWorker = config.get('registerWorker')
-var seneca = require('seneca')({log:'silent'})
+const registerWorker = config.get('registerWorker')
 const pino = require('pino')
 const PINO = config.get('pino')
 const PINO_DB_OPTION = config.get('pinoDB')
 const chokidar = require('chokidar')
 const fs = require('fs')
 const cxnOptions = config.get('cxnOptions')
-const pluginCreate = config.get('plugins.createPattern')
-const pluginFind = config.get('plugins.findPattern')
-const pluginQueue = config.get('plugins.queuePattern')
 const FLOWZ_TABLE = config.get('flowz_table')
 const SCHEDULER_TABLE = config.get('scheduler_table')
 const rdash = require('rethinkdbdash')(cxnOptions)
 const Queue = require('rethinkdb-job-queue')
-
-function createJob (bodyData) {
-  return new Promise((resolve, reject) => {
-    seneca.use('job').act(pluginCreate, bodyData, (err, result) => {
-      if (err) reject(err)
-      else resolve(result)
-    })
-  })
-}
-
-function findJob (bodyData) {
-  return new Promise((resolve, reject) => {
-    seneca.use('job').act(pluginFind, bodyData, (err, result) => {
-      if (err) reject(err)
-      else resolve(result)
-    })
-  })
-}
-
-function getJobQueue (options) {
-  return new Promise((resolve, reject) => {
-    seneca.use('job').act(pluginQueue, options, (err, result) => {
-      if (err) reject(err)
-      else resolve(result)
-    })
-  })
-}
 
 process.on('message', (m) => {
   pino(PINO).info('CHILD got message:', m)
@@ -66,11 +36,8 @@ function getJobTypeWorkerProcess (jobType) {
 
 let runWorker = function (options) {
   pino(PINO).info("Worker Start", options)
-  getJobQueue(options).then(async result => {
+  common.getJobQueue(options).then(async result => {
     try {
-
-      // var lock = true
-
       function enableWatcher(SYSTEM_LOGS_TABLE) {
         //watcher
         const CHOKIDAR_OPTION = config.get('chokidar')
@@ -241,5 +208,6 @@ let executeWorker = async function (jobType, options) {
   }
 }
 
+process.setMaxListeners(0)
 let jobOptions = JSON.parse(process.argv[3])
 executeWorker(process.argv[2], jobOptions)
