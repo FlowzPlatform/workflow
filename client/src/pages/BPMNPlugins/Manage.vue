@@ -36,7 +36,7 @@
       </Form>
       <Row>
         <Col>
-          <Table border ref="selection" :columns="columns" :data="plugins" stripe></Table>
+          <Table size="small" :loading="logingPluginList" border ref="selection" :columns="columns" :data="plugins" stripe></Table>
         </Col>
       </Row>
     </div>
@@ -48,6 +48,7 @@
   export default {
     data () {
       return {
+        logingPluginList: true,
         loadingFormPlugin: false,
         formPlugin: {
           type: 'file',
@@ -105,6 +106,30 @@
                 }
               })
             }
+          },
+          {
+            title: 'Action',
+            key: 'action',
+            width: 150,
+            align: 'center',
+            render: (h, params) => {
+              return h('div', [
+                h('Button', {
+                  props: {
+                    type: 'primary',
+                    size: 'small'
+                  },
+                  style: {
+                    marginRight: '5px'
+                  },
+                  on: {
+                    click: () => {
+                      this.show(params.index)
+                    }
+                  }
+                }, 'Uninstall')
+              ])
+            }
           }
         ],
         plugins: []
@@ -132,6 +157,13 @@
         let self = this
         dbbpmnplugin.get().then(response => {
           self.plugins = response
+          self.logingPluginList = false
+        }).catch(error => {
+          this.$Notice.error({
+            title: error,
+            desc: 'connection to the server timed out',
+            duration: 0
+          })
         })
       },
       handleEnableDisable (data) {

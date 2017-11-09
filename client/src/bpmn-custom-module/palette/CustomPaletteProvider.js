@@ -91,7 +91,6 @@ CustomPaletteProvider.prototype.getPaletteEntries = function () {
   }
 
   var plugin = [] // require('../../../bpmnPlugin/config.json') // ['Filter', 'sendRFQ']
-  console.log('config', config.default)
   $.ajax({
     url: config.default.serverURI + '/bpmnplugins',
     dataType: 'json',
