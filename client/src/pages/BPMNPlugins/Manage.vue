@@ -3,7 +3,7 @@
       <Form ref="formPlugin" :model="formPlugin">
         <template v-if="formPlugin.type == 'url'">
           <FormItem :prop="'url.link'" :rules="{required: true, message: 'Please enter valid url', trigger: 'blur'}">
-            <Input v-model="formPlugin.url.link">
+            <Input v-model="formPlugin.url.link" placeholder="http://example.com/index.json">
               <Select v-model="formPlugin.type" :on-change="handleTypeChange('formPlugin')" slot="prepend" style="width: 150px">
                 <Option value="url">URL</Option>
                 <Option value="file">
@@ -23,7 +23,7 @@
                 </Option>
               </Select>
             </Input>
-            <input @change="handleFileChange" type="file" accept=".json, application/json" style="width: calc(100% - 150px);z-index: 999;opacity: 0;position: absolute;right: 0px;top: 0;">
+            <input @change="handleFileChange" type="file" accept=".json, application/json" style="width: calc(100% - 150px);z-index: 99;opacity: 0;position: absolute;right: 0px;top: 0;">
           </FormItem>
         </template>
         <FormItem>
@@ -67,12 +67,14 @@
           {
             title: 'Worker type',
             key: 'worker-type',
-            sortable: true
+            sortable: true,
+            width: 200
           },
           {
             title: 'createdOn',
             key: 'createdOn',
             sortable: true,
+            width: 200,
             render: (h, params) => {
               return h('div', moment(this.plugins[params.index].createdOn).format('lll'))
             }
@@ -80,6 +82,7 @@
           {
             title: 'isEnable',
             key: 'isEnable',
+            width: 100,
             render: (h, params) => {
               return h('i-switch', {
                 props: {
@@ -118,6 +121,9 @@
         },
         created (data) {
           this.plugins.push(data)
+        },
+        deleted (data) {
+          console.log('data', data)
         }
       }
     },

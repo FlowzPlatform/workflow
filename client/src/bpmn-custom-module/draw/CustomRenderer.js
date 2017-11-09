@@ -12,6 +12,7 @@ var svgClasses = require('tiny-svg/lib/classes')
 var TASK_BORDER_RADIUS = 10
 var _ = require('lodash')
 var $ = require('jquery')
+var config = require('@/config')
 var LABEL_STYLE = {
   fontFamily: 'Arial, sans-serif',
   fontSize: 12
@@ -97,7 +98,7 @@ var CustomRender = function (eventBus, pathMap, styles) {
     type = type.replace(/^camunda:/, '')
     var plugin = [] // require('../../../bpmnPlugin/config.json') // ['Filter', 'sendRFQ']
     $.ajax({
-      url: 'http://172.16.230.176:2020/bpmnplugins',
+      url: config.default.serverURI + '/bpmnplugins',
       dataType: 'json',
       async: false,
       success: function (data) {

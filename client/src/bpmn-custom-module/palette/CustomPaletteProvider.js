@@ -7,6 +7,7 @@ var _ = require('lodash')
   // var axios = require('axios')
 var $ = require('jquery')
 var assign = require('lodash/object').assign
+var config = require('@/config')
 
 var CustomPaletteProvider = function (palette, create, elementFactory, spaceTool, lassoTool, handTool, globalConnect, translate) {
   this._create = create
@@ -90,9 +91,9 @@ CustomPaletteProvider.prototype.getPaletteEntries = function () {
   }
 
   var plugin = [] // require('../../../bpmnPlugin/config.json') // ['Filter', 'sendRFQ']
-
+  console.log('config', config.default)
   $.ajax({
-    url: 'http://172.16.230.176:2020/bpmnplugins',
+    url: config.default.serverURI + '/bpmnplugins',
     dataType: 'json',
     async: false,
     success: function (data) {
