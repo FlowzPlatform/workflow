@@ -97,27 +97,27 @@ var CustomRender = function (eventBus, pathMap, styles) {
     type = type.replace(/^camunda:/, '')
     var plugin = [] // require('../../../bpmnPlugin/config.json') // ['Filter', 'sendRFQ']
     $.ajax({
-      url: 'https://s3-us-west-2.amazonaws.com/airflowbucket1/bpmnplugin/config.json',
+      url: 'http://172.16.230.176:2020/bpmnplugins',
       dataType: 'json',
       async: false,
       success: function (data) {
-        plugin = data
+        plugin = data.data
       }
     })
-    var plug = _.chain(plugin).map(f => {
-      var plug = {}
-      $.ajax({
-        url: f.url, // 'https://s3-us-west-2.amazonaws.com/airflowbucket1/bpmnplugin/Filter/index.json',
-        dataType: 'json',
-        async: false,
-        success: function (data) {
-          plug = data
-        }
-      })
+    var plug = _.chain(plugin).map(plug => {
+      // var plug = {}
+      // $.ajax({
+      //   url: f.url, // 'https://s3-us-west-2.amazonaws.com/airflowbucket1/bpmnplugin/Filter/index.json',
+      //   dataType: 'json',
+      //   async: false,
+      //   success: function (data) {
+      //     plug = data
+      //   }
+      // })
       return plug
         // delete require.cache[require.resolve(`../../../bpmnPlugin/${f}/index.js`)]
         // return require(`../../../bpmnPlugin/${f}/index.js`)
-    }).find(f => { return f.type === type }).value()
+    }).find(f => { return f['worker-type'] === type }).value()
 
     var attrs = {
       fill: getFillColor(element),
@@ -133,7 +133,7 @@ var CustomRender = function (eventBus, pathMap, styles) {
       y: 5,
       width: element.width / 4,
       height: element.height / 4,
-      href: plug.imageStr
+      href: plug.imgurl
     })
 
     svgAppend(parentGfx, catGfx)
