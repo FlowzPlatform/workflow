@@ -1,4 +1,4 @@
-var seneca = require('seneca')({log:'silent'})
+var common = require('./common')
 const config = require('config')
 const _ = require('lodash')
 var app = require('express')()
@@ -9,21 +9,19 @@ const symmetricWorker = config.get('symmetricWorker')
 const rdash = require('rethinkdbdash')(cxnOptions)
 const pino = require('pino')
 
-const pluginCreate = config.get('plugins.createPattern')
-const pluginFind = config.get('plugins.findPattern')
-const pluginQueue = config.get('plugins.queuePattern')
 const waitingThreshold = config.get('waitingThreshold')
 const increaseWorker = config.get('increaseWorker')
 const maxWorker = config.get('maxWorker')
 const PINO = config.get('pino')
 let wCount = 1
 let registeredJobTypeQueueObj = {}     // register job type queue object
+var connected = false
 
 checkTableExistsOrNot(symmetricWorker.table)
-.then(res => {
-  pino(PINO).info(res)
-  setTimeout(startAllRegisteredJobType, 1000)
-})
+  .then(res => {
+    pino(PINO).info(res)
+    connected=true
+  })
 
 process.setMaxListeners(0)
 let socketObj = io.of('/execute-worker')
@@ -46,15 +44,6 @@ function checkTableExistsOrNot (table) {
   })
 }
 
-function createJob (bodyData) {
-  return new Promise((resolve, reject) => {
-    seneca.use('job').act(pluginCreate, bodyData, (err, result) => {
-      if (err) reject(err)
-      else resolve(result)
-    })
-  })
-}
-
 function deleteDataJobType (table, jobTyped) {
   return new Promise(async (resolve, reject) => {
     await rdash.table(table)
@@ -70,21 +59,12 @@ function deleteDataJobType (table, jobTyped) {
   })
 }
 
-function findJob (bodyData) {
-  return new Promise((resolve, reject) => {
-    seneca.use('job').act(pluginFind, bodyData, (err, result) => {
-      if (err) reject(err)
-      else resolve(result)
-    })
-  })
-}
-
 function generateQueueObjectByJobTypeWithOutSave (jobType, options) {
   return new Promise((resolve, reject) => {
     if (registeredJobTypeQueueObj[jobType]) {
       resolve('JobType registered successfully')
     } else {
-      getJobQueue(options).then(result => {
+      common.getJobQueue(options).then(result => {
         try {
           registeredJobTypeQueueObj[jobType] = {'qObj': result.q, 'options': options}
           resolve('JobType registered successfully')
@@ -101,7 +81,7 @@ function generateQueueObjectByJobTypeWithSaveToDB (jobType, options) {
     if (registeredJobTypeQueueObj[jobType]) {
       resolve('JobType already registered')
     } else {
-      getJobQueue(options).then(result => {
+      common.getJobQueue(options).then(result => {
         try {
           let registeredJobType = {
             jobType: jobType,
@@ -145,15 +125,6 @@ function getDataJobType (table, jobTyped) {
     })
     .error(function (err) {
       reject(err)
-    })
-  })
-}
-
-function getJobQueue (options) {
-  return new Promise((resolve, reject) => {
-    seneca.use('job').act(pluginQueue, options, (err, result) => {
-      if (err) reject(err)
-      else resolve(result)
     })
   })
 }
@@ -209,7 +180,7 @@ function saveToRethinkDB (table, data) {
 }
 
 async function startAllRegisteredJobType () {
-  if(!rdash) {
+  if(!connected) {
     setTimeout(() => { startAllRegisteredJobType() }, 1000)
   } else {
     let jobTypes = await getAllJobType(symmetricWorker.table)
@@ -260,3 +231,5 @@ app.post('/register-jobtype/:jobtype', async function (req, res) {
     return res.status(400).send('JobType not registered')
   }
 })
+
+startAllRegisteredJobType()

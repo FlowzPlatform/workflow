@@ -71,30 +71,17 @@ app.post('/upload-worker-process', async function (req, res) {
   })
 })
 
-app.post('/check', async function (req, res) {
-  console.log(req.body)
-  res.send(req.body)
-})
-
 app.listen(registerWorker.port)
 
-function saveToRethinkDB (table, data) {
-  return new Promise(async(resolve, reject) => {
-    let result = await getDataJobType(table, data.jobType)
-    let messageData = data
-    let saveData
-    if (result.id === undefined) {
-      saveData = rdash.table(table).insert(messageData)
-    } else {
-      saveData = rdash.table(table).filter({id: result.id}).update(messageData)
-    }
-    saveData.run()
-    .then(function (result) {
-      pino(PINO).info('data inserted')
-      resolve(result)
-    })
-    .error(function (err) {
-      reject(err)
+function checkTableExistsOrNot (table) {
+  return new Promise((resolve, reject) => {
+    rdash.tableList().run().then(function (tableNames) {
+      if (_.includes(tableNames, table)) {
+        resolve('table already exists')
+      } else {
+        rdash.tableCreate(table).run()
+        resolve('table created')
+      }
     })
   })
 }
@@ -117,15 +104,23 @@ function getDataJobType (table, jobTyped) {
   })
 }
 
-function checkTableExistsOrNot (table) {
-  return new Promise((resolve, reject) => {
-    rdash.tableList().run().then(function (tableNames) {
-      if (_.includes(tableNames, table)) {
-        resolve('table already exists')
-      } else {
-        rdash.tableCreate(table).run()
-        resolve('table created')
-      }
+function saveToRethinkDB (table, data) {
+  return new Promise(async(resolve, reject) => {
+    let result = await getDataJobType(table, data.jobType)
+    let messageData = data
+    let saveData
+    if (result.id === undefined) {
+      saveData = rdash.table(table).insert(messageData)
+    } else {
+      saveData = rdash.table(table).filter({id: result.id}).update(messageData)
+    }
+    saveData.run()
+    .then(function (result) {
+      pino(PINO).info('data inserted')
+      resolve(result)
+    })
+    .error(function (err) {
+      reject(err)
     })
   })
 }

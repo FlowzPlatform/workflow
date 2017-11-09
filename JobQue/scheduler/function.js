@@ -98,7 +98,9 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
       		"id": childJob.id
       	},
       	"data": childJob.data,
-        "status": "waiting"
+        "options": {
+          "status": "waiting"
+        }
       })
 
       let tmp = await this.updateLog(childJob, 'processing', false)
@@ -185,7 +187,7 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
         "options" : {
           "timeout": TIMEOUT,
           "retrymax": 0,
-          "dateEnable": dateEnable
+          "manualStatus": 'created'
         },
         "jobs":[jobData]
       })
@@ -266,7 +268,6 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
         "findVal": { data : { id : targetSchema.id, fId : fId }, status : 'created' }
       })
 
-      console.log(response)
       response = response.data
       if (response.length > 0) {
         return _.sortBy(response,['dateCreated'])
@@ -574,7 +575,6 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
       //get job from its respective worker
       let targetJobs = await this.getJobFromQueue(targetSchema, fId)
 
-      console.log(targetSchema, fId)
       //get array size of external inputs
       let numberOfExternalInputs = externalInput.length
 
@@ -588,7 +588,7 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
       await this.mapExternalInputs(externalInput, targetJobs, numberOfExternalInputs, capacity, fillFrom)
 
       let numberOfUpdatedJobs = capacity ? Math.ceil(numberOfExternalInputs / capacity) : 1
-      numberOfUpdatedJobs = targetJobs.length < numberOfUpdatedJobs ? targetJobs.length : numberOfUpdatedJobs
+      numberOfUpdatedJobs = targetJobs.length < numberOfUpdatedJobs ? targetJobs.length : targetJobs ? numberOfUpdatedJobs : 0
 
       //for each updated job, check if all inputs required by the process are available or not
       //if all inputs are available, begin the target process
