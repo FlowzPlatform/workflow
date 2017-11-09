@@ -344,7 +344,8 @@ module.exports = function job (options) {
           job[key] = newCreateJoboption[key]
         }
       }
-
+      if (job.dateEnable) job.dateEnable = new Date(job.dateEnable)
+      
       let qObj = await queueObj.createJob(job)
       resolve(qObj)
     })
