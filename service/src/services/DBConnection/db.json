@@ -16,20 +16,6 @@
                 "notes": "",
                 "isdefault": false,
                 "id": "f613518b-200b-46ca-bebd-90db7d45c553"
-            },
-            {
-                "isenable": false,
-                "connection_name": "qqq",
-                "host": "localhost",
-                "port": "28015",
-                "dbname": "schema_builder",
-                "username": "",
-                "password": "",
-                "upldIcn": "",
-                "rdoCrt": "",
-                "notes": "",
-                "isdefault": false,
-                "id": "6b37ec64-0624-41be-a387-0739d3098f75"
             }
         ]
     },
