@@ -118,7 +118,7 @@ var CustomRender = function (eventBus, pathMap, styles) {
       return plug
         // delete require.cache[require.resolve(`../../../bpmnPlugin/${f}/index.js`)]
         // return require(`../../../bpmnPlugin/${f}/index.js`)
-    }).find(f => { return f['worker-type'] === type }).value()
+    }).find(f => { return f.worker_type === type }).value()
 
     var attrs = {
       fill: getFillColor(element),

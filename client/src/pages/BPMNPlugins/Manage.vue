@@ -31,7 +31,7 @@
             <span v-if="!loadingFormPlugin">Install</span>
             <span v-else>Loading...</span>
           </Button>
-          
+          <Button type="ghost" @click="handleReset('formPlugin')"><span>Reset</span></Button>
         </FormItem>
       </Form>
       <Row>
@@ -45,13 +45,15 @@
   import dbbpmnplugin from '@/api/bpmnplugins'
   import moment from 'moment'
   import _ from 'lodash'
+  import axios from 'axios'
   export default {
     data () {
       return {
         logingPluginList: true,
         loadingFormPlugin: false,
+        fileJson: {},
         formPlugin: {
-          type: 'file',
+          type: 'url',
           url: {
             link: ''
           },
@@ -61,13 +63,31 @@
         },
         columns: [
           {
+            title: ' ',
+            key: 'imgurl',
+            align: 'center',
+            width: 60,
+            render: (h, params) => {
+              return h('Avatar', {
+                props: {
+                  shape: 'square',
+                  size: 'small',
+                  src: this.plugins[params.index].imgurl
+                },
+                style: {
+                  backgroundColor: 'transparent'
+                }
+              })
+            }
+          },
+          {
             title: 'Title',
             key: 'title',
             sortable: true
           },
           {
             title: 'Worker type',
-            key: 'worker-type',
+            key: 'worker_type',
             sortable: true,
             width: 200
           },
@@ -84,10 +104,12 @@
             title: 'isEnable',
             key: 'isEnable',
             width: 100,
+            align: 'center',
             render: (h, params) => {
               return h('i-switch', {
                 props: {
-                  value: this.plugins[params.index].isEnable
+                  value: this.plugins[params.index].isEnable,
+                  size: 'small'
                 },
                 on: {
                   'on-change': (value) => {
@@ -124,7 +146,13 @@
                   },
                   on: {
                     click: () => {
-                      this.show(params.index)
+                      this.$Modal.confirm({
+                        title: 'Confirm',
+                        content: '<p>Are you sure you want to <b> uninstall </b> this plugin?</p>',
+                        onOk: () => {
+                          this.handleUninstall(this.plugins[params.index].id)
+                        }
+                      })
                     }
                   }
                 }, 'Uninstall')
@@ -145,10 +173,11 @@
           this.plugins.splice($index, 1, data)
         },
         created (data) {
-          this.plugins.push(data)
+          this.plugins.splice(0, 1, data)
         },
-        deleted (data) {
-          console.log('data', data)
+        removed (data) {
+          let $index = _.findIndex(this.plugins, (o) => { return o.id === data.id })
+          this.plugins.splice($index, 1)
         }
       }
     },
@@ -183,23 +212,58 @@
         // }
       },
       handleFileChange (e) {
+        let self = this
         var files = e.target.files || e.dataTransfer.files
         if (files.length > 0) {
-          // this.$refs['formPlugin'].resetFields()
           this.formPlugin.file.name = files[0].name
+          var reader = new FileReader()
+          reader.onload = (e) => {
+            self.fileJson = JSON.parse(e.target.result)
+          }
+          reader.readAsText(e.target.files[0])
         }
       },
       handleSubmit (name) {
         this.loadingFormPlugin = true
-        this.$refs[name].validate((valid) => {
+        this.$refs[name].validate(async (valid) => {
           if (valid) {
-            this.$Message.success('Success!')
-            this.loadingFormPlugin = false
+            if (this.formPlugin.type === 'url') {
+              let filecontent = await axios.get(this.formPlugin.url.link)
+              this.fileJson = filecontent.data
+            }
+            dbbpmnplugin.create(this.fileJson).then(response => {
+              this.$Message.success('Plugin install successfully!')
+              this.loadingFormPlugin = false
+              this.$refs[name].resetFields()
+              this.formPlugin.type = 'url'
+            }).catch(error => {
+              this.$Notice.error({
+                title: 'Request failed',
+                desc: error
+              })
+              this.loadingFormPlugin = false
+            })
           } else {
-            this.$Message.error('Fail!')
+            this.$Message.error('Validation failed!')
             this.loadingFormPlugin = false
           }
         })
+      },
+      handleUninstall (id) {
+        dbbpmnplugin.delete(id)
+        .then(response => {
+          this.$Message.success('sucessfully uninstall.')
+        })
+        .catch(error => {
+          this.$Notice.error({
+            title: 'Failed',
+            desc: error
+          })
+        })
+      },
+      handleReset (name) {
+        this.$refs[name].resetFields()
+        this.formPlugin.type = 'url'
       }
     }
   }

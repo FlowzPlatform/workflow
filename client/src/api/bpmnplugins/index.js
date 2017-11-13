@@ -35,7 +35,26 @@ export default {
         return ({ status: 'success', message: 'Record updated sucessfully;' })
       })
       .catch(error => {
-        return ({ error: 'success', message: error })
+        return ({ status: 'error', message: error })
+      })
+  },
+  create: (data) => {
+    return api.request('post', '/' + model, data)
+      .then(response => {
+        return ({ status: 'success', message: 'sucessfully installed' })
+      })
+      .catch(error => {
+        throw error.message
+      })
+  },
+  delete: (id) => {
+    return api.request('delete', '/' + model + '/' + id)
+      .then(response => {
+        return ({ status: 'success', message: 'sucessfully deleted' })
+      })
+      .catch(error => {
+        throw error.message
       })
   }
+
 }
