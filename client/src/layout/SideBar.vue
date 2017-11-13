@@ -102,9 +102,9 @@
 /*eslint-disable*/
   import api from '../api'
   const X2JS = require('x2js')
-  import schemaModel from '@/api/schema'
-  import schemamappingModel from '@/api/schemamapping'
-  import approvalModel from '@/api/approval'
+  // import schemaModel from '@/api/schema'
+  // import schemamappingModel from '@/api/schemamapping'
+  // import approvalModel from '@/api/approval'
   import instanceModel from '@/api/flowzinstance'
   import mongo from '../assets/images/mongo.png'
   import rethink from '../assets/images/rethink.png'
@@ -125,34 +125,34 @@
       }
     },
     created () {
-      this.$store.dispatch('getSchema')
-      this.$store.dispatch('getSettings')
+      // this.$store.dispatch('getSchema')
+      // this.$store.dispatch('getSettings')
       this.$store.dispatch('getFlowzdata')
     },
     computed: {
-      schema () {
-        // console.log('allSchema from sidebar computed', this.$store.getters.allSchema, this.$store.getters.allSettings)
-        var _data = this.$store.getters.allSchema
-        var _settings = this.$store.getters.allSettings
-        if (_data.length > 0) {
-          _.map(_data, function (obj) {
-            // console.log('obj', obj)
-              _.forEach(_settings[obj.database[0]], function(res, i){
-                var instance = _.find(res, {id: obj.database[1]})
+      // schema () {
+      //   // console.log('allSchema from sidebar computed', this.$store.getters.allSchema, this.$store.getters.allSettings)
+      //   var _data = this.$store.getters.allSchema
+      //   var _settings = this.$store.getters.allSettings
+      //   if (_data.length > 0) {
+      //     _.map(_data, function (obj) {
+      //       // console.log('obj', obj)
+      //         _.forEach(_settings[obj.database[0]], function(res, i){
+      //           var instance = _.find(res, {id: obj.database[1]})
                   
-                  if (instance.upldIcn === '') {
-                    obj.iconpath = obj.database[0]
-                  } else {
-                    obj.iconpath = instance.upldIcn
-                  }
-              })
-          })
-          console.log(_data)
-          return _.orderBy(_data, [checkcase => checkcase.title.toLowerCase()], [this.orderby])
-        } else {
-          return []
-        }
-      },
+      //             if (instance.upldIcn === '') {
+      //               obj.iconpath = obj.database[0]
+      //             } else {
+      //               obj.iconpath = instance.upldIcn
+      //             }
+      //         })
+      //     })
+      //     console.log(_data)
+      //     return _.orderBy(_data, [checkcase => checkcase.title.toLowerCase()], [this.orderby])
+      //   } else {
+      //     return []
+      //   }
+      // },
       flowz () {
         var _flowz = this.$store.getters.flowzData
         this.flowzList = _flowz
@@ -261,25 +261,25 @@
           }
         })
       },
-      setData (name, url, id) {
-        var obj = {name: name, url: url, id: id}
-        var self = this
-        var flag = 0
-        // console.log(obj)
-        // console.log(this.$store.state.tabdata.length)
-        this.$store.state.tabdata.forEach(function (result, i) {
-          if (result.id === id) {
-            flag = 1
-            self.$store.state.activetab = i
-            self.$router.push(result.url)
-          }
-        })
-        if (flag === 0) {
-          this.$store.dispatch('getTabdata', obj)
-          this.$store.state.activetab = this.$store.state.tabdata.length - 1
-          this.$router.push(url)
-        }
-      },
+      // setData (name, url, id) {
+      //   var obj = {name: name, url: url, id: id}
+      //   var self = this
+      //   var flag = 0
+      //   // console.log(obj)
+      //   // console.log(this.$store.state.tabdata.length)
+      //   this.$store.state.tabdata.forEach(function (result, i) {
+      //     if (result.id === id) {
+      //       flag = 1
+      //       self.$store.state.activetab = i
+      //       self.$router.push(result.url)
+      //     }
+      //   })
+      //   if (flag === 0) {
+      //     this.$store.dispatch('getTabdata', obj)
+      //     this.$store.state.activetab = this.$store.state.tabdata.length - 1
+      //     this.$router.push(url)
+      //   }
+      // },
       handleCommand (name) {
         this.orderby = name
       },

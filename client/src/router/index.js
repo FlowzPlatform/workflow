@@ -35,6 +35,9 @@ import Register from '@/pages/Register'
 import ApprovalList from '@/pages/approval/List'
 import ApprovalNew from '@/pages/approval/New'
 
+// BPMN Plugins
+import ManageBPMNPlugin from '@/pages/BPMNPlugins/Manage'
+
 Vue.use(Router)
 const routes = [{
   path: '/',
@@ -46,6 +49,11 @@ const routes = [{
     component: Dashboard,
     name: 'Dashboard',
     meta: { description: 'Overview of environment' }
+  }, { // Plugin
+    path: 'bpmn-plugin',
+    component: ManageBPMNPlugin,
+    name: 'bpmn-plugin',
+    meta: { description: 'Schema' }
   }, { // Schema
     path: 'schema',
     component: Schema,
