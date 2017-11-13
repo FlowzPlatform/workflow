@@ -40,28 +40,27 @@ module.exports = {
 
 
 var beforeCreate = async( function(hook) {
-  // console.log('Hook....', hook.data)
   for(let [inx, iObj] of hook.data.input.entries()) {
-    iObj['i_id'] = iObj.id
+    // iObj['i_id'] = iObj.id
     var res = await (checkSchemaObj(iObj.entityschema[0]))
-    console.log('response ********************', res)
-    iObj.entityschema = [{id: res}] 
-    delete iObj.id 
+    iObj.entityschema = res
+    // delete iObj.id 
   }
   for(let [inx, oObj] of hook.data.output.entries()) {
-    oObj['o_id'] = oObj.id
-    var res = []
+    // oObj['o_id'] = oObj.id
+    // var res = []
     for(var [i, obj] of oObj.entityschema.entries()) {
       var s = await (checkSchemaObj(obj))
-      res.push({id: s})
+      // console.log('s', s)
+      oObj.entityschema = s
     }
-    oObj.entityschema = res
-    delete oObj.id 
+    // oObj.entityschema = res
+    // delete oObj.id 
   }
-  hook.data['worker-type'] = hook.data.type
-  // hook.data['imgurl'] = hook.data.imageStr
-  hook.data['imgurl'] = ""
-  hook.data['worker-type-id'] = ""
+  hook.data['worker_type'] = hook.data.type
+  hook.data['imgurl'] = hook.data.imageStr
+  // hook.data['imgurl'] = ""
+  hook.data['worker_type_id'] = ""
   hook.data['createdOn'] = new Date()
   hook.data['isEnable'] = true
   hook.data['url'] = ""
@@ -70,7 +69,6 @@ var beforeCreate = async( function(hook) {
 })
 
 var checkSchemaObj = async(function(obj) {
-  console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>')
   obj['createTemplate'] = []
   obj['emailTemplate'] = []
   obj['viewTemplate'] = []
@@ -94,10 +92,8 @@ var checkSchemaObj = async(function(obj) {
 })
 
 var checkFlag = function(obj) {
-  console.log('checkFlag............')
   var status = false
   for(let [i, sObj] of obj.entity.entries()) {
-    console.log('..........', sObj)
     if (typeof sObj.type === 'object'){
       // console.log('1111111111111', sObj.type)
       status = true
@@ -109,6 +105,5 @@ var checkFlag = function(obj) {
 
 var saveSchemaObj = async( function(obj) {
   var res = await (axios.post(serverUrl + '/schema', obj))
-  console.log('res...........saveSchemaObj ', res.data)
   return res.data.generated_keys[0]
 })
