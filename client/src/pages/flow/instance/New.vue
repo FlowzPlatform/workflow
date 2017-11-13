@@ -299,7 +299,7 @@ export default {
         data = Object.keys(v)
         // console.log('!!!!!!!!!', v['candidate name'])
       })
-      console.log('DDDDDDDDDDDDDDDDDD', data)
+      // console.log('DDDDDDDDDDDDDDDDDD', data)
       _.forEach(data, function (value) {
         if (value === 'Schemaid' || value === '_id' || value === 'id') {
         } else {
@@ -332,7 +332,7 @@ export default {
         dt.push(v)
       //   // }
       })
-      console.log('@@@@@@@@@@@@@@', dt)
+      // console.log('@@@@@@@@@@@@@@', dt)
       return dt
 
       // var dt = []
