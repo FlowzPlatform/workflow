@@ -1,13 +1,13 @@
 <template>
   <div class="flow">
-    <row>
-      <Button type="primary" style="float: right;margin-bottom: 2px;" @click="addNewFlow"><Icon type="plus" size="16"></Icon> Add</Button>
+    <row type="flex" justify="end">
+      <Button type="primary" size="small" style="margin-bottom: 2px;" @click="addNewFlow" icon="plus"> Add</Button>
     </row>
     <!-- <div slot="content">
         <div class="schema-form ivu-table-wrapper">
             <div class="ivu-table ivu-table-border">
                 <div class="ivu-table-body"> -->
-                    <Table :columns="columns10" :data="flowzList"></Table>
+                    <Table size="small" :columns="columns10" :data="flowzList"></Table>
                     <!-- <table cellspacing="0" cellpadding="0" border="0" style="width: 100%;">
                         <thead>
                             <tr>

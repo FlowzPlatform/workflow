@@ -7,6 +7,7 @@ var _ = require('lodash')
   // var axios = require('axios')
 var $ = require('jquery')
 var assign = require('lodash/object').assign
+var config = require('@/config')
 
 var CustomPaletteProvider = function (palette, create, elementFactory, spaceTool, lassoTool, handTool, globalConnect, translate) {
   this._create = create
@@ -90,13 +91,12 @@ CustomPaletteProvider.prototype.getPaletteEntries = function () {
   }
 
   var plugin = [] // require('../../../bpmnPlugin/config.json') // ['Filter', 'sendRFQ']
-
   $.ajax({
-    url: 'https://s3-us-west-2.amazonaws.com/airflowbucket1/bpmnplugin/config.json',
+    url: config.default.serverURI + '/bpmnplugins',
     dataType: 'json',
     async: false,
     success: function (data) {
-      plugin = data
+      plugin = _.filter(data.data, (f) => { return f.isEnable })
     }
   });
 
@@ -104,21 +104,21 @@ CustomPaletteProvider.prototype.getPaletteEntries = function () {
   // console.log('plugin', plugin)
 
   var pallets = {}
-  _.each(plugin, (f) => {
+  _.each(plugin, (plug) => {
     // // requirejs.undef(`../../../bpmnPlugin/${f}/index.js`)
     // delete require.cache[require.resolve(`../../../bpmnPlugin/${f}/index.js`)];
     // var plug = require(`../../../bpmnPlugin/${f}/index.js`)
-    var plug = {}
-    $.ajax({
-      url: f.url, // 'https://s3-us-west-2.amazonaws.com/airflowbucket1/bpmnplugin/Filter/index.json',
-      dataType: 'json',
-      async: false,
-      success: function (data) {
-        plug = data
-      }
-    });
+    // var plug = {}
+    // $.ajax({
+    //   url: f.url, // 'https://s3-us-west-2.amazonaws.com/airflowbucket1/bpmnplugin/Filter/index.json',
+    //   dataType: 'json',
+    //   async: false,
+    //   success: function (data) {
+    //     plug = data
+    //   }
+    // });
 
-    pallets['create.' + plug.type] = createAction('camunda:' + plug.type, 'activity', 'palette-img', plug.title, plug.imageStr, { input: plug.input, output: plug.output })
+    pallets['create.' + plug.worker_type] = createAction('camunda:' + plug.worker_type, 'activity', 'palette-img', plug.title, plug.imgurl, { input: plug.input, output: plug.output })
       // {
       //   group: 'activity',
       //   title: plug.title, // 'Create Plugin',

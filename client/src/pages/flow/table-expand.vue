@@ -3,7 +3,7 @@
         <Row class="expand-row">
             <Col span="24">
                 <span class="expand-key">
-                  <Table :columns="processCol" :data="processData"></Table>
+                  <Table size="small" :columns="processCol" :data="processData"></Table>
                 </span>
             </Col>
         </Row>
@@ -12,6 +12,7 @@
 <script>
 import instanceModel from '@/api/flowzinstance'
 import flowzInstanceById from '@/api/flowz'
+import moment from 'moment'
 // let _ = require('lodash')
 export default {
   data () {
@@ -23,7 +24,12 @@ export default {
         },
         {
           title: 'Created On',
-          key: 'createdOn'
+          key: 'createdOn',
+          sortable: true,
+          width: 200,
+          render: (h, params) => {
+            return h('div', moment(this.processData[params.index].createdOn).format('lll'))
+          }
         },
         {
           title: 'Action',

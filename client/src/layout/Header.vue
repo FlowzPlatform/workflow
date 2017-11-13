@@ -47,6 +47,12 @@
                           Krunal Mahera
                         </template>
                         <Menu-item name="1-1">
+                            <router-link to="/bpmn-plugin">
+                                <i class="fa fa-plug"></i>
+                                Plugins
+                            </router-link>
+                        </Menu-item>
+                        <Menu-item name="1-1">
                             <a @click="handleRemove()">
                                 <Icon type="ios-locked-outline" :size="16"></Icon>
                                 Logout

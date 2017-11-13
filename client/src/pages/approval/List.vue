@@ -1,14 +1,15 @@
 <template>
-  <div class="layout">
-    <div class="layout-header">
-        <Button type="primary" icon="plus" @click="addApproval" size="small" slot="extra" class="pull-right">Add</Button>
-        <div>
-          <h4>Approval</h4>
-        </div>
-    </div>
-    <div>
-      <Table :columns="approvalCol" :data="approvalData"></Table>
-    </div>
+  <div>
+    <Row type="flex" justify="end">
+      <Col>
+        <Button type="primary" icon="plus" style="margin-bottom: 2px;" @click="addApproval" size="small">Add</Button>
+      </Col>
+    </Row>
+    <Row>
+      <Col>
+        <Table size="small" :columns="approvalCol" :data="approvalData"></Table>
+      </Col>
+    </Row>
   </div>
 </template>
 

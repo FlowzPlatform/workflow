@@ -1,11 +1,11 @@
 <template>
   <div>
-  <row>
+  <row type="flex" justify="end">
     <router-link to="/schema/new">
-      <Button type="primary" style="float: right;margin-bottom: 2px;"><Icon type="plus" size="16"></Icon> Add</Button>
+      <Button type="primary" size="small" style="margin-bottom: 2px;" icon="plus">Add</Button>
     </router-link>
   </row>
-    <Table :columns="schemaCol" :data="schemaData"></Table>
+    <Table size="small" :columns="schemaCol" :data="schemaData"></Table>
   </div>
 </template>
 <script type="text/javascript">
