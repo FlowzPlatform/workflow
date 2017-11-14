@@ -46,6 +46,9 @@ import 'iview/dist/styles/iview.css' // CSS
 
 Vue.use(iView, { locale })
 
+import VueCodeMirror from 'vue-codemirror'
+Vue.use(VueCodeMirror)
+
 /* jquery-ui */
 
 /* IView */
@@ -88,7 +91,7 @@ router.beforeEach((to, from, next) => {
 })
 
 sync(store, router)
-console.log('process.env.accesskey', process.env.accesskey)
+  // console.log('process.env.accesskey', process.env.accesskey)
 new Vue({
   el: '#app',
   router,
