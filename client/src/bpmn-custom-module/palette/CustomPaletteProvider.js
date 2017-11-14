@@ -118,7 +118,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function () {
     //   }
     // });
 
-    pallets['create.' + plug.worker_type] = createAction('camunda:' + plug.worker_type, 'activity', 'palette-img', plug.title, plug.imgurl, { input: plug.input, output: plug.output })
+    pallets['create.' + plug.pluginType] = createAction('camunda:' + plug.pluginType, 'activity', 'palette-img', plug.title, plug.image, { input: plug.input, output: plug.output })
       // {
       //   group: 'activity',
       //   title: plug.title, // 'Create Plugin',

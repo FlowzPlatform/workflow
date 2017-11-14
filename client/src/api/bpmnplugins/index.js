@@ -35,7 +35,7 @@ export default {
         return ({ status: 'success', message: 'Record updated sucessfully;' })
       })
       .catch(error => {
-        return ({ status: 'error', message: error })
+        throw error.message
       })
   },
   create: (data) => {

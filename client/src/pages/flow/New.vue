@@ -20,7 +20,7 @@
 
 <script>
   import _ from 'lodash'
-
+  import config from '@/config'
   import schema from '@/api/schema'
   import approval from '@/api/approval'
   import emailtemplate from '@/api/emailtemplate'
@@ -85,35 +85,27 @@
         }
       },
       initBPMN (data) {
+        console.log('config', config)
         let plugin = [] // require('../../../bpmnPlugin/config.json') // ['Filter', 'sendRFQ']
         $.ajax({
-          url: 'https://s3-us-west-2.amazonaws.com/airflowbucket1/bpmnplugin/config.json',
+          url: config.serverURI + '/bpmnplugins',
           dataType: 'json',
           async: false,
           success: function (data) {
-            plugin = data
+            plugin = data.data
           }
         })
-        let types = _.chain(plugin).map(f => {
+        let types = _.map(plugin, plug => {
           // delete require.cache[require.resolve(`../../../bpmnPlugin/${f}/index.js`)]
           // let plug = require(`../../../bpmnPlugin/${f}/index.js`)
-          let plug = {}
-          $.ajax({
-            url: f.url, // 'https://s3-us-west-2.amazonaws.com/airflowbucket1/bpmnplugin/Filter/index.json',
-            dataType: 'json',
-            async: false,
-            success: function (data) {
-              plug = data
-            }
-          })
           return {
-            'name': plug.type,
+            'name': plug.pluginType,
             'isAbstract': true,
             'superClass': [
               'bpmn:FlowNode'
             ]
           }
-        }).value()
+        })
 
         this.bpmnModeler = new BpmnModeler({
           container: '#js-canvas',
