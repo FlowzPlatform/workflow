@@ -20,7 +20,6 @@ CustomPaletteProvider.prototype.getPaletteEntries = function () {
   var create = this._create
   var translate = this._translate
   var plugins = this._plugins
-    // console.log('this._plugin', this._plugin)
   var renderInputOutput = function (shape, input, output) {
     var element = elementFactory._bpmnFactory.create('bpmn:ExtensionElements', { values: [] });
     element.$parent = shape.businessObject;
@@ -89,12 +88,23 @@ CustomPaletteProvider.prototype.getPaletteEntries = function () {
     }
   }
 
-  plugins = _.filter(plugins, (f) => { return f.isEnable })
+  plugins = _.chain(plugins).map(m => {
+    m.group = 'flow' || m.group
+    return m
+  }).filter((f) => { return f.isEnable }).groupBy('group').value()
 
   var pallets = {}
-  _.each(plugins, (plug) => {
-    pallets['create.' + plug.pluginType] = createAction('camunda:' + plug.pluginType, 'flow-plugin', 'palette-img', plug.title, plug.image, { input: plug.input, output: plug.output })
+  _.each(plugins, (plugGroup, key) => {
+    pallets[key + '-separator'] = {
+      group: key,
+      separator: true
+    }
+    _.each(plugGroup, (plug) => {
+      pallets['create.' + plug.pluginType] = createAction('camunda:' + plug.pluginType, key, 'palette-img', plug.title, plug.image, { input: plug.input, output: plug.output })
+    })
   })
+
+
   return pallets
 }
 CustomPaletteProvider.$inject = [
