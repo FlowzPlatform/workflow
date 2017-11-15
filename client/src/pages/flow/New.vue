@@ -99,23 +99,15 @@
         }
       },
       async initBPMN (data) {
-        let types = await modelBpmnplugin.get().then(response => {
-          return _.map(response, plug => {
-            return {
-              'name': plug.pluginType,
-              'isAbstract': true,
-              'superClass': [
-                'bpmn:FlowNode'
-              ]
-            }
-          })
-        }).catch(error => {
-          this.$Notice.error({
-            title: 'Error',
-            desc: error.message,
-            duration: 0
-          })
-          return undefined
+        let plugins = await modelBpmnplugin.get()
+        let types = _.map(plugins, plug => {
+          return {
+            'name': plug.pluginType,
+            'isAbstract': true,
+            'superClass': [
+              'bpmn:FlowNode'
+            ]
+          }
         })
         if (types !== undefined) {
           this.bpmnModeler = new BpmnModeler({
@@ -124,6 +116,7 @@
               parent: '#js-properties-panel',
               data: data
             },
+            additionalPlugins: plugins,
             additionalModules: [
               propertiesPanelModule,
               propertiesProviderModule,
