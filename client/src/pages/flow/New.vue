@@ -1,30 +1,43 @@
 <template>
   <div class="flow">
     <div style="margin:-15px;">
-      <div class="split" style="height: calc(100vh - 110px);">
-        <div id="bpmn-panel" class="split split-horizontal">
-          <div id="js-canvas" style="width: 100%;height: calc(100vh - 110px);position: relative;"></div>
-        </div>
-        <div id="bpmn-properties-panel" class="split split-horizontal">
-          <Tooltip content="Save" placement="left" class="upload-icon">
-            <a  @click="save">
-              <i class="fa fa-floppy-o"></i>
-            </a>
-          </Tooltip>
-          <div id="js-properties-panel"></div>
-        </div>
-      </div>
+      <Row>
+        <Col v-show="loading" class="demo-spin-col" span="24">
+            <Spin fix>
+                <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
+                <div>Loading</div>
+            </Spin>
+        </Col>
+      </Row>
+      <Row>
+        <Col v-show="!loading" span="24">
+          <div class="split" style="height: calc(100vh - 97.51px);">
+            <div id="bpmn-panel" class="split split-horizontal">
+              <div id="js-canvas" style="width: 100%;height: calc(100vh - 110px);position: relative;"></div>
+            </div>
+            <div id="bpmn-properties-panel" class="split split-horizontal">
+              <Tooltip content="Save" placement="left" class="upload-icon">
+                <a  @click="save">
+                  <i class="fa fa-floppy-o"></i>
+                </a>
+              </Tooltip>
+              <div id="js-properties-panel"></div>
+            </div>
+          </div>
+        </Col>
+      </Row>
     </div>
   </div>
 </template>
 
 <script>
   import _ from 'lodash'
-  import config from '@/config'
+  // import config from '@/config'
   import schema from '@/api/schema'
   import approval from '@/api/approval'
   import emailtemplate from '@/api/emailtemplate'
   import schemamapping from '@/api/schemamapping'
+  import modelBpmnplugin from '@/api/bpmnplugins'
   import Split from 'split.js'
   import flowz from '@/api/flowz'
 
@@ -38,13 +51,14 @@
   import camundaModdleDescriptor from '../../../static/bpmn/camunda-bpmn-moddle/resources/camunda'
   import customPaletteModule from '@/bpmn-custom-module'
   const X2JS = require('x2js')
-  import $ from 'jquery'
+  // import $ from 'jquery'
 
   // let bpmnModeler = null
   export default {
     name: 'flow',
     data () {
       return {
+        loading: true,
         bpmnModeler: null,
         bpmnXML: '<?xml version="1.0" encoding="UTF-8"?><bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn"><bpmn:process id="Process_1" isExecutable="false"><bpmn:startEvent id="StartEvent_1" /></bpmn:process><bpmndi:BPMNDiagram id="BPMNDiagram_1"><bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1"><bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1"><dc:Bounds x="173" y="102" width="36" height="36" /></bpmndi:BPMNShape></bpmndi:BPMNPlane></bpmndi:BPMNDiagram></bpmn:definitions>'
       }
@@ -84,20 +98,9 @@
           this.$Message.error('Please Add Process name !')
         }
       },
-      initBPMN (data) {
-        console.log('config', config)
-        let plugin = [] // require('../../../bpmnPlugin/config.json') // ['Filter', 'sendRFQ']
-        $.ajax({
-          url: config.serverURI + '/bpmnplugins',
-          dataType: 'json',
-          async: false,
-          success: function (data) {
-            plugin = data.data
-          }
-        })
-        let types = _.map(plugin, plug => {
-          // delete require.cache[require.resolve(`../../../bpmnPlugin/${f}/index.js`)]
-          // let plug = require(`../../../bpmnPlugin/${f}/index.js`)
+      async initBPMN (data) {
+        let plugins = await modelBpmnplugin.get()
+        let types = _.map(plugins, plug => {
           return {
             'name': plug.pluginType,
             'isAbstract': true,
@@ -106,38 +109,41 @@
             ]
           }
         })
-
-        this.bpmnModeler = new BpmnModeler({
-          container: '#js-canvas',
-          propertiesPanel: {
-            parent: '#js-properties-panel',
-            data: data
-          },
-          additionalModules: [
-            propertiesPanelModule,
-            propertiesProviderModule,
-            customPaletteModule
-          ],
-          moddleExtensions: {
-            flowz: {
-              'name': 'Camunda',
-              'uri': 'http://camunda.org/schema/1.0/bpmn',
-              'prefix': 'camunda',
-              'xml': {
-                'tagAlias': 'lowerCase'
-              },
-              'associations': [],
-              'types': types
+        if (types !== undefined) {
+          this.bpmnModeler = new BpmnModeler({
+            container: '#js-canvas',
+            propertiesPanel: {
+              parent: '#js-properties-panel',
+              data: data
             },
-            camunda: camundaModdleDescriptor
-          }
-        })
-        this.bpmnModeler.importXML(this.bpmnXML, function (err) {
-          if (err) {
-            console.error(err)
-          } else {
-          }
-        })
+            additionalPlugins: plugins,
+            additionalModules: [
+              propertiesPanelModule,
+              propertiesProviderModule,
+              customPaletteModule
+            ],
+            moddleExtensions: {
+              flowz: {
+                'name': 'Camunda',
+                'uri': 'http://camunda.org/schema/1.0/bpmn',
+                'prefix': 'camunda',
+                'xml': {
+                  'tagAlias': 'lowerCase'
+                },
+                'associations': [],
+                'types': types
+              },
+              camunda: camundaModdleDescriptor
+            }
+          })
+          this.bpmnModeler.importXML(this.bpmnXML, function (err) {
+            if (err) {
+              console.error(err)
+            } else {
+            }
+          })
+        }
+        this.loading = false
       },
       storeXMLtolocalStorage () {
         let self = this
@@ -154,39 +160,46 @@
         sizes: [80, 20],
         minSize: [800, 200]
       })
-
       var process = [
         new Promise((resolve, reject) => {
           schema.get().then((response) => {
             response.data.splice(0, 0, { title: '---select---', id: 0 })
             resolve(response.data)
+          }).catch(error => {
+            reject(error)
           })
         }),
         new Promise((resolve, reject) => {
           approval.get().then((response) => {
             resolve(response.map(f => ({ value: f.id, name: f.proccessname })))
+          }).catch(error => {
+            reject(error)
           })
         }),
         new Promise((resolve, reject) => {
           emailtemplate.get().then((response) => {
             resolve(response.data.data.map(f => ({ value: f.id, name: f.name })))
+          }).catch(error => {
+            reject(error)
           })
         }),
         new Promise((resolve, reject) => {
           schemamapping.get().then((response) => {
             resolve(response.data.data)
+          }).catch(error => {
+            reject(error)
           })
         })
       ]
 
-      Promise.all(process).then((response) => {
+      Promise.all(process).then(async (response) => {
         // response[0].splice(0, 0, { name: '---select---', value: 0 })
         response[1].splice(0, 0, { name: '---select---', value: 0 })
         response[2].splice(0, 0, { name: '---select---', value: 0 })
         if (this.$route.params.id !== undefined) {
-          this.bpmnXML = flowz.get(this.$route.params.id).then((result) => {
+          this.bpmnXML = flowz.get(this.$route.params.id).then(async (result) => {
             this.bpmnXML = result.data.xml
-            this.initBPMN({
+            await this.initBPMN({
               schema: response[0],
               approval: response[1],
               emailtemplate: response[2],
@@ -206,7 +219,7 @@
             }) // Create bpmn
           })
         } else {
-          this.initBPMN({
+          await this.initBPMN({
             schema: response[0],
             approval: response[1],
             emailtemplate: response[2],
@@ -235,6 +248,12 @@
             }
           })
         }
+      }, reason => {
+        this.$Notice.error({
+          title: reason.message,
+          desc: 'connection to the server timed out',
+          duration: 0
+        })
       })
     }
   }

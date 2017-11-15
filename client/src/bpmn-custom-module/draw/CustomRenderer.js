@@ -11,14 +11,12 @@ var svgClasses = require('tiny-svg/lib/classes')
   // var Cat = require('../cat')
 var TASK_BORDER_RADIUS = 10
 var _ = require('lodash')
-var $ = require('jquery')
-var config = require('@/config')
 var LABEL_STYLE = {
   fontFamily: 'Arial, sans-serif',
   fontSize: 12
 }
 
-var CustomRender = function (eventBus, pathMap, styles) {
+var CustomRender = function (eventBus, pathMap, styles, plugins) {
   BaseRenderer.call(this, eventBus, 2000)
 
   var textUtil = new TextUtil({
@@ -96,29 +94,7 @@ var CustomRender = function (eventBus, pathMap, styles) {
 
   this.drawTriangle = function (parentGfx, element, type) {
     type = type.replace(/^camunda:/, '')
-    var plugin = [] // require('../../../bpmnPlugin/config.json') // ['Filter', 'sendRFQ']
-    $.ajax({
-      url: config.default.serverURI + '/bpmnplugins',
-      dataType: 'json',
-      async: false,
-      success: function (data) {
-        plugin = data.data
-      }
-    })
-    var plug = _.chain(plugin).map(plug => {
-      // var plug = {}
-      // $.ajax({
-      //   url: f.url, // 'https://s3-us-west-2.amazonaws.com/airflowbucket1/bpmnplugin/Filter/index.json',
-      //   dataType: 'json',
-      //   async: false,
-      //   success: function (data) {
-      //     plug = data
-      //   }
-      // })
-      return plug
-        // delete require.cache[require.resolve(`../../../bpmnPlugin/${f}/index.js`)]
-        // return require(`../../../bpmnPlugin/${f}/index.js`)
-    }).find(f => { return f.pluginType === type }).value()
+    var plug = _.find(plugins, f => { return f.pluginType === type })
 
     var attrs = {
       fill: getFillColor(element),
@@ -148,7 +124,7 @@ inherits(CustomRender, BaseRenderer)
 
 module.exports = CustomRender
 
-CustomRender.$inject = ['eventBus', 'pathMap', 'styles']
+CustomRender.$inject = ['eventBus', 'pathMap', 'styles', 'config.additionalPlugins']
 
 CustomRender.prototype.drawShape = function (p, element) {
   var type = element.type
