@@ -294,13 +294,15 @@ export default {
       var log = this.getLastLog(propData)
       var obj = log.input
       var data = []
+
       _.forEach(obj, function (v, k) {
         data = Object.keys(v)
         // console.log('!!!!!!!!!', v['candidate name'])
       })
+      // console.log('DDDDDDDDDDDDDDDDDD', data)
       _.forEach(data, function (value) {
-        if (value === 'candidate name' || value === 'contact number' || value === 'id') {
-          console.log('@@@@@@@@@@@@@@ee', value)
+        if (value === 'Schemaid' || value === '_id' || value === 'id') {
+        } else {
           cols.push({title: value, key: value})
         }
       })
@@ -313,7 +315,7 @@ export default {
     getLogDataFormData (propData) {
       var log = this.getLastLog(propData)
       var obj = log.input
-      var data
+      // var data
       var dt = []
       _.forEach(obj, (v, k) => {
         // console.log('############', v.id, k)
@@ -321,16 +323,16 @@ export default {
       //   //   console.log('title', k)
       //   //   console.log('key', v)
         // data.push(v)
-        data = {
-          'candidate name': v['candidate name'],
-          'contact number': v['contact number'],
-          'id': v.id
-        }
+        // data = {
+        //   'candidate name': v['candidate name'],
+        //   'contact number': v['contact number'],
+        //   'id': v.id
+        // }
 
-        dt.push(data)
+        dt.push(v)
       //   // }
       })
-      console.log('@@@@@@@@@@@@@@', dt)
+      // console.log('@@@@@@@@@@@@@@', dt)
       return dt
 
       // var dt = []

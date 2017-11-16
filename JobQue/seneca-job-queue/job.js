@@ -89,7 +89,6 @@ module.exports = function job (options) {
 
       // Merge Options
       newoptions = mergeOptions(options, newoption)
-
       let queueObj = await createJobQueue(newoptions.connection, newoptions.queue)
       queueObj.on('error', (err) => {
         // err object is system error
@@ -345,7 +344,7 @@ module.exports = function job (options) {
         }
       }
       if (job.dateEnable) job.dateEnable = new Date(job.dateEnable)
-      
+
       let qObj = await queueObj.createJob(job)
       resolve(qObj)
     })

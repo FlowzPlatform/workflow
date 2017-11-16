@@ -50,7 +50,7 @@ let runWorker = function (options) {
             rdash.table(SYSTEM_LOGS_TABLE).insert(parsedData).run(function (err , result) {
               if (err) {
                 pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).error({},err)
-                pino(PINO_C_OPTION).error({},err)
+                pino(PINO).error({},err)
               }
             })
           })
