@@ -204,7 +204,8 @@ export default {
   },
   methods: {
     async createNewInstance (index, id) {
-      let generatedJson = await this.generateJson(this.flowzList[index].xml)
+      // let generatedJson = await this.generateJson(this.flowzList[index].xml)
+      let generatedJson = this.flowzList[index].json
       // console.log('generatedJson', JSON.stringify(generatedJson))
       // console.log('generatedJson', generatedJson)
       generatedJson.fid = id

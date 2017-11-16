@@ -1,0 +1,17 @@
+{
+  "name": "pluginwatcher",
+  "version": "1.0.0",
+  "description": "",
+  "main": "start",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "nikitam",
+  "license": "ISC",
+  "dependencies": {
+    "asyncawait": "^1.0.6",
+    "axios": "^0.17.1",
+    "lodash": "^4.17.4",
+    "twit": "^2.2.9"
+  }
+}

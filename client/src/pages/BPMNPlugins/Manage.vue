@@ -173,7 +173,8 @@
           this.plugins.splice($index, 1, data)
         },
         created (data) {
-          this.plugins.splice(0, 1, data)
+          // this.plugins.splice(0, 1, data)
+          this.plugins.push(data)
         },
         removed (data) {
           let $index = _.findIndex(this.plugins, (o) => { return o.id === data.id })
