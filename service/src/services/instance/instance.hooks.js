@@ -51,6 +51,7 @@ var getinstancevalue = async(function(id) {
 });
 
 function AddValueToJobQue(flowid, data, processid) {
+  console.log('data', data)
   const Queue = require('rethinkdb-job-queue')
   const cxnOptions = config
   const qOptions = {
