@@ -36,7 +36,7 @@ var checkData = async(function(_data) {
   var flag = false;
   for (let i = 0; i < s.data.data.length; i++) {
     // console.log('type ===== ',)
-    if (_data.type == s.data.data[i]['worker-type']) {
+    if (_data.pluginType == s.data.data[i]['pluginType']) {
       flag = true;
     }
   }
