@@ -42,10 +42,12 @@
     </div>
 </template>
 <script>
-  import dbbpmnplugin from '@/api/bpmnplugins'
+  import ModelBpmnplugin from '@/api/bpmnplugins'
   import moment from 'moment'
   import _ from 'lodash'
   import axios from 'axios'
+  import FormData from 'form-data'
+  import config from '@/config'
   export default {
     data () {
       return {
@@ -117,12 +119,21 @@
                             onOk: async () => {
                               var response = await this.handleEnableDisable(params.row)
                               if (response.status === 'success') {
-                                this.plugins[params.index].worker.src = params.row.worker.src
-                                this.$Message.success('Update successfully!')
+                                var form = new FormData()
+                                form.append('jobtype', params.row.pluginType.toLowerCase() + '_worker')
+                                form.append('jobprocess', params.row.worker.src)
+                                axios.post(config.workerRegisterURL + '/upload-worker-process', form, {headers: {'Content-Type': 'application/x-www-form-urlencoded'}}).then(response => {
+                                  this.plugins[params.index].worker.src = params.row.worker.src
+                                  this.$Message.success('Update successfully!')
+                                  this.$Modal.remove()
+                                }).catch(error => {
+                                  this.$Message.error(error.message)
+                                  this.$Modal.remove()
+                                })
                               } else {
                                 this.$Message.error(response.message)
+                                this.$Modal.remove()
                               }
-                              this.$Modal.remove()
                             }
                           })
                         }
@@ -275,7 +286,7 @@
     methods: {
       init () {
         let self = this
-        dbbpmnplugin.get().then(response => {
+        ModelBpmnplugin.get().then(response => {
           self.plugins = response
           self.logingPluginList = false
         }).catch(error => {
@@ -287,7 +298,7 @@
         })
       },
       async handleEnableDisable (data) {
-        return await dbbpmnplugin.update(data.id, data).then(response => {
+        return await ModelBpmnplugin.update(data.id, data).then(response => {
           return {status: 'success'}
         }).catch(error => {
           return {status: 'error', message: error}
@@ -324,7 +335,7 @@
               let filecontent = await axios.get(this.formPlugin.url.link)
               this.fileJson = filecontent.data
             }
-            dbbpmnplugin.create(this.fileJson).then(response => {
+            ModelBpmnplugin.create(this.fileJson).then(response => {
               this.$Message.success('Plugin install successfully!')
               this.loadingFormPlugin = false
               this.$refs[name].resetFields()
@@ -343,7 +354,7 @@
         })
       },
       async handleUninstall (id) {
-        return await dbbpmnplugin.delete(id)
+        return await ModelBpmnplugin.delete(id)
         .then(response => {
           return {status: 'success'}
         })
