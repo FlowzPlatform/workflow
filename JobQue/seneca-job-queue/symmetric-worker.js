@@ -8,7 +8,7 @@ const cxnOptions = config.get('cxnOptions')
 const symmetricWorker = config.get('symmetricWorker')
 const rdash = require('rethinkdbdash')(cxnOptions)
 const pino = require('pino')
-
+const cors = require('cors')
 const waitingThreshold = config.get('waitingThreshold')
 const increaseWorker = config.get('increaseWorker')
 const maxWorker = config.get('maxWorker')
@@ -23,6 +23,7 @@ checkTableExistsOrNot(symmetricWorker.table)
     connected=true
   })
 
+app.use(cors())
 process.setMaxListeners(0)
 let socketObj = io.of('/execute-worker')
 socketObj.on('connection', function (socket) {

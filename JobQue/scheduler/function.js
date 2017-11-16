@@ -624,7 +624,7 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
     let targetSchema = _.find(processList,{'id': targetId}) //get process block from processList based on targetId
     let targetSchemaIndex = _.findIndex(processList,{'id': targetId}) //get index of process block from processList based on targetId
     //if output of previous data is single object, convert it to array
-    let sourceOutput = (jobData.output instanceof Array) ? jobData.output : target.outputid ? jobData.output[target.outputid] : [jobData.output]
+    let sourceOutput = (jobData.output instanceof Array) ? jobData.output : target.outputid ? jobData.output[target.outputid.toLowerCase()] : [jobData.output]
     if (sourceOutput) {
       let outputPropertyIndex = target.outputid ? _.findIndex(notifyingProcessSchema.outputProperty, {id: target.outputid}) : 0
       let sourceName = jobData.currentProcess //variable to store id of process which got completed
