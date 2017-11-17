@@ -137,17 +137,17 @@ import instance from '@/api/flowzinstance'
 import schemaTemplate from '@/components/SchemaTemplate.vue'
 import expandRow1 from './formdata-expand.vue'
 import _ from 'lodash'
-// import Split from 'split.js'
+import modelBpmnplugin from '@/api/bpmnplugins'
 import BpmnViewer from 'bpmn-js/lib/NavigatedViewer.js'
 import flowz from '@/api/flowz'
 import axios from 'axios'
 import config from '../../../config'
 // socket
-import $ from 'jquery'
+// import $ from 'jquery'
 // import propertiesPanelModule from '../../../../static/bpmn/bpmn-js-properties-panel'
 // import propertiesProviderModule from '../../../../static/bpmn/bpmn-js-properties-panel/lib/provider/camunda'
 import camundaModdleDescriptor from '../../../../static/bpmn/camunda-bpmn-moddle/resources/camunda'
-import customPaletteModule from '@/bpmn-custom-module'
+// import customPaletteModule from '@/bpmn-custom-module'
 
 let viewer, canvas
 export default {
@@ -194,20 +194,27 @@ export default {
       console.log(error)
     })
     await flowz.get(this.flowid)
-    .then(response => {
+    .then(async response => {
       console.log('response.data.data.xml', response.data)
       this.bpmnXML = response.data.xml
-      self.initBPMN()
+      await self.initBPMN()
     })
   },
   feathers: {
     'flowz-instance': {
-      updated (data) { // update status using socket
+      async updated (data) { // update status using socket
+        let self = this
         if (data.id === this.$route.params.id) {
+          console.log('data.processList', data.processList)
+          console.log('data.process_log', data.process_log)
           this.flowInstance = data.processList
           this.flowInstanceLog = data.process_log
-          document.getElementById('canvas').innerHTML = ''
-          this.initBPMN()
+          // document.getElementById('canvas').innerHTML = ''
+          _.forEach(self.flowInstanceLog, function (process) {
+            canvas = viewer.get('canvas')
+            canvas.addMarker(process.job, _.chain(self.flowInstanceLog).orderBy(['lastModified'], ['asc']).findLast((f) => { return f.job === process.job }).value().status)
+          })
+          // await this.initBPMN()
         }
       }
     }
@@ -415,90 +422,71 @@ export default {
       // return _.chain(this.flowInstanceLog).orderBy(['lastModified'], ['asc']).find((f) => { return f.job === item.id }).value()
       return _.orderBy(_.filter(this.flowInstanceLog, function (o) { return o.job === item.id }), ['lastModified'], ['asc'])
     },
-    initBPMN () {
+    async initBPMN () {
+      console.log('call=============')
       let self = this
 
-      let plugin = [] // require('../../../bpmnPlugin/config.json') // ['Filter', 'sendRFQ']
-      $.ajax({
-        url: 'https://s3-us-west-2.amazonaws.com/airflowbucket1/bpmnplugin/config.json',
-        dataType: 'json',
-        async: false,
-        success: function (data) {
-          plugin = data
-        }
-      })
-      let types = _.chain(plugin).map(f => {
-        // delete require.cache[require.resolve(`../../../bpmnPlugin/${f}/index.js`)]
-        // let plug = require(`../../../bpmnPlugin/${f}/index.js`)
-        let plug = {}
-        $.ajax({
-          url: f.url, // 'https://s3-us-west-2.amazonaws.com/airflowbucket1/bpmnplugin/Filter/index.json',
-          dataType: 'json',
-          async: false,
-          success: function (data) {
-            plug = data
-          }
-        })
+      let plugins = await modelBpmnplugin.get()
+      let types = _.map(plugins, plug => {
         return {
-          'name': plug.type,
+          'name': plug.pluginType,
           'isAbstract': true,
           'superClass': [
             'bpmn:FlowNode'
           ]
         }
-      }).value()
-      console.log('customPaletteModule', customPaletteModule)
-      console.log('types', camundaModdleDescriptor)
-      console.log('types', types)
-      viewer = new BpmnViewer({
-        container: '#canvas',
-        zoomLevel: 8,
-        additionalModules: [
-          require('@/bpmn-custom-module/viewindex')
-        ],
-        moddleExtensions: {
-          flowz: {
-            'name': 'Camunda',
-            'uri': 'http://camunda.org/schema/1.0/bpmn',
-            'prefix': 'camunda',
-            'xml': {
-              'tagAlias': 'lowerCase'
+      })
+      if (types !== undefined) {
+        viewer = new BpmnViewer({
+          container: '#canvas',
+          additionalPlugins: plugins,
+          additionalModules: [
+            require('@/bpmn-custom-module/viewindex')
+          ],
+          moddleExtensions: {
+            flowz: {
+              'name': 'Camunda',
+              'uri': 'http://camunda.org/schema/1.0/bpmn',
+              'prefix': 'camunda',
+              'xml': {
+                'tagAlias': 'lowerCase'
+              },
+              'associations': [],
+              'types': types
             },
-            'associations': [],
-            'types': types
-          },
-          camunda: camundaModdleDescriptor
-        }
-      })
-      viewer.importXML(this.bpmnXML, function (err) {
-        if (err) {
-          console.log('error rendering', err)
-        } else {
-          // console.log('self', self)
-          _.forEach(self.flowInstanceLog, function (process) {
-            canvas = viewer.get('canvas')
-            canvas.addMarker(process.job, _.chain(self.flowInstanceLog).orderBy(['lastModified'], ['asc']).findLast((f) => { return f.job === process.job }).value().status)
-          })
-        }
-      })
-      var eventBus = viewer.get('eventBus')
-
-      // you may hook into any of the following events
-      var events = [
-        // 'element.hover',
-        // 'element.out',
-        'element.click'
-        // 'element.dblclick',
-        // 'element.mousedown',
-        // 'element.mouseup'
-      ]
-      events.forEach(function (event) {
-        eventBus.on(event, function (e) {
-          // e.element = the model element
-          // e.gfx = the graphical element
-          console.log(event, 'on', e.element.id)
+            camunda: camundaModdleDescriptor
+          }
         })
-      })
+        viewer.importXML(this.bpmnXML, function (err) {
+          if (err) {
+            console.log('error rendering', err)
+          } else {
+            // console.log('self', self)
+            _.forEach(self.flowInstanceLog, function (process) {
+              canvas = viewer.get('canvas')
+              canvas.addMarker(process.job, _.chain(self.flowInstanceLog).orderBy(['lastModified'], ['asc']).findLast((f) => { return f.job === process.job }).value().status)
+            })
+          }
+        })
+        var eventBus = viewer.get('eventBus')
+
+        // you may hook into any of the following events
+        var events = [
+          // 'element.hover',
+          // 'element.out',
+          'element.click'
+          // 'element.dblclick',
+          // 'element.mousedown',
+          // 'element.mouseup'
+        ]
+        events.forEach(function (event) {
+          eventBus.on(event, function (e) {
+            // e.element = the model element
+            // e.gfx = the graphical element
+            console.log(event, 'on', e.element.id)
+          })
+        })
+      }
     },
     forwardmappingdata () {
       // console.log('config.serverURI', config.serverURI)

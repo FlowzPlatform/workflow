@@ -19,6 +19,13 @@
                           <template v-for="(item, index) in data.items">
                             <Row :gutter="16">
                               <Col span="8">
+                                <FormItem :prop="'items.' + index + '.role'" :rules="{required: true, trigger: 'blur'}">
+                                  <Select v-model="item.role" @focus="setFocus(index)" placeholder="Role" style="min-width:165px">
+                                    <Option v-for="item in roleList" :value="item" :key="item">{{ item }}</Option>
+                                  </Select>
+                                </FormItem>
+                              </Col>
+                              <!-- <Col span="8">
                                 <FormItem
                                   :prop="'items.' + index + '.role'"
                                   :rules="{required: true, trigger: 'blur'}">
@@ -31,7 +38,7 @@
                               	  :rules="{required: true, trigger: 'blur'}">
                               	  <input type="text" v-model="item.email" @focus="setFocus(index)" placeholder="Email"></input>
                               	</FormItem>
-                            	</Col>
+                            	</Col> -->
                               <Col span="4">
                                   <Button type="ghost" @click="handleRemove(index)">Delete</Button>
                               </Col>
@@ -117,6 +124,7 @@
 <script>
   import propertyManage from '@/pages/approval/PropertyManage.vue'
   import approval from '@/api/approval'
+  import approvalrole from '@/api/approvalrole'
 
   let approvalSchema = {
     finalNotification: {
@@ -162,7 +170,8 @@
         ckbRejectedEmails: false,
         ckbProgressEmails: false,
         ind: 0,
-        processArr: null
+        processArr: null,
+        roleList: []
         // formDynamic: {
         //   items: [
         //     {
@@ -206,6 +215,11 @@
           this.data.items = items
           this.processArr = processArr
         }
+        this.data.items[0].role = processData.items[0].role
+      }
+      let approvalroleList = await approvalrole.get()
+      for (i = 0; i < approvalroleList.length; i++) {
+        this.roleList.push(approvalroleList[i])
       }
     },
     methods: {

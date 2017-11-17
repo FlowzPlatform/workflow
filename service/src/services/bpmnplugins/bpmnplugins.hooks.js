@@ -40,7 +40,6 @@ module.exports = {
     remove: []
   }
 };
-
 var schemaequalChecker = function(item) {
   var allschema = await (getallSchema())
   var flag = false
@@ -52,14 +51,13 @@ var schemaequalChecker = function(item) {
     delete obj.emailTemplate
     delete obj.viewTemplate
     var s = _.isEqual(obj, item)
-    if(s) {
-      return {status: s, id: sid}
+    if (s) {
+      return { status: s, id: sid }
     }
   }
-  return {status: flag}
+  return { status: flag }
 }
-
-var checkpulginexist = async (function(sdata) {
+var checkpulginexist = async(function(sdata) {
   var _pdata = await (axios.get(serverUrl + '/bpmnplugins'))
   var flag = false;
   for (let i = 0; i < _pdata.data.data.length; i++) {
@@ -67,15 +65,14 @@ var checkpulginexist = async (function(sdata) {
       flag = true;
     }
   }
-  if(!flag) {
+  if (!flag) {
     // console.log('Not..Exist')
-    return {status: false}
+    return { status: false }
   } else {
     // console.log('Exist')
-    return {status: true}
+    return { status: true }
   }
-}) 
-
+})
 var sendError = function(hook) {
   console.log('plugins already exists.................................................');
   throw new Error('sasssssssssssssssssssssssssssss')
@@ -83,12 +80,11 @@ var sendError = function(hook) {
 var beforeCreate = async(function(hook) {
   // console.log('Hook Data.......................', hook.data)
   var n = await (checkpulginexist(hook.data))
-  // console.log('checkpulginexist...................', n)
-  if(n.status) {
+    // console.log('checkpulginexist...................', n)
+  if (n.status) {
     // throw new Error('Message text can not be empty')
     hook.result = { data: 'already exist', code: 500 }
     sendError(hook)
-
     // hook.error = new errors.BadRequest('Something is wrong');
     // hook.error = new errors.Conflict('This entry already exists');
     // return hook
@@ -96,9 +92,9 @@ var beforeCreate = async(function(hook) {
     for (let [inx, iObj] of hook.data.input.entries()) {
       // iObj['i_id'] = iObj.id
       var s = await (schemaequalChecker(iObj.entityschema[0]))
-      // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> input', s)
+        // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> input', s)
       if (s.status) {
-        iObj.entityschema = s.id  
+        iObj.entityschema = s.id
       } else {
         var res = await (checkSchemaObj(iObj.entityschema[0]))
         iObj.entityschema = res
@@ -107,9 +103,9 @@ var beforeCreate = async(function(hook) {
     for (let [inx, oObj] of hook.data.output.entries()) {
       for (var [i, obj] of oObj.entityschema.entries()) {
         var s = await (schemaequalChecker(obj))
-        // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> output', s)
-        if(s.status) {
-          oObj.entityschema = s.id  
+          // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> output', s)
+        if (s.status) {
+          oObj.entityschema = s.id
         } else {
           var s = await (checkSchemaObj(obj))
           oObj.entityschema = s
@@ -137,7 +133,6 @@ var beforeCreate = async(function(hook) {
     delete hook.data.imageStr
   }
 })
-
 var registerWorkerProcess = async(function(obj, src) {
   let workerparameter = {}
   workerparameter.jobtype = obj.pluginType + '_worker'
@@ -186,7 +181,7 @@ var saveSchemaObj = async(function(obj) {
   var res = await (axios.post(serverUrl + '/schema', obj))
   return res.data.generated_keys[0]
 })
-var getallSchema = async (function() {
+var getallSchema = async(function() {
   var res = await (axios.get(serverUrl + '/schema'))
   return res.data
 })

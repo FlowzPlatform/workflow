@@ -11,7 +11,7 @@ var T = new Twit({
 })
 var stream = T.stream('statuses/filter', { track: '@KrunalMMahera' })
 stream.on('tweet', function(tweet) {
-  // console.log('tweet', tweet)
+  console.log('tweet', tweet)
   axios.get(config.serverURI + '/flowz/' + flowid)
     .then(function(response) {
       let jsonobject = {}
@@ -36,9 +36,9 @@ function addInputForStartProcess(flowinstance, tweet) {
   let startEventEntity = _.find(flowinstance.processList, function(o) { return o.id == startEvent; });
   let object = {
     Attachement: '',
-    Message: tweet.text,
+    Message: tweet,
     Schemaid: startEventEntity.inputProperty[0].entityschema.id,
-    Type: 'tweet'
+    Type: 'tweet_template'
   }
   let inputdata = []
   inputdata.push(object)

@@ -27,6 +27,7 @@ export default {
           key: 'createdOn',
           sortable: true,
           width: 200,
+          sortType: 'desc',
           render: (h, params) => {
             return h('div', moment(this.processData[params.index].createdOn).format('lll'))
           }
