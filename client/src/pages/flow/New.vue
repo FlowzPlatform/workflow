@@ -11,19 +11,19 @@
       </Row>
       <Row>
         <Col v-show="!loading" span="24">
-          <div class="split" style="height: calc(100vh - 97.51px);">
-            <div id="bpmn-panel" class="split split-horizontal">
+          <Split style="height: calc(100vh - 97.51px);">
+            <SplitArea :size="80" :minSize="800">
               <div id="js-canvas" style="width: 100%;height: calc(100vh - 110px);position: relative;"></div>
-            </div>
-            <div id="bpmn-properties-panel" class="split split-horizontal">
+            </SplitArea >
+            <SplitArea :size="20" :minSize="200">
               <Tooltip content="Save" placement="left" class="upload-icon">
                 <a  @click="save">
                   <i class="fa fa-floppy-o"></i>
                 </a>
               </Tooltip>
               <div id="js-properties-panel"></div>
-            </div>
-          </div>
+            </SplitArea>
+          </Split>
         </Col>
       </Row>
     </div>
@@ -37,9 +37,8 @@
   import emailtemplate from '@/api/emailtemplate'
   import schemamappingModel from '@/api/schemamapping'
   import modelBpmnplugin from '@/api/bpmnplugins'
-  import Split from 'split.js'
   import flowz from '@/api/flowz'
-
+  
   import 'diagram-js/assets/diagram-js.css'
   import 'bpmn-js/assets/bpmn-font/css/bpmn-embedded.css'
   
@@ -402,10 +401,6 @@
       }
     },
     mounted () {
-      Split(['#bpmn-panel', '#bpmn-properties-panel'], {
-        sizes: [80, 20],
-        minSize: [800, 200]
-      })
       var process = [
         new Promise((resolve, reject) => {
           schemaModel.get().then((response) => {

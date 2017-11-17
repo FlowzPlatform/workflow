@@ -10,11 +10,11 @@
       </div>
     </row>
     <row>
-      <div class="split" style="height: calc(100vh - 110px);">
-      <div v-show="graph" id="canvas" style="height: calc(80vh - 350px);border: 1px solid rgb(233, 234, 236);">
-      </div>
-      <!-- <div id="vertical-split" class="split split-horizontal"> -->
-        <div  v-if="list || graph" id="vertical-split" style="height: calc(90vh - 130px);position: relative; margin-top:10px">
+      <Split style="height: calc(100vh - 162px);" :direction="'vertical'">
+        <SplitArea :size="graph? 38 : 0">
+          <div id="canvas" style="height: 95%"></div>
+        </SplitArea>
+        <SplitArea :size="graph? 60: 97"  v-if="list || graph" style="margin-top:10px">
           <Col :span="spanTable">
             <div class="schema-form ivu-table-wrapper" >
                   <div class="ivu-table ivu-table-border">
@@ -77,14 +77,14 @@
           <Col span="16" v-if="showProp">
               <div>
                   <div class="demo-tabs-style1" style="background: #eee;padding:16px;">
-                      <Tabs type="card"  style="min-height: calc(90vh - 130px);">
+                      <Tabs type="card">
                           <TabPane label="Form Data" name="formtab">
                             <div v-if="html && propData.inputProperty.length > 0 &&  getStatus(propData) === 'inputRequired'" class="schema-form ivu-table-wrapper" style="padding-top:15px">
                                 <div class="ivu-table ivu-table-border">
                                     <span class="ivu-table-body">
                                         <table cellspacing="0" cellpadding="0" border="0" style="width:100%">
                                             <tbody class="ivu-table-tbody">
-                                               <schemaTemplate :row="propData" :html="html"></schemaTemplate>
+                                                <schemaTemplate :row="propData" :html="html"></schemaTemplate>
                                             </tbody>
                                         </table>
                                     </span>
@@ -95,7 +95,7 @@
                                     <span class="ivu-table-body">
                                         <table cellspacing="0" cellpadding="0" border="0" style="width:100%">
                                             <tbody class="ivu-table-tbody">
-                                               <template>
+                                                <template>
                                                 <tr class="ivu-table-row">
                                                   <td >
                                                     <div class="ivu-table-cell">
@@ -124,9 +124,8 @@
                   </div>
               </div>
           </Col>
-        </div>
-      <!-- </div> -->
-    </div>
+        </SplitArea>
+      </Split>
       <!-- <Table :columns="columns" :data="flowInstance"></Table> -->
       <!-- {{showProp}} -->
     </row>
@@ -138,7 +137,7 @@ import instance from '@/api/flowzinstance'
 import schemaTemplate from '@/components/SchemaTemplate.vue'
 import expandRow1 from './formdata-expand.vue'
 import _ from 'lodash'
-import Split from 'split.js'
+// import Split from 'split.js'
 import BpmnViewer from 'bpmn-js/lib/NavigatedViewer.js'
 import flowz from '@/api/flowz'
 import axios from 'axios'
@@ -180,10 +179,9 @@ export default {
     }
   },
   async mounted () {
-    Split(['#canvas', '#vertical-split'], {
-      direction: 'vertical'
-    })
-
+    // Split(['#canvas', '#vertical-split'], {
+    //   direction: 'vertical'
+    // })
     let self = this
     // console.log(this.$route.params.id)
     await instance.getThis(this.$route.params.id)
@@ -454,6 +452,7 @@ export default {
       console.log('types', types)
       viewer = new BpmnViewer({
         container: '#canvas',
+        zoomLevel: 8,
         additionalModules: [
           require('@/bpmn-custom-module/viewindex')
         ],
