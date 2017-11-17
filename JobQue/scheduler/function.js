@@ -624,85 +624,87 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
     let targetSchema = _.find(processList,{'id': targetId}) //get process block from processList based on targetId
     let targetSchemaIndex = _.findIndex(processList,{'id': targetId}) //get index of process block from processList based on targetId
     //if output of previous data is single object, convert it to array
-    let sourceOutput = (jobData.output instanceof Array) ? jobData.output : target.outputid ? jobData.output[target.outputid] : [jobData.output]
-    let outputPropertyIndex = target.outputid ? _.findIndex(notifyingProcessSchema.outputProperty, {id: target.outputid}) : 0
-    let sourceName = jobData.currentProcess //variable to store id of process which got completed
+    let sourceOutput = (jobData.output instanceof Array) ? jobData.output : target.outputid ? jobData.output[target.outputid.toLowerCase()] : [jobData.output]
+    if (sourceOutput) {
+      let outputPropertyIndex = target.outputid ? _.findIndex(notifyingProcessSchema.outputProperty, {id: target.outputid}) : 0
+      let sourceName = jobData.currentProcess //variable to store id of process which got completed
 
-    //get all child jobs from the respective child type queue whose status is `parameterMapping`
-    let targetJobs = await this.getJobFromQueue(targetSchema, fId)
-    //to know from where to start filling the free slot
-    let fillFrom = null
+      //get all child jobs from the respective child type queue whose status is `parameterMapping`
+      let targetJobs = await this.getJobFromQueue(targetSchema, fId)
+      //to know from where to start filling the free slot
+      let fillFrom = null
 
-    //find number of new available data
-    let numberOfNewDataAvailable = sourceOutput.length
+      //find number of new available data
+      let numberOfNewDataAvailable = sourceOutput.length
 
-    //get mapping for the given source process in the target process
-    let sourceTargetMapping = await this.getMapping(targetSchema, sourceName)
+      //get mapping for the given source process in the target process
+      let sourceTargetMapping = await this.getMapping(targetSchema, sourceName)
 
-    //get max size of input array that process accepts
-    let capacity = await this.getCapacity(targetSchema)
+      //get max size of input array that process accepts
+      let capacity = await this.getCapacity(targetSchema)
 
-    //if no child job is present in the respective child type queue, create new job in the
-    //respective child type queue
-    if (!targetJobs) {
+      //if no child job is present in the respective child type queue, create new job in the
+      //respective child type queue
+      if (!targetJobs) {
 
-      //function to create new jobs
-      targetJobs = await this.createNewJobs(targetSchema, targetSchemaIndex, flowInstance, numberOfNewDataAvailable, capacity)
-      fillFrom = 0
-    }
-    else {
-
-      //from targetJobs got, get size of data they can handle
-      let numberOfAllFreeSlotsAvailbale = await this.getNumberOfAllFreeSlotsAvailable(targetJobs, capacity, sourceName)
-
-      //check if numberOfAllFreeSlotsAvailbale is enough for the new data
-      newJobsRequired = (numberOfAllFreeSlotsAvailbale - numberOfNewDataAvailable) > 0 ? false : capacity ? true : numberOfAllFreeSlotsAvailbale == 0 ? true : false
-
-      //if numberOfAllFreeSlotsAvailbale is not enough, create new jobs and add them to array targetJobs
-      if (newJobsRequired) {
-
-        let newJobs = await this.createNewJobs(targetSchema, targetSchemaIndex, flowInstance, numberOfNewDataAvailable-numberOfAllFreeSlotsAvailbale, capacity)
-        targetJobs = targetJobs.concat(newJobs)
-      }
-
-      //function to get start point from where mapping needs to be done
-      fillFrom = await this.getFillFromStartPoint(targetJobs, capacity, sourceName)
-    }
-
-    //map the source output to target input based on the mapping defined
-    await this.mapOutputsToChildInputs(targetJobs, sourceTargetMapping, sourceOutput, capacity, numberOfNewDataAvailable, fillFrom, sourceName, notifyingProcessSchema, outputPropertyIndex)
-
-    //get number of updated jobs
-    let numberOfUpdatedJobs = capacity ? Math.ceil(numberOfNewDataAvailable / capacity) : 1
-
-    //for each updated job, check if all inputs required by the process are available or not
-    //if all inputs are available, begin the target process
-    //else update the target process in its respective job queue to latest mapping
-    for (let i=fillFrom; i<numberOfUpdatedJobs; i++) {
-
-      //get boolean to check if all inputs needed by the process to start are now all available or not
-      let inputAvailability = await this.areAllInputsAvailable(targetJobs[i], targetSchemaIndex, fId, false)
-
-      if (inputAvailability) {
-        //if all inputs are available, update the latest mapping done and begin the process
-        //i.e. change status of the job for that process in it's respective worker queue to `waiting`
-        pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).info({'fId': fId, 'jobId': targetId}, 'next job')
-        pino(PINO_C_OPTION).info({'fId': fId, 'jobId': targetId}, 'next job')
-        let tmp = await this.beginProcess(targetJobs[i])
+        //function to create new jobs
+        targetJobs = await this.createNewJobs(targetSchema, targetSchemaIndex, flowInstance, numberOfNewDataAvailable, capacity)
+        fillFrom = 0
       }
       else {
-        //i.e. all inputs are still not available so just update the latest mapping done
-        //(it's status in it's respective worker queue will not be changed)
-        var mappingRequired = capacity ? false : this.externalMappingRequired(targetJobs[i])
-        if (mappingRequired) {
-          pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).warn({'fId': fId, 'jobId': targetId}, 'mapping required')
-          pino(PINO_C_OPTION).warn({'fId': fId, 'jobId': targetId}, 'mapping required')
+
+        //from targetJobs got, get size of data they can handle
+        let numberOfAllFreeSlotsAvailbale = await this.getNumberOfAllFreeSlotsAvailable(targetJobs, capacity, sourceName)
+
+        //check if numberOfAllFreeSlotsAvailbale is enough for the new data
+        newJobsRequired = (numberOfAllFreeSlotsAvailbale - numberOfNewDataAvailable) > 0 ? false : capacity ? true : numberOfAllFreeSlotsAvailbale == 0 ? true : false
+
+        //if numberOfAllFreeSlotsAvailbale is not enough, create new jobs and add them to array targetJobs
+        if (newJobsRequired) {
+
+          let newJobs = await this.createNewJobs(targetSchema, targetSchemaIndex, flowInstance, numberOfNewDataAvailable-numberOfAllFreeSlotsAvailbale, capacity)
+          targetJobs = targetJobs.concat(newJobs)
+        }
+
+        //function to get start point from where mapping needs to be done
+        fillFrom = await this.getFillFromStartPoint(targetJobs, capacity, sourceName)
+      }
+
+      //map the source output to target input based on the mapping defined
+      await this.mapOutputsToChildInputs(targetJobs, sourceTargetMapping, sourceOutput, capacity, numberOfNewDataAvailable, fillFrom, sourceName, notifyingProcessSchema, outputPropertyIndex)
+
+      //get number of updated jobs
+      let numberOfUpdatedJobs = capacity ? Math.ceil(numberOfNewDataAvailable / capacity) : 1
+
+      //for each updated job, check if all inputs required by the process are available or not
+      //if all inputs are available, begin the target process
+      //else update the target process in its respective job queue to latest mapping
+      for (let i=fillFrom; i<numberOfUpdatedJobs; i++) {
+
+        //get boolean to check if all inputs needed by the process to start are now all available or not
+        let inputAvailability = await this.areAllInputsAvailable(targetJobs[i], targetSchemaIndex, fId, false)
+
+        if (inputAvailability) {
+          //if all inputs are available, update the latest mapping done and begin the process
+          //i.e. change status of the job for that process in it's respective worker queue to `waiting`
+          pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).info({'fId': fId, 'jobId': targetId}, 'next job')
+          pino(PINO_C_OPTION).info({'fId': fId, 'jobId': targetId}, 'next job')
+          let tmp = await this.beginProcess(targetJobs[i])
         }
         else {
-          pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).warn({'fId': fId, 'jobId': targetId}, 'all inputs not available')
-          pino(PINO_C_OPTION).warn({'fId': fId, 'jobId': targetId}, 'all inputs not available')
+          //i.e. all inputs are still not available so just update the latest mapping done
+          //(it's status in it's respective worker queue will not be changed)
+          var mappingRequired = capacity ? false : this.externalMappingRequired(targetJobs[i])
+          if (mappingRequired) {
+            pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).warn({'fId': fId, 'jobId': targetId}, 'mapping required')
+            pino(PINO_C_OPTION).warn({'fId': fId, 'jobId': targetId}, 'mapping required')
+          }
+          else {
+            pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).warn({'fId': fId, 'jobId': targetId}, 'all inputs not available')
+            pino(PINO_C_OPTION).warn({'fId': fId, 'jobId': targetId}, 'all inputs not available')
+          }
+          let tmp = await this.updateProcess(targetJobs[i])
         }
-        let tmp = await this.updateProcess(targetJobs[i])
       }
     }
     return 'success'

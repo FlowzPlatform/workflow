@@ -173,6 +173,8 @@ export default {
           // obj = this.lastLog.input[0]
           // obj.database = this.schema.database
           obj.Schemaid = self.schema._id
+          delete obj.id
+          delete obj._id
           self.formSchemaInstance.data.push(obj)
         })
       } else {

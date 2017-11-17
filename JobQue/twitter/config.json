@@ -1,0 +1,11 @@
+{
+  "serverURI": "http://localhost:3030",
+  "watcherPath": "../bpmnPlugin",
+  "tweetCredential": {
+    "consumer_key": "xxx",
+    "consumer_secret": "xxx",
+    "access_token": "xxx",
+    "access_token_secret": "xxx"
+  },
+  "flowid": "2d0b5f58-7ea8-4f34-a2ca-0151d2103069"
+}

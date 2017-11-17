@@ -1,0 +1,20 @@
+{
+	"pino": {
+    "timestamp": false,
+		"prettyPrint": {
+      "forceColor": true
+    }
+	},
+	"rethinkdb": {
+    "host": "localhost",
+    "port": 28015,
+    "db": "mailservice"
+  },
+  "table": "emails",
+  "cxnOptions": {
+    "host": "localhost",
+    "port": 28015,
+    "db": "Flowz"
+  },
+  "users": "users"
+}

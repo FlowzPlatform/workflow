@@ -42,10 +42,12 @@
     </div>
 </template>
 <script>
-  import dbbpmnplugin from '@/api/bpmnplugins'
+  import ModelBpmnplugin from '@/api/bpmnplugins'
   import moment from 'moment'
   import _ from 'lodash'
   import axios from 'axios'
+  import FormData from 'form-data'
+  import config from '@/config'
   export default {
     data () {
       return {
@@ -63,6 +65,97 @@
         },
         columns: [
           {
+            type: 'expand',
+            width: 50,
+            render: (h, params) => {
+              // var self = this
+              return h('Row', [
+                h('Col', [
+                  h('codemirror', {
+                    props: {
+                      options: {
+                        tabSize: 2,
+                        mode: params.row.worker.type, // 'text/javascript',
+                        // theme: 'base16-light',
+                        lineNumbers: true,
+                        line: true,
+                        // keyMap: 'sublime',
+                        extraKeys: { 'Ctrl': 'autocomplete' },
+                        foldGutter: true,
+                        gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
+                        styleSelectedText: true,
+                        highlightSelectionMatches: { showToken: /\w/, annotateScrollbar: true }
+                      },
+                      code: params.row.worker.src
+                    },
+                    on: {
+                      change: function (newCode) {
+                        params.row.worker.src = newCode
+                      }
+                    }
+                  })
+                ]),
+                h('Col', [
+                  h('div', {
+                    style: {
+                      marginTop: '5px',
+                      marginLeft: '30px'
+                    }
+                  }, [
+                    h('Button', {
+                      props: {
+                        type: 'primary',
+                        size: 'small'
+                      },
+                      style: {
+                        marginRight: '5px'
+                      },
+                      on: {
+                        click: () => {
+                          this.$Modal.confirm({
+                            title: 'Confirm',
+                            content: '<p>Are you sure you want to Update?</p>',
+                            loading: true,
+                            onOk: async () => {
+                              var response = await this.handleEnableDisable(params.row)
+                              if (response.status === 'success') {
+                                var form = new FormData()
+                                form.append('jobtype', params.row.pluginType.toLowerCase() + '_worker')
+                                form.append('jobprocess', params.row.worker.src)
+                                axios.post(config.workerRegisterURL + '/upload-worker-process', form, {headers: {'Content-Type': 'application/x-www-form-urlencoded'}}).then(response => {
+                                  this.plugins[params.index].worker.src = params.row.worker.src
+                                  this.$Message.success('Update successfully!')
+                                  this.$Modal.remove()
+                                }).catch(error => {
+                                  this.$Message.error(error.message)
+                                  this.$Modal.remove()
+                                })
+                              } else {
+                                this.$Message.error(response.message)
+                                this.$Modal.remove()
+                              }
+                            }
+                          })
+                        }
+                      }
+                    }, 'Update'),
+                    h('Button', {
+                      props: {
+                        type: 'ghost',
+                        size: 'small'
+                      },
+                      on: {
+                        click: () => {
+                          params.row.worker.src = this.plugins[params.index].worker.src
+                        }
+                      }
+                    }, 'Reset')
+                  ])
+                ])
+              ])
+            }
+          },
+          {
             title: ' ',
             key: 'imgurl',
             align: 'center',
@@ -72,7 +165,7 @@
                 props: {
                   shape: 'square',
                   size: 'small',
-                  src: this.plugins[params.index].imgurl
+                  src: this.plugins[params.index].image
                 },
                 style: {
                   backgroundColor: 'transparent'
@@ -86,8 +179,8 @@
             sortable: true
           },
           {
-            title: 'Worker type',
-            key: 'worker_type',
+            title: 'pluginType',
+            key: 'pluginType',
             sortable: true,
             width: 200
           },
@@ -96,6 +189,7 @@
             key: 'createdOn',
             sortable: true,
             width: 200,
+            sortType: 'desc',
             render: (h, params) => {
               return h('div', moment(this.plugins[params.index].createdOn).format('lll'))
             }
@@ -117,8 +211,8 @@
                     this.$Modal.confirm({
                       title: 'Confirm',
                       content: '<p>Are you sure you want to ' + (value ? 'enable' : 'disable') + ' this plugin?</p>',
-                      onOk: () => {
-                        this.handleEnableDisable(this.plugins[params.index])
+                      onOk: async () => {
+                        await this.handleEnableDisable(this.plugins[params.index])
                       },
                       onCancel: () => {
                         this.plugins[params.index].isEnable = !value
@@ -148,9 +242,16 @@
                     click: () => {
                       this.$Modal.confirm({
                         title: 'Confirm',
+                        loading: true,
                         content: '<p>Are you sure you want to <b> uninstall </b> this plugin?</p>',
-                        onOk: () => {
-                          this.handleUninstall(this.plugins[params.index].id)
+                        onOk: async () => {
+                          var response = await this.handleUninstall(this.plugins[params.index].id)
+                          if (response.status === 'success') {
+                            this.$Message.success('Uninstall successfull.')
+                          } else {
+                            this.$Message.error(response.message)
+                          }
+                          this.$Modal.remove()
                         }
                       })
                     }
@@ -173,7 +274,8 @@
           this.plugins.splice($index, 1, data)
         },
         created (data) {
-          this.plugins.splice(0, 1, data)
+          // this.plugins.splice(0, 1, data)
+          this.plugins.push(data)
         },
         removed (data) {
           let $index = _.findIndex(this.plugins, (o) => { return o.id === data.id })
@@ -184,7 +286,7 @@
     methods: {
       init () {
         let self = this
-        dbbpmnplugin.get().then(response => {
+        ModelBpmnplugin.get().then(response => {
           self.plugins = response
           self.logingPluginList = false
         }).catch(error => {
@@ -195,9 +297,11 @@
           })
         })
       },
-      handleEnableDisable (data) {
-        dbbpmnplugin.update(data.id, data).then(response => {
-          console.log('response', response)
+      async handleEnableDisable (data) {
+        return await ModelBpmnplugin.update(data.id, data).then(response => {
+          return {status: 'success'}
+        }).catch(error => {
+          return {status: 'error', message: error}
         })
       },
       handleTypeChange (name) {
@@ -231,7 +335,7 @@
               let filecontent = await axios.get(this.formPlugin.url.link)
               this.fileJson = filecontent.data
             }
-            dbbpmnplugin.create(this.fileJson).then(response => {
+            ModelBpmnplugin.create(this.fileJson).then(response => {
               this.$Message.success('Plugin install successfully!')
               this.loadingFormPlugin = false
               this.$refs[name].resetFields()
@@ -249,16 +353,13 @@
           }
         })
       },
-      handleUninstall (id) {
-        dbbpmnplugin.delete(id)
+      async handleUninstall (id) {
+        return await ModelBpmnplugin.delete(id)
         .then(response => {
-          this.$Message.success('sucessfully uninstall.')
+          return {status: 'success'}
         })
         .catch(error => {
-          this.$Notice.error({
-            title: 'Failed',
-            desc: error
-          })
+          return {status: 'error', message: error}
         })
       },
       handleReset (name) {

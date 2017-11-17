@@ -7,7 +7,9 @@ var app = require('express')()
 const pino = require('pino')
 const PINO = config.get('pino')
 const fileUpload = require('express-fileupload')
+const cors = require('cors')
 
+app.use(cors())
 app.use(fileUpload())
 
 checkTableExistsOrNot(registerWorker.table)
