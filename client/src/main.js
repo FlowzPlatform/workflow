@@ -58,6 +58,10 @@ Vue.use(VueCodeMirror)
 import AsyncComputed from 'vue-async-computed'
 Vue.use(AsyncComputed)
 
+/* vue-split-panel */
+import VueSplit from 'vue-split-panel'
+Vue.use(VueSplit)
+
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */

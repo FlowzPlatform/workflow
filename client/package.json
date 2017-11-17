@@ -58,6 +58,7 @@
     "vue-html": "^0.3.0",
     "vue-input-tag": "0.0.16",
     "vue-router": "^2.7.0",
+    "vue-split-panel": "^1.0.1",
     "vue2-codemirror-lite-js": "^3.4.7",
     "vuedraggable": "^2.14.1",
     "vuex": "^2.4.0",
