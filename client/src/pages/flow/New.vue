@@ -278,12 +278,11 @@
             proccess.extensionElements.myInputs.input = [proccess.extensionElements.myInputs.input]
           }
           return await Promise.all(_.map(proccess.extensionElements.myInputs.input, async (m) => {
+            console.log('m._approvalClass', m._approvalClass)
             return {
               id: m._id,
               entityschema: await schemaModel.getAll(m._entityschema),
-              approvalClass: m._approvalClass !== undefined && m._approvalClass !== '0' ? await approvalModel.get(m._approvalClass).then(content => {
-                return content.data
-              }) : undefined,
+              approvalClass: (m._approvalClass !== undefined && m._approvalClass !== '0') ? await approvalModel.get(m._approvalClass) : undefined,
               cancelLabel: m._cancelLabel,
               choice: m._choice,
               createTemplate: m._createTemplate,
@@ -306,9 +305,7 @@
             return {
               id: m._id,
               entityschema: await schemaModel.getAll(m._entityschema),
-              approvalClass: m._approvalClass !== undefined && m._approvalClass !== '0' ? await approvalModel.get(m._approvalClass).then(content => {
-                return content.data
-              }) : undefined,
+              approvalClass: m._approvalClass !== undefined && m._approvalClass !== '0' ? await approvalModel.get(m._approvalClass) : undefined,
               cancelLabel: m._cancelLabel,
               choice: m._choice,
               createTemplate: m._createTemplate,

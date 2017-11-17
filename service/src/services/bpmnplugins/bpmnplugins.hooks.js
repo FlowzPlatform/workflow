@@ -66,8 +66,8 @@ var beforeCreate = async(function(hook) {
   hook.data['createdOn'] = new Date()
   hook.data['isEnable'] = true
   hook.data['url'] = ""
-  delete hook.data.type
-  delete hook.data.imageStr
+    // delete hook.data.type
+    // delete hook.data.imageStr
 })
 var registerWorkerProcess = async(function(obj, src) {
   let workerparameter = {}

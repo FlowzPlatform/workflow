@@ -1,7 +1,6 @@
 import api from '../../api'
 let model = 'approval'
 export default {
-
   // let gets = async function (id) {
   //     return true;
   //   },
@@ -12,15 +11,24 @@ export default {
   //     return api.request('get', '/' + model + '/' + id)
   //   }
   // }
-
   get: (rowId) => {
-    return api.request('get', '/' + model)
-      .then(response => {
-        return response.data.data
-      })
-      .catch(error => {
-        throw error
-      })
+    if (rowId === undefined) {
+      return api.request('get', '/' + model)
+        .then(response => {
+          return response.data.data
+        })
+        .catch(error => {
+          throw error
+        })
+    } else {
+      return api.request('get', '/' + model + '/' + rowId)
+        .then(response => {
+          return response.data
+        })
+        .catch(error => {
+          console.log(error)
+        })
+    }
   },
   getOne: (rowId) => {
     return api.request('get', '/' + model + '/' + rowId)

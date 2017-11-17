@@ -202,6 +202,20 @@ export default {
       console.log(error)
     })
   },
+  feathers: {
+    'flowz-instance': {
+      created (data) { // update status using socket
+        console.log('New Data', data)
+        flowz.get()
+        .then(response => {
+          this.flowzList = response.data.data
+        })
+        .catch(error => {
+          console.log(error)
+        })
+      }
+    }
+  },
   methods: {
     async createNewInstance (index, id) {
       // let generatedJson = await this.generateJson(this.flowzList[index].xml)
