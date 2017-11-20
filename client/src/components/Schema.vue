@@ -773,8 +773,8 @@ export default {
       this.isMjmlEditor = !this.isMjmlEditor
     },
     handleCloseMjmlClick (self) {
-      this.mjmlUpload.push(self)
-      console.log(this.mjmlUpload)
+      // this.mjmlUpload.push(self)
+      console.log('hgys',self)
       this.isMjmlEditor = !this.isMjmlEditor
     },
     savegriddata(index, template, isViewTemplate) {

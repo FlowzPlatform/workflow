@@ -814,7 +814,7 @@ export default {
       this.isMjmlEditor = !this.isMjmlEditor
     },
     handleCloseMjmlClick (self) {
-      this.mjmlUpload.push(self)
+      // this.mjmlUpload.push(self)
       console.log(this.mjmlUpload)
       this.isMjmlEditor = !this.isMjmlEditor
     },
