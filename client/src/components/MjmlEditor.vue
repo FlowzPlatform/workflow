@@ -21,16 +21,13 @@
       </Form>
     </div>
     <div class="templateEditor">
-      <div style="margin-top:15px" id="gjs">
+      <div id="gjs">
         <mj-container min-height="100px"></mj-container>
       </div>
     </div>
   </div>
 </template>
 
-<!-- <script src="jquery/dist/jquery.min.js"></script>
-<script src="grapesjs/dist/grapes.min.js"></script>
-<script src="grapesjs-mjml/dist/grapesjs-mjml.min.js"></script> -->
 
 <script>
 /*eslint-disable*/
@@ -89,7 +86,7 @@ export default {
           let bucket = new AWS.S3({ params: { Bucket: 'airflowbucket1/obexpense/expenses' } })
           console.log(bucket)
           var mjmlData = {
-            Key: this.formInline.filename,
+            Key: this.formInline.filename+'.html',
             ContentType: 'application/mjml',
             Body: mjmlTemplate
           }
@@ -97,7 +94,7 @@ export default {
             console.log('Uploaded :: ' + parseInt((evt.loaded * 100) / evt.total) + '%')
           }).send(function (err, data) {
             if (err) { alert(err) } else {
-              mjmlobj = {'filename': filename, 'url': data.Location, 'notes': notes}
+              mjmlobj = {'filename': filename , 'url': data.Location, 'notes': notes}
               self.formInline.loading = false
               self.dispatch('schema', 'close-mjml', mjmlobj)
             }
@@ -116,7 +113,6 @@ export default {
 .gjs-editor {
   height: 100%;
   width: 100%;
-  position: absolute;
 }
 .gjs-field select{
   height: 23px;
@@ -129,5 +125,8 @@ export default {
 }
 .saveMjml{
   margin-bottom: 15px;
+}
+.templateEditor{
+  height: 60vh !important;
 }
 </style>
