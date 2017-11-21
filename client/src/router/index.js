@@ -34,6 +34,7 @@ import Register from '@/pages/Register'
 // Approval area
 import ApprovalList from '@/pages/approval/List'
 import ApprovalNew from '@/pages/approval/New'
+import Reply from '@/pages/approval/MailReply'
 
 // BPMN Plugins
 import ManageBPMNPlugin from '@/pages/BPMNPlugins/Manage'
@@ -189,6 +190,10 @@ const routes = [{
         required: false
       }
     }]
+  }, {
+    path: '/mail/reply/:mailid/:pid/:fiid',
+    name: 'mail/reply',
+    component: Reply
   }]
 }, {
   path: '/Login',
