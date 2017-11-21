@@ -59,7 +59,12 @@
                 </FormItem>
                 <FormItem>
                     <Checkbox v-model="frmSettings.isenable" label="enable">Enable</Checkbox>
-                    <Checkbox v-model="frmSettings.isdefault" label="default">is Default</Checkbox>
+                    <span v-if="checkdefault">
+                        <Checkbox v-model="frmSettings.isdefault" label="default" disabled>is Default</Checkbox>
+                    </span>
+                    <span v-else>
+                        <Checkbox v-model="frmSettings.isdefault" label="default">is Default</Checkbox>
+                    </span>
                 </FormItem>
             </Col>
         </Row>
@@ -86,6 +91,7 @@ export default{
     components: {'input-tag': InputTag},
     data() {
         return {
+            checkdefault: false,
             mongo,
             rethink,
             elastic,
@@ -122,6 +128,20 @@ export default{
         }
     },
     methods: {
+        checkdefaultfun: async function() {
+          // console.log('................')
+          var _res = await api.request('get', '/settings')
+          var dbins_l = 0
+          for(let db in _res.data) {
+            dbins_l += _res.data[db].dbinstance.length
+          }
+          // console.log(dbins_l)
+          if(dbins_l === 0) {
+            // return false
+            this.checkdefault = true
+            this.frmSettings.isdefault = true
+          }
+        },
         clearIcon(value) {
             this.frmSettings.upldIcn = ''
         },
@@ -159,6 +179,7 @@ export default{
         }
     },
     mounted() {
+        this.checkdefaultfun()
         this.frmSettings.selectedDb = this.$route.params.db;
         var self = this;
         $(document).ready(function(){
