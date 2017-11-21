@@ -8,7 +8,7 @@ const pino = require('pino')
 module.exports = function (options) {
 
   process.setMaxListeners(0)
-  
+
   options = options ? options : {}
   const cxnOptions = options.cxnOptions ? options.cxnOptions : app.rethinkdb
   const qOptions = options.qOptions ? options.qOptions : app.qOptions
@@ -63,7 +63,7 @@ module.exports = function (options) {
         //the condition will be satisfied if the job is created by some process worker as a part
         //of notifying schcduler that the process completed succesfully a that particular worker
 
-        func.notificationACK(flowInstance, fId, job.data, next)
+        func.notificationACK(flowInstance, fId, job.data, next, cxnOptions, qOptions)
       }
       else if (job.data.isExternalInput) {
         //the condition will be satisfied if the job is created in
