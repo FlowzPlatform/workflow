@@ -216,12 +216,12 @@ export default {
         Instance.post({ instanceid: this.instanceid, processid: this.processid, data: obj.data })
         .then(response => {
           console.log('response', response.data)
-          this.$Notice.success({title: 'success!', desc: 'Instance Saved...'})
+          this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
           this.$Loading.finish()
         })
         .catch(error => {
           console.log('Error', error)
-          this.$Notice.error({title: 'Error!', desc: 'Instance Not Saved...'})
+          this.$Notice.error({title: 'Error!', desc: 'Instance not saved...'})
           this.$Loading.error()
         })
       } else {

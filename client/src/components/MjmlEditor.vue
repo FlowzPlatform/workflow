@@ -21,7 +21,7 @@
       </Form>
     </div>
     <div class="templateEditor">
-      <div style="margin-top:15px" id="gjs">
+      <div style="margin-top:15px;min-height:400px;" id="gjs">
         <mj-container min-height="100px"></mj-container>
       </div>
     </div>
