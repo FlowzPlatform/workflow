@@ -1,4 +1,4 @@
-<template>
+f<template>
   <div class="schema-instance">
     <Form ref="formSchemaInstance" :model="formSchemaInstance">
       <!-- <Form-item 
