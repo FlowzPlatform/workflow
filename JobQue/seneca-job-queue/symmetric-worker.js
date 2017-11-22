@@ -154,7 +154,8 @@ async function getSummary () {
         pino(PINO).info('\n' + 'job-type : ' + jobType  + ' | host : ' + cOptions.host + ' | port : ' + cOptions.port + ' | db : ' + cOptions.db + '\n\x1b[33m' + JSON.stringify(summary) + '\x1b[0m')
 
         let sCreated = summary.created ? summary.created : 0
-        let denominator = (summary.total - (summary.active + summary.completed + summary.cancelled + summary.failed + summary.terminated + sCreated))
+        let sIR = summary.inputRequired ? summary.inputRequired : 0
+        let denominator = (summary.total - (summary.active + summary.completed + summary.cancelled + summary.failed + summary.terminated + sCreated + sIR))
         let waitingRatio = denominator != 0 ? (summary.waiting) / denominator : 0
         if (waitingRatio > waitingThreshold && wCount < maxWorker ) {
           let startWorkers = parseInt(((100 * (waitingRatio - waitingThreshold)) * increaseWorker) / 100)
