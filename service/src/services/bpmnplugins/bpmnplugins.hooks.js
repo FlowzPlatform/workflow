@@ -179,7 +179,7 @@ var checkFlag = function(obj) {
 }
 var saveSchemaObj = async(function(obj) {
   var res = await (axios.post(serverUrl + '/schema', obj))
-  return res.data.generated_keys[0]
+  return res.data
 })
 var getallSchema = async(function() {
   var res = await (axios.get(serverUrl + '/schema'))

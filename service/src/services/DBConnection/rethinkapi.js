@@ -65,13 +65,23 @@ module.exports = {
   generateInstanceTable: async(function (data){
     // console.log('Rethink generate instance collection..........', ins_id, title);
     var title = data.title
+    if(data.database[1] == undefined) {
+     data.database[1] = dr[0].id 
+    }
     var ins_id = data.database[1]
     for(let [i, db_i] of r.entries()) {
       if(db_i.id == ins_id) {
-        console.log(r[i].conn)
-        var res = await (r[i].conn.tableCreate(title))
+        // console.log(r[i].conn)
+        var ii = await (r[i].conn.tableList().contains(title))
+        // console.log('generateInstanceTable rethink ......... ', ii, title)
+        if(!ii) {
+          var res = await (r[i].conn.tableCreate(title))
+          return 'created'
+        } else {
+          return 'exist'
+        }
         // console.log('res......generateInstanceTable........', res)
-        return res
+        // return res
       }
     }
   }),
@@ -328,6 +338,9 @@ module.exports = {
   postSchema: async(function (data) {
     console.log('rethink post Schema');
     console.log('guid', data.database[1])
+    if(data.database[1] == undefined) {
+      data.database[1] = dr[0].id
+    }
     // var selectedDB = _.find(r, (d) => {
     //     return d.id == data.database[1]
     // })
@@ -335,8 +348,8 @@ module.exports = {
     var schema = await (dr[0].conn.table("schema").insert(data).run());
 
     var _id = schema.generated_keys[0];
-    dr[0].conn.table("schema").get(_id).update({ '_id': _id }).run();
-    return schema;
+    var a = await (dr[0].conn.table("schema").get(_id).update({ '_id': _id }).run());
+    return _id;
 
 
     //    var schema = await (r.table("schema").insert(data).run());

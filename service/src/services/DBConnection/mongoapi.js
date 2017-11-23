@@ -311,7 +311,7 @@ module.exports = {
       // console.log(selectedDB)
     var schema = await (defaultDb[0].conn.collection('schema').insert(data));
     // console.log(schema)
-    return schema.ops;
+    return schema.ops[0]._id;
   }),
   postflowsInstance: async(function (data, dbid, collName) {
     console.log('...................mongo post flowsInstance...................');

@@ -514,7 +514,7 @@ module.exports = {
         type: 'schema',
         body: data
     }))
-    return result;
+    return result._id;
   }),
   postflowsInstance: async(function (data, dbid, typeName) {
     console.log('........................elastic post flowsInstance....................');
