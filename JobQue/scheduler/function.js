@@ -43,7 +43,7 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
           if (tmp) return 'done'
         }
         else {
-          await this.updateProcess(targetJob, 'inputRequired')
+          await this.updateProcess(targetJob, 'mappingRequired')
           let tmp = await this.updateLog(targetJob, 'mappingRequired', requiredFieldsSkeleton)
           if (tmp) return 'done'
         }
@@ -577,8 +577,9 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
       targetSchema = _.find(flowInstance.processList,{'id': targetId})
       targetSchemaIndex = _.findIndex(flowInstance.processList,{'id': targetId})
 
+      let requiredStatus = jobData.isMapping ? 'mappingRequired' : 'inputRequired'
       //get job from its respective worker
-      let targetJobs = await this.getJobFromQueue(targetSchema, fId, 'inputRequired')
+      let targetJobs = await this.getJobFromQueue(targetSchema, fId, requiredStatus)
 
       //get array size of external inputs
       let numberOfExternalInputs = externalInput.length
@@ -633,12 +634,13 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
     if (sourceOutput) {
       if (targetSchema.isProcessTask) {
         await this.updateLog(targetSchema, 'running', null, true, fId)
+        let type = targetSchema.type ? targetSchema.type.toLowerCase() : 'tweet'
         for (let j=0; j<sourceOutput.length; j++) {
           sourceOutput[j] = JSON.stringify(sourceOutput[j])
           targetSchema = JSON.stringify(targetSchema)
           c_options = JSON.stringify(cxnOptions)
           q_options = JSON.stringify(qOptions)
-          let n = cp.fork(`${__dirname}/${'process.js'}`, ['tweet', PROCESS_URL, targetSchema, targetSchemaIndex, sourceOutput[j], fId, c_options, q_options])
+          let n = cp.fork(`${__dirname}/${'process.js'}`, [type, PROCESS_URL, targetSchema, targetSchemaIndex, sourceOutput[j], fId, c_options, q_options])
         }
       }
       else {

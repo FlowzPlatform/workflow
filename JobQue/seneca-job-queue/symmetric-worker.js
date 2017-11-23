@@ -14,6 +14,7 @@ const waitingThreshold = config.get('waitingThreshold')
 const increaseWorker = config.get('increaseWorker')
 const maxWorker = config.get('maxWorker')
 const PINO = config.get('pino')
+const r = require('rethinkdb')
 let wCount = 1
 let registeredJobTypeQueueObj = {}     // register job type queue object
 let deadQueueObj = {}
@@ -47,10 +48,10 @@ function checkTableExistsOrNot (table) {
   })
 }
 
-function deleteDataJobType (table, jobTyped) {
+function deleteDataJobType (table, jobType) {
   return new Promise(async (resolve, reject) => {
     await rdash.table(table)
-    .filter(rdash.row('jobType').eq(jobTyped))
+    .filter(rdash.row('jobType').eq(jobType))
     .delete()
     .run()
     .then(function (result) {
@@ -121,10 +122,25 @@ function getAllJobType (table) {
   })
 }
 
-function getDataJobType (table, jobTyped) {
+async function getCount (cOptions, jobType) {
+  return new Promise ((resolve, reject)=>{
+    r.connect(cOptions, function (err, conn) {
+      if (err) {
+        resolve(0)
+      } else {
+        r.table(jobType).filter((r.row('status').eq('completed')).and(r.row('dateEnable').gt(r.now()))).count().run(conn, function(err, result) {
+          if (err) resolve(0)
+          resolve(result)
+        })
+      }
+    })
+  })
+}
+
+function getDataJobType (table, jobType) {
   return new Promise(async (resolve, reject) => {
     await rdash.table(table)
-    .filter(rdash.row('jobType').eq(jobTyped))
+    .filter(rdash.row('jobType').eq(jobType))
     .run()
     .then(function (result) {
       if (result.length > 0) {
@@ -153,11 +169,13 @@ async function getSummary () {
         let summary = await objQ.summary()
         pino(PINO).info('\n' + 'job-type : ' + jobType  + ' | host : ' + cOptions.host + ' | port : ' + cOptions.port + ' | db : ' + cOptions.db + '\n\x1b[33m' + JSON.stringify(summary) + '\x1b[0m')
 
+        let sWaiting = await getCount(cOptions, jobType)
         let sCreated = summary.created ? summary.created : 0
         let sIR = summary.inputRequired ? summary.inputRequired : 0
-        let denominator = (summary.total - (summary.active + summary.completed + summary.cancelled + summary.failed + summary.terminated + sCreated + sIR))
-        let waitingRatio = denominator != 0 ? (summary.waiting) / denominator : 0
-        if (waitingRatio > waitingThreshold && wCount < maxWorker ) {
+        let sMR = summary.mappingRequired ? summary.mappingRequired : 0
+        let denominator = (summary.total - (summary.active + summary.completed + summary.cancelled + summary.failed + summary.terminated + sCreated + sIR + sMR))
+        let waitingRatio = denominator != 0 ? (summary.waiting - sWaiting) / denominator : 0
+        if (waitingRatio > waitingThreshold) {
           let startWorkers = parseInt(((100 * (waitingRatio - waitingThreshold)) * increaseWorker) / 100)
           pino(PINO).info("before emit")
           socketObj.emit('worker', {'jobType': jobType, 'needWorker': startWorkers, 'options': registeredJobTypeQueueObj[jKey].options})
