@@ -81,7 +81,7 @@ chokidar.watch(path.join(__dirname, '../DBConnection/db.json'), { ignored: /(^|[
   delete require.cache[require.resolve('../DBConnection/mongoapi')];
   delete require.cache[require.resolve('../DBConnection/rethinkapi')];
   delete require.cache[require.resolve('../DBConnection/elasticapi')];
-  delete require.cache[require.resolve('../DBConnection/mysqlapi')];
+ //  delete require.cache[require.resolve('../DBConnection/mysqlapi')];
   var checking = await (readfile());
   if (checking == 'nodata') {
     console.log('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ from instance');

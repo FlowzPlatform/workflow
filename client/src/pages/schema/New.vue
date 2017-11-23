@@ -747,6 +747,7 @@ export default {
             .then(response => {
               // this.toggleLoading()
               // this.$router.push(data.redirect)
+              // console.log('Response Schema ... ', response.data)
               this.$Notice.success({title: 'success!'})
               this.loading = false
               this.viewTemplate = []

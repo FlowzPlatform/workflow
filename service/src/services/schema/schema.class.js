@@ -62,7 +62,7 @@ chokidar.watch(path.join(__dirname, '../DBConnection/db.json'), { ignored: /(^|[
   delete require.cache[require.resolve('../DBConnection/mongoapi')];
   delete require.cache[require.resolve('../DBConnection/rethinkapi')];
   delete require.cache[require.resolve('../DBConnection/elasticapi')];
-  delete require.cache[require.resolve('../DBConnection/mysqlapi')];  
+//   delete require.cache[require.resolve('../DBConnection/mysqlapi')];  
   
   var checking = await (readfile);
   // console.log('checking',checking);
@@ -74,17 +74,20 @@ chokidar.watch(path.join(__dirname, '../DBConnection/db.json'), { ignored: /(^|[
 
 
   var saveSchema = async( function(data) {
-    var db;
-    if(data.database != undefined) {
-      db = require('../DBConnection/' + data.database[0] + 'api')
-      var createTable = await (db.generateInstanceTable(data))
+    var db1;
+    if(data.hasOwnProperty('database')) {
+      db1 = require('../DBConnection/' + data.database[0] + 'api')
+      var createTable = await (db1.generateInstanceTable(data))
       // console.log('createTable >>>>>>>>>>>>>>>>>', createTable)
     } else {
-      // db = require()
-      // var createTable = await (dbapi[0].api.generateInstanceTable(dbapi[0], data.title))
+      data.database = [];
+      data.database[0] = dbapi[0].db
+      // db1 = require()
+      var createTable = await (dbapi[0].api.generateInstanceTable(data))
       // console.log('createTable >>>>>>>>>>>>>>>>>', createTable)
     }
     var dbdata = await (dbapi[0].api.postSchema(data));
+    console.log('dbdata.................... ', dbdata)
     return dbdata
   })
 
@@ -351,8 +354,9 @@ class Service {
     console.log('create feathers...');
     // var _dbindex = _.findIndex(dbapi, { 'db': data.database[0] });
     var res = saveSchema(data)
+    return Promise.resolve(res)
     // var dbdata = dbapi[0].api.postSchema(data);
-    return Promise.resolve(data);
+    // return Promise.resolve(dbdata);
   }
 
   update(id, data, params) {
