@@ -950,6 +950,10 @@
         "name": "capacity",
         "type": "String",
         "isAttr": true
+      }, {
+        "name": "isProcessTask",
+        "type": "Boolean",
+        "isAttr": true
       }]
     },
     {

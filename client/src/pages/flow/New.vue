@@ -66,34 +66,34 @@
           function (e, xml) {
             xmlData = xml
           })
-        console.log('xmlData', xmlData)
+        // console.log('xmlData', xmlData)
         let x2js = new X2JS()
-        console.log('x2js', x2js)
-        // let data = x2js.xml2js(xmlData)
-        // if (data.definitions.process._name !== undefined) {
-        //   // console.log(data.name)
-        //   let flowObject = {}
-        //   flowObject.ProcessName = data.definitions.process._name
-        //   flowObject.xml = xmlData
-        //   flowObject.json = await this.generateJson(xmlData)
-        //   // console.log('xmlData', xmlData)
-        //   let result = null
-        //   if (this.$route.params.id !== undefined) {
-        //     result = flowz.put(this.$route.params.id, flowObject)
-        //   } else {
-        //     result = flowz.post(flowObject)
-        //   }
-        //   result.then(response => {
-        //     this.$Notice.success({title: 'Success!!', desc: 'Mapping Saved...'})
-        //     localStorage.removeItem('BPMNXml')
-        //     this.$router.push('/flow')
-        //   }).catch(error => {
-        //     console.log(error)
-        //     this.$Notice.error({title: 'Error!!', desc: 'Mapping Not Saved...'})
-        //   })
-        // } else {
-        //   this.$Message.error('Please Add Process name !')
-        // }
+        // console.log('x2js', x2js)
+        let data = x2js.xml2js(xmlData)
+        if (data.definitions.process._name !== undefined) {
+          // console.log(data.name)
+          let flowObject = {}
+          flowObject.ProcessName = data.definitions.process._name
+          flowObject.xml = xmlData
+          flowObject.json = await this.generateJson(xmlData)
+          // console.log('xmlData', xmlData)
+          let result = null
+          if (this.$route.params.id !== undefined) {
+            result = flowz.put(this.$route.params.id, flowObject)
+          } else {
+            result = flowz.post(flowObject)
+          }
+          result.then(response => {
+            this.$Notice.success({title: 'Success!!', desc: 'Mapping Saved...'})
+            localStorage.removeItem('BPMNXml')
+            this.$router.push('/flow')
+          }).catch(error => {
+            console.log(error)
+            this.$Notice.error({title: 'Error!!', desc: 'Mapping Not Saved...'})
+          })
+        } else {
+          this.$Message.error('Please Add Process name !')
+        }
       },
       async initBPMN (data) {
         let plugins = await modelBpmnplugin.get()
