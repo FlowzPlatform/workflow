@@ -128,7 +128,7 @@ async function getCount (cOptions, jobType) {
       if (err) {
         resolve(0)
       } else {
-        r.table(jobType).filter((r.row('status').eq('completed')).and(r.row('dateEnable').gt(r.now()))).count().run(conn, function(err, result) {
+        r.table(jobType).filter((r.row('status').eq('waiting')).and(r.row('dateEnable').gt(r.now()))).count().run(conn, function(err, result) {
           if (err) resolve(0)
           resolve(result)
         })
@@ -167,18 +167,19 @@ async function getSummary () {
 
         let concurrency = objQ.concurrency
         let summary = await objQ.summary()
-        pino(PINO).info('\n' + 'job-type : ' + jobType  + ' | host : ' + cOptions.host + ' | port : ' + cOptions.port + ' | db : ' + cOptions.db + '\n\x1b[33m' + JSON.stringify(summary) + '\x1b[0m')
+        pino(PINO).info('\n' + 'job-type : ' + jobType  + ' | host : ' + cOptions.host + ' | port : ' + cOptions.port + ' | db : ' + cOptions.db + '\n\x1b[33m' + JSON.stringify(summary) + '\x1b[0m' + '\n')
 
         let sWaiting = await getCount(cOptions, jobType)
         let sCreated = summary.created ? summary.created : 0
         let sIR = summary.inputRequired ? summary.inputRequired : 0
         let sMR = summary.mappingRequired ? summary.mappingRequired : 0
-        let denominator = (summary.total - (summary.active + summary.completed + summary.cancelled + summary.failed + summary.terminated + sCreated + sIR + sMR))
-        let waitingRatio = denominator != 0 ? (summary.waiting - sWaiting) / denominator : 0
-        if (waitingRatio > waitingThreshold) {
-          let startWorkers = parseInt(((100 * (waitingRatio - waitingThreshold)) * increaseWorker) / 100)
-          pino(PINO).info("before emit")
-          socketObj.emit('worker', {'jobType': jobType, 'needWorker': startWorkers, 'options': registeredJobTypeQueueObj[jKey].options})
+        // let denominator = (summary.total - (summary.active + summary.completed + summary.cancelled + summary.failed + summary.terminated + sCreated + sIR + sMR))
+        // let waitingRatio = denominator != 0 ? (summary.waiting - sWaiting) / denominator : 0
+        // pino(PINO).warn('waiting-ratio : '+waitingRatio)
+        let waitingJobs = summary.waiting - sWaiting
+        if (waitingJobs >= 1) {
+          pino(PINO).info(jobType + " worker required")
+          socketObj.emit('worker', {'jobType': jobType, 'options': registeredJobTypeQueueObj[jKey].options})
         }
       } catch (err) {
         deadQueueObj[jKey] = registeredJobTypeQueueObj[jKey]
