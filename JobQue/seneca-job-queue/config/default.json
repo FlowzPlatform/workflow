@@ -9,7 +9,7 @@
   "cxnOptions" : {
     "host": "localhost",
     "port": 28015,
-    "db": "Flowz"
+    "db": "FlowzEngine"
   },
   "symmetricWorker": {
     "port" : 9000,

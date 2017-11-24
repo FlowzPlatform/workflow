@@ -84,6 +84,20 @@ var addtoApprovalClass = async(function(instanceid, inputdata, processid) {
   const job = q.createJob(jobOptions)
     //--------------- Add job -----------------
   q.addJob(job).then((savedJobs) => {}).catch(err => console.error(err))
+  axios.get('http://localhost:3030/flowz-instance/' + instanceid)
+    .then(response => {
+      let log = _.chain(response).orderBy(['lastModified'], ['asc']).findLast((f) => { return f.job === processid }).value()
+      console.log('=====1=1=1=1=1=1=1=1====>', log)
+      log.status = 'sendForApproval'
+      console.log('-1->', _.find(response.process_log, log))
+      axios.put('http://localhost:3030/flowz-instance/' + instanceid, response)
+        .then(res => {
+          console.log(res)
+        })
+        .catch(error => {
+          console.log('Error : ', error)
+        })
+    })
 })
 var getinstancevalue = async(function(id) {
   var response = await (axios.get('http://localhost:3030/instance/' + id))
