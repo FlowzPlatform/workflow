@@ -662,43 +662,47 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
           //get job from its respective worker
           let targetJobs = await this.getJobFromQueueE(targetSchema, jobId)
 
-          //get array size of external inputs
-          let numberOfExternalInputs = externalInput.length
+          if (!(_.isEqual(targetJobs[0].data.input,externalInput))) {
+            //get array size of external inputs
+            let numberOfExternalInputs = externalInput.length
 
-          //get max size of input array that process accepts
-          let capacity = await this.getCapacity(targetSchema)
+            // get max size of input array that process accepts
+            let capacity = await this.getCapacity(targetSchema)
 
-          //get start point from where external inputs mapping will start_start
-          let fillFrom = 0
+            //get start point from where external inputs mapping will start_start
+            let fillFrom = 0
 
-          //map supplied external inputs
-          await this.mapExternalInputs(externalInput, targetJobs, numberOfExternalInputs, capacity, fillFrom)
+            //map supplied external inputs
+            await this.mapExternalInputs(externalInput, targetJobs, numberOfExternalInputs, capacity, fillFrom)
 
-          let numberOfUpdatedJobs = capacity ? Math.ceil(numberOfExternalInputs / capacity) : 1
-          numberOfUpdatedJobs = targetJobs.length < numberOfUpdatedJobs ? targetJobs.length : targetJobs ? numberOfUpdatedJobs : 0
+            // let numberOfUpdatedJobs = capacity ? Math.ceil(numberOfExternalInputs / capacity) : 1
+            // numberOfUpdatedJobs = targetJobs.length < numberOfUpdatedJobs ? targetJobs.length : targetJobs ? numberOfUpdatedJobs : 0
 
-          //for each updated job, check if all inputs required by the process are available or not
-          //if all inputs are available, begin the target process
-          //else update the target process in its respective job queue to latest mapping
-          for (let i=fillFrom; i<numberOfUpdatedJobs; i++) {
+            //for each updated job, check if all inputs required by the process are available or not
+            //if all inputs are available, begin the target process
+            //else update the target process in its respective job queue to latest mapping
+            // for (let i=fillFrom; i<numberOfUpdatedJobs; i++) {
 
-            //get boolean to check if all inputs needed by the process to start are now all available or not
-            let inputAvailability = await this.areAllInputsAvailable(targetJobs[i], targetSchemaIndex, fId, true)
+              //get boolean to check if all inputs needed by the process to start are now all available or not
+              // let inputAvailability = await this.areAllInputsAvailable(targetJobs[i], targetSchemaIndex, fId, true)
+              let inputAvailability = await this.areAllInputsAvailable(targetJobs[0], targetSchemaIndex, fId, true)
 
-            if (inputAvailability) {
-              //if all inputs are available, update the latest mapping done and begin the process
-              //i.e. change status of the job for that process in it's respective worker queue to `waiting`
-              pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).info({'fId': jobData.fId, 'jobId': targetSchema.id}, 'next job')
-              pino(PINO_C_OPTION).info({'fId': jobData.fId, 'jobId': targetSchema.id}, 'next job')
-              await this.beginProcess(targetJobs[i])
-            }
-            else {
-              //i.e. all inputs are still not available so just update the latest mapping done
-              //(it's status in it's respective worker queue will not be changed)
-              pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).warn({'fId': jobData.fId, 'jobId': targetSchema.id}, 'all inputs not available')
-              pino(PINO_C_OPTION).warn({'fId': jobData.fId, 'jobId': targetSchema.id}, 'all inputs not available')
-              // let tmp = await this.updateProcess(targetJobs[i])
-            }
+              if (inputAvailability) {
+                //if all inputs are available, update the latest mapping done and begin the process
+                //i.e. change status of the job for that process in it's respective worker queue to `waiting`
+                pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).info({'fId': jobData.fId, 'job': targetSchema.id, 'jobId': targetJobs[0].id}, 'next job')
+                pino(PINO_C_OPTION).info({'fId': jobData.fId, 'job': targetSchema.id, 'jobId': targetJobs[0].id}, 'next job')
+                // await this.beginProcess(targetJobs[i])
+                await this.beginProcess(targetJobs[0])
+              }
+              else {
+                //i.e. all inputs are still not available so just update the latest mapping done
+                //(it's status in it's respective worker queue will not be changed)
+                pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).warn({'fId': jobData.fId, 'job': targetSchema.id, 'jobId': targetJobs[0].id}, 'all inputs not available')
+                pino(PINO_C_OPTION).warn({'fId': jobData.fId, 'job': targetSchema.id, 'jobId': targetJobs[0].id}, 'all inputs not available')
+                // let tmp = await this.updateProcess(targetJobs[i])
+              }
+            // }
           }
           resolve(next(null, 'success'))
         }
@@ -727,7 +731,7 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
             c_options = JSON.stringify(cxnOptions)
             q_options = JSON.stringify(qOptions)
             let n = cp.fork(`${__dirname}/${'process.js'}`, [type, PROCESS_URL, targetSchema, targetSchemaIndex, sourceOutput[j], fId, c_options, q_options])
-            await rdash.table(RUNTIME_PROCESS_TABLE).insert({options: [type, PROCESS_URL, targetSchema, targetSchemaIndex, sourceOutput[j], fId, c_options, q_options]}).run()
+            await rdash.table(RUNTIME_PROCESS_TABLE).insert({options: [type, PROCESS_URL, targetSchema, targetSchemaIndex, sourceOutput[j], fId, c_options, q_options], created: new Date()}).run()
           }
         }
         else {
@@ -822,7 +826,7 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
   async function rerunProcess () {
     return new Promise (async (resolve, reject) => {
       try {
-        let previousProcess = await rdash.table(RUNTIME_PROCESS_TABLE).run()
+        let previousProcess = await rdash.table(RUNTIME_PROCESS_TABLE).filter(rdash.row('created').gt(new Date(new Date().getTime() - 86400000))).run()
         for (let i=0; i<previousProcess.length; i++) {
           let n = cp.fork(`${__dirname}/${'process.js'}`, previousProcess[i].options)
         }
