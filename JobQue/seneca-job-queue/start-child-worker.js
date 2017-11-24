@@ -63,7 +63,7 @@ let runWorker = function (options) {
       let qObj = result.q
       qObj.process(async (job, next, onCancel) => {
         try {
-          lock = true
+          //lock = true
           JobExecute(job)
             .then(result => { pino(PINO).info('worker done', options.queue.name); next(null, result) })
             .catch(err => {
@@ -142,18 +142,19 @@ let runWorker = function (options) {
           }
 
           const q = new Queue(cxnOptions, qOptions)
-          var jobOptions = {}
-          jobOptions.data = {}
-          jobOptions.data.fId = fId
-          jobOptions.data.type = processType.toLowerCase()
-          jobOptions.data.isNewInstance = false
-          jobOptions.data.output = output
-          jobOptions.data.currentProcess = currentProcess
-          jobOptions.data.input = input
-          jobOptions.data.forProcess = forProcess
-          jobOptions.data.processNotification = true
-          // jobOptions.timeout = TIMEOUT
-          jobOptions.retryMax = 0
+          var jobOptions = {
+            data: {
+              fId: fId,
+              type: processType.toLowerCase(),
+              isNewInstance: false,
+              output: output,
+              currentProcess: currentProcess,
+              input: input,
+              forProcess: forProcess,
+              processNotification: true
+            },
+            retryMax: 0
+          }
 
           //--------------- Create new job -----------------
           const job = await q.createJob(jobOptions)

@@ -5,12 +5,14 @@ const _ = require('lodash')
 const fs = require("fs")
 const pino = require('pino')
 const axios = require('axios')
+const cp = require('child_process')
 
 module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
 
   const FIND_URL = options.service && options.service.find ? options.service.find : app.service.find
   const UPDATE_URL = options.service && options.service.update ? options.service.update : app.service.update
   const CREATE_URL = options.service && options.service.create ? options.service.create : app.service.create
+  const PROCESS_URL = options.job_module && options.service.job_module ? options.service.job_module : app.service.job_module
   const cxnOptions = options.cxnOptions ? options.cxnOptions : app.rethinkdb
   const SCHEDULER_TABLE = options.scheduler ? options.scheduler : app.scheduler_table
   const FLOWZ_TABLE = options.fTable ? options.fTable : app.flowz_table
@@ -31,19 +33,23 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
         let sourceCounts = targetJob.data.sourceCount ? Object.values(targetJob.data.sourceCount) : []
 
         if (sourceCounts.length < numberOfExternalSchema || (capacity && Math.min(...sourceCounts) != capacity)) {
+          await this.updateProcess(targetJob, 'created')
           let tmp = await this.updateLog(targetJob, 'created', false)
           if (tmp) return 'done'
         }
         else if (capacity) {
+          await this.updateProcess(targetJob, 'inputRequired')
           let tmp = await this.updateLog(targetJob, 'inputRequired', requiredFieldsSkeleton)
           if (tmp) return 'done'
         }
         else {
+          await this.updateProcess(targetJob, 'mappingRequired')
           let tmp = await this.updateLog(targetJob, 'mappingRequired', requiredFieldsSkeleton)
           if (tmp) return 'done'
         }
       }
       else {
+        await this.updateProcess(targetJob, 'inputRequired')
         let tmp = await this.updateLog(targetJob, 'inputRequired', requiredFieldsSkeleton)
         if (tmp) return 'done'
       }
@@ -132,24 +138,24 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
   }
 
   // -------- // -------- checkConnection -------- // -------- //
-  this.constructor.prototype.checkConnection = async function(crash, delay) {
-    var r = require('rethinkdb')
-    r.connect(cxnOptions, function(err, conn) {
-      if (err) {
-        pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).error({}, 'rethinkdb error')
-        pino(PINO_C_OPTION).error({}, 'rethinkdb error')
-        setTimeout(function(){
-          pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).info({}, 'retrying connection')
-          pino(PINO_C_OPTION).info({}, 'retrying connection')
-          this.checkConnection(true, delay)
-        },5000)
-      }else{
-        if (crash) {
-          setTimeout(function(){},delay)
-        }
-      }
-    })
-  }
+  // this.constructor.prototype.checkConnection = async function(crash, delay) {
+  //   var r = require('rethinkdb')
+  //   r.connect(cxnOptions, function(err, conn) {
+  //     if (err) {
+  //       pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).error({}, 'rethinkdb error')
+  //       pino(PINO_C_OPTION).error({}, 'rethinkdb error')
+  //       setTimeout(function(){
+  //         pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).info({}, 'retrying connection')
+  //         pino(PINO_C_OPTION).info({}, 'retrying connection')
+  //         this.checkConnection(true, delay)
+  //       },5000)
+  //     }else{
+  //       if (crash) {
+  //         setTimeout(function(){},delay)
+  //       }
+  //     }
+  //   })
+  // }
 
   // -------- // -------- createNewJobs -------- // -------- //
   this.constructor.prototype.createNewJobs = async function (targetSchema, targetSchemaIndex, flowInstance, numberOfNewDataAvailable, capacity) {
@@ -242,7 +248,6 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
 
   // -------- // -------- getFlowInstance -------- // -------- //
   this.constructor.prototype.getFlowInstance = async function (fId) {
-    await this.checkConnection(false,100)
     let tmp = await rdash.table(FLOWZ_TABLE).get(fId).run()
     return tmp
   }
@@ -257,7 +262,7 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
   }
 
   // -------- // -------- getJobFromQueue -------- // -------- //
-  this.constructor.prototype.getJobFromQueue = async function (targetSchema, fId) {
+  this.constructor.prototype.getJobFromQueue = async function (targetSchema, fId, status) {
 
     try {
       var response = await axios.post(FIND_URL, {
@@ -265,7 +270,7 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
         "queue": {
           "name": targetSchema.type.toLowerCase() + '_worker'
         },
-        "findVal": { data : { id : targetSchema.id, fId : fId }, status : 'created' }
+        "findVal": { data : { id : targetSchema.id, fId : fId }, status : status }
       })
 
       response = response.data
@@ -515,7 +520,7 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
   }
 
   // -------- // -------- notificationACK -------- // -------- //
-  this.constructor.prototype.notificationACK = async function (flowInstance, fId, jobData, next) {
+  this.constructor.prototype.notificationACK = async function (flowInstance, fId, jobData, next, cxnOptions, qOptions) {
     //get all next states of the completed process
     let forProcess = jobData.forProcess
     let targetProcesses = await this.getNextStates(flowInstance, forProcess)
@@ -539,12 +544,12 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
 
           //if condition verified, call performTargetOperation
           if (isConditionSatisfied) {
-            let tmp = await this.performTargetOperation(processList, targetProcess, jobData, flowInstance, notifyingProcessSchema)
+            let tmp = await this.performTargetOperation(processList, targetProcess, jobData, flowInstance, notifyingProcessSchema, cxnOptions, qOptions)
           }
         }
         else {
           //i.e. no condition for this next state, so call performTargetOperation anyway
-          let tmp = await this.performTargetOperation(processList, targetProcess, jobData, flowInstance, notifyingProcessSchema)
+          let tmp = await this.performTargetOperation(processList, targetProcess, jobData, flowInstance, notifyingProcessSchema, cxnOptions, qOptions)
         }
       }
       return next(null, 'success')
@@ -572,8 +577,9 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
       targetSchema = _.find(flowInstance.processList,{'id': targetId})
       targetSchemaIndex = _.findIndex(flowInstance.processList,{'id': targetId})
 
+      let requiredStatus = jobData.isMapping ? 'mappingRequired' : 'inputRequired'
       //get job from its respective worker
-      let targetJobs = await this.getJobFromQueue(targetSchema, fId)
+      let targetJobs = await this.getJobFromQueue(targetSchema, fId, requiredStatus)
 
       //get array size of external inputs
       let numberOfExternalInputs = externalInput.length
@@ -610,7 +616,7 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
           //(it's status in it's respective worker queue will not be changed)
           pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).warn({'fId': jobData.fId, 'jobId': targetSchema.id}, 'all inputs not available')
           pino(PINO_C_OPTION).warn({'fId': jobData.fId, 'jobId': targetSchema.id}, 'all inputs not available')
-          let tmp = await this.updateProcess(targetJobs[i])
+          // let tmp = await this.updateProcess(targetJobs[i])
         }
       }
       return 'done'
@@ -618,7 +624,7 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
   }
 
   // -------- // -------- performTargetOperation -------- // -------- //
-  this.constructor.prototype.performTargetOperation = async function (processList, target, jobData, flowInstance, notifyingProcessSchema) {
+  this.constructor.prototype.performTargetOperation = async function (processList, target, jobData, flowInstance, notifyingProcessSchema, cxnOptions, qOptions) {
     let targetId = target.id
     let fId = flowInstance.id //get database id of flowInstance to which it belongs
     let targetSchema = _.find(processList,{'id': targetId}) //get process block from processList based on targetId
@@ -626,84 +632,98 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
     //if output of previous data is single object, convert it to array
     let sourceOutput = (jobData.output instanceof Array) ? jobData.output : target.outputid ? jobData.output[target.outputid.toLowerCase()] : [jobData.output]
     if (sourceOutput) {
-      let outputPropertyIndex = target.outputid ? _.findIndex(notifyingProcessSchema.outputProperty, {id: target.outputid}) : 0
-      let sourceName = jobData.currentProcess //variable to store id of process which got completed
-
-      //get all child jobs from the respective child type queue whose status is `parameterMapping`
-      let targetJobs = await this.getJobFromQueue(targetSchema, fId)
-      //to know from where to start filling the free slot
-      let fillFrom = null
-
-      //find number of new available data
-      let numberOfNewDataAvailable = sourceOutput.length
-
-      //get mapping for the given source process in the target process
-      let sourceTargetMapping = await this.getMapping(targetSchema, sourceName)
-
-      //get max size of input array that process accepts
-      let capacity = await this.getCapacity(targetSchema)
-
-      //if no child job is present in the respective child type queue, create new job in the
-      //respective child type queue
-      if (!targetJobs) {
-
-        //function to create new jobs
-        targetJobs = await this.createNewJobs(targetSchema, targetSchemaIndex, flowInstance, numberOfNewDataAvailable, capacity)
-        fillFrom = 0
+      if (targetSchema.isProcessTask) {
+        await this.updateLog(targetSchema, 'running', null, true, fId)
+        let type = targetSchema.type ? targetSchema.type.toLowerCase() : 'tweet'
+        for (let j=0; j<sourceOutput.length; j++) {
+          sourceOutput[j] = JSON.stringify(sourceOutput[j])
+          targetSchema = JSON.stringify(targetSchema)
+          c_options = JSON.stringify(cxnOptions)
+          q_options = JSON.stringify(qOptions)
+          let n = cp.fork(`${__dirname}/${'process.js'}`, [type, PROCESS_URL, targetSchema, targetSchemaIndex, sourceOutput[j], fId, c_options, q_options])
+        }
       }
       else {
+        let outputPropertyIndex = target.outputid ? _.findIndex(notifyingProcessSchema.outputProperty, {id: target.outputid}) : 0
+        let sourceName = jobData.currentProcess //variable to store id of process which got completed
 
-        //from targetJobs got, get size of data they can handle
-        let numberOfAllFreeSlotsAvailbale = await this.getNumberOfAllFreeSlotsAvailable(targetJobs, capacity, sourceName)
+        //get all child jobs from the respective child type queue whose status is `parameterMapping`
+        let targetJobs = await this.getJobFromQueue(targetSchema, fId, 'created')
+        //to know from where to start filling the free slot
+        let fillFrom = null
 
-        //check if numberOfAllFreeSlotsAvailbale is enough for the new data
-        newJobsRequired = (numberOfAllFreeSlotsAvailbale - numberOfNewDataAvailable) > 0 ? false : capacity ? true : numberOfAllFreeSlotsAvailbale == 0 ? true : false
+        //find number of new available data
+        let numberOfNewDataAvailable = sourceOutput.length
 
-        //if numberOfAllFreeSlotsAvailbale is not enough, create new jobs and add them to array targetJobs
-        if (newJobsRequired) {
+        //get mapping for the given source process in the target process
+        let sourceTargetMapping = await this.getMapping(targetSchema, sourceName)
 
-          let newJobs = await this.createNewJobs(targetSchema, targetSchemaIndex, flowInstance, numberOfNewDataAvailable-numberOfAllFreeSlotsAvailbale, capacity)
-          targetJobs = targetJobs.concat(newJobs)
-        }
+        //get max size of input array that process accepts
+        let capacity = await this.getCapacity(targetSchema)
 
-        //function to get start point from where mapping needs to be done
-        fillFrom = await this.getFillFromStartPoint(targetJobs, capacity, sourceName)
-      }
-
-      //map the source output to target input based on the mapping defined
-      await this.mapOutputsToChildInputs(targetJobs, sourceTargetMapping, sourceOutput, capacity, numberOfNewDataAvailable, fillFrom, sourceName, notifyingProcessSchema, outputPropertyIndex)
-
-      //get number of updated jobs
-      let numberOfUpdatedJobs = capacity ? Math.ceil(numberOfNewDataAvailable / capacity) : 1
-
-      //for each updated job, check if all inputs required by the process are available or not
-      //if all inputs are available, begin the target process
-      //else update the target process in its respective job queue to latest mapping
-      for (let i=fillFrom; i<numberOfUpdatedJobs; i++) {
-
-        //get boolean to check if all inputs needed by the process to start are now all available or not
-        let inputAvailability = await this.areAllInputsAvailable(targetJobs[i], targetSchemaIndex, fId, false)
-
-        if (inputAvailability) {
-          //if all inputs are available, update the latest mapping done and begin the process
-          //i.e. change status of the job for that process in it's respective worker queue to `waiting`
-          pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).info({'fId': fId, 'jobId': targetId}, 'next job')
-          pino(PINO_C_OPTION).info({'fId': fId, 'jobId': targetId}, 'next job')
-          let tmp = await this.beginProcess(targetJobs[i])
+        //if no child job is present in the respective child type queue, create new job in the
+        //respective child type queue
+        if (!targetJobs) {
+          //function to create new jobs
+          targetJobs = await this.createNewJobs(targetSchema, targetSchemaIndex, flowInstance, numberOfNewDataAvailable, capacity)
+          fillFrom = 0
         }
         else {
-          //i.e. all inputs are still not available so just update the latest mapping done
-          //(it's status in it's respective worker queue will not be changed)
-          var mappingRequired = capacity ? false : this.externalMappingRequired(targetJobs[i])
-          if (mappingRequired) {
-            pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).warn({'fId': fId, 'jobId': targetId}, 'mapping required')
-            pino(PINO_C_OPTION).warn({'fId': fId, 'jobId': targetId}, 'mapping required')
+          for (var o=0; o<targetJobs.length; o++) {
+            pino(PINO_C_OPTION).warn(targetJobs[o].data)
+          }
+          //from targetJobs got, get size of data they can handle
+          let numberOfAllFreeSlotsAvailbale = await this.getNumberOfAllFreeSlotsAvailable(targetJobs, capacity, sourceName)
+
+          //check if numberOfAllFreeSlotsAvailbale is enough for the new data
+          newJobsRequired = (numberOfAllFreeSlotsAvailbale - numberOfNewDataAvailable) > 0 ? false : capacity ? true : numberOfAllFreeSlotsAvailbale == 0 ? true : false
+
+          //if numberOfAllFreeSlotsAvailbale is not enough, create new jobs and add them to array targetJobs
+          if (newJobsRequired) {
+
+            let newJobs = await this.createNewJobs(targetSchema, targetSchemaIndex, flowInstance, numberOfNewDataAvailable-numberOfAllFreeSlotsAvailbale, capacity)
+            targetJobs = targetJobs.concat(newJobs)
+          }
+
+          //function to get start point from where mapping needs to be done
+          fillFrom = await this.getFillFromStartPoint(targetJobs, capacity, sourceName)
+        }
+
+        //map the source output to target input based on the mapping defined
+        await this.mapOutputsToChildInputs(targetJobs, sourceTargetMapping, sourceOutput, capacity, numberOfNewDataAvailable, fillFrom, sourceName, notifyingProcessSchema, outputPropertyIndex)
+
+        //get number of updated jobs
+        let numberOfUpdatedJobs = capacity ? Math.ceil(numberOfNewDataAvailable / capacity) : 1
+
+        //for each updated job, check if all inputs required by the process are available or not
+        //if all inputs are available, begin the target process
+        //else update the target process in its respective job queue to latest mapping
+        for (let i=fillFrom; i<numberOfUpdatedJobs; i++) {
+
+          //get boolean to check if all inputs needed by the process to start are now all available or not
+          let inputAvailability = await this.areAllInputsAvailable(targetJobs[i], targetSchemaIndex, fId, false)
+
+          if (inputAvailability) {
+            //if all inputs are available, update the latest mapping done and begin the process
+            //i.e. change status of the job for that process in it's respective worker queue to `waiting`
+            pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).info({'fId': fId, 'jobId': targetId}, 'next job')
+            pino(PINO_C_OPTION).info({'fId': fId, 'jobId': targetId}, 'next job')
+            let tmp = await this.beginProcess(targetJobs[i])
           }
           else {
-            pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).warn({'fId': fId, 'jobId': targetId}, 'all inputs not available')
-            pino(PINO_C_OPTION).warn({'fId': fId, 'jobId': targetId}, 'all inputs not available')
+            //i.e. all inputs are still not available so just update the latest mapping done
+            //(it's status in it's respective worker queue will not be changed)
+            var mappingRequired = capacity ? false : this.externalMappingRequired(targetJobs[i])
+            if (mappingRequired) {
+              pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).warn({'fId': fId, 'jobId': targetId}, 'mapping required')
+              pino(PINO_C_OPTION).warn({'fId': fId, 'jobId': targetId}, 'mapping required')
+            }
+            else {
+              pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).warn({'fId': fId, 'jobId': targetId}, 'all inputs not available')
+              pino(PINO_C_OPTION).warn({'fId': fId, 'jobId': targetId}, 'all inputs not available')
+            }
+            // let tmp = await this.updateProcess(targetJobs[i])
           }
-          let tmp = await this.updateProcess(targetJobs[i])
         }
       }
     }
@@ -711,19 +731,23 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
   }
 
   // -------- // -------- updateLog -------- // -------- //
-  this.constructor.prototype.updateLog = async function (targetJob, status, requiredFieldsSkeleton) {
-    let data = targetJob.data
-    let sourceCount = data.sourceCount ? data.sourceCount : []
-    if (requiredFieldsSkeleton) {
-      return rdash.table(FLOWZ_TABLE).get(data.fId).update({process_log: rdash.row('process_log').append({job: data.id, jobType: data.type.toLowerCase(), jobId: targetJob.id, input: data.input, sourceCount: sourceCount, status: status, requiredFields: requiredFieldsSkeleton, lastModified: new Date()})}).run()
-    }
-    else {
-      return rdash.table(FLOWZ_TABLE).get(data.fId).update({process_log: rdash.row('process_log').append({job: data.id, jobType: data.type.toLowerCase(), jobId: targetJob.id, input: data.input, sourceCount: sourceCount, status: status, lastModified: new Date()})}).run()
+  this.constructor.prototype.updateLog = async function (targetJob, status, requiredFieldsSkeleton, isProcess, fId) {
+    if (isProcess) {
+      return rdash.table(FLOWZ_TABLE).get(fId).update({process_log: rdash.row('process_log').append({job: targetJob.id, jobType: targetJob.type.toLowerCase(), status: status, lastModified: new Date()})}).run()
+    } else {
+      let data = targetJob.data
+      let sourceCount = data.sourceCount ? data.sourceCount : []
+      if (requiredFieldsSkeleton) {
+        return rdash.table(FLOWZ_TABLE).get(data.fId).update({process_log: rdash.row('process_log').append({job: data.id, jobType: data.type.toLowerCase(), jobId: targetJob.id, input: data.input, sourceCount: sourceCount, status: status, requiredFields: requiredFieldsSkeleton, lastModified: new Date()})}).run()
+      }
+      else {
+        return rdash.table(FLOWZ_TABLE).get(data.fId).update({process_log: rdash.row('process_log').append({job: data.id, jobType: data.type.toLowerCase(), jobId: targetJob.id, input: data.input, sourceCount: sourceCount, status: status, lastModified: new Date()})}).run()
+      }
     }
   }
 
   // -------- // -------- updateProcess -------- // -------- //
-  this.constructor.prototype.updateProcess = async function (childJob) {
+  this.constructor.prototype.updateProcess = async function (childJob, status) {
     try {
       var response = await axios.post(UPDATE_URL, {
         "connection": cxnOptions,
@@ -733,7 +757,10 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
         "findVal": {
       		"id": childJob.id
       	},
-      	"data": childJob.data
+      	"data": childJob.data,
+        "options": {
+          "status": status
+        }
       })
 
       return 'done'
