@@ -11,9 +11,12 @@
   "dependencies": {
     "asyncawait": "^1.0.6",
     "axios": "^0.17.1",
+    "jquery": "^3.2.1",
     "json-daex": "0.0.13",
     "lodash": "^4.17.4",
+    "mjml": "^3.3.5",
     "pino": "^4.10.1",
+    "rethinkdb": "^2.3.3",
     "rethinkdb-job-queue": "^3.1.4",
     "rethinkdbdash": "^2.3.31",
     "twit": "^2.2.9"
