@@ -38,6 +38,7 @@ module.exports = {
 };
 var aftercreateInstance = async(function(hook) {
   let outputObject = [];
+  console.log('hook.result', hook.result)
   for (var element in hook.result) {
     let object = await (getinstancevalue(hook.result[element].refid))
     outputObject.push(object);
@@ -49,16 +50,16 @@ var aftercreateInstance = async(function(hook) {
   console.log('process', process)
   if (process != undefined) {
     if (process.inputProperty[0].approvalClass !== undefined) {
-      addtoApprovalClass(hook.data.instanceid, outputObject, hook.data.processid)
+      addtoApprovalClass(hook.data.instanceid, outputObject, hook.data.processid, hook.data.jobId)
     } else {
-      AddValueToJobQue(hook.data.instanceid, outputObject, hook.data.processid)
+      AddValueToJobQue(hook.data.instanceid, outputObject, hook.data.processid, hook.data.jobId)
     }
   } else {
-    AddValueToJobQue(hook.data.instanceid, outputObject, hook.data.processid)
+    AddValueToJobQue(hook.data.instanceid, outputObject, hook.data.processid, hook.data.jobId)
   }
   // AddValueToJobQue(hook.data.instanceid, outputObject, hook.data.processid)
 });
-var addtoApprovalClass = async(function(instanceid, inputdata, processid) {
+var addtoApprovalClass = async(function(instanceid, inputdata, processid, jobId) {
   console.log('approval class', inputdata)
   const Queue = require('rethinkdb-job-queue')
     //--------------- Connection Options -----------------
@@ -75,7 +76,8 @@ var addtoApprovalClass = async(function(instanceid, inputdata, processid) {
     "fId": instanceid,
     "input": inputdata,
     "isExternalInput": true,
-    "jobId": processid,
+    "job": processid,
+    "jobId": jobId
   }
   jobOptions.timeout = app.get('qJobTimeout')
   jobOptions.retryMax = app.get('qJobRetryMax')
@@ -91,7 +93,7 @@ var getinstancevalue = async(function(id) {
   return response.data
 });
 
-function AddValueToJobQue(flowid, data, processid) {
+function AddValueToJobQue(flowid, data, processid, jobId) {
   const Queue = require('rethinkdb-job-queue')
   const cxnOptions = config
   const qOptions = {
@@ -104,7 +106,8 @@ function AddValueToJobQue(flowid, data, processid) {
     "fId": flowid,
     "input": data,
     "isExternalInput": true,
-    "jobId": processid,
+    "job": processid,
+    "jobId": jobId
   }
   jobOptions.timeout = app.get('qJobTimeout')
   jobOptions.retryMax = app.get('qJobRetryMax')
