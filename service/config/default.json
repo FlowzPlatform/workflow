@@ -9,7 +9,7 @@
   "rethinkdb": {
     "db": "FlowzEngine",
     "servers": [{
-      "host": "localhost",
+      "host": "172.16.160.117",
       "port": "28015"
     }]
   },
