@@ -27,7 +27,7 @@ let executeProcess = async function (jobType) {
     let processCode = await getProcess(jobType)
     const script = new vm.Script(`(function(require) {`+processCode +`})`, { filename: 'processTrace.vm' })
     script.runInThisContext()(require)
-    pino(PINO).info({Process: jobType, fId: process.argv[7]}, 'process created')
+    pino(PINO).info({Process: jobType, fId: process.argv[7], pId: process.pid}, 'process created')
   } catch (e) {
     pino(PINO).error(e)
     pino(PINO).error('unable to load child worker')
