@@ -47,7 +47,7 @@ function beforeCreate(hook) {
   var jobOptions = {}
   jobOptions.data = {}
   jobOptions.data = hook.data
-  console.log('jobOptions.data--Hook', jobOptions.data)
+    // console.log('jobOptions.data--Hook', jobOptions.data)
   jobOptions.timeout = app.get('qJobTimeout')
   jobOptions.retryMax = app.get('qJobRetryMax')
   const job = q.createJob(jobOptions)

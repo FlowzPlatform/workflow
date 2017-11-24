@@ -2,10 +2,10 @@
   "serverURI": "http://localhost:3030",
   "watcherPath": "../bpmnPlugin",
   "tweetCredential": {
-    "consumer_key": "XXXXXXXX",
-    "consumer_secret": "XXXXXXXX",
-    "access_token": "XXXXXXXX-XXXXXXXX",
-    "access_token_secret": "XXXXXXXX"
+    "consumer_key": "TcVuvcy0O0prffK7yDBQ7gp7Q",
+    "consumer_secret": "Gqsa31Y2woRapitGucYKrJW5q4Kz6fqZ177gj73EILMRHOeZNP",
+    "access_token": "342663682-nQsA685vZLjgJoDlaIEh9hWSNpE6MAsaVzJqhLEN",
+    "access_token_secret": "nEFc1TQMdcJQRop4ByHHiSSz2d0A6a5ikV1QbbODB7Sc7"
   },
   "flowid": "7f7556e6-dbc0-493e-8076-2ebc18cba3ae",
   "rethinkdb": {

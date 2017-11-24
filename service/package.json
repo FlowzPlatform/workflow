@@ -54,6 +54,7 @@
     "get-json": "^1.0.0",
     "helmet": "^3.8.1",
     "jsonfile": "^3.0.1",
+    "lodash": "^4.17.4",
     "mongodb": "^2.2.31",
     "mongoose": "^4.11.13",
     "nedb": "^1.8.0",

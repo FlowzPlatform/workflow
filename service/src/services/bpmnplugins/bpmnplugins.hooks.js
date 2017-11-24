@@ -85,9 +85,9 @@ var beforeCreate = async(function(hook) {
     // throw new Error('Message text can not be empty')
     hook.result = { data: 'already exist', code: 500 }
     sendError(hook)
-    // hook.error = new errors.BadRequest('Something is wrong');
-    // hook.error = new errors.Conflict('This entry already exists');
-    // return hook
+      // hook.error = new errors.BadRequest('Something is wrong');
+      // hook.error = new errors.Conflict('This entry already exists');
+      // return hook
   } else {
     for (let [inx, iObj] of hook.data.input.entries()) {
       // iObj['i_id'] = iObj.id
