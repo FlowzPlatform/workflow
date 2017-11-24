@@ -295,7 +295,7 @@ class Service {
         //   }
         // })
         // console.log('_data.................', response[0])
-        return response[0][0]
+        return response[0]
       })
       return _data;
   
