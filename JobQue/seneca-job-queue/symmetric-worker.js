@@ -170,9 +170,9 @@ async function getSummary () {
         pino(PINO).info('\n' + 'job-type : ' + jobType  + ' | host : ' + cOptions.host + ' | port : ' + cOptions.port + ' | db : ' + cOptions.db + '\n\x1b[33m' + JSON.stringify(summary) + '\x1b[0m' + '\n')
 
         let sWaiting = await getCount(cOptions, jobType)
-        let sCreated = summary.created ? summary.created : 0
-        let sIR = summary.inputRequired ? summary.inputRequired : 0
-        let sMR = summary.mappingRequired ? summary.mappingRequired : 0
+        // let sCreated = summary.created ? summary.created : 0
+        // let sIR = summary.inputRequired ? summary.inputRequired : 0
+        // let sMR = summary.mappingRequired ? summary.mappingRequired : 0
         // let denominator = (summary.total - (summary.active + summary.completed + summary.cancelled + summary.failed + summary.terminated + sCreated + sIR + sMR))
         // let waitingRatio = denominator != 0 ? (summary.waiting - sWaiting) / denominator : 0
         // pino(PINO).warn('waiting-ratio : '+waitingRatio)
