@@ -11,13 +11,12 @@ var svgClasses = require('tiny-svg/lib/classes')
   // var Cat = require('../cat')
 var TASK_BORDER_RADIUS = 10
 var _ = require('lodash')
-var $ = require('jquery')
 var LABEL_STYLE = {
   fontFamily: 'Arial, sans-serif',
   fontSize: 12
 }
 
-var CustomRender = function (eventBus, pathMap, styles) {
+var CustomRender = function (eventBus, pathMap, styles, plugins) {
   BaseRenderer.call(this, eventBus, 2000)
 
   var textUtil = new TextUtil({
@@ -94,30 +93,8 @@ var CustomRender = function (eventBus, pathMap, styles) {
   }
 
   this.drawTriangle = function (parentGfx, element, type) {
-    type = type.replace(/^flowz:/, '')
-    var plugin = [] // require('../../../bpmnPlugin/config.json') // ['Filter', 'sendRFQ']
-    $.ajax({
-      url: 'https://s3-us-west-2.amazonaws.com/airflowbucket1/bpmnplugin/config.json',
-      dataType: 'json',
-      async: false,
-      success: function (data) {
-        plugin = data
-      }
-    })
-    var plug = _.chain(plugin).map(f => {
-      var plug = {}
-      $.ajax({
-        url: f.url, // 'https://s3-us-west-2.amazonaws.com/airflowbucket1/bpmnplugin/Filter/index.json',
-        dataType: 'json',
-        async: false,
-        success: function (data) {
-          plug = data
-        }
-      })
-      return plug
-        // delete require.cache[require.resolve(`../../../bpmnPlugin/${f}/index.js`)]
-        // return require(`../../../bpmnPlugin/${f}/index.js`)
-    }).find(f => { return f.type === type }).value()
+    type = type.replace(/^camunda:/, '')
+    var plug = _.find(plugins, f => { return f.pluginType === type })
 
     var attrs = {
       fill: getFillColor(element),
@@ -133,7 +110,7 @@ var CustomRender = function (eventBus, pathMap, styles) {
       y: 5,
       width: element.width / 4,
       height: element.height / 4,
-      href: plug.imageStr
+      href: plug.image
     })
 
     svgAppend(parentGfx, catGfx)
@@ -147,12 +124,12 @@ inherits(CustomRender, BaseRenderer)
 
 module.exports = CustomRender
 
-CustomRender.$inject = ['eventBus', 'pathMap', 'styles']
+CustomRender.$inject = ['eventBus', 'pathMap', 'styles', 'config.additionalPlugins']
 
 CustomRender.prototype.drawShape = function (p, element) {
   var type = element.type
 
-  if (type.match(/flowz:/gi)) {
+  if (type.match(/camunda:/gi)) {
     return this.drawTriangle(p, element, type)
   }
 }

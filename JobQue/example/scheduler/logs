@@ -1,1 +1,1 @@
-{"pid":13391,"hostname":"OBLAP-77","level":40,"time":1509511783218,"msg":"all inputs not available","fId":"23fd42d8-78ae-4a49-80c1-11cd6056274a","jobId":"Task_0skci50","v":1}
+{"pid":8481,"hostname":"OBLAP-71","level":50,"time":1511505917735,"msg":"... error in process\nTypeError: Cannot read property 'type' of undefined","v":1}

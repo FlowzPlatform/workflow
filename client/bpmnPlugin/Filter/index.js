@@ -9,9 +9,16 @@ module.exports = {
     createTemplate: ''
   }],
   output: [{
-    id: 'output1',
-    notes: 'my output',
-    entityschema: '23efd22b-5ad4-465d-ab0e-49b40e24f9bd',
-    createTemplate: ''
-  }]
+      id: 'output1',
+      notes: 'my output',
+      entityschema: '23efd22b-5ad4-465d-ab0e-49b40e24f9bd',
+      createTemplate: ''
+    },
+    {
+      id: 'output1',
+      notes: 'my output',
+      entityschema: '23efd22b-5ad4-465d-ab0e-49b40e24f9bd',
+      createTemplate: ''
+    }
+  ]
 }

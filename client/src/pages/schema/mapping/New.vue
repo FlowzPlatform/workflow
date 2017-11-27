@@ -251,7 +251,7 @@ export default {
         // console.log('this.sourceSchemaEntity', this.sourceSchemaEntity)
         self.SourceOptionDt.push({value: self._sourceSchema._id, label: self._sourceSchema.title})
         self.formMapping.producer = self._sourceSchema._id
-        self._targetSchema = _.reject(self.allSchema, {_id: self.rid})
+        self._targetSchema = self.allSchema // _.reject(self.allSchema, {_id: self.rid})
         self.TargetOptionDt = _.map(self._targetSchema, (m) => {
           return {value: m._id, label: m.title}
         })

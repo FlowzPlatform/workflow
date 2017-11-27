@@ -46,11 +46,19 @@
       <Col>
         <Form ref="formSchema" :model="formSchema">
           <Form-item
+            v-if="!formSchema._id"
             label="Schema Title"
             prop="title"
             :label-width="100"
-            :rules="{required: true, message: 'Please enter your schema title', trigger: 'blur'}">
-              <Input type="text" v-model="formSchema.title"></Input>
+            :rules="titlerules">
+              <Input type="text" v-model.trim="formSchema.title"></Input>
+          </Form-item>
+          <Form-item
+            v-if="formSchema._id"
+            label="Schema Title"
+            :label-width="100"
+            >
+              <Input type="text" v-model="formSchema.title" disabled></Input>
           </Form-item>
           <div class="schema-form ivu-table-wrapper">
             <div class="ivu-table ivu-table-border">
@@ -93,7 +101,12 @@
                             <tr class="ivu-table-row" v-for="(item, index) in formSchema.entity">
                                 <td class="">
                                     <div class="ivu-table-cell">
-                                        <Input type="text" v-model="item.name" placeholder="name" size="small" class="schema-form-input"></Input>
+                                         <Form-item
+                                        :prop="'entity.' + index + '.name'"
+                                        :rules="entityrules"
+                                        >
+                                          <Input type="text" v-model="item.name" placeholder="name" size="small" class="schema-form-input"></Input>
+                                        </Form-item>
                                     </div>
                                 </td>
                                 <td class="">
@@ -450,6 +463,34 @@ export default {
   mixins: [Emitter],
   components: {'input-tag': InputTag, 'grid-manager': gridmanager, 'GrapesComponent': GrapesComponent,  'MjmlEditor': MjmlEditor},
   data () {
+    const validateTitle = async(rule, value, callback) => {
+      var patt = new RegExp(/^_|\`|\~|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\+|\=|\[|\{|\]|\}|\||\\|\'|\<|\,|\.|\>|\?|\/|\"|\;|\:|\-|\s/)
+      var _res = patt.test(value)
+      if (_res) {
+        callback(new Error('Not Allowed Special Character'))
+      } else {
+        var res = await this.validateTitle(value)
+        // console.log('res..// ', res)
+        if (res === 'yes') {
+          callback(new Error('Already Exist....'))
+        } else {
+          callback();
+        }
+      }
+    };
+    const validateEntField = async(rule, value, callback) => {
+      var patt = new RegExp(/\`|\~|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\+|\=|\[|\{|\]|\}|\||\\|\'|\<|\,|\>|\?|\/|\"|\;|\:/)
+      var _res = patt.test(value)
+      if (_res) {
+        callback(new Error('Invalid Input'))
+      } else {
+        if (value === 'id' || value === '_id') {
+          callback(new Error('Not allowed. Please enter another name.'))
+        } else {
+          callback();
+        }
+      }
+    };
     return {
       loading: false,
       isGridManager: false,
@@ -487,7 +528,26 @@ export default {
       isGrapesComponent: false,
       isMjmlEditor: false,
       templates: '',
-      activetab: 'view'
+      activetab: 'view',
+      titlerules: [{
+        required: true,
+        message: 'Please enter your schema title',
+        trigger: 'blur'
+      },
+      { 
+        validator: validateTitle,
+        trigger: 'blur' 
+      }],
+      entityrules: [{
+        required: true,
+        message: 'Please enter name',
+        trigger: 'blur'
+      },
+      {
+        validator: validateEntField,
+        trigger: 'blur'
+      }
+      ]
     }
   },
   mounted () {
@@ -539,6 +599,15 @@ export default {
       // }
   },
   methods: {
+    validateTitle: async function(title) {
+      var res = await (api.request('get', '/schema'))
+      for (let [inx, obj] of res.data.entries()) {
+        if (obj.title === title) {
+          return 'yes'
+        } 
+      }
+      return 'no'
+    },
     back () {
       this.$router.go(-1)
     },
@@ -678,6 +747,7 @@ export default {
             .then(response => {
               // this.toggleLoading()
               // this.$router.push(data.redirect)
+              // console.log('Response Schema ... ', response.data)
               this.$Notice.success({title: 'success!'})
               this.loading = false
               this.viewTemplate = []
@@ -711,7 +781,7 @@ export default {
             })
           }
         } else {
-          this.$Message.error('error!')
+          // this.$Message.error('error!')
         }
       })
     },
@@ -814,7 +884,7 @@ export default {
       this.isMjmlEditor = !this.isMjmlEditor
     },
     handleCloseMjmlClick (self) {
-      this.mjmlUpload.push(self)
+      // this.mjmlUpload.push(self)
       console.log(this.mjmlUpload)
       this.isMjmlEditor = !this.isMjmlEditor
     },
@@ -883,6 +953,9 @@ export default {
     this.$on('close-mjml', this.handleCloseMjmlClick)
   },
   watch: {
+    'formSchema.title' : function(v) {
+       this.formSchema.title = v.toLowerCase().trim();
+    },
     '$route.params.id' (newId, oldId) {
       this.setTypes(newId)
       // fetch data

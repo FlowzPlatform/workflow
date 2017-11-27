@@ -38,6 +38,7 @@ import ApprovalNew from '@/pages/approval/New'
 
 // User area
 import UserDashboard from '@/pages/user/dashboard'
+import ManageBPMNPlugin from '@/pages/BPMNPlugins/Manage
 
 Vue.use(Router)
 const routes = [{
@@ -50,6 +51,11 @@ const routes = [{
     component: Dashboard,
     name: 'Dashboard',
     meta: { description: 'Overview of environment' }
+  }, { // Plugin
+    path: 'bpmn-plugin',
+    component: ManageBPMNPlugin,
+    name: 'bpmn-plugin',
+    meta: { description: 'Schema' }
   }, { // Schema
     path: 'schema',
     component: Schema,

@@ -1,0 +1,34 @@
+{
+  "name": "seneca-job-queue",
+  "version": "1.0.0",
+  "description": "",
+  "main": "symmetric-worker.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.17.0",
+    "child_process": "^1.0.2",
+    "chokidar": "^1.7.0",
+    "config": "^1.27.0",
+    "cors": "^2.8.4",
+    "express": "^4.16.2",
+    "express-fileupload": "^0.3.0",
+    "fs": "0.0.1-security",
+    "lodash": "^4.17.4",
+    "pino": "^4.9.0",
+    "request": "^2.83.0",
+    "request-promise": "^4.2.2",
+    "rethinkdb": "^2.3.3",
+    "rethinkdb-job-queue": "^3.1.4",
+    "rethinkdbdash": "^2.3.31",
+    "seneca": "^3.4.3",
+    "seneca-web": "^2.1.0",
+    "seneca-web-adapter-express": "^1.0.2",
+    "socket.io": "^2.0.4",
+    "socket.io-client": "^2.0.4",
+    "vm": "^0.1.0"
+  }
+}

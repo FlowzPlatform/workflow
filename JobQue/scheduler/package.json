@@ -8,12 +8,18 @@
   "author": "bhumilsarvaiya",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.17.0",
+    "child_process": "^1.0.2",
     "chokidar": "^1.7.0",
     "fs": "0.0.1-security",
     "lodash": "^4.17.4",
     "pino": "^4.7.2",
+    "request": "^2.83.0",
+    "request-promise": "^4.2.2",
     "rethinkdb": "^2.3.3",
-    "rethinkdb-job-queue": "^3.1.4"
+    "rethinkdb-job-queue": "^3.1.4",
+    "twit": "^2.2.9",
+    "vm": "^0.1.0"
   },
   "devDependencies": {
     "webpack": "^3.5.6"

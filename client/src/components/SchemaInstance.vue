@@ -1,4 +1,4 @@
-<template>
+f<template>
   <div class="schema-instance">
     <Form ref="formSchemaInstance" :model="formSchemaInstance">
       <!-- <Form-item 
@@ -173,6 +173,8 @@ export default {
           // obj = this.lastLog.input[0]
           // obj.database = this.schema.database
           obj.Schemaid = self.schema._id
+          delete obj.id
+          delete obj._id
           self.formSchemaInstance.data.push(obj)
         })
       } else {
@@ -211,7 +213,7 @@ export default {
       console.log('checkkkkkkkkkkkk', check)
       this.$Loading.start()
       if (check) {
-        Instance.post({ instanceid: this.instanceid, processid: this.processid, data: obj.data })
+        Instance.post({ instanceid: this.instanceid, processid: this.processid, jobId: this.lastLog.jobId, data: obj.data })
         .then(response => {
           console.log('response', response.data)
           this.$Notice.success({title: 'success!', desc: 'Instance Saved...'})
@@ -282,6 +284,9 @@ export default {
     '$route.params.schemaid' (newId, oldId) {
       // fetch data
       this.fetch(newId)
+    },
+    'lastLog' (newData) {
+      this.fetch(this.id)
     }
   }
 }
