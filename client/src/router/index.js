@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 // Layout
 import Layout from '@/layout/Master'
+import userLayout from '@/layout/user/Master'
 
 // Area
 import Dashboard from '@/area/Dashboard'
@@ -34,6 +35,9 @@ import Register from '@/pages/Register'
 // Approval area
 import ApprovalList from '@/pages/approval/List'
 import ApprovalNew from '@/pages/approval/New'
+
+// User area
+import UserDashboard from '@/pages/user/dashboard'
 
 Vue.use(Router)
 const routes = [{
@@ -181,6 +185,15 @@ const routes = [{
         required: false
       }
     }]
+  }]
+}, { // Enduser Dashboard
+  path: '/user',
+  name: 'User',
+  component: userLayout,
+  children: [{
+    path: 'approval/list',
+    name: 'approval',
+    component: UserDashboard
   }]
 }, {
   path: '/Login',

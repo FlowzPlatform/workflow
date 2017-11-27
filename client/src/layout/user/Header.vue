@@ -3,14 +3,14 @@
         <Row type="flex">
         <Col :span="1" v-if="toggeleEnable">
             <Row type="flex" justify="end" align="middle">
-              <span @click="$store.state.sidenavtoggle = !$store.state.sidenavtoggle">
+              <span>
                 <Icon type="navicon-round" :size="32" style="line-height: inherit;cursor:pointer"></Icon>
               </span>
             </Row>
         </Col>
         <i-col :span="5">
             <div class="f-logo">
-                <img src="../assets/images/logo.png" style="width:100%;vertical-align: inherit;">
+                <img src="../../assets/images/logo.png" style="width:100%;vertical-align: inherit;">
             </div>
         </i-col>
         <i-col :span="18">
@@ -47,7 +47,7 @@
                           Krunal Mahera
                         </template>
                         <Menu-item name="1-1">
-                            <a @click="handleRemove()">
+                            <a>
                                 <Icon type="ios-locked-outline" :size="16"></Icon>
                                 Logout
                             </a>
@@ -60,19 +60,3 @@
         </Row>
     </Menu>
 </template>
-<script>
-/*eslint-disable*/
-  export default {
-    computed: {
-      toggeleEnable () {
-        return !this.$store.state.sidenavpin || (!this.$store.state.sidenavtoggle)
-      }
-    },
-    methods:{
-      handleRemove () {
-        localStorage.removeItem('logintoken')
-        this.$router.push('Login')
-      }
-    }
-  }
-</script>
