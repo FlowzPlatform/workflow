@@ -97,14 +97,10 @@ export default {
   }
 }
 </script>
-<style>
-    /*.f-layout-content{
-        margin: 0px;
-    }
-    .f-layout-content-main {
-        padding:0px;
-    }*/
+<style lang="less">
+    @import "../assets/styles/index.less";
 </style>
+
 
 <!-- <template>
   <div>
