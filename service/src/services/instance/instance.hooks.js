@@ -39,14 +39,15 @@ module.exports = {
 var aftercreateInstance = async(function(hook) {
   let outputObject = [];
   console.log('hook.result', hook.result)
+  let flowinstace = await (axios.get('http://localhost:3030/flowz-instance/' + hook.data.instanceid))
+  let process = _.find(flowinstace.data.processList, function(o) { return o.id == hook.data.processid; });
+  
   for (var element in hook.result) {
-    let object = await (getinstancevalue(hook.result[element].refid))
+    let object = await (getinstancevalue(hook.result[element].refid, process.inputProperty[0].entityschema._id))
     outputObject.push(object);
   }
   console.log('hook.data.processid', hook.data.processid)
   console.log('hook.data.instanceid', hook.data.instanceid)
-  let flowinstace = await (axios.get('http://localhost:3030/flowz-instance/' + hook.data.instanceid))
-  let process = _.find(flowinstace.data.processList, function(o) { return o.id == hook.data.processid; });
   console.log('process', process)
   if (process != undefined) {
     if (process.inputProperty[0].approvalClass !== undefined) {
@@ -88,21 +89,21 @@ var addtoApprovalClass = async(function(instanceid, inputdata, processid, jobId)
   q.addJob(job).then((savedJobs) => {}).catch(err => console.error(err))
   axios.get('http://localhost:3030/flowz-instance/' + instanceid)
     .then(response => {
-      let log = _.chain(response).orderBy(['lastModified'], ['asc']).findLast((f) => { return f.job === processid }).value()
-      console.log('=====1=1=1=1=1=1=1=1====>', log)
+      let log = _.chain(response.data.process_log).orderBy(['lastModified'], ['asc']).findLast((f) => { return f.jobId === jobId }).value()
       log.status = 'sendForApproval'
-      console.log('-1->', _.find(response.process_log, log))
-      axios.put('http://localhost:3030/flowz-instance/' + instanceid, response)
+      let index = _.findIndex(response.data.process_log, log)
+      axios.put('http://localhost:3030/flowz-instance/' + instanceid, response.data)
         .then(res => {
-          console.log(res)
+          console.log('Status updated for approval : sendForApproval')
         })
         .catch(error => {
           console.log('Error : ', error)
         })
     })
 })
-var getinstancevalue = async(function(id) {
-  var response = await (axios.get('http://localhost:3030/instance/' + id))
+var getinstancevalue = async(function(id, schemaid) {
+  console.log('schemaid', schemaid)
+  var response = await (axios.get('http://localhost:3030/instance/' + id + '?schemaid=' + schemaid))
     // console.log('response', response)
   return response.data
 });

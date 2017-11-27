@@ -190,7 +190,7 @@ const routes = [{
         required: false
       }
     }, {
-      path: '/mail/reply/:mailid/:pid/:fiid',
+      path: '/mail/reply/:mailid/:pid/:jobid/:fiid',
       name: 'mail/reply',
       component: Reply
     }]

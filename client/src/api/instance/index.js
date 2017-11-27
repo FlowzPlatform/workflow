@@ -8,8 +8,8 @@ export default {
   get: () => {
     return api.request('get', '/' + model)
   },
-  getThis: (id) => {
-    return api.request('get', '/' + model + '/' + id)
+  getThis: (id, Schemaid) => {
+    return api.request('get', '/' + model + '/' + id + '?schemaid=' + Schemaid)
   },
   post: (data) => {
     console.log('data', data)

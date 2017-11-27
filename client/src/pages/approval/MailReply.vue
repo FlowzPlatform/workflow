@@ -1,7 +1,7 @@
 <template>
 <div style="background:#eee;padding:20px;margin:50px;">
   <Card :bordered="false">
-      <p slot="title">Appraval Action</p>
+      <p slot="title">Confirm Approval</p>
       <p slot="extra" v-show="notes">Notes : {{notes}}</p>
 			<div v-html="viewTemplateHtml"></div>
       <Button id="approve" type="primary" :loading="Aloading" v-on:click="handleApproval(true)">
@@ -184,13 +184,15 @@ export default {
           .then(async function (response) {
             // self.process = await _.find(response.data.processList, ['id', self.$route.params.pid])
             _.forEach(self.process.target, function (item) {
-              lastLogIndex = _.findIndex(response.data.process_log, self.getLastLog(item.id))
+              lastLogIndex = _.findIndex(response.data.process_log, self.getLastLog(item.jobid))
+              lastLogIndex.status = 'inputRequired'
               _.forEach(response.data.process_log[lastLogIndex].input, function (inputs) {
                 if (inputs.Email === self.$route.params.mailid) {
                   inputs.Approved = action
                 }
               })
             })
+
             await self.addToJobQue()
             flowInstance.put(self.$route.params.fiid, response.data)
               .then(async function (res) {
@@ -212,7 +214,7 @@ export default {
     },
     addToJobQue () {
       let self = this
-      let lastLog = self.getLastLog(self.$route.params.pid)
+      let lastLog = self.getLastLog(self.$route.params.jobid)
       console.log('1', lastLog)
       if (lastLog !== undefined && lastLog.status === 'inputRequired') {
         console.log('2')
@@ -220,7 +222,8 @@ export default {
           'fId': self.$route.params.fiid,
           'input': self.input,
           'isExternalInput': true,
-          'jobId': lastLog.job
+          'job': lastLog.job,
+          'jobId': lastLog.jobId
         }
         let uri = config.serverURI + '/addInputToJobQue'
         console.log('dataObject', dataObject)
@@ -234,7 +237,7 @@ export default {
       }
     },
     getLastLog (item) {
-      return _.chain(this.flowInstanceLog).orderBy(['lastModified'], ['asc']).findLast((f) => { return f.job === item }).value()
+      return _.chain(this.flowInstanceLog).orderBy(['lastModified'], ['asc']).findLast((f) => { return f.jobId === item }).value()
     },
     fillForm (log) {
       for (var i = 0; i < this.process.inputProperty[0].entityschema.entity.length; i++) {
@@ -275,6 +278,7 @@ export default {
         })
         viewTemplateUrl = _.find(self.process.inputProperty[0].entityschema.viewTemplate, ['filename', self.process.inputProperty[0].viewTemplate])
         viewTemplateUrl = viewTemplateUrl.url
+        console.log('viewTemplateUrl', viewTemplateUrl)
         await axios({
           method: 'get',
           url: viewTemplateUrl

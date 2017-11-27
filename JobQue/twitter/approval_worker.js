@@ -34,15 +34,18 @@ q.process(async(job, next) => {
     let emailTemplate, emailTemplateUrl, emailTemplateHtml, runningProcess, processLog
     let approvar = []
     let rolesEmail = []
+    console.log('--------job.data.jobId------------->', job.data.jobId)
     await axios({
         method: 'get',
         url: 'http://172.16.160.117:3030/flowz-instance/' + job.data.fId
       })
       .then(async function(response) {
+        console.log('--response-->', response)
         runningProcess = _.find(response.data.processList, ['id', job.data.jobId])
         processLog = response.data.process_log
 
         emailTemplate = runningProcess.inputProperty[0].entityschema.emailTemplate
+        console.log('-----ROLES------->>', runningProcess.inputProperty[0].approvalClass.items[0].role)
         let processRoles = runningProcess.inputProperty[0].approvalClass.items[0].role
 
         await axios({
@@ -81,7 +84,7 @@ q.process(async(job, next) => {
     if (rolesEmail.length > 0) {
       for(var j = 0; j < rolesEmail.length; j++)
       {
-        let submitLink = 'http://localhost:8000/mail/reply/' + rolesEmail[j] + '/' + job.data.jobId + '/' + job.data.fId
+        let submitLink = 'http://localhost:8000/mail/reply/' + rolesEmail[j] + '/' + job.data.job + '/' + job.data.jobId + '/' + job.data.fId
         let myData = {
           "to": rolesEmail[j],
           "subject": "From " + rolesEmail[j],
