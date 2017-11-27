@@ -38,16 +38,16 @@ module.exports = {
 };
 var aftercreateInstance = async(function(hook) {
   let outputObject = [];
-  console.log('hook.result', hook.result)
-  for (var element in hook.result) {
-    let object = await (getinstancevalue(hook.result[element].refid))
-    outputObject.push(object);
-  }
-  console.log('hook.data.processid', hook.data.processid)
-  console.log('hook.data.instanceid', hook.data.instanceid)
+  // console.log('hook.result', hook.result)
   let flowinstace = await (axios.get('http://localhost:3030/flowz-instance/' + hook.data.instanceid))
   let process = _.find(flowinstace.data.processList, function(o) { return o.id == hook.data.processid; });
-  console.log('process', process)
+  for (var element in hook.result) {
+    let object = await (getinstancevalue(hook.result[element].refid, process.inputProperty[0].entityschema._id))
+    outputObject.push(object);
+  }
+  // console.log('hook.data.processid', hook.data.processid)
+  // console.log('hook.data.instanceid', hook.data.instanceid)
+  // console.log('process', process.inputProperty[0].entityschema._id)
   if (process != undefined) {
     if (process.inputProperty[0].approvalClass !== undefined) {
       addtoApprovalClass(hook.data.instanceid, outputObject, hook.data.processid, hook.data.jobId)
@@ -87,8 +87,9 @@ var addtoApprovalClass = async(function(instanceid, inputdata, processid, jobId)
     //--------------- Add job -----------------
   q.addJob(job).then((savedJobs) => {}).catch(err => console.error(err))
 })
-var getinstancevalue = async(function(id) {
-  var response = await (axios.get('http://localhost:3030/instance/' + id))
+var getinstancevalue = async(function(id, schemaid) {
+  console.log('schemaid', schemaid)
+  var response = await (axios.get('http://localhost:3030/instance/' + id + '?schemaid=' + schemaid))
     // console.log('response', response)
   return response.data
 });
@@ -109,6 +110,7 @@ function AddValueToJobQue(flowid, data, processid, jobId) {
     "job": processid,
     "jobId": jobId
   }
+  console.log('jobOptions', jobOptions)
   jobOptions.timeout = app.get('qJobTimeout')
   jobOptions.retryMax = app.get('qJobRetryMax')
   const job = q.createJob(jobOptions)
