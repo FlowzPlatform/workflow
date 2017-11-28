@@ -1,8 +1,8 @@
-const config = require('config')
+const config = require('./config')
 const cp = require('child_process')
 const pino = require('pino')
-const PINO = config.get('pino')
-const symmetricWorker = config.get('symmetricWorker')
+const PINO = config.pino
+const symmetricWorker = config.symmetricWorker
 
 function executeChildProcessAsWorker (jobType, options) {
   try {

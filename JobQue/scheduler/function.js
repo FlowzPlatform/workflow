@@ -133,8 +133,8 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
   // -------- // -------- checkAllInputsAvailable -------- // -------- //
   this.constructor.prototype.checkAllInputsAvailable = async function (targetJob, capacity, externalCheck) {
     return new Promise (async (resolve, reject) => {
-      if (targetJob.data.inputProperty.length == 0) return true
-      else if ((capacity == targetJob.data.input.length && targetJob.data.input.length != 0)|| externalCheck) {
+      if (targetJob.data.inputProperty.length == 0) resolve(true)
+      else if ((capacity == targetJob.data.input.length && targetJob.data.input.length != 0) || externalCheck) {
         let targetEntitySchema = targetJob.data.inputProperty[0].entityschema
         for (let j=0; j<targetJob.data.input.length; j++) {
 
@@ -189,7 +189,12 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
           "options" : {
             "timeout": TIMEOUT,
             "retrymax": 0,
-            "manualStatus": 'created'
+            "manualStatus": 'created',
+            'scheduler': {
+              'cxnOptions': cxnOptions,
+              'table': SCHEDULER_TABLE
+            },
+            'flowz_table': FLOWZ_TABLE
           },
           "jobs":[jobData]
         })
@@ -760,9 +765,6 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
             fillFrom = 0
           }
           else {
-            for (var o=0; o<targetJobs.length; o++) {
-              pino(PINO_C_OPTION).warn(targetJobs[o].data)
-            }
             //from targetJobs got, get size of data they can handle
             let numberOfAllFreeSlotsAvailbale = await this.getNumberOfAllFreeSlotsAvailable(targetJobs, capacity, sourceName)
 
