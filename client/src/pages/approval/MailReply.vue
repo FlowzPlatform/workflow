@@ -4,6 +4,9 @@
       <p slot="title">Confirm Approval</p>
       <p slot="extra" v-show="notes">Notes : {{notes}}</p>
 			<div v-html="viewTemplateHtml"></div>
+      <ul class="error">
+        <li v-for="item in err">{{item}}</li>
+      </ul>
       <Button id="approve" type="primary" :loading="Aloading" v-on:click="handleApproval(true)">
         <span v-if="!Aloading">Approve</span>
         <span v-else>Updating...</span>
@@ -55,11 +58,11 @@ export default {
             let val = this.value
             if (val === '' || val === null || val === undefined) {
               err.push(element + ' - is required..!')
-              if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
-                $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> required..!</div>')
-              }
+              // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
+              //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> required..!</div>')
+              // }
             } else {
-              $('input[name="' + element + '"]').parent().next('.validation').remove()
+              // $('input[name="' + element + '"]').parent().next('.validation').remove()
             }
 
             if (this.hasAttribute('pattern')) {
@@ -67,12 +70,12 @@ export default {
               let regEx = pttrn.test(val)
               if (!regEx) {
                 err.push(element + ' - Enter proper format..!')
-                if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
-                  $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Enter proper format..!</div>')
-                }
+                // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
+                //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Enter proper format..!</div>')
+                // }
               } else {
                 // obj[element] = val
-                $('input[name="' + element + '"]').parent().next('.validation').remove()
+                // $('input[name="' + element + '"]').parent().next('.validation').remove()
               }
             }
             if (this.type === 'date') {
@@ -81,52 +84,52 @@ export default {
                 let maxDate = new Date(result.maxdate)
                 if (inputDate > maxDate) {
                   err.push(element + ' - Enter minimum date then ' + maxDate)
-                  if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
-                    $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Enter minimum date then ' + maxDate + '</div>')
-                  }
+                  // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
+                  //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Enter minimum date then ' + maxDate + '</div>')
+                  // }
                 } else {
                   // obj[element] = val
-                  $('input[name="' + element + '"]').parent().next('.validation').remove()
+                  // $('input[name="' + element + '"]').parent().next('.validation').remove()
                 }
               } else if (result.mindate !== '') {
                 let minDate = new Date(result.mindate)
                 if (inputDate < minDate) {
                   err.push(element + ' - Enter maximum date then ' + minDate)
-                  if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
-                    $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Enter minimum date then ' + minDate + '</div>')
-                  }
+                  // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
+                  //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Enter minimum date then ' + minDate + '</div>')
+                  // }
                 } else {
                   // obj[element] = val
-                  $('input[name="' + element + '"]').parent().next('.validation').remove()
+                  // $('input[name="' + element + '"]').parent().next('.validation').remove()
                 }
               }
             }
             if (result.min !== 0 || result.max !== 0) {
               if (val.length > result.min && val.length > result.max) {
                 err.push(element + ' - Minimum length :' + result.min + ' Maximum length :' + result.max)
-                if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
-                  $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Minimum length :' + result.min + ' Maximum length :' + result.max + '</div>')
-                }
+                // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
+                //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Minimum length :' + result.min + ' Maximum length :' + result.max + '</div>')
+                // }
               } else if (val.length > result.max && val.length < result.min) {
                 err.push(element + ' - Minimum length :' + result.min + ' Maximum length :' + result.max)
-                if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
-                  $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Minimum length :' + result.min + ' Maximum length :' + result.max + '</div>')
-                }
+                // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
+                //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Minimum length :' + result.min + ' Maximum length :' + result.max + '</div>')
+                // }
               } else {
                 // obj[element] = val
-                $('input[name="' + element + '"]').parent().next('.validation').remove()
+                // $('input[name="' + element + '"]').parent().next('.validation').remove()
               }
             }
             if (result.allowedValue.length > 0) {
               let check = _.includes(result.allowedValue, val)
               if (!check) {
                 err.push(element + ' - Allowed value are' + result.allowedValue)
-                if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
-                  $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Allowed value are' + result.allowedValue + '</div>')
-                }
+                // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
+                //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Allowed value are' + result.allowedValue + '</div>')
+                // }
               } else {
                 // obj[element] = val
-                $('input[name="' + element + '"]').parent().next('.validation').remove()
+                // $('input[name="' + element + '"]').parent().next('.validation').remove()
               }
             }
             switch (this.type) {
@@ -135,12 +138,12 @@ export default {
                 let testEmail = re.test(val)
                 if (testEmail) {
                   inputs[element] = await val
-                  $('input[name="' + element + '"]').parent().next('.validation').remove()
+                  // $('input[name="' + element + '"]').parent().next('.validation').remove()
                 } else {
                   err.push(element + ' - Enter valid email address..!')
-                  if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
-                    $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Enter valid email address..!</div>')
-                  }
+                  // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
+                  //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Enter valid email address..!</div>')
+                  // }
                 }
                 break
               case 'number':
@@ -151,9 +154,9 @@ export default {
                   $('input[name="' + element + '"]').parent().next('.validation').remove()
                 } else {
                   err.push(element + ' - Enter numbers only..!')
-                  if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
-                    $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Enter numbers only..!</div>')
-                  }
+                  // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
+                  //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Enter numbers only..!</div>')
+                  // }
                 }
                 break
               case 'date':
@@ -161,12 +164,12 @@ export default {
                 testEmail = re.test(val)
                 if (testEmail) {
                   inputs[element] = await val
-                  $('input[name="' + element + '"]').parent().next('.validation').remove()
+                  // $('input[name="' + element + '"]').parent().next('.validation').remove()
                 } else {
                   err.push(element + ' - Invalid date format..!')
-                  if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
-                    $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Invalid date format..!</div>')
-                  }
+                  // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
+                  //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Invalid date format..!</div>')
+                  // }
                 }
                 break
               default:
@@ -177,15 +180,15 @@ export default {
       }
       if (err.length > 0) {
         self.$Notice.error({title: 'Error..!', desc: 'Fill all the details carefully.'})
+        self.Aloading = false
       } else {
         self.input.inputs = inputs
-        console.log('input-->', self.input)
         await flowInstance.getThis(self.$route.params.fiid)
           .then(async function (response) {
             // self.process = await _.find(response.data.processList, ['id', self.$route.params.pid])
             _.forEach(self.process.target, function (item) {
               lastLogIndex = _.findIndex(response.data.process_log, self.getLastLog(item.jobid))
-              lastLogIndex.status = 'inputRequired'
+              response.data.process_log[lastLogIndex].status = 'inputRequired'
               _.forEach(response.data.process_log[lastLogIndex].input, function (inputs) {
                 if (inputs.Email === self.$route.params.mailid) {
                   inputs.Approved = action
@@ -212,21 +215,18 @@ export default {
           })
       }
     },
-    addToJobQue () {
+    async addToJobQue () {
       let self = this
-      let lastLog = self.getLastLog(self.$route.params.jobid)
-      console.log('1', lastLog)
-      if (lastLog !== undefined && lastLog.status === 'inputRequired') {
-        console.log('2')
-        let dataObject = {
+      let lastLog = await self.getLastLog(self.$route.params.jobid)
+      if (lastLog !== undefined && lastLog.status === 'sendForApproval') {
+        let dataObject = await {
           'fId': self.$route.params.fiid,
           'input': self.input,
           'isExternalInput': true,
           'job': lastLog.job,
           'jobId': lastLog.jobId
         }
-        let uri = config.serverURI + '/addInputToJobQue'
-        console.log('dataObject', dataObject)
+        let uri = await config.serverURI + '/addInputToJobQue'
         axios.post(uri, dataObject)
         .then(function (response) {
           console.log(response)
@@ -267,7 +267,7 @@ export default {
       .then(async function (response) {
         self.flowInstanceLog = await response.data.process_log
         self.process = await _.find(response.data.processList, ['id', self.$route.params.pid])
-        processLog = await self.getLastLog(self.$route.params.pid)
+        processLog = await self.getLastLog(self.$route.params.jobid)
         _.forEach(self.process.target, async function (item) {
           lastLogIndex = await _.findIndex(response.data.process_log, self.getLastLog(item.id))
           _.forEach(response.data.process_log[lastLogIndex].input, function (inputs) {
@@ -296,3 +296,8 @@ export default {
   }
 }
 </script>
+<style scoped>
+.error {
+  color: red;
+}
+</style>

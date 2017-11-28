@@ -34,18 +34,14 @@ q.process(async(job, next) => {
     let emailTemplate, emailTemplateUrl, emailTemplateHtml, runningProcess, processLog
     let approvar = []
     let rolesEmail = []
-    console.log('--------job.data.jobId------------->', job.data.jobId)
     await axios({
         method: 'get',
-        url: 'http://172.16.160.117:3030/flowz-instance/' + job.data.fId
+        url: 'http://localhost:3030/flowz-instance/' + job.data.fId
       })
       .then(async function(response) {
-        console.log('--response-->', response)
-        runningProcess = _.find(response.data.processList, ['id', job.data.jobId])
+        runningProcess = _.find(response.data.processList, ['id', job.data.job])
         processLog = response.data.process_log
-
         emailTemplate = runningProcess.inputProperty[0].entityschema.emailTemplate
-        console.log('-----ROLES------->>', runningProcess.inputProperty[0].approvalClass.items[0].role)
         let processRoles = runningProcess.inputProperty[0].approvalClass.items[0].role
 
         await axios({
@@ -64,8 +60,7 @@ q.process(async(job, next) => {
       })
       .then(function(response) {
         emailTemplateHtml = response.data
-        
-        processLog = _.chain(processLog).orderBy(['lastModified'], ['asc']).findLast((f) => { return f.job === job.data.jobId }).value()
+        processLog = _.chain(processLog).orderBy(['lastModified'], ['asc']).findLast((f) => { return f.jobId === job.data.jobId }).value()
         for(var i = 0; i < runningProcess.inputProperty[0].entityschema.entity.length; i++) {
           let element = runningProcess.inputProperty[0].entityschema.entity[i].name
           element = element.toLowerCase()
@@ -73,14 +68,12 @@ q.process(async(job, next) => {
           element = _.capitalize(element)
           emailTemplateHtml = emailTemplateHtml.substr(0, index + element.length + 3) + processLog.input[0][element] + emailTemplateHtml.substr(index + element.length + 3)
         }
-        console.log('--MJML-->', emailTemplateHtml)
         emailTemplateHtml = mjml2html(emailTemplateHtml)
-        console.log('--Html-->', emailTemplateHtml)
       })
       .catch(function(error) {
         console.log('Error : ', error)
       })
-    console.log('rolesEmail', rolesEmail)
+    // console.log('rolesEmail', rolesEmail)
     if (rolesEmail.length > 0) {
       for(var j = 0; j < rolesEmail.length; j++)
       {
