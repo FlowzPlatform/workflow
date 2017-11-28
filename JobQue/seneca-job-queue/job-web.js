@@ -3,16 +3,16 @@
 var seneca = require('seneca')({log: 'silent'})
 const Web = require('seneca-web')
 const cors = require('cors')
-const webconfig = require('config')
+const webconfig = require('./config')
 var app = require('express')()
 const pino = require('pino')
 
-const pluginCreate = webconfig.get('plugins.createPattern')
-const pluginFind = webconfig.get('plugins.findPattern')
-const pluginUpdate = webconfig.get('plugins.updatePattern')
-const PINO = webconfig.get('pino')
-const webPort = webconfig.get('web-option.port')
-const urlPrefix = webconfig.get('web-option.urlPrefix')
+const pluginCreate = webconfig.plugins.createPattern
+const pluginFind = webconfig.plugins.findPattern
+const pluginUpdate = webconfig.plugins.updatePattern
+const PINO = webconfig.pino
+const webPort = webconfig.web_option.port
+const urlPrefix = webconfig.web_option.urlPrefix
 
 var Routes = [
   {

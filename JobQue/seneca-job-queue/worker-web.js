@@ -1,11 +1,11 @@
-const config = require('config')
+const config = require('./config')
 const _ = require('lodash')
-const cxnOptions = config.get('cxnOptions')
+const cxnOptions = config.cxnOptions
 const rdash = require('rethinkdbdash')(cxnOptions)
-const registerWorker = config.get('registerWorker')
+const registerWorker = config.registerWorker
 var app = require('express')()
 const pino = require('pino')
-const PINO = config.get('pino')
+const PINO = config.pino
 const fileUpload = require('express-fileupload')
 const cors = require('cors')
 

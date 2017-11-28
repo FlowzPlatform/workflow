@@ -12,7 +12,6 @@
     "axios": "^0.17.0",
     "child_process": "^1.0.2",
     "chokidar": "^1.7.0",
-    "config": "^1.27.0",
     "cors": "^2.8.4",
     "express": "^4.16.2",
     "express-fileupload": "^0.3.0",

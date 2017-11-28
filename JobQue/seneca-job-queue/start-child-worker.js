@@ -1,16 +1,15 @@
 var common = require('./common')
-const config = require('config')
-const registerWorker = config.get('registerWorker')
+const config = require('./config')
+const registerWorker = config.registerWorker
 const pino = require('pino')
-const PINO = config.get('pino')
-const PINO_DB_OPTION = config.get('pinoDB')
+const PINO = config.pino
+const PINO_DB_OPTION = config.pinoDB
 const chokidar = require('chokidar')
 const fs = require('fs')
-const cxnOptions = config.get('cxnOptions')
-const FLOWZ_TABLE = config.get('flowz_table')
-const SCHEDULER_TABLE = config.get('scheduler_table')
-const rdash = require('rethinkdbdash')(cxnOptions)
 const Queue = require('rethinkdb-job-queue')
+const cxnOptions = config.cxnOptions
+const rethinkdbdash = require('rethinkdbdash')
+const rdash = require('rethinkdbdash')(cxnOptions)
 
 process.on('message', (m) => {
   pino(PINO).info('CHILD got message:', m)
@@ -24,7 +23,7 @@ global.JobExecute
 
 function getJobTypeWorkerProcess (jobType) {
   return new Promise((resolve, reject) => {
-    rp(registerWorker.getJobModuleApiURL + jobType)
+    rp(registerWorker.getJobModuleApiURL + registerWorker.getJobModuleApiService + jobType)
       .then(function (jobProcessCode) {
         resolve(jobProcessCode)
       })
@@ -40,7 +39,7 @@ let runWorker = function (options) {
     try {
       function enableWatcher(SYSTEM_LOGS_TABLE) {
         //watcher
-        const CHOKIDAR_OPTION = config.get('chokidar')
+        const CHOKIDAR_OPTION = config.chokidar
         var watcher = chokidar.watch('./logs', CHOKIDAR_OPTION)
 
         watcher.on('change', path =>
@@ -57,13 +56,11 @@ let runWorker = function (options) {
         )
       }
 
-      enableWatcher(config.get('system_logs_table'))
-
+      enableWatcher(config.system_logs_table)
       pino(PINO).info('job queue object created', options.queue.name)
       let qObj = result.q
       qObj.process(async (job, next, onCancel) => {
         try {
-          //lock = true
           JobExecute(job)
             .then(result => { pino(PINO).info('worker done', options.queue.name); next(null, result) })
             .catch(err => {
@@ -80,17 +77,9 @@ let runWorker = function (options) {
           return next(err)
         }
       })
-      // qObj.on('idle', (queueId) => {
-      //   if (!lock) {
-      //     pino(PINO).info('Queue is idle: ' + queueId)
-      //     pino(PINO).info("worker process id :", process.pid)
-      //     process.send({ 'subprocess': 'exit', 'pid': process.pid })
-      //     process.exit()
-      //   }
-      // })
       qObj.on('terminated', (queueId, jobId) => {
         qObj.getJob(jobId).then((job) => {
-          processError(job[0].data, job[0].id)
+          processError(job[0].data, job[0].id, job[0].scheduler, job[0].flowz_table)
           pino(PINO).info({ 'fId': job[0].data.fId, 'jobId': job[0].data.id }, 'job terminated');
           pino(PINO_DB_OPTION, fs.createWriteStream('./logs')).info({ 'fId': job[0].data.fId, 'jobId': job[0].data.id }, 'job terminated')
         }).catch(err => {
@@ -101,7 +90,7 @@ let runWorker = function (options) {
 
       qObj.on('completed', (queueId, jobId, isRepeating) => {
         qObj.getJob(jobId).then((job) => {
-          processSuccess(job[0].data, job[0].id)
+          processSuccess(job[0].data, job[0].id, job[0].scheduler, job[0].flowz_table)
           pino(PINO).info({ 'fId': job[0].data.fId, 'jobId': job[0].data.id }, 'job completed')
           pino(PINO_DB_OPTION, fs.createWriteStream('./logs')).info({ 'fId': job[0].data.fId, 'jobId': job[0].data.id }, 'job completed')
         }).catch(err => {
@@ -120,28 +109,26 @@ let runWorker = function (options) {
         }
       }
 
-      async function processSuccess (job, jobId) {
-        await notifyScheduler(job.fId, job.output, job.input, job.id, job.type, job.forProcess)
+      async function processSuccess (job, jobId, scheduler, flowz_table) {
+        await notifyScheduler(job.fId, job.output, job.input, job.id, job.type, job.forProcess, scheduler)
           .catch((err) => pino(PINO).error(err))
-        await updateFlowInstance('completed', job.fId, job.forProcess, job.id, job.output, job.type, job.input, jobId, job.sourceCount)
-        // lock = qObj.running === 0 ? false : lock
+        await updateFlowInstance('completed', job.fId, job.forProcess, job.id, job.output, job.type, job.input, jobId, job.sourceCount, scheduler, flowz_table)
         await checkIdle()
       }
 
-      async function processError (job, jobId) {
-        await updateFlowInstance('terminated', job.fId, job.forProcess, job.id, job.output, job.type, job.input, jobId, job.sourceCount)
+      async function processError (job, jobId, scheduler, flowz_table) {
+        await updateFlowInstance('terminated', job.fId, job.forProcess, job.id, job.output, job.type, job.input, jobId, job.sourceCount, scheduler, flowz_table)
         await checkIdle()
-        // lock = qObj.running === 0 ? false : lock
       }
 
-      async function notifyScheduler (fId, output, input, currentProcess, processType, forProcess){
-        return new Promise(async (resolve, reject) =>{
+      async function notifyScheduler (fId, output, input, currentProcess, processType, forProcess, scheduler, flowz_table) {
+        return new Promise(async (resolve, reject) => {
           //--------------- Queue Options -----------------
           let qOptions = {
-            name: SCHEDULER_TABLE
+            name: scheduler.table
           }
 
-          const q = new Queue(cxnOptions, qOptions)
+          const q = new Queue(scheduler.cxnOptions, qOptions)
           var jobOptions = {
             data: {
               fId: fId,
@@ -167,11 +154,13 @@ let runWorker = function (options) {
 
       }
 
-      async function updateFlowInstance (newStatus, fId, forProcess, current, output, type, input, jobId, sourceCount) {
+      async function updateFlowInstance (newStatus, fId, forProcess, current, output, type, input, jobId, sourceCount, scheduler, flowz_table) {
+        let r = rethinkdbdash(scheduler.cxnOptions)
         sourceCount = sourceCount ? sourceCount : []
-        let tmp = await rdash.table(FLOWZ_TABLE).get(fId).update({'process_log': rdash.row('process_log').append({job: current, jobType: type.toLowerCase(), jobId: jobId, input: input, sourceCount: sourceCount, output: output, status: newStatus, lastModified: new Date()})}).run()
-        pino(PINO).info({ 'fId': fId, 'jobId': current },'process in flow instance updated')
-        pino(PINO_DB_OPTION, fs.createWriteStream('./logs')).info({ 'fId': fId, 'jobId': current },'process in flow instance updated')
+        let tmp = await r.table(flowz_table).get(fId).update({'process_log': r.row('process_log').append({job: current, jobType: type.toLowerCase(), jobId: jobId, input: input, sourceCount: sourceCount, output: output, status: newStatus, lastModified: new Date()})}).run()
+        r.getPoolMaster().drain()
+        pino(PINO).info({ 'fId': fId, 'job': current, 'jobId': jobId },'process in flow instance updated')
+        pino(PINO_DB_OPTION, fs.createWriteStream('./logs')).info({ 'fId': fId, 'job': current, 'jobId': jobId },'process in flow instance updated')
       }
     } catch (e) {
       pino(PINO).error(e)

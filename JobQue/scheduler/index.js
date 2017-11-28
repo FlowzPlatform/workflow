@@ -1,5 +1,5 @@
 const Queue = require('rethinkdb-job-queue')
-const app = require('./config.json')
+const app = require('./default.json')
 const _ = require('lodash')
 const chokidar = require('chokidar')
 const fs = require("fs")
