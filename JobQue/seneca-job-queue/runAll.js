@@ -1,6 +1,6 @@
 const cp = require('child_process')
-var files = ['symmetric-worker', 'worker-need', 'worker-web', 'job-web']
-
-for (var i in files) {
-  let n = cp.fork(`${__dirname}/${files[i]}`)
-}
+cp.fork(`./symmetric-worker`)
+cp.fork(`./worker-need`)
+cp.fork(`./worker-web`)
+cp.fork(`./job-web`)
+cp.fork(`../scheduler/scheduler`)
