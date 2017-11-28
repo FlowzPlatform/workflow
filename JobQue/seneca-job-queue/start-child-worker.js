@@ -23,7 +23,7 @@ global.JobExecute
 
 function getJobTypeWorkerProcess (jobType) {
   return new Promise((resolve, reject) => {
-    rp(registerWorker.getJobModuleApiURL + jobType)
+    rp(registerWorker.getJobModuleApiURL + registerWorker.getJobModuleApiService + jobType)
       .then(function (jobProcessCode) {
         resolve(jobProcessCode)
       })

@@ -44,11 +44,13 @@
     }
   },
   "service": {
-    "find": "http://localhost:5000/job/find/",
-    "update": "http://localhost:5000/job/update/",
-    "create": "http://localhost:5000/job/create/",
-    "job_module": "http://localhost:3000/job-module/"
+    "find": "/job/find/",
+    "update": "/job/update/",
+    "create": "/job/create/",
+    "job_module": "/job-module/"
   },
+  "serviceURL": "http://localhost:5000",
+  "jobURL": "http://localhost:3000",
   "cache_size": 20,
   "runtime_process_table": "runtime_process"
 }

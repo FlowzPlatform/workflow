@@ -1,5 +1,5 @@
 const Queue = require('rethinkdb-job-queue')
-const app = require('./config.json')
+const app = require('./default.json')
 const TIMEOUT = 60000*60
 const _ = require('lodash')
 const fs = require("fs")
@@ -9,10 +9,10 @@ const cp = require('child_process')
 
 module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
 
-  const FIND_URL = options.service && options.service.find ? options.service.find : app.service.find
-  const UPDATE_URL = options.service && options.service.update ? options.service.update : app.service.update
-  const CREATE_URL = options.service && options.service.create ? options.service.create : app.service.create
-  const PROCESS_URL = options.job_module && options.service.job_module ? options.service.job_module : app.service.job_module
+  const FIND_URL = options.serviceURL ? options.serviceURL + app.service.find : app.serviceURL + app.service.find
+  const UPDATE_URL = options.serviceURL ? options.serviceURL + app.service.update : app.serviceURL + app.service.update
+  const CREATE_URL = options.serviceURL ? options.serviceURL + app.service.create : app.serviceURL + app.service.create
+  const PROCESS_URL = options.jobURL ? options.jobURL + app.service.job_module : app.serviceURL + app.service.job_module
   const cxnOptions = options.cxnOptions ? options.cxnOptions : app.rethinkdb
   const SCHEDULER_TABLE = options.scheduler ? options.scheduler : app.scheduler_table
   const FLOWZ_TABLE = options.fTable ? options.fTable : app.flowz_table
@@ -828,6 +828,10 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
   async function rerunProcess () {
     return new Promise (async (resolve, reject) => {
       try {
+        let tableList = await rdash.tableList().run()
+        if (!(_.includes(tableList, RUNTIME_PROCESS_TABLE))) {
+          await rdash.tableCreate(RUNTIME_PROCESS_TABLE).run()
+        }
         let previousProcess = await rdash.table(RUNTIME_PROCESS_TABLE).filter(rdash.row('created').gt(new Date(new Date().getTime() - 86400000))).run()
         for (let i=0; i<previousProcess.length; i++) {
           let n = cp.fork(`${__dirname}/${'process.js'}`, previousProcess[i].options)

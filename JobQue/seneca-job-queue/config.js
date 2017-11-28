@@ -9,12 +9,13 @@ module.exports = {
   cxnOptions: {
     host: process.env.host || "localhost",
     port: process.env.port || 28015,
-    db: process.env.db || "Flowz"
+    db: process.env.db || "FlowzEngine"
   },
   symmetricWorker: {
     port : process.env.symmetric_port || 9000,
     table : "symmetricWorkers",
-    executeWorkerURL: "http://localhost:9000/execute-worker",
+    executeWorkerURL: "http://localhost:9000",
+    executeWorkerService: "/execute-worker",
     childProcessFile: "start-child-worker.js"
   },
   waitingThreshold: 0.40,
@@ -29,7 +30,8 @@ module.exports = {
   registerWorker: {
     table: "registerWorkers",
     port: process.env.register_port || 3000,
-    getJobModuleApiURL: "http://localhost:3000/job-module/"
+    getJobModuleApiURL: "http://localhost:3000",
+    getJobModuleApiService: "/job-module/"
   },
   web_option: {
     port: process.env.job_port || 5000,

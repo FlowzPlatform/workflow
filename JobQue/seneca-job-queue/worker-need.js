@@ -16,7 +16,7 @@ function executeChildProcessAsWorker (jobType, options) {
   }
 }
 
-var socket = require('socket.io-client')(symmetricWorker.executeWorkerURL, {reconnect: true})
+var socket = require('socket.io-client')(symmetricWorker.executeWorkerURL + symmetricWorker.executeWorkerService, {reconnect: true})
 
 socket.on('connect', function () {pino(PINO).info('socket is connected')})
 socket.on('worker', function (data) {

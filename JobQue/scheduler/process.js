@@ -1,7 +1,7 @@
 const vm = require('vm')
 const rp = require('request-promise')
 const pino = require('pino')
-var config = require('./config.json')
+const config = require('./default.json')
 const PINO = config.pinoConsole
 
 global.options = []
