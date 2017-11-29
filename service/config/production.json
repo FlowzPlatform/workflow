@@ -1,4 +1,22 @@
 {
-  "host": "service-app.feathersjs.com",
-  "port": "PORT"
+  "host": "localhost",
+  "port": 3030,
+  "public": "../public/",
+  "paginate": {
+    "default": 10,
+    "max": 50
+  },
+  "rethinkdb": {
+    "db": "FlowzEngine",
+    "servers": [{
+      "host": "XXXX",
+      "port": "00000"
+    }]
+  },
+  "scheduler_table": "scheduler",
+  "qJobTimeout": 3600000,
+  "qJobRetryMax": 0,
+  "instance_table": "flowzinstance",
+  "approvar_table": "approvalClass",
+  "system_logs_table": "system_logs"
 }

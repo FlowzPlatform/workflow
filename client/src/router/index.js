@@ -38,7 +38,7 @@ import ApprovalNew from '@/pages/approval/New'
 
 // User area
 import UserDashboard from '@/pages/user/dashboard'
-import ManageBPMNPlugin from '@/pages/BPMNPlugins/Manage
+import ManageBPMNPlugin from '@/pages/BPMNPlugins/Manage'
 
 Vue.use(Router)
 const routes = [{

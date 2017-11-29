@@ -2,8 +2,8 @@ let async = require('asyncawait/async');
 let await = require('asyncawait/await');
 let axios = require('axios')
 const app = require('config');
-const config = app.get('rethinkdb')
-const rdash = require('rethinkdbdash')(config)
+var serverUrl = 'http://' + app.host + ':' + app.port + '/'
+const config = require('../config')
 const _ = require('lodash')
 module.exports = {
   before: {
@@ -39,7 +39,7 @@ module.exports = {
 var aftercreateInstance = async(function(hook) {
   let outputObject = [];
   // console.log('hook.result', hook.result)
-  let flowinstace = await (axios.get('http://localhost:3030/flowz-instance/' + hook.data.instanceid))
+  let flowinstace = await (axios.get(serverUrl + 'flowz-instance/' + hook.data.instanceid))
   let process = _.find(flowinstace.data.processList, function(o) { return o.id == hook.data.processid; });
   for (var element in hook.result) {
     let object = await (getinstancevalue(hook.result[element].refid, process.inputProperty[0].entityschema._id))
@@ -89,7 +89,7 @@ var addtoApprovalClass = async(function(instanceid, inputdata, processid, jobId)
 })
 var getinstancevalue = async(function(id, schemaid) {
   console.log('schemaid', schemaid)
-  var response = await (axios.get('http://localhost:3030/instance/' + id + '?schemaid=' + schemaid))
+  var response = await (axios.get(serverUrl + 'instance/' + id + '?schemaid=' + schemaid))
     // console.log('response', response)
   return response.data
 });
