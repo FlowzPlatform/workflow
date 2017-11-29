@@ -10,8 +10,8 @@
 </template>
 <script type="text/javascript">
   import schema from '@/api/schema'
-import api from '@/api'
-import _ from 'lodash'
+  import api from '@/api'
+  import _ from 'lodash'
   export default {
     data () {
       return {

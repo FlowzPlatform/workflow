@@ -246,7 +246,7 @@
             }
             if (actionResponse.status === 'success') {
               this.$Notice.success({duration: 3, title: 'Success!!', desc: actionResponse.message})
-              this.$router.push('/approval')
+              this.$router.push('approval')
             } else {
               this.$Notice.error({duration: 3, title: 'Error!!', desc: actionResponse.message})
             }

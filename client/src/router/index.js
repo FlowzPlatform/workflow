@@ -1,7 +1,10 @@
 import Vue from 'vue'
-import Router from 'vue-router'
+import VueRouter from 'vue-router'
 // Layout
 import Layout from '@/layout/Master'
+
+// userLayout
+import userLayout from '@/userLayout/Master'
 
 // Area
 import Dashboard from '@/area/Dashboard'
@@ -38,17 +41,18 @@ import ApprovalNew from '@/pages/approval/New'
 // BPMN Plugins
 import ManageBPMNPlugin from '@/pages/BPMNPlugins/Manage'
 
-Vue.use(Router)
+Vue.use(VueRouter)
+
 const routes = [{
-  path: '/',
+  path: '/admin',
   name: 'Layout',
   component: Layout,
+  meta: {requireAuth: true, userAuth: false, adminAuth: true},
   children: [{
     path: 'dashboard',
     alias: '',
     component: Dashboard,
-    name: 'Dashboard',
-    meta: { description: 'Overview of environment' }
+    name: 'Dashboard'
   }, { // Plugin
     path: 'bpmn-plugin',
     component: ManageBPMNPlugin,
@@ -198,5 +202,15 @@ const routes = [{
   path: '/Register',
   name: 'Register',
   component: Register
+}, {
+  path: '/user',
+  name: 'userLayout',
+  component: userLayout,
+  meta: {requireAuth: true, userAuth: true, adminAuth: false}
+}, {
+  path: '/',
+  name: '',
+  redirect: '/Login'
 }]
+
 export default routes

@@ -79,17 +79,28 @@ var router = new VueRouter({
 
 // Some middleware to help us ensure the user is authenticated.
 router.beforeEach((to, from, next) => {
+  console.log(to)
   iView.LoadingBar.config({ color: '#0e406d' })
-    // window.console.log('Transition', transition)
-    // console.log(to)
-  if (to.auth && (to.router.app.$store.state.token === 'null')) {
-    window.console.log('Not authenticated')
-    next({
-      path: '/login',
-      query: { redirect: to.fullPath }
-    })
+  if (to.matched[0].meta.requireAuth) {
+    const authUser = JSON.parse(window.localStorage.getItem('authUser'))
+    if (!authUser || !authUser.token) {
+      next('/login')
+    } else if (to.matched[0].meta.adminAuth) {
+      const authUser = JSON.parse(window.localStorage.getItem('authUser'))
+      if (authUser.role === 1) {
+        next()
+      } else {
+        next('/user')
+      }
+    } else if (to.matched[0].meta.userAuth) {
+      const authUser = JSON.parse(window.localStorage.getItem('authUser'))
+      if (authUser.role !== 1) {
+        next()
+      } else {
+        next('/admin/dashboard')
+      }
+    }
   } else {
-    // window.console.log('authenticated')
     next()
   }
 })

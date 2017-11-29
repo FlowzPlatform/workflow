@@ -17,5 +17,6 @@ export default {
   sidenavtoggle: true,
   sidenavpin: true,
   mappingTemp: [],
-  BPMNxml: ''
+  BPMNxml: '',
+  isLoggedIn: false
 }
