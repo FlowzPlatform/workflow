@@ -24,6 +24,7 @@ var serviceTaskDelegateProps = require('./parts/ServiceTaskDelegateProps'),
   myInputProps = require('./parts/MyInputProps'),
   myPropertiesIOProps = require('./parts/myPropertiesIOProps'),
   myOutputProps = require('./parts/myOutputProps'),
+  myConfigProps = require('./parts/MyConfigProps'),
   capacityProps = require('./parts/CapacityProps'),
   startEventInitiator = require('./parts/StartEventInitiator'),
   variableMapping = require('./parts/VariableMappingProps'),
@@ -253,6 +254,18 @@ function createOutputGroups(element, bpmnFactory, elementRegistry, translate, da
   ];
 }
 
+function createConfigGroups(element, bpmnFactory, elementRegistry, translate, data) {
+  var configGroup = {
+    id: 'configs',
+    label: translate('Config'),
+    entries: []
+  }
+  myConfigProps(configGroup, element, bpmnFactory, translate)
+  return [
+    configGroup
+  ]
+}
+
 function createListenersTabGroups(element, bpmnFactory, elementRegistry, translate) {
   var listenersGroup = {
     id: 'listeners',
@@ -448,13 +461,19 @@ function CamundaPropertiesProvider(eventBus, bpmnFactory, elementRegistry, eleme
       label: translate('Output'),
       groups: createOutputGroups(element, bpmnFactory, elementRegistry, translate)
     };
+    var configTab = {
+      id: 'Configuration',
+      label: translate('Config'),
+      groups: createConfigGroups(element, bpmnFactory, elementRegistry, translate)
+    }
     return [
       generalTab,
       ioMapping,
       // variablesTab,
       // connectorTab,
       propertiesTab,
-      outputTab
+      outputTab,
+      configTab
       // formsTab,
       // listenersTab,
       // inputOutputTab,

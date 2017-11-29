@@ -3,14 +3,15 @@
         <Row type="flex">
         <Col :span="1" v-if="toggeleEnable">
             <Row type="flex" justify="end" align="middle">
-              <span @click="$store.state.sidenavtoggle = !$store.state.sidenavtoggle">
+              <span>
                 <Icon type="navicon-round" :size="32" style="line-height: inherit;cursor:pointer"></Icon>
               </span>
             </Row>
         </Col>
-        <i-col :span="5">
+        <i-col :span="5" class="logo">
             <div class="f-logo">
-                <img src="../assets/images/logo.png" style="width:100%;vertical-align: inherit;">
+                <Icon type="navicon-round" :size="30"></Icon>  
+                <img src="../../assets/images/Flowz-logo.png">
             </div>
         </i-col>
         <i-col :span="18">
@@ -47,13 +48,7 @@
                           Krunal Mahera
                         </template>
                         <Menu-item name="1-1">
-                            <router-link to="/bpmn-plugin">
-                                <i class="fa fa-plug"></i>
-                                Plugins
-                            </router-link>
-                        </Menu-item>
-                        <Menu-item name="1-1">
-                            <a @click="handleRemove()">
+                            <a>
                                 <Icon type="ios-locked-outline" :size="16"></Icon>
                                 Logout
                             </a>
@@ -66,19 +61,3 @@
         </Row>
     </Menu>
 </template>
-<script>
-/*eslint-disable*/
-  export default {
-    computed: {
-      toggeleEnable () {
-        return !this.$store.state.sidenavpin || (!this.$store.state.sidenavtoggle)
-      }
-    },
-    methods:{
-      handleRemove () {
-        localStorage.removeItem('logintoken')
-        this.$router.push('Login')
-      }
-    }
-  }
-</script>

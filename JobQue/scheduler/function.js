@@ -579,13 +579,13 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
 
           //if all inputs are available to begin the process, call begin process function
           if (inputAvailability) {
-            pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).info({'fId': fId, 'jobId': startStateId}, 'next job')
-            pino(PINO_C_OPTION).info({'fId': fId, 'jobId': startStateId}, 'next job')
+            pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).info({'fId': fId, 'job': startStateId, 'jobId': startJob.id}, 'next job')
+            pino(PINO_C_OPTION).info({'fId': fId, 'job': startStateId, 'jobId': startJob.id}, 'next job')
             await this.beginProcess(startJob)
           }
           else {
-            pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).warn({'fId': fId, 'jobId': startStateId}, 'all inputs not available')
-            pino(PINO_C_OPTION).warn({'fId': fId, 'jobId': startStateId}, 'all inputs not available')
+            pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).warn({'fId': fId, 'job': startStateId, 'jobId': startJob.id}, 'all inputs not available')
+            pino(PINO_C_OPTION).warn({'fId': fId, 'job': startStateId, 'jobId': startJob.id}, 'all inputs not available')
           }
         }
         resolve(next(null, 'success'))
@@ -810,8 +810,8 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
                 pino(PINO_C_OPTION).warn({'fId': fId, 'jobId': targetId}, 'mapping required')
               }
               else {
-                pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).warn({'fId': fId, 'jobId': targetId}, 'all inputs not available')
-                pino(PINO_C_OPTION).warn({'fId': fId, 'jobId': targetId}, 'all inputs not available')
+                pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).warn({'fId': fId, 'job': targetId, 'jobId': targetJobs[i].id}, 'all inputs not available')
+                pino(PINO_C_OPTION).warn({'fId': fId, 'job': targetId, 'jobId': targetJobs[i].id}, 'all inputs not available')
               }
               // let tmp = await this.updateProcess(targetJobs[i])
             }

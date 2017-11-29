@@ -950,6 +950,38 @@
         "name": "capacity",
         "type": "String",
         "isAttr": true
+      }, {
+        "name": "isProcessTask",
+        "type": "Boolean",
+        "isAttr": true
+      }]
+    },
+    {
+      "name": "MyConfigurations",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": [
+          "bpmn:StartEvent",
+          "bpmn:UserTask"
+        ]
+      },
+      "properties": [{
+        "name": "fields",
+        "type": "Configuration",
+        "isMany": true
+      }]
+    },
+    {
+      "name": "Configuration",
+      "superClass": ["Element"],
+      "properties": [{
+        "name": "key",
+        "type": "String",
+        "isAttr": true
+      }, {
+        "name": "value",
+        "type": "String",
+        "isAttr": true
       }]
     },
     {
