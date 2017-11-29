@@ -60,7 +60,6 @@ var aftercreateInstance = async(function(hook) {
   // AddValueToJobQue(hook.data.instanceid, outputObject, hook.data.processid)
 });
 var addtoApprovalClass = async(function(instanceid, inputdata, processid, jobId) {
-  console.log('approval class', inputdata)
   const Queue = require('rethinkdb-job-queue')
     //--------------- Connection Options -----------------
   const cxnOptions = config
@@ -81,14 +80,26 @@ var addtoApprovalClass = async(function(instanceid, inputdata, processid, jobId)
   }
   jobOptions.timeout = app.get('qJobTimeout')
   jobOptions.retryMax = app.get('qJobRetryMax')
-  console.log('jobOptions', jobOptions)
     //--------------- Create new job -----------------
   const job = q.createJob(jobOptions)
     //--------------- Add job -----------------
   q.addJob(job).then((savedJobs) => {}).catch(err => console.error(err))
+  axios.get(serverUrl + 'flowz-instance/' + instanceid)
+    .then(response => {
+      let log = _.chain(response.data.process_log).orderBy(['lastModified'], ['asc']).findLast((f) => { return f.jobId === jobId }).clone().value()
+      log.status = 'sendForApproval'
+      log.lastModified = new Date()
+      response.data.process_log.push(log)
+      axios.put(serverUrl + 'flowz-instance/' + instanceid, response.data)
+        .then(res => {
+          console.log('Status updated for approval : sendForApproval')
+        })
+        .catch(error => {
+          console.log('Error : ', error)
+        })
+    })
 })
 var getinstancevalue = async(function(id, schemaid) {
-  console.log('schemaid', schemaid)
   var response = await (axios.get(serverUrl + 'instance/' + id + '?schemaid=' + schemaid))
     // console.log('response', response)
   return response.data

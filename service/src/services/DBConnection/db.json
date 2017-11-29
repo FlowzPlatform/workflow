@@ -4,15 +4,14 @@
   },
   "rethink": {
     "dbinstance": [{
-      "isenable": true,
-      "connection_name": "rethink",
+      "isenable": false,
+      "connection_name": "Rethink",
       "host": "localhost",
       "port": "28015",
       "dbname": "FlowzEngine",
       "username": "",
       "password": "",
       "upldIcn": "",
-      "rdoCrt": "",
       "notes": "",
       "isdefault": true,
       "id": "f613518b-200b-46ca-bebd-90db7d45c553"

@@ -35,6 +35,7 @@ import Register from '@/pages/Register'
 // Approval area
 import ApprovalList from '@/pages/approval/List'
 import ApprovalNew from '@/pages/approval/New'
+import Reply from '@/pages/approval/MailReply'
 
 // User area
 import UserDashboard from '@/pages/user/dashboard'
@@ -190,6 +191,10 @@ const routes = [{
         id: String,
         required: false
       }
+    }, {
+      path: '/mail/reply/:mailid/:pid/:jobid/:fiid',
+      name: 'mail/reply',
+      component: Reply
     }]
   }]
 }, { // Enduser Dashboard
