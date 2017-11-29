@@ -1,0 +1,6 @@
+{
+  "port": "PORT",
+  "host": "HOST",
+  "rdb_host": "RDB_HOST",
+  "rdb_port": "RDB_PORT"
+}

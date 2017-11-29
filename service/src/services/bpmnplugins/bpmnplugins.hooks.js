@@ -74,8 +74,7 @@ var checkpulginexist = async(function(sdata) {
   }
 })
 var sendError = function(hook) {
-  console.log('plugins already exists.................................................');
-  throw new Error('sasssssssssssssssssssssssssssss')
+  throw new Error('Plugin Already Imported.')
 }
 var beforeCreate = async(function(hook) {
   // console.log('Hook Data.......................', hook.data)
@@ -141,11 +140,11 @@ var registerWorkerProcess = async(function(obj, src) {
   form.append("jobtype", obj.pluginType + '_worker');
   form.append("jobprocess", src);
   const config = { headers: form.getHeaders() };
-  let registeredWorker = await (axios.post('http://172.16.230.253:3000/upload-worker-process', form, config))
+  let registeredWorker = await (axios.post(config.registerWokerAPI, form, config))
   if (registeredWorker.err) {
     return undefined
   } else {
-    let callputmethod = await (axios.put('http://172.16.230.253:9000/register-jobtype/' + obj.pluginType + '_worker'));
+    let callputmethod = await (axios.put(config.registerProcessAPI + obj.pluginType + '_worker'));
     return registeredWorker
   }
   return registeredWorker

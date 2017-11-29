@@ -10,9 +10,8 @@ const instancetest = require('./instance-test/instance-test.service.js');
 const scheduler = require('./scheduler/scheduler.service.js');
 const logs = require('./logs/logs.service.js');
 const addInputToJobQue = require('./addInputToJobQue/addInputToJobQue.service.js');
-
 const bpmnplugins = require('./bpmnplugins/bpmnplugins.service.js');
-
+const usermaster = require('./usermaster/usermaster.service.js');
 module.exports = function() {
   const app = this; // eslint-disable-line no-unused-vars
   app.configure(schema);
@@ -28,4 +27,5 @@ module.exports = function() {
   app.configure(addInputToJobQue);
   //app.configure(scheduler);
   app.configure(bpmnplugins);
+  app.configure(usermaster);
 };
