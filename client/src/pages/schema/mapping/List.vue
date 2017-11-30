@@ -144,7 +144,7 @@ export default {
       })
     },
     show (schemaId,mappingId) {
-    	 this.$router.push('/schema/'+ schemaId + '/mapping/edit/' + mappingId)
+    	 this.$router.push('/admin/schema/'+ schemaId + '/mapping/edit/' + mappingId)
     },
     remove (index) {
       this.$Modal.confirm({

@@ -228,7 +228,7 @@ export default {
       instanceModel.post(generatedJson)
       .then(response => {
         // console.log('response.data', response.data)
-        this.$router.push('/flow/instance/' + response.data.id)
+        this.$router.push('/admin/flow/instance/' + response.data.id)
       })
       .catch(error => {
         console.log(error)
@@ -236,7 +236,7 @@ export default {
     },
     addNewFlow () {
       this.$store.dispatch('removeXMLtoLocalStorage')
-      this.$router.push('/flow/new')
+      this.$router.push({name: 'flow/new'})
     },
     deleteFlow (id, inx) {
       this.$Modal.confirm({

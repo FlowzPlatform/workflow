@@ -34,7 +34,10 @@
 
 <script>
  /*eslint-disable*/
- import axios from 'axios'
+import axios from 'axios'
+import login from '@/api/user'
+import userLogin from '@/api/userlogin'
+import config from '../config'
 
 export default {
   name: 'M_Login',
@@ -62,7 +65,7 @@ export default {
           let self = this
           axios({
             method: 'post',
-            url: 'http://ec2-54-88-11-110.compute-1.amazonaws.com/api/login',
+            url: config.loginURL,
             data: {
               email: self.formInline.Email,
               password: self.formInline.Password
@@ -73,25 +76,18 @@ export default {
             if (response) {
               window.localStorage.setItem("auth_token",response.data.logintoken)
               authUser.token = window.localStorage.getItem("auth_token")
-              axios({
-                method: 'get',
-                url: 'http://172.16.160.117:3030/usermaster?emailId='+self.formInline.Email
-              })
-              .then(response => {
-                if (response) {
-                  authUser.role = parseInt(response.data.data[0].role)
-                  self.$store.state.isLoggedIn = true
-                  window.localStorage.setItem("authUser",JSON.stringify(authUser))
-                  if(authUser.role === 1){
-                    self.$Message.success("Admin successfully logged in")
-                    self.$router.push({ path: '/admin/dashboard'})
-                  } else {
-                    self.$Message.success("User successfully logged in")
-                    self.$router.push({ path: '/user'})
-                  }
+              login.getByParam(self.formInline.Email).then((response) => {
+                authUser.role = parseInt(response.data.data[0].role)
+                self.$store.state.isLoggedIn = true
+                window.localStorage.setItem("authUser",JSON.stringify(authUser))
+                if(authUser.role === 1){
+                  self.$Message.success("Admin successfully logged in")
+                  self.$router.push({ path: '/admin/dashboard'})
+                } else {
+                  self.$Message.success("User successfully logged in")
+                  self.$router.push({ path: '/user'})
                 }
-              })
-              .catch(function(e) {
+              }).catch(error => {
                 self.$Message.error('You are not allowed to access this application.')
               })
             } else {
