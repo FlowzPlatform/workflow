@@ -52,7 +52,7 @@ export default {
                 },
                 on: {
                   click: () => {
-                    this.$router.push('/flow/instance/' + params.row.id)
+                    this.$router.push('/admin/flow/instance/' + params.row.id)
                     // this.getprocessInstance(params.row.id)
                   }
                 }
@@ -71,28 +71,29 @@ export default {
                 },
                 on: {
                   click: () => {
-                    this.$router.push('/flow/instance/log/' + params.row.id)
+                    this.$router.push('/admin/flow/instance/log/' + params.row.id)
                   }
                 }
-              }, ''),
-              h('Button', {
-                props: {
-                  type: 'text',
-                  size: 'large',
-                  icon: 'android-delete'
-                },
-                style: {
-                  marginRight: '3px',
-                  padding: '0px',
-                  fontSize: '20px',
-                  color: '#e74c3c'
-                }
-                // on: {
-                //   click: () => {
-                //     this.deleteFlow(this.flowzList[params.index].id)
-                //   }
-                // }
               }, '')
+              // ,
+              // h('Button', {
+              //   props: {
+              //     type: 'text',
+              //     size: 'large',
+              //     icon: 'android-delete'
+              //   },
+              //   style: {
+              //     marginRight: '3px',
+              //     padding: '0px',
+              //     fontSize: '20px',
+              //     color: '#e74c3c'
+              //   }
+              //   // on: {
+              //   //   click: () => {
+              //   //     this.deleteFlow(this.flowzList[params.index].id)
+              //   //   }
+              //   // }
+              // }, '')
             ])
           }
         }

@@ -83,7 +83,7 @@
           result.then(response => {
             this.$Notice.success({title: 'Success!!', desc: 'Mapping Saved...'})
             localStorage.removeItem('BPMNXml')
-            this.$router.push('/flow')
+            this.$router.push({name: 'flow'})
           }).catch(error => {
             console.log(error)
             this.$Notice.error({title: 'Error!!', desc: 'Mapping Not Saved...'})

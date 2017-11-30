@@ -1,7 +1,7 @@
 <template>
   <div>
   <row type="flex" justify="end">
-    <router-link to="/schema/new">
+    <router-link :to="{name:'schema/new'}">
       <Button type="primary" size="small" style="margin-bottom: 2px;" icon="plus">Add</Button>
     </router-link>
   </row>
