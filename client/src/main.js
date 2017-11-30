@@ -65,6 +65,9 @@ Vue.use(VueSplit)
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */
+// cookies
+var VueCookie = require('vue-cookie')
+Vue.use(VueCookie)
 
 // Routing logic
 Vue.use(VueRouter)

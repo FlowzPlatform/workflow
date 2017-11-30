@@ -62,7 +62,7 @@ var aftercreateInstance = async(function(hook) {
 var addtoApprovalClass = async(function(instanceid, inputdata, processid, jobId) {
   const Queue = require('rethinkdb-job-queue')
     //--------------- Connection Options -----------------
-  const cxnOptions = config
+  const cxnOptions = config.rethinkdb
     //--------------- Queue Options -----------------
   const qOptions = {
     name: app.get('approvar_table')

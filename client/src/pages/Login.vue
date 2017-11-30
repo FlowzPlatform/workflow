@@ -38,6 +38,7 @@ import axios from 'axios'
 import login from '@/api/user'
 import userLogin from '@/api/userlogin'
 import config from '../config'
+import psl from 'psl'
 
 export default {
   name: 'M_Login',
@@ -65,7 +66,7 @@ export default {
           let self = this
           axios({
             method: 'post',
-            url: config.loginURL,
+            url: config.loginURL + 'login',
             data: {
               email: self.formInline.Email,
               password: self.formInline.Password
@@ -75,10 +76,14 @@ export default {
             let authUser = {}
             if (response) {
               window.localStorage.setItem("auth_token",response.data.logintoken)
+              let location = psl.parse(window.location.hostname)
+              location = location.domain === null ? location.input : location.domain
+              self.$cookie.set('auth_token', response.data.logintoken, {expires: 1, domain: location});
               authUser.token = window.localStorage.getItem("auth_token")
               login.getByParam(self.formInline.Email).then((response) => {
                 authUser.role = parseInt(response.data.data[0].role)
                 self.$store.state.isLoggedIn = true
+                self.$cookie.set('authUser', JSON.stringify(authUser), {expires: 1, domain: location});
                 window.localStorage.setItem("authUser",JSON.stringify(authUser))
                 if(authUser.role === 1){
                   self.$Message.success("Admin successfully logged in")
@@ -111,7 +116,36 @@ export default {
     }
   },
   mounted(){
-    if(window.localStorage.getItem("auth_token") !== null){
+    if(this.$cookie.get('auth_token') !== null){
+      axios({
+        method: 'post',
+        url: config.loginURL + 'userdetail', 
+        headers: {
+          'authorization': this.$cookie.get('auth_token')
+        }
+      })
+      .then(response => {
+        let self = this
+        let authUser = {}
+        let email = response.data.data.email
+        login.getByParam(self.formInline.Email).then((response) => {
+          authUser.role = parseInt(response.data.data[0].role)
+          self.$store.state.isLoggedIn = true
+          self.$cookie.set('authUser', JSON.stringify(authUser), {expires: 1, domain: location});
+          window.localStorage.setItem("authUser",JSON.stringify(authUser))
+          if(authUser.role === 1){
+            self.$Message.success("Admin successfully logged in")
+            self.$router.push({ path: '/admin/dashboard'})
+          } else {
+            self.$Message.success("User successfully logged in")
+            self.$router.push({ path: '/user'})
+          }
+        }).catch(error => {
+          self.$Message.error('You are not allowed to access this application.')
+        })
+      })
+      .catch(function(e) {
+      })
       this.$router.push({ path: '/user'})
     }
   }

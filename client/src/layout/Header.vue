@@ -67,6 +67,7 @@
     </Menu>
 </template>
 <script>
+  import psl from 'psl'
 /*eslint-disable*/
   export default {
     computed: {
@@ -79,6 +80,10 @@
         this.$store.state.isLoggedIn = false
         localStorage.removeItem('authUser')
         localStorage.removeItem('auth_token')
+        let location = psl.parse(window.location.hostname)
+        location = location.domain === null ? location.input : location.domain
+        this.$cookie.delete('authUser', {domain: location});
+        this.$cookie.delete('auth_token', {domain: location});
         this.$router.push('/login')
       }
     }

@@ -39,7 +39,7 @@ module.exports = {
 function beforeCreate(hook) {
   // Create Job Que Scheduler Entry
   const Queue = require('rethinkdb-job-queue')
-  const cxnOptions = config
+  const cxnOptions = config.rethinkdb
   const qOptions = {
     name: app.get('scheduler_table')
   }

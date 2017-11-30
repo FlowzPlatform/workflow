@@ -5,8 +5,8 @@ module.exports = {
   rethinkdb: {
     db: "FlowzEngine",
     servers: [{
-      host: host,
-      port: port
+      host: config.get('rdb_host').trim(),
+      port: config.get('rdb_port').trim()
     }]
   }
 }

@@ -81,7 +81,7 @@ function aftercreateInstance(hook) {
   if (hook.data.id != undefined) {
     const Queue = require('rethinkdb-job-queue')
       //--------------- Connection Options -----------------
-    const cxnOptions = config
+    const cxnOptions = config.rethinkdb
       //--------------- Queue Options -----------------
     const qOptions = {
       name: app.get('scheduler_table')
