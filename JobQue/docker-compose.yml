@@ -1,0 +1,13 @@
+version: '2'
+services:
+
+  Seneca_Jobqueue_Flowz:
+    image: obdev/seneca_jobqueue_flowz
+    ports:
+    - 3004:3000
+    - 3005:5000
+    - 3006:9000
+    environment:
+      - host=enter rethinkdb host
+      - port=28015
+    restart: always
