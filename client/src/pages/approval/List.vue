@@ -117,10 +117,10 @@
           console.log(this.approvalData)
         },
         addApproval: function(){
-          this.$router.push('/approval/new')
+          this.$router.push('approval/new')
         },
         edit: function(rowId){
-          this.$router.push('/approval/edit/' + rowId)
+          this.$router.push('approval/edit/' + rowId)
         },
         removeRow: function(rowId,index){
           this.$Modal.confirm({
