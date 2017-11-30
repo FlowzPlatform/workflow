@@ -128,7 +128,8 @@ export default {
         let self = this
         let authUser = {}
         let email = response.data.data.email
-        login.getByParam(self.formInline.Email).then((response) => {
+        console.log('email', email)
+        login.getByParam(email).then((response) => {
           authUser.role = parseInt(response.data.data[0].role)
           self.$store.state.isLoggedIn = true
           self.$cookie.set('authUser', JSON.stringify(authUser), {expires: 1, domain: location});
