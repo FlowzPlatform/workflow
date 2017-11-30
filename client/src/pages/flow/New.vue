@@ -66,17 +66,14 @@
           function (e, xml) {
             xmlData = xml
           })
-        // console.log('xmlData', xmlData)
         let x2js = new X2JS()
-        // console.log('x2js', x2js)
         let data = x2js.xml2js(xmlData)
         if (data.definitions.process._name !== undefined) {
-          // console.log(data.name)
           let flowObject = {}
           flowObject.ProcessName = data.definitions.process._name
           flowObject.xml = xmlData
           flowObject.json = await this.generateJson(xmlData)
-          // console.log('xmlData', xmlData)
+          // console.log('xmlData', flowObject.json)
           let result = null
           if (this.$route.params.id !== undefined) {
             result = flowz.put(this.$route.params.id, flowObject)
@@ -156,7 +153,7 @@
         let x2js = new X2JS()
         let jsonXML = x2js.xml2js(xml)
         jsonXML = jsonXML.definitions.process
-        console.log('jsonXML', jsonXML)
+        // console.log('jsonXML', jsonXML)
         let instanceObject = {}
         instanceObject.name = jsonXML._name
         instanceObject.start_delay = 3000
@@ -194,8 +191,6 @@
         for (let d of process.target) {
         // _.forEach(process.target, (d) => {
           // merge all module
-          console.log('jsonXML', jsonXML)
-          console.log('d', d)
           var mergeModules = _.chain(jsonXML).map((m, k) => {
             if (typeof m === 'object') {
               m = _.isArray(m) ? m : [m]
@@ -212,25 +207,23 @@
           //   return _.isArray(m) ? m : [m]
           // })
           .value()
-          // console.log('mergeModules', mergeModules)
           // generate process
           let result = await _.chain(_.union(...mergeModules))
           .filter((f, i, k) => {
-            // console.log('k', k)
             return f._id === d.id
           })
           .map(async (m) => {
-            // console.log('m', m)
             let _mapping = await self.getMapping(m, mergeModules)
-            console.log('m', m)
             return {
               id: m._id,
-              capacity: (m._isFormInput) ? m._capacity : false,
+              capacity: (m['_camunda:isFormInput']) ? m['_camunda:capacity'] : false,
+              isProcessTask: (m['_camunda:isProcessTask'] === 'true'),
               name: m._name,
               type: m.workerType.toLowerCase(),
-              isProcessTask: m.workerType.toLowerCase() === 'tweet' ? 'true' : false,
+              // isProcessTask: m.workerType.toLowerCase() === 'tweet' ? 'true' : false,
               target: m.outgoing ? self.getTargetId(m, jsonXML) : [],
               mapping: (_.union(..._mapping)),
+              configurations: self.getConfigurationsProperties(m),
               inputProperty: await self.getInputProperties(m),
               outputProperty: await self.getOutputProperties(m)
             }
@@ -244,13 +237,16 @@
         let self = this
         return await Promise.all(_.chain(process.startEvent)
         .map(async (m) => {
+          console.log('m', m)
           return {
             id: m._id,
-            capacity: (m._isFormInput) ? m._capacity : false,
+            capacity: (m['_camunda:isFormInput']) ? m['_camunda:capacity'] : false,
+            isProcessTask: (m['_camunda:isProcessTask'] === 'true'),
             name: m._name,
             type: 'start',
             target: self.getTargetId(m, process),
             mapping: [],
+            configurations: self.getConfigurationsProperties(m),
             inputProperty: await self.getInputProperties(m),
             outputProperty: await self.getOutputProperties(m)
           }
@@ -272,13 +268,28 @@
           // return { id: targetMap.__text }
         })
       },
+      getConfigurationsProperties (proccess) {
+        if (proccess.extensionElements && proccess.extensionElements.myConfigurations) {
+          if (!_.isArray(proccess.extensionElements.myConfigurations.configuration)) {
+            proccess.extensionElements.myConfigurations.configuration = [proccess.extensionElements.myConfigurations.configuration]
+          }
+          console.log('proccess.extensionElements.myConfigurations', proccess.extensionElements.myConfigurations)
+          return _.map(proccess.extensionElements.myConfigurations.configuration, (m) => {
+            return {
+              key: m._key,
+              value: m._value
+            }
+          })
+        } else {
+          return []
+        }
+      },
       async getInputProperties (proccess) {
         if (proccess.extensionElements && proccess.extensionElements.myInputs) {
           if (!_.isArray(proccess.extensionElements.myInputs.input)) {
             proccess.extensionElements.myInputs.input = [proccess.extensionElements.myInputs.input]
           }
           return await Promise.all(_.map(proccess.extensionElements.myInputs.input, async (m) => {
-            console.log('m._approvalClass', m._approvalClass)
             return {
               id: m._id,
               entityschema: await schemaModel.getAll(m._entityschema),
