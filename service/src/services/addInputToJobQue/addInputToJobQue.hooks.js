@@ -2,7 +2,7 @@ let async = require('asyncawait/async');
 let await = require('asyncawait/await');
 const app = require('config');
 const config = require('../config')
-const rdash = require('rethinkdbdash')(config)
+  // const rdash = require('rethinkdbdash')(config)
 const _ = require('lodash')
 module.exports = {
   before: {
