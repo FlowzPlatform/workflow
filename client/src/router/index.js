@@ -2,55 +2,45 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 // Layout
 import Layout from '@/layout/Master'
-import userLayout from '@/layout/user/Master'
-
+// import userLayout from '@/layout/user/Master'
 // userLayout
-// import userLayout from '@/userLayout/Master'
-
+import userLayout from '@/userLayout/Master'
 // Area
 import Dashboard from '@/area/Dashboard'
 import Flow from '@/area/Flow'
 import DbSettings from '@/area/DbSettings'
 import Schema from '@/area/Schema'
 import Approval from '@/area/Approval'
-
 // Schema area
 import SchemaMapping from '@/pages/schema/Mapping'
 import SchemaMappingNew from '@/pages/schema/mapping/New'
 import SchemaMappingList from '@/pages/schema/mapping/List'
 import SchemaList from '@/pages/schema/schemaList'
-
 // Flow area
 import FlowzList from '@/pages/flow/List'
 import FlowNew from '@/pages/flow/New'
 import flowInstance from '@/pages/flow/instance/New'
 import flowLog from '@/pages/flow/systemLog'
-
 // DbSettings area
 import DbSettingsList from '@/pages/dbSettings/List'
 import DbSettingsNew from '@/pages/dbSettings/New'
 import SchemaNew from '@/pages/schema/New'
-
 // pages
 import Login from '@/pages/Login'
 import Register from '@/pages/Register'
-
 // Approval area
 import ApprovalList from '@/pages/approval/List'
 import ApprovalNew from '@/pages/approval/New'
 import Reply from '@/pages/approval/MailReply'
-
 // User area
 import UserDashboard from '@/pages/user/dashboard'
 import ManageBPMNPlugin from '@/pages/BPMNPlugins/Manage'
-
 Vue.use(VueRouter)
-
 const routes = [{
   path: '/admin',
   name: 'Layout',
   component: Layout,
-  meta: {requireAuth: true, userAuth: false, adminAuth: true},
+  meta: { requireAuth: true, userAuth: false, adminAuth: true },
   children: [{
     path: 'dashboard',
     alias: '',
@@ -222,11 +212,10 @@ const routes = [{
   path: '/user',
   name: 'userLayout',
   component: userLayout,
-  meta: {requireAuth: true, userAuth: true, adminAuth: false}
+  meta: { requireAuth: true, userAuth: true, adminAuth: false }
 }, {
   path: '/',
   name: '',
   redirect: '/Login'
 }]
-
 export default routes
