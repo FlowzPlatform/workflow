@@ -81,31 +81,27 @@ export default {
                 self.$store.state.isLoggedIn = true
                 window.localStorage.setItem("authUser",JSON.stringify(authUser))
                 if(authUser.role === 1){
+                  self.$Message.success("Admin successfully logged in")
                   self.$router.push({ path: '/admin/dashboard'})
                 } else {
+                  self.$Message.success("User successfully logged in")
                   self.$router.push({ path: '/user'})
                 }
               }).catch(error => {
-                reject(error)
+                self.$Message.error('You are not allowed to access this application.')
               })
-              // axios({
-              //   method: 'get',
-              //   url: 'http://172.16.160.117:3030/usermaster?emailId='+self.formInline.Email
-              // })
-              // .then(response => {
-              //   if (response) {
-              //     authUser.role = parseInt(response.data.data[0].role)
-              //     self.$store.state.isLoggedIn = true
-              //     window.localStorage.setItem("authUser",JSON.stringify(authUser))
-              //     if(authUser.role === 1){
-              //       self.$router.push({ path: '/admin/dashboard'})
-              //     } else {
-              //       self.$router.push({ path: '/user'})
-              //     }
-              //   }
-              // })
             } else {
               self.$store.state.isLoggedIn = false
+            }
+          })
+          .catch(function(e) {
+            if(e.response.status === 401){
+              if(e.response.data === 'That user does not exist'){
+                self.$Message.error('User does not exist')
+              }
+              if(e.response.data === "password doesn't match"){
+                self.$Message.error("Password doesn't match")
+              }
             }
           })
         } else {

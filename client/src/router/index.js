@@ -33,7 +33,7 @@ import ApprovalList from '@/pages/approval/List'
 import ApprovalNew from '@/pages/approval/New'
 import Reply from '@/pages/approval/MailReply'
 // User area
-import UserDashboard from '@/pages/user/dashboard'
+// import UserDashboard from '@/pages/user/dashboard'
 import ManageBPMNPlugin from '@/pages/BPMNPlugins/Manage'
 Vue.use(VueRouter)
 const routes = [{
@@ -190,15 +190,6 @@ const routes = [{
       name: 'mail/reply',
       component: Reply
     }]
-  }]
-}, { // Enduser Dashboard
-  path: '/user',
-  name: 'User',
-  component: userLayout,
-  children: [{
-    path: 'approval/list',
-    name: 'approval',
-    component: UserDashboard
   }]
 }, {
   path: '/Login',
