@@ -118,8 +118,8 @@ export default {
   mounted(){
     if(this.$cookie.get('auth_token') !== null){
       axios({
-        method: 'post',
-        url: config.loginURL + 'userdetail', 
+        method: 'get',
+        url: config.loginURL + 'userdetails', 
         headers: {
           'authorization': this.$cookie.get('auth_token')
         }
