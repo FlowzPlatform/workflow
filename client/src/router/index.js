@@ -5,7 +5,7 @@ import Layout from '@/layout/Master'
 import userLayout from '@/layout/user/Master'
 
 // userLayout
-import userLayout from '@/userLayout/Master'
+// import userLayout from '@/userLayout/Master'
 
 // Area
 import Dashboard from '@/area/Dashboard'
