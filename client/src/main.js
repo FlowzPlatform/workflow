@@ -84,6 +84,7 @@ var router = new VueRouter({
 router.beforeEach((to, from, next) => {
   console.log(to)
   iView.LoadingBar.config({ color: '#0e406d' })
+  next()
   if (to.matched[0].meta.requireAuth) {
     const authUser = JSON.parse(window.localStorage.getItem('authUser'))
     if (!authUser || !authUser.token) {

@@ -128,9 +128,9 @@ export default {
         let self = this
         let authUser = {}
         let email = response.data.data.email
-        console.log('email', email)
         login.getByParam(email).then((response) => {
           authUser.role = parseInt(response.data.data[0].role)
+          authUser.token = this.$cookie.get('auth_token')
           self.$store.state.isLoggedIn = true
           self.$cookie.set('authUser', JSON.stringify(authUser), {expires: 1, domain: location});
           window.localStorage.setItem("authUser",JSON.stringify(authUser))
@@ -147,7 +147,6 @@ export default {
       })
       .catch(function(e) {
       })
-      this.$router.push({ path: '/user'})
     }
   }
 }
