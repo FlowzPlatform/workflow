@@ -107,7 +107,7 @@ var getinstancevalue = async(function(id, schemaid) {
 
 function AddValueToJobQue(flowid, data, processid, jobId) {
   const Queue = require('rethinkdb-job-queue')
-  const cxnOptions = config
+  const cxnOptions = config.rethinkdb
   const qOptions = {
     name: app.get('scheduler_table')
   }

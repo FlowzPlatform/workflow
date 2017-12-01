@@ -104,6 +104,7 @@
           }
         })
         if (types !== undefined) {
+          camundaModdleDescriptor.types = _.concat(camundaModdleDescriptor.types, types)
           this.bpmnModeler = new BpmnModeler({
             container: '#js-canvas',
             propertiesPanel: {
@@ -117,16 +118,16 @@
               customPaletteModule
             ],
             moddleExtensions: {
-              flowz: {
-                'name': 'Camunda',
-                'uri': 'http://camunda.org/schema/1.0/bpmn',
-                'prefix': 'camunda',
-                'xml': {
-                  'tagAlias': 'lowerCase'
-                },
-                'associations': [],
-                'types': types
-              },
+              // flowz: {
+              //   'name': 'Camunda',
+              //   'uri': 'http://camunda.org/schema/1.0/bpmn',
+              //   'prefix': 'camunda',
+              //   'xml': {
+              //     'tagAlias': 'lowerCase'
+              //   },
+              //   'associations': [],
+              //   'types': types
+              // },
               camunda: camundaModdleDescriptor
             }
           })
@@ -214,10 +215,11 @@
           })
           .map(async (m) => {
             let _mapping = await self.getMapping(m, mergeModules)
+            console.log('m', m)
             return {
               id: m._id,
-              capacity: (m['_camunda:isFormInput']) ? m['_camunda:capacity'] : false,
-              isProcessTask: (m['_camunda:isProcessTask'] === 'true'),
+              capacity: (m._isFormInput) ? m._capacity : false,
+              isProcessTask: (m._isProcessTask === 'true'),
               name: m._name,
               type: m.workerType.toLowerCase(),
               // isProcessTask: m.workerType.toLowerCase() === 'tweet' ? 'true' : false,
@@ -240,8 +242,8 @@
           console.log('m', m)
           return {
             id: m._id,
-            capacity: (m['_camunda:isFormInput']) ? m['_camunda:capacity'] : false,
-            isProcessTask: (m['_camunda:isProcessTask'] === 'true'),
+            capacity: (m._isFormInput) ? m._capacity : false,
+            isProcessTask: (m._isProcessTask === 'true'),
             name: m._name,
             type: 'start',
             target: self.getTargetId(m, process),

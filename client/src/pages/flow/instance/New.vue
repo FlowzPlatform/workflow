@@ -270,6 +270,7 @@ export default {
         }
       })
       if (types !== undefined) {
+        camundaModdleDescriptor.types = _.concat(camundaModdleDescriptor.types, types)
         viewer = new BpmnViewer({
           container: '#canvas',
           additionalPlugins: plugins,
@@ -277,16 +278,16 @@ export default {
             require('@/bpmn-custom-module/viewindex')
           ],
           moddleExtensions: {
-            flowz: {
-              'name': 'Camunda',
-              'uri': 'http://camunda.org/schema/1.0/bpmn',
-              'prefix': 'camunda',
-              'xml': {
-                'tagAlias': 'lowerCase'
-              },
-              'associations': [],
-              'types': types
-            },
+            // flowz: {
+            //   'name': 'Camunda',
+            //   'uri': 'http://camunda.org/schema/1.0/bpmn',
+            //   'prefix': 'camunda',
+            //   'xml': {
+            //     'tagAlias': 'lowerCase'
+            //   },
+            //   'associations': [],
+            //   'types': types
+            // },
             camunda: camundaModdleDescriptor
           }
         })

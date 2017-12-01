@@ -142,7 +142,13 @@ export default {
             self.$router.push({ path: '/user'})
           }
         }).catch(error => {
-          self.$Message.error('You are not allowed to access this application.')
+          authUser.role = 3
+          authUser.token = this.$cookie.get('auth_token')
+          self.$store.state.isLoggedIn = true
+          self.$cookie.set('authUser', JSON.stringify(authUser), {expires: 1, domain: location});
+          window.localStorage.setItem("authUser",JSON.stringify(authUser))
+          self.$router.push({ path: '/user'})
+          // self.$Message.error('You are not allowed to access this application.')
         })
       })
       .catch(function(e) {
