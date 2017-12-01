@@ -726,18 +726,15 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
       let targetSchemaIndex = _.findIndex(processList,{'id': targetId}) //get index of process block from processList based on targetId
       //if output of previous data is single object, convert it to array
       let sourceOutput = (jobData.output instanceof Array) ? jobData.output : target.outputid ? jobData.output[target.outputid.toLowerCase()] : [jobData.output]
-      if (sourceOutput) {
+      if (sourceOutput || targetSchema.isProcessTask) {
         if (targetSchema.isProcessTask) {
           await this.updateLog(targetSchema, 'running', null, true, fId)
           let type = targetSchema.type ? targetSchema.type.toLowerCase() : 'tweet'
-          for (let j=0; j<sourceOutput.length; j++) {
-            sourceOutput[j] = JSON.stringify(sourceOutput[j])
-            targetSchema = JSON.stringify(targetSchema)
-            c_options = JSON.stringify(cxnOptions)
-            q_options = JSON.stringify(qOptions)
-            let n = cp.fork(`${__dirname}/${'process.js'}`, [type, PROCESS_URL, targetSchema, targetSchemaIndex, sourceOutput[j], fId, c_options, q_options])
-            await rdash.table(RUNTIME_PROCESS_TABLE).insert({options: [type, PROCESS_URL, targetSchema, targetSchemaIndex, sourceOutput[j], fId, c_options, q_options], created: new Date()}).run()
-          }
+          targetSchema = JSON.stringify(targetSchema)
+          c_options = JSON.stringify(cxnOptions)
+          q_options = JSON.stringify(qOptions)
+          let n = cp.fork(`${__dirname}/${'process.js'}`, [type, PROCESS_URL, targetSchema, targetSchemaIndex, fId, c_options, q_options])
+          await rdash.table(RUNTIME_PROCESS_TABLE).insert({options: [type, PROCESS_URL, targetSchema, targetSchemaIndex, fId, c_options, q_options], created: new Date()}).run()
         }
         else {
           let outputPropertyIndex = target.outputid ? _.findIndex(notifyingProcessSchema.outputProperty, {id: target.outputid}) : 0
