@@ -9,7 +9,9 @@ module.exports = {
   cxnOptions: {
     host: process.env.host || "localhost",
     port: process.env.port || 28015,
-    db: process.env.db || "FlowzEngine"
+    db: process.env.db || "FlowzEngine",
+    user: process.env.user,
+    password: process.env.password
   },
   symmetricWorker: {
     port : process.env.symmetric_port || 9000,
