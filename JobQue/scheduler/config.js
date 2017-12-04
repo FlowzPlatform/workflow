@@ -1,10 +1,12 @@
+const fs = require('fs')
+
 module.exports = {
   rethinkdb: {
     host: process.env.host || "localhost",
     port: process.env.port || 28015,
     db: process.env.db || "FlowzEngine",
-    user: process.env.user,
-    password: process.env.password
+    authKey: process.env.authDB,
+    ssl: process.env.cert ? { ca: fs.readFileSync(process.env.cert) } : null
   },
   qOptions: {
     name: process.env.scheduler || "scheduler",

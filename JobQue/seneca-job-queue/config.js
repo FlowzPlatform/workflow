@@ -1,3 +1,5 @@
+const fs = require('fs')
+
 module.exports = {
   plugins : {
     createPattern: "role:job,cmd:create",
@@ -10,8 +12,8 @@ module.exports = {
     host: process.env.host || "localhost",
     port: process.env.port || 28015,
     db: process.env.db || "FlowzEngine",
-    user: process.env.user,
-    password: process.env.password
+    authKey: process.env.authDB,
+    ssl: process.env.cert ? { ca: fs.readFileSync(process.env.cert) } : null
   },
   symmetricWorker: {
     port : process.env.symmetric_port || 9000,
