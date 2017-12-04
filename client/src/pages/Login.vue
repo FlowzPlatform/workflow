@@ -5,9 +5,16 @@
         <Col :span="6" offset="1">
           <Form ref="formLogin" :model="formLogin" :rules="ruleLogin">
             <FormItem class="animate0 bounceIn">
-              <div style="text-align: center;">
-                <img src="../assets/images/logo.png" style="width:60%;"/>
+							<div class="pageheader">
+                <div class="pageicon"><i class="fa fa-unlock-alt"></i></div>
+                <div class="pagetitle">
+                  <h5>Your Login Information</h5>
+                  <h1>Login</h1>
+                </div>
               </div>
+              <!-- <div style="text-align: center;">
+                <img src="../assets/images/Flowz-Icon.png" style="width:60%;"/>
+              </div> -->
             </FormItem>
             <FormItem prop="email" class="animate1 bounceIn">
               <Input type="text" v-model="formLogin.email" placeholder="Email ID">
@@ -114,7 +121,38 @@ export default {
 	}
   .loginpage {
       background: #0866c6;
-      height: 100vh;
+      min-height: 100vh;
+  }
+	.loginpage .pageheader{
+    background: none;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding: 0 0 25px 0;
+  } 
+  .loginpage .pageicon {
+      width: 70px;
+      font-size: 42px;
+      padding: 10px;
+      color: #fff;
+      border: 3px solid #fff;
+      display: inline-block;
+      -moz-border-radius: 50px;
+      -webkit-border-radius: 50px;
+      border-radius: 50px;
+      float: left;
+      text-align: center;
+  }
+  .loginpage .pagetitle{
+    margin-left: 90px;
+    padding-top: 5px;
+  }
+  .loginpage .pagetitle h5{
+    text-transform: uppercase;
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+  }
+  .loginpage .pagetitle h1{
+    color: #fff;
+    font-size: 32px;
   }
   .loginpage .ivu-input, .loginpage .login-btn {
     border-radius: 0;
@@ -221,99 +259,6 @@ export default {
 	-ms-animation-fill-mode: both;
 	animation-duration: .8s;
 	animation-delay: .8s;
-	animation-timing-function: ease;
-	animation-fill-mode: both;	          
-}  
-
-.animate5{
-   	-webkit-animation-duration: .8s;
-	-webkit-animation-delay: 1s;
-	-webkit-animation-timing-function: ease;
-	-webkit-animation-fill-mode: both;
-	-moz-animation-duration: .8s;
-	-moz-animation-delay: 1s;
-	-moz-animation-timing-function: ease;
-	-moz-animation-fill-mode: both;
-	-ms-animation-duration: .8s;
-	-ms-animation-delay: 1s;
-	-ms-animation-timing-function: ease;
-	-ms-animation-fill-mode: both;
-	animation-duration: .8s;
-	animation-delay: 1s;
-	animation-timing-function: ease;
-	animation-fill-mode: both;	          
-}    
-.animate6{
-   	-webkit-animation-duration: .8s;
-	-webkit-animation-delay: 1.2s;
-	-webkit-animation-timing-function: ease;
-	-webkit-animation-fill-mode: both;
-	-moz-animation-duration: .8s;
-	-moz-animation-delay: 1.2s;
-	-moz-animation-timing-function: ease;
-	-moz-animation-fill-mode: both;
-	-ms-animation-duration: .8s;
-	-ms-animation-delay: 1.2s;
-	-ms-animation-timing-function: ease;
-	-ms-animation-fill-mode: both;
-	animation-duration: .8s;
-	animation-delay: 1.2s;
-	animation-timing-function: ease;
-	animation-fill-mode: both;	          
-}    
-.animate7{
-   	-webkit-animation-duration: .8s;
-	-webkit-animation-delay: 1.4s;
-	-webkit-animation-timing-function: ease;
-	-webkit-animation-fill-mode: both;
-	-moz-animation-duration: .8s;
-	-moz-animation-delay: 1.4s;
-	-moz-animation-timing-function: ease;
-	-moz-animation-fill-mode: both;
-	-ms-animation-duration: .8s;
-	-ms-animation-delay: 1.4s;
-	-ms-animation-timing-function: ease;
-	-ms-animation-fill-mode: both;
-	animation-duration: .8s;
-	animation-delay: 1.4s;
-	animation-timing-function: ease;
-	animation-fill-mode: both;	          
-}
-
-.animate8{
-   	-webkit-animation-duration: .8s;
-	-webkit-animation-delay: 1.8s;
-	-webkit-animation-timing-function: ease;
-	-webkit-animation-fill-mode: both;
-	-moz-animation-duration: .8s;
-	-moz-animation-delay: 1.8s;
-	-moz-animation-timing-function: ease;
-	-moz-animation-fill-mode: both;
-	-ms-animation-duration: .8s;
-	-ms-animation-delay: 1.8s;
-	-ms-animation-timing-function: ease;
-	-ms-animation-fill-mode: both;
-	animation-duration: .8s;
-	animation-delay: 1.8s;
-	animation-timing-function: ease;
-	animation-fill-mode: both;	          
-}
-
-.animate9{
-   	-webkit-animation-duration: .8s;
-	-webkit-animation-delay: 1.8s;
-	-webkit-animation-timing-function: ease;
-	-webkit-animation-fill-mode: both;
-	-moz-animation-duration: .8s;
-	-moz-animation-delay: 1.8s;
-	-moz-animation-timing-function: ease;
-	-moz-animation-fill-mode: both;
-	-ms-animation-duration: .8s;
-	-ms-animation-delay: 1.8s;
-	-ms-animation-timing-function: ease;
-	-ms-animation-fill-mode: both;
-	animation-duration: .8s;
-	animation-delay: 1.8s;
 	animation-timing-function: ease;
 	animation-fill-mode: both;	          
 }
