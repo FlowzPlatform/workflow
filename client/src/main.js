@@ -51,6 +51,10 @@ Vue.use(VueCodeMirror)
 
 /* jquery-ui */
 
+/* Animated css */
+
+import 'animate.css/animate.css'
+
 /* IView */
 // import 'bootstrap/dist/css/bootstrap.css'
 // import 'bootstrap-vue/dist/bootstrap-vue.css'
@@ -82,30 +86,54 @@ var router = new VueRouter({
 
 // Some middleware to help us ensure the user is authenticated.
 router.beforeEach((to, from, next) => {
-  console.log(to)
   iView.LoadingBar.config({ color: '#0e406d' })
-  next()
-  if (to.matched[0].meta.requireAuth) {
-    const authUser = JSON.parse(window.localStorage.getItem('authUser'))
-    if (!authUser || !authUser.token) {
-      next('/login')
-    } else if (to.matched[0].meta.adminAuth) {
-      const authUser = JSON.parse(window.localStorage.getItem('authUser'))
-      if (authUser.role === 1) {
-        next()
-      } else {
-        next('/user')
-      }
-    } else if (to.matched[0].meta.userAuth) {
-      const authUser = JSON.parse(window.localStorage.getItem('authUser'))
-      if (authUser.role !== 1) {
-        next()
-      } else {
-        next('/admin/dashboard')
-      }
-    }
+    // window.console.log('Transition', transition)
+    // router.app.$store.state.token
+  const token = router.app.$cookie.get('auth_token')
+  if (to.matched.some(record => record.meta.requiresAuth) && (!token || token === 'null')) {
+    window.console.log('Not authenticated')
+    next({
+      path: '/login',
+      query: { redirect: to.fullPath }
+    })
   } else {
-    next()
+    if (to.matched.some(record => record.meta.requiresAuth)) {
+      store.dispatch('authenticate', token).then(response => {
+        store.commit('SET_USER', response)
+          // get user role
+        if (to.matched.some(record => record.meta.role)) {
+          store.dispatch('getUser', response.email).then(user => {
+            if (store.state.role !== null) {
+              store.commit('SET_ROLE', user.role)
+              if (to.matched.find(record => record.meta.role).meta.role.indexOf(parseInt(user.role)) === -1) {
+                next({
+                  path: '/login',
+                  query: { redirect: to.fullPath }
+                })
+              } else {
+                next()
+              }
+            } else {
+              store.commit('SET_ROLE', user.role)
+              next({
+                path: parseInt(user.role) === 1 ? '/admin/dashboard' : '/'
+              })
+            }
+          })
+        } else {
+          next()
+        }
+      }).catch(error => {
+        console.log(error.message)
+          // window.console.log('Not authenticated')
+        next({
+          path: '/login',
+          query: { redirect: to.fullPath }
+        })
+      })
+    } else {
+      next()
+    }
   }
 })
 
@@ -118,14 +146,3 @@ new Vue({
   template: '<App/>',
   components: { App }
 })
-
-// Check local storage to handle refreshes
-if (window.localStorage) {
-  var localUserString = window.localStorage.getItem('user') || 'null'
-  var localUser = JSON.parse(localUserString)
-
-  if (localUser && store.state.user !== localUser) {
-    store.commit('SET_USER', localUser)
-    store.commit('SET_TOKEN', window.localStorage.getItem('token'))
-  }
-}

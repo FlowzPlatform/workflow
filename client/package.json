@@ -16,6 +16,7 @@
   "dependencies": {
     "@deveodk/vue-tinymce": "^1.0.0",
     "FormData": "^0.10.1",
+    "animate.css": "^3.5.2",
     "aws-sdk": "^2.130.0",
     "axios": "^0.16.2",
     "babel-plugin-syntax-jsx": "^6.18.0",

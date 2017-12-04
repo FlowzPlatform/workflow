@@ -40,7 +40,7 @@ const routes = [{
   path: '/admin',
   name: 'Layout',
   component: Layout,
-  meta: { requireAuth: true, userAuth: false, adminAuth: true },
+  meta: { requiresAuth: true, role: [1] },
   children: [{
     path: 'dashboard',
     alias: '',
@@ -200,13 +200,9 @@ const routes = [{
   name: 'Register',
   component: Register
 }, {
-  path: '/user',
+  path: '/',
   name: 'userLayout',
   component: userLayout,
-  meta: { requireAuth: true, userAuth: true, adminAuth: false }
-}, {
-  path: '/',
-  name: '',
-  redirect: '/Login'
+  meta: { requiresAuth: true, role: [2, 3] }
 }]
 export default routes
