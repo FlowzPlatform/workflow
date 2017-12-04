@@ -170,7 +170,8 @@ export default {
         created: 'ios-paper-outline',
         completed: 'checkmark',
         inputRequired: 'ios-help-outline',
-        processing: 'load-a'
+        processing: 'load-a',
+        SendForApproval: 'paper-airplane'
       },
       logColumns: [{
         title: 'job',
@@ -191,6 +192,7 @@ export default {
     }
   },
   async mounted () {
+    console.log('-->', this.selectedProcess)
     await this.init()
   },
   feathers: {
@@ -339,6 +341,7 @@ export default {
     },
     handleProcessClick (item, log) {
       this.showProp = true
+      console.log('item', item)
       this.selectedProcess = item
       this.selectedLogs = log
     },

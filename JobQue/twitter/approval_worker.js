@@ -36,7 +36,7 @@ q.process(async(job, next) => {
     let rolesEmail = []
     await axios({
         method: 'get',
-        url: 'http://localhost:3030/flowz-instance/' + job.data.fId
+        url: 'http://172.16.160.117:3030/flowz-instance/' + job.data.fId
       })
       .then(async function(response) {
         runningProcess = _.find(response.data.processList, ['id', job.data.job])
@@ -53,6 +53,7 @@ q.process(async(job, next) => {
         })
         emailTemplateUrl = _.find(runningProcess.inputProperty[0].entityschema.emailTemplate, ['filename', runningProcess.inputProperty[0].emailTemplate])
         emailTemplateUrl = emailTemplateUrl.url
+        console.log('URL', emailTemplateUrl)
       })
     await axios({
         method: 'get',
@@ -109,13 +110,13 @@ q.process(async(job, next) => {
     await job.update()
     return next(null, 'success')
   } catch (err) {
+    console.log('==>', err)
     pino().error('... error in process',err)
     return next(new Error('error'))
   }
 })
 q.on('terminated', (queueId, jobId) => {
   q.getJob(jobId).then((job) => {
-    func.processError(job[0].data)
     pino().info({ 'jobId': job[0].data.id }, 'Approval Type Job terminated');
     pino(fs.createWriteStream('./mylog')).info({ 'fId': job[0].data.fId, 'jobId': job[0].data.id }, 'Approval Type Job terminated')
   }).catch(err => {
