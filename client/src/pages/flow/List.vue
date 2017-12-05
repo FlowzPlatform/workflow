@@ -227,7 +227,7 @@ export default {
       // console.log('instanceModel', instanceModel)
       instanceModel.post(generatedJson)
       .then(response => {
-        // console.log('response.data', response.data)
+        console.log('response.data', response.data)
         this.$router.push('/flow/instance/' + response.data.id)
       })
       .catch(error => {

@@ -1,35 +1,21 @@
 <template>
-  <div class="layout" :class="{'layout-hide-text': spanLeft < 5}">
-    <f-header></f-header>
+  <div class="layout">
+   
     <Row type="flex">
-       <Col :span="spanLeft" class="layout-menu-left">
+      <i-col v-if="$store.state.sidenavtoggle" :span="5" :style="styles">
         <f-sidebar></f-sidebar>
-      </Col>
-      <Col :span="spanRight">
+      </i-col>
+      <i-col :span="contentSpan" style="z-index:1">
+         <f-header></f-header>  
          <div class="f-layout-content">
           <div class="f-layout-content-main">
             <router-view></router-view>
           </div>
         </div> 
         <f-footer></f-footer>
-      </Col>
+      </i-col>
     </Row>  
   </div>  
-  <!-- <div class="layout" :class="{'layout-hide-text': spanLeft < 5}">
-    <Row type="flex">
-      <Col :span="spanLeft" class="layout-menu-left">
-        <f-sidebar></f-sidebar>
-      </Col>
-      <Col :span="spanRight">
-         <div class="f-layout-content">
-          <div class="f-layout-content-main">
-            <router-view></router-view>
-          </div>
-        </div> 
-        <f-footer></f-footer>
-      </Col>
-    </Row>
-  </div> -->
 </template>
 
 <script>
@@ -47,26 +33,30 @@ export default {
     'f-footer': Footer
   },
   data () {
-    return {
-      spanLeft: 5,
-      spanRight: 19
-    }
   },
   computed: {
     iconSize () {
       return this.spanLeft === 5 ? 14 : 24
+    },
+    tabdata () {
+      console.log('this.$store.getters.TabData', this.$store.getters.TabData)
+      return this.$store.getters.TabData
+    },
+    styles () {
+      let style = {}
+      if (this.$store.state.sidenavtoggle && !this.$store.state.sidenavtoggle || !this.$store.state.sidenavpin) {
+        style.position = 'fixed'
+        style['z-index'] = '99'
+        style.height = '100%'
+        style.background = '#363e4f'
+      }
+      return style
+    },
+    contentSpan () {
+      return this.$store.state.sidenavtoggle && this.$store.state.sidenavpin ? 19 : 24
     }
   },
   methods: {
-    toggleClick () {
-      // if (this.spanLeft === 5) {
-      //   this.spanLeft = 2
-      //   this.spanRight = 22
-      // } else {
-      //   this.spanLeft = 5
-      //   this.spanRight = 19
-      // }
-    }
   }
 }
 </script>

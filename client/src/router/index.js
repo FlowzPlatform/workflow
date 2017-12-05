@@ -38,7 +38,8 @@ import ApprovalNew from '@/pages/approval/New'
 
 // User area
 import UserDashboard from '@/pages/user/dashboard'
-import ManageBPMNPlugin from '@/pages/BPMNPlugins/Manage
+// import UserProcesslist from '@/pages/user/processlist'
+import ManageBPMNPlugin from '@/pages/BPMNPlugins/Manage'
 
 Vue.use(Router)
 const routes = [{
@@ -199,8 +200,28 @@ const routes = [{
   children: [{
     path: 'approval/list',
     name: 'approval',
-    component: UserDashboard
+    component: UserDashboard,
+    meta: { description: 'DashBoard' }
+  }, {
+    path: 'approval/:id',
+    name: 'Process',
+    component: UserDashboard,
+    meta: { description: 'List' },
+    props: {
+      id: String,
+      required: false
+    }
   }]
+  // }, {
+  //   path: 'approval/:id',
+  //   name: 'Process',
+  //   component: UserProcesslist,
+  //   meta: { description: 'List' },
+  //   props: {
+  //     id: String,
+  //     required: false
+  //   }
+  // }]
 }, {
   path: '/Login',
   name: 'Login',
