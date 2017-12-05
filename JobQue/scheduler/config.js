@@ -6,7 +6,7 @@ module.exports = {
     port: process.env.port || 28015,
     db: process.env.db || "FlowzEngine",
     authKey: process.env.authDB,
-    ssl: process.env.cert ? { ca: fs.readFileSync(process.env.cert) } : null
+    ssl: process.env.cert ? { ca: fs.readFileSync('./ca.cer') } : null
   },
   qOptions: {
     name: process.env.scheduler || "scheduler",

@@ -1,1 +1,1 @@
-{"pid":29905,"hostname":"OBLAP-71","level":30,"time":1512391003182,"msg":"next job","fId":"82357c6c-ccc2-49d7-9527-50ab0eb7fd24","job":"StartEvent_1","jobId":"9db164f8-9e6e-4456-83ef-a02db3692731","v":1}
+{"pid":8275,"hostname":"OBLAP-71","level":40,"time":1512452208965,"msg":"all inputs not available","fId":"7a700c18-6f69-4d64-a0cc-6143c79b6983","job":"Set_Reply_And_Send_For_Approval","jobId":"614691dd-40e2-40bf-89dc-30bede4c31a3","v":1}
