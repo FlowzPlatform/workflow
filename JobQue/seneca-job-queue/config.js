@@ -13,7 +13,7 @@ module.exports = {
     port: process.env.port || 28015,
     db: process.env.db || "FlowzEngine",
     authKey: process.env.authDB,
-    ssl: process.env.cert ? { ca: fs.readFileSync('./ca.crt') } : null
+    ssl: process.env.cert ? { ca: fs.readFileSync('./ca.cer') } : null
   },
   symmetricWorker: {
     port : process.env.symmetric_port || 4003,
