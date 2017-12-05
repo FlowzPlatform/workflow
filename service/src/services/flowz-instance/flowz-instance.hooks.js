@@ -1,7 +1,8 @@
 let async = require('asyncawait/async');
 let await = require('asyncawait/await');
 const app = require('config');
-const config = app.get('rethinkdb')
+const config = require('../config')
+var serverUrl = 'http://' + app.host + ':' + app.port + '/'
 const _ = require('lodash')
 const axios = require('axios')
 module.exports = {
@@ -38,8 +39,6 @@ module.exports = {
   }
 };
 var updateProcesslogforMappingRequired = async(function(hook) {
-  console.log('------------------ update --------------');
-  // console.log('updatedHook', hook.result);
   for (let [key, m] of hook.result.processList.entries()) {
     m.log = _.chain(hook.result.process_log).filter(f => {
       return f.job === m.id
@@ -70,24 +69,19 @@ var handleMappingRequireStatus = async(function(data, fid) {
           'jobId': _lastLog.jobId,
           'job': _lastLog.job
         }
-        let uri = 'http://localhost:3030/addInputToJobQue'
-        console.log('axios call', _lastLog.jobId)
+        let uri = serverUrl + 'addInputToJobQue'
         await (axios.post(uri, dataObject))
       }
     }
-    // }))
-    // console.log('_allProcess', _allProcess)
-    // return Promise.all([])
   }
 })
 
 function aftercreateInstance(hook) {
   let id = hook.data.id;
-  // console.log('hook.data.id', hook.data)
   if (hook.data.id != undefined) {
     const Queue = require('rethinkdb-job-queue')
       //--------------- Connection Options -----------------
-    const cxnOptions = config
+    const cxnOptions = config.rethinkdb
       //--------------- Queue Options -----------------
     const qOptions = {
       name: app.get('scheduler_table')

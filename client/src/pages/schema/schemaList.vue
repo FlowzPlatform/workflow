@@ -1,7 +1,7 @@
 <template>
   <div>
   <row type="flex" justify="end">
-    <router-link to="/schema/new">
+    <router-link :to="{name:'schema/new'}">
       <Button type="primary" size="small" style="margin-bottom: 2px;" icon="plus">Add</Button>
     </router-link>
   </row>
@@ -10,8 +10,8 @@
 </template>
 <script type="text/javascript">
   import schema from '@/api/schema'
-import api from '@/api'
-import _ from 'lodash'
+  import api from '@/api'
+  import _ from 'lodash'
   export default {
     data () {
       return {

@@ -1,8 +1,8 @@
-const config = require('config')
+const config = require('./config')
 const cp = require('child_process')
 const pino = require('pino')
-const PINO = config.get('pino')
-const symmetricWorker = config.get('symmetricWorker')
+const PINO = config.pino
+const symmetricWorker = config.symmetricWorker
 
 function executeChildProcessAsWorker (jobType, options) {
   try {
@@ -16,7 +16,7 @@ function executeChildProcessAsWorker (jobType, options) {
   }
 }
 
-var socket = require('socket.io-client')(symmetricWorker.executeWorkerURL, {reconnect: true})
+var socket = require('socket.io-client')(symmetricWorker.executeWorkerURL + symmetricWorker.executeWorkerService, {reconnect: true})
 
 socket.on('connect', function () {pino(PINO).info('socket is connected')})
 socket.on('worker', function (data) {

@@ -1,18 +1,18 @@
 const Queue = require('rethinkdb-job-queue')
-const config = require('config')
+const config = require('./config')
 const pino = require('pino')
-const PINO = config.get('pino')
-const pluginSubscriptionCreate = config.get('plugins.subscriptionCreatePattern')
-const pluginCreate = config.get('plugins.createPattern')
-const pluginFind = config.get('plugins.findPattern')
-const pluginQueue = config.get('plugins.queuePattern')
-const pluginUpdate = config.get('plugins.updatePattern')
+const PINO = config.pino
+const pluginSubscriptionCreate = config.plugins.subscriptionCreatePattern
+const pluginCreate = config.plugins.createPattern
+const pluginFind = config.plugins.findPattern
+const pluginQueue = config.plugins.queuePattern
+const pluginUpdate = config.plugins.updatePattern
 
-const dbConfig = config.get('cxnOptions')
-const qConfig = config.get('defaultQueue')
-const subsConfig = config.get('defaultSubscription')
+const dbConfig = config.cxnOptions
+const qConfig = config.defaultQueue
+const subsConfig = config.defaultSubscription
 
-const qCreateOption = config.get('defaultCreateJob')
+const qCreateOption = config.defaultCreateJob
 
 const defaultOption = {
   connection: dbConfig,

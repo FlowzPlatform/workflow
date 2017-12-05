@@ -9,6 +9,9 @@ export default {
   SET_TOKEN (state, token) {
     state.token = token
   },
+  SET_ROLE (state, role) {
+    state.role = role
+  },
   SET_SCHEMA (state, schema) {
     state.schema = schema
   },

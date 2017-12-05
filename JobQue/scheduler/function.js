@@ -1,5 +1,5 @@
 const Queue = require('rethinkdb-job-queue')
-const app = require('./config.json')
+const app = require('./default.json')
 const TIMEOUT = 60000*60
 const _ = require('lodash')
 const fs = require("fs")
@@ -9,10 +9,10 @@ const cp = require('child_process')
 
 module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
 
-  const FIND_URL = options.service && options.service.find ? options.service.find : app.service.find
-  const UPDATE_URL = options.service && options.service.update ? options.service.update : app.service.update
-  const CREATE_URL = options.service && options.service.create ? options.service.create : app.service.create
-  const PROCESS_URL = options.job_module && options.service.job_module ? options.service.job_module : app.service.job_module
+  const FIND_URL = options.serviceURL ? options.serviceURL + app.service.find : app.serviceURL + app.service.find
+  const UPDATE_URL = options.serviceURL ? options.serviceURL + app.service.update : app.serviceURL + app.service.update
+  const CREATE_URL = options.serviceURL ? options.serviceURL + app.service.create : app.serviceURL + app.service.create
+  const PROCESS_URL = options.jobURL ? options.jobURL + app.service.job_module : app.serviceURL + app.service.job_module
   const cxnOptions = options.cxnOptions ? options.cxnOptions : app.rethinkdb
   const SCHEDULER_TABLE = options.scheduler ? options.scheduler : app.scheduler_table
   const FLOWZ_TABLE = options.fTable ? options.fTable : app.flowz_table
@@ -133,8 +133,8 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
   // -------- // -------- checkAllInputsAvailable -------- // -------- //
   this.constructor.prototype.checkAllInputsAvailable = async function (targetJob, capacity, externalCheck) {
     return new Promise (async (resolve, reject) => {
-      if (targetJob.data.inputProperty.length == 0) return true
-      else if ((capacity == targetJob.data.input.length && targetJob.data.input.length != 0)|| externalCheck) {
+      if (targetJob.data.inputProperty.length == 0) resolve(true)
+      else if ((capacity == targetJob.data.input.length && targetJob.data.input.length != 0) || externalCheck) {
         let targetEntitySchema = targetJob.data.inputProperty[0].entityschema
         for (let j=0; j<targetJob.data.input.length; j++) {
 
@@ -189,7 +189,12 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
           "options" : {
             "timeout": TIMEOUT,
             "retrymax": 0,
-            "manualStatus": 'created'
+            "manualStatus": 'created',
+            'scheduler': {
+              'cxnOptions': cxnOptions,
+              'table': SCHEDULER_TABLE
+            },
+            'flowz_table': FLOWZ_TABLE
           },
           "jobs":[jobData]
         })
@@ -721,18 +726,15 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
       let targetSchemaIndex = _.findIndex(processList,{'id': targetId}) //get index of process block from processList based on targetId
       //if output of previous data is single object, convert it to array
       let sourceOutput = (jobData.output instanceof Array) ? jobData.output : target.outputid ? jobData.output[target.outputid.toLowerCase()] : [jobData.output]
-      if (sourceOutput) {
+      if (sourceOutput || targetSchema.isProcessTask) {
         if (targetSchema.isProcessTask) {
           await this.updateLog(targetSchema, 'running', null, true, fId)
           let type = targetSchema.type ? targetSchema.type.toLowerCase() : 'tweet'
-          for (let j=0; j<sourceOutput.length; j++) {
-            sourceOutput[j] = JSON.stringify(sourceOutput[j])
-            targetSchema = JSON.stringify(targetSchema)
-            c_options = JSON.stringify(cxnOptions)
-            q_options = JSON.stringify(qOptions)
-            let n = cp.fork(`${__dirname}/${'process.js'}`, [type, PROCESS_URL, targetSchema, targetSchemaIndex, sourceOutput[j], fId, c_options, q_options])
-            await rdash.table(RUNTIME_PROCESS_TABLE).insert({options: [type, PROCESS_URL, targetSchema, targetSchemaIndex, sourceOutput[j], fId, c_options, q_options], created: new Date()}).run()
-          }
+          targetSchema = JSON.stringify(targetSchema)
+          c_options = JSON.stringify(cxnOptions)
+          q_options = JSON.stringify(qOptions)
+          let n = cp.fork(`${__dirname}/${'process.js'}`, [type, PROCESS_URL, targetSchema, targetSchemaIndex, fId, c_options, q_options])
+          await rdash.table(RUNTIME_PROCESS_TABLE).insert({options: [type, PROCESS_URL, targetSchema, targetSchemaIndex, fId, c_options, q_options], created: new Date()}).run()
         }
         else {
           let outputPropertyIndex = target.outputid ? _.findIndex(notifyingProcessSchema.outputProperty, {id: target.outputid}) : 0
@@ -760,9 +762,6 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
             fillFrom = 0
           }
           else {
-            for (var o=0; o<targetJobs.length; o++) {
-              pino(PINO_C_OPTION).warn(targetJobs[o].data)
-            }
             //from targetJobs got, get size of data they can handle
             let numberOfAllFreeSlotsAvailbale = await this.getNumberOfAllFreeSlotsAvailable(targetJobs, capacity, sourceName)
 
@@ -826,6 +825,10 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
   async function rerunProcess () {
     return new Promise (async (resolve, reject) => {
       try {
+        let tableList = await rdash.tableList().run()
+        if (!(_.includes(tableList, RUNTIME_PROCESS_TABLE))) {
+          await rdash.tableCreate(RUNTIME_PROCESS_TABLE).run()
+        }
         let previousProcess = await rdash.table(RUNTIME_PROCESS_TABLE).filter(rdash.row('created').gt(new Date(new Date().getTime() - 86400000))).run()
         for (let i=0; i<previousProcess.length; i++) {
           let n = cp.fork(`${__dirname}/${'process.js'}`, previousProcess[i].options)

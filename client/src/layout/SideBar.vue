@@ -102,8 +102,8 @@
 /*eslint-disable*/
   import api from '../api'
   const X2JS = require('x2js')
-  // import schemaModel from '@/api/schema'
-  // import schemamappingModel from '@/api/schemamapping'
+  import schemaModel from '@/api/schema'
+  import schemamappingModel from '@/api/schemamapping'
   // import approvalModel from '@/api/approval'
   import instanceModel from '@/api/flowzinstance'
   import mongo from '../assets/images/mongo.png'
@@ -177,7 +177,7 @@
     methods: {
       addNewFlow () {
         this.$store.dispatch('removeXMLtoLocalStorage')
-        this.$router.push('/flow/new')
+        this.$router.push('/admin/flow/new')
       },
       handleRemove (index) {
         this.$Modal.confirm({
@@ -289,7 +289,7 @@
         instanceModel.post(generatedJson)
         .then(response => {
           // console.log('response.data', response.data)
-          this.$router.push('/flow/instance/' + response.data.id)
+          this.$router.push('/admin/flow/instance/' + response.data.id)
         })
         .catch(error => {
           console.log(error)

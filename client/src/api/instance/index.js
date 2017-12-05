@@ -1,6 +1,6 @@
 import api from '../../api'
 let model = 'instance'
-// let model = 'instance-test'
+  // let model = 'instance-test'
 export default {
   // let gets = async function (id) {
   //     return true;
@@ -8,8 +8,8 @@ export default {
   get: () => {
     return api.request('get', '/' + model)
   },
-  getThis: (id) => {
-    return api.request('get', '/' + model + '/' + id)
+  getThis: (id, Schemaid) => {
+    return api.request('get', '/' + model + '/' + id + '?schemaid=' + Schemaid)
   },
   post: (data) => {
     console.log('data', data)

@@ -17,25 +17,25 @@
             <Row type="flex" justify="end">
                 <div class="layout-nav">
                     <Menu-item name="1">
-                        <router-link to="/approval">
+                        <router-link to="/admin/approval">
                             <Icon type="filing" :size="14"></Icon>
                             Approval
                         </router-link>
                     </Menu-item>
                     <Menu-item name="2">
-                        <router-link to="/schema">
+                        <router-link to="/admin/schema">
                             <Icon type="filing" :size="14"></Icon>
                             Schema
                         </router-link>
                     </Menu-item>
                     <Menu-item name="3">
-                        <router-link to="/flow">
+                        <router-link to="/admin/flow">
                             <Icon type="network" :size="14"></Icon>
                             Flow
                         </router-link>
                     </Menu-item>
                     <Menu-item name="4">
-                        <router-link to="/DbSettings">
+                        <router-link to="/admin/DbSettings">
                             <Icon type="gear-b" :size="14"></Icon>
                             Db-settings
                         </router-link>
@@ -44,10 +44,10 @@
                       <Submenu name="1">
                         <template slot="title">
                           <Icon type="person" :size="16"></Icon>
-                          Krunal Mahera
+                          {{$store.state.user.fullname}}
                         </template>
                         <Menu-item name="1-1">
-                            <router-link to="/bpmn-plugin">
+                            <router-link to="/admin/bpmn-plugin">
                                 <i class="fa fa-plug"></i>
                                 Plugins
                             </router-link>
@@ -67,6 +67,7 @@
     </Menu>
 </template>
 <script>
+  import psl from 'psl'
 /*eslint-disable*/
   export default {
     computed: {
@@ -76,8 +77,13 @@
     },
     methods:{
       handleRemove () {
-        localStorage.removeItem('logintoken')
-        this.$router.push('Login')
+        let location = psl.parse(window.location.hostname)
+        location = location.domain === null ? location.input : location.domain
+        this.$cookie.delete('auth_token', {domain: location});
+        this.$store.commit('SET_TOKEN', null)
+        this.$store.commit('SET_USER', null)
+        this.$store.commit('SET_ROLE', null)
+        this.$router.push('/login')
       }
     }
   }

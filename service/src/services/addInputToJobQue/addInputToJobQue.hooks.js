@@ -1,8 +1,8 @@
 let async = require('asyncawait/async');
 let await = require('asyncawait/await');
 const app = require('config');
-const config = app.get('rethinkdb')
-const rdash = require('rethinkdbdash')(config)
+const config = require('../config')
+  // const rdash = require('rethinkdbdash')(config)
 const _ = require('lodash')
 module.exports = {
   before: {
@@ -39,7 +39,7 @@ module.exports = {
 function beforeCreate(hook) {
   // Create Job Que Scheduler Entry
   const Queue = require('rethinkdb-job-queue')
-  const cxnOptions = config
+  const cxnOptions = config.rethinkdb
   const qOptions = {
     name: app.get('scheduler_table')
   }

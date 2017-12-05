@@ -55,3 +55,5 @@ __0.1.0__
 Copyright (c) 2016
 
 Licensed under the [MIT license](LICENSE).
+
+ SET RDB_HOST=localhost && set RDB_PORT=28015 && npm start

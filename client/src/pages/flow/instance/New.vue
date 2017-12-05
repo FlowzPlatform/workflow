@@ -110,9 +110,10 @@
                       <Tabs>
                         <TabPane label="Form Data" name="formtab">
                           <template v-if="selectedProcess.inputProperty[0].entityschema.createTemplate.length > 0 && getCurrentStatus(selectedLogs) === 'inputRequired'">
-                            <!-- <schemaTemplate :row="propData" :html="html"></schemaTemplate> -->
+                            {{selectedProcess.inputProperty[0].entityschema.createTemplate[0].url}}
+                            <schemaTemplate :row="selectedProcess" :html="getHtml(selectedProcess.inputProperty[0].entityschema.createTemplate.url)"></schemaTemplate>
                           </template>
-                          <template v-if="getCurrentStatus(selectedLogs) === 'inputRequired'">
+                          <template v-else-if="getCurrentStatus(selectedLogs) === 'inputRequired'">
                             <expandRow :row="selectedProcess" :lastLog="getLastLog(selectedLogs)"></expandRow>
                           </template>
                           <template v-else>
@@ -227,6 +228,9 @@ export default {
     back () {
       this.$router.go(-1)
     },
+    async getHtml (url) {
+      return await axios.get(url)
+    },
     async init () {
       // Get Flow Instance
       this.flowInstance = await instance.getThis(this.$route.params.id)
@@ -266,6 +270,7 @@ export default {
         }
       })
       if (types !== undefined) {
+        camundaModdleDescriptor.types = _.concat(camundaModdleDescriptor.types, types)
         viewer = new BpmnViewer({
           container: '#canvas',
           additionalPlugins: plugins,
@@ -273,16 +278,16 @@ export default {
             require('@/bpmn-custom-module/viewindex')
           ],
           moddleExtensions: {
-            flowz: {
-              'name': 'Camunda',
-              'uri': 'http://camunda.org/schema/1.0/bpmn',
-              'prefix': 'camunda',
-              'xml': {
-                'tagAlias': 'lowerCase'
-              },
-              'associations': [],
-              'types': types
-            },
+            // flowz: {
+            //   'name': 'Camunda',
+            //   'uri': 'http://camunda.org/schema/1.0/bpmn',
+            //   'prefix': 'camunda',
+            //   'xml': {
+            //     'tagAlias': 'lowerCase'
+            //   },
+            //   'associations': [],
+            //   'types': types
+            // },
             camunda: camundaModdleDescriptor
           }
         })

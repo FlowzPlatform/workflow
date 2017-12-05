@@ -1,0 +1,6 @@
+const cp = require('child_process')
+cp.fork(`./symmetric-worker`)
+cp.fork(`./worker-need`)
+cp.fork(`./worker-web`)
+cp.fork(`./job-web`)
+cp.fork(`../scheduler/scheduler`)
