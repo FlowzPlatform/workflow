@@ -215,11 +215,14 @@
           })
           .map(async (m) => {
             let _mapping = await self.getMapping(m, mergeModules)
-            console.log('m', m)
+            // console.log('m', m)
+            // console.log('m', m._isProcessTask)
+            // let processTask = m._isProcessTask !== undefined ? (m._isProcessTask === 'true') : (m['_camunda:isProcessTask'] === 'true')
+            // console.log('processTask', processTask)
             return {
               id: m._id,
               capacity: (m._isFormInput) ? m._capacity : false,
-              isProcessTask: (m._isProcessTask === 'true'),
+              isProcessTask: m._isProcessTask !== undefined ? (m._isProcessTask === 'true') : (m['_camunda:isProcessTask'] === 'true'),
               name: m._name,
               type: m.workerType.toLowerCase(),
               // isProcessTask: m.workerType.toLowerCase() === 'tweet' ? 'true' : false,
@@ -243,7 +246,7 @@
           return {
             id: m._id,
             capacity: (m._isFormInput) ? m._capacity : false,
-            isProcessTask: (m._isProcessTask === 'true'),
+            isProcessTask: m._isProcessTask !== undefined ? (m._isProcessTask === 'true') : (m['_camunda:isProcessTask'] === 'true'),
             name: m._name,
             type: 'start',
             target: self.getTargetId(m, process),
