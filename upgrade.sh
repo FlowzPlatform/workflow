@@ -3,7 +3,7 @@ curl -u ""$RANCHER_USER":"$RANCHER_PASS"" \
 -H 'Accept: application/json' \
 -H 'Content-Type: application/json' \
 -d '{
-     "inServiceStrategy":{"launchConfig": {"imageUuid":"docker:obdev/seneca_jobqueue_flowz:dev","kind": "container","labels":{"io.rancher.container.pull_image": "always","io.rancher.scheduler.affinity:host_label": "machine=cluster-flowz"},"ports": ["4001:4001/tcp","4002:4002/tcp","4003:4003/tcp"],"version": "406e9785-7b0f-47b4-a247-45eecae7fbf5","environment": {"host": "159.203.134.27","port": "28015"}}},"toServiceStrategy":null}' \
+     "inServiceStrategy":{"launchConfig": {"imageUuid":"docker:obdev/seneca_jobqueue_flowz:dev","kind": "container","labels":{"io.rancher.container.pull_image": "always","io.rancher.scheduler.affinity:host_label": "machine=cluster-flowz"},"ports": ["4001:4001/tcp","4002:4002/tcp","4003:4003/tcp"],"version": "406e9785-7b0f-47b4-a247-45eecae7fbf5","environment": {"host": "aws-us-east-1-portal.30.dblayer.com","port": 16868,"authDB":"51b2885598be1c2c1243a5c9c3548ad2","cert":true}}},"toServiceStrategy":null}' \
 'http://rancher.flowz.com:8080/v2-beta/projects/1a29/services/1s239?action=upgrade'
 
 curl -u ""$RANCHER_USER":"$RANCHER_PASS"" \
