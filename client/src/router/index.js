@@ -5,6 +5,7 @@ import Layout from '@/layout/Master'
 // import userLayout from '@/layout/user/Master'
 // userLayout
 import userLayout from '@/userLayout/Master'
+import UserDashboard from '@/pages/user/dashboard'
 // Area
 import Dashboard from '@/area/Dashboard'
 import Flow from '@/area/Flow'
@@ -32,6 +33,7 @@ import Register from '@/pages/Register'
 import ApprovalList from '@/pages/approval/List'
 import ApprovalNew from '@/pages/approval/New'
 import Reply from '@/pages/approval/MailReply'
+import FormReply from '@/pages/approval/FormReply'
 // User area
 // import UserDashboard from '@/pages/user/dashboard'
 import ManageBPMNPlugin from '@/pages/BPMNPlugins/Manage'
@@ -185,10 +187,6 @@ const routes = [{
         id: String,
         required: false
       }
-    }, {
-      path: '/mail/reply/:mailid/:pid/:jobid/:fiid',
-      name: 'mail/reply',
-      component: Reply
     }]
   }]
 }, {
@@ -200,10 +198,33 @@ const routes = [{
   name: 'Register',
   component: Register
 }, {
-  path: '/user',
-  name: 'userLayout',
+  path: '/',
+  name: 'User',
   component: userLayout,
-  meta: { requireAuth: true, userAuth: true, adminAuth: false }
+  meta: { requiresAuth: true, role: [2, 3] },
+  children: [{
+    path: '/',
+    name: 'approval',
+    component: UserDashboard,
+    meta: { description: 'DashBoard' }
+  }, {
+    path: 'approval/:id',
+    name: 'Process',
+    component: UserDashboard,
+    meta: { description: 'List' },
+    props: {
+      id: String,
+      required: false
+    }
+  }, {
+    path: '/mail/reply/:mailid/:pid/:jobid/:fiid',
+    name: 'mail/reply',
+    component: Reply
+  }, {
+    path: '/form/reply/:pid/:fiid',
+    name: 'form/reply',
+    component: FormReply
+  }]
 }, {
   path: '/',
   name: '',

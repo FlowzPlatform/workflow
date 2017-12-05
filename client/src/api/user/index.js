@@ -10,7 +10,7 @@ export default {
   },
   getByParam: (param) => {
     // 'http://172.16.160.117:3030/usermaster?emailId='+self.formInline.Email
-    return api.request('get', '/' + model + '?emailId=' + param)
+    return api.request('get', '/' + model + '?email=' + param)
   },
   post: (data) => {
     return api.request('post', '/' + model, data)
