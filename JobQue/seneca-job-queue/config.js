@@ -1,7 +1,6 @@
 const fs = require('fs')
-
 module.exports = {
-  plugins : {
+  plugins: {
     createPattern: "role:job,cmd:create",
     findPattern: "role:job,cmd:findjob",
     queuePattern: "role:job,cmd:queue",
@@ -16,8 +15,8 @@ module.exports = {
     ssl: process.env.cert ? { ca: fs.readFileSync('./ca.crt') } : null
   },
   symmetricWorker: {
-    port : process.env.symmetric_port || 4003,
-    table : "symmetricWorkers",
+    port: process.env.symmetric_port || 4003,
+    table: "symmetricWorkers",
     executeWorkerURL: "http://localhost:4003",
     executeWorkerService: "/execute-worker",
     childProcessFile: "start-child-worker.js"
@@ -41,7 +40,7 @@ module.exports = {
     port: process.env.job_port || 4002,
     urlPrefix: "/job"
   },
-  defaultQueue : {
+  defaultQueue: {
     name: "start",
     masterInterval: 60000,
     changeFeed: true,
@@ -51,7 +50,7 @@ module.exports = {
   defaultSubscription: {
     enable: true
   },
-  defaultCreateJob : {
+  defaultCreateJob: {
     priority: "normal",
     timeout: 300000,
     retrymax: 3,

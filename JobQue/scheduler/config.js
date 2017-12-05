@@ -1,5 +1,4 @@
 const fs = require('fs')
-
 module.exports = {
   rethinkdb: {
     host: process.env.host || "localhost",
@@ -16,5 +15,5 @@ module.exports = {
     removeFinishedJobs: false
   },
   serviceURL: process.env.serviceURL || "http://localhost:4002",
-  jobURL : process.env.jobURL || "http://localhost:4001"
+  jobURL: process.env.jobURL || "http://localhost:4001"
 }
