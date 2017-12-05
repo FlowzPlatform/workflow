@@ -16,9 +16,9 @@ module.exports = {
     ssl: process.env.cert ? { ca: fs.readFileSync(process.env.cert) } : null
   },
   symmetricWorker: {
-    port : process.env.symmetric_port || 9000,
+    port : process.env.symmetric_port || 4003,
     table : "symmetricWorkers",
-    executeWorkerURL: "http://localhost:9000",
+    executeWorkerURL: "http://localhost:4003",
     executeWorkerService: "/execute-worker",
     childProcessFile: "start-child-worker.js"
   },
@@ -33,12 +33,12 @@ module.exports = {
   },
   registerWorker: {
     table: "registerWorkers",
-    port: process.env.register_port || 3000,
-    getJobModuleApiURL: "http://localhost:3000",
+    port: process.env.register_port || 4001,
+    getJobModuleApiURL: "http://localhost:4001",
     getJobModuleApiService: "/job-module/"
   },
   web_option: {
-    port: process.env.job_port || 5000,
+    port: process.env.job_port || 4002,
     urlPrefix: "/job"
   },
   defaultQueue : {

@@ -15,6 +15,6 @@ module.exports = {
     concurrency: 1,
     removeFinishedJobs: false
   },
-  serviceURL: process.env.serviceURL || "http://localhost:5000",
-  jobURL : process.env.jobURL || "http://localhost:3000"
+  serviceURL: process.env.serviceURL || "http://localhost:4002",
+  jobURL : process.env.jobURL || "http://localhost:4001"
 }
