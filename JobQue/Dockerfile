@@ -14,6 +14,6 @@ WORKDIR /usr/src/app/seneca-job-queue
 RUN npm install
 
 
-EXPOSE 3000 5000 9000
+EXPOSE 4001 4002 4003
 
 CMD node runAll.js
