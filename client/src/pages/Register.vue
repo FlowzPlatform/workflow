@@ -1,5 +1,7 @@
 <template>
   <div>
+    <vue-particles color="#dedede">
+    </vue-particles>
     <div class="registerpage">
     <div class="registerpanel">
       <Row type="flex" justify="center" align="middle">
@@ -304,6 +306,12 @@ export default {
 	animation-delay: 1s;
 	animation-timing-function: ease;
 	animation-fill-mode: both;	          
-}    
-
+}
+#particles-js {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
 </style>
