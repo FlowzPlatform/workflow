@@ -51,6 +51,9 @@ Vue.use(VueCodeMirror)
 
 /* jquery-ui */
 
+import VueParticles from 'vue-particles'
+Vue.use(VueParticles)
+
 /* Animated css */
 
 import 'animate.css/animate.css'
