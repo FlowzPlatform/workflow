@@ -4,7 +4,7 @@ import VueRouter from 'vue-router'
 import Layout from '@/layout/Master'
 import userLayout from '@/layout/user/Master'
 // userLayout
-import userLayout from '@/userLayout/Master'
+// import userLayout from '@/userLayout/Master'
 import UserDashboard from '@/pages/user/dashboard'
 // Area
 import Dashboard from '@/area/Dashboard'
@@ -38,7 +38,7 @@ import FormReply from '@/pages/approval/FormReply'
 // import UserDashboard from '@/pages/user/dashboard'
 // import ManageBPMNPlugin from '@/pages/BPMNPlugins/Manage'
 
-import UserDashboard from '@/pages/user/dashboard'
+// import UserDashboard from '@/pages/user/dashboard'
 // import UserProcesslist from '@/pages/user/processlist'
 import ManageBPMNPlugin from '@/pages/BPMNPlugins/Manage'
 Vue.use(VueRouter)
@@ -213,16 +213,6 @@ const routes = [{
       required: false
     }
   }]
-    // }, {
-    //   path: 'approval/:id',
-    //   name: 'Process',
-    //   component: UserProcesslist,
-    //   meta: { description: 'List' },
-    //   props: {
-    //     id: String,
-    //     required: false
-    //   }
-    // }]
 }, {
   path: '/Login',
   name: 'Login',

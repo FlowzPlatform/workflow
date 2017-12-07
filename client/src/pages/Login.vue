@@ -5,6 +5,12 @@
       </vue-particles>
       <Row type="flex" justify="center" align="middle">
         <Col :span="6" offset="1">
+          <form id="form-facebook" name="form-facebook" :action="loginWithFacebookUrl" method="post">
+            <input type="hidden" name="success_url" :value="facebookSuccessCallbackUrl">
+          </form>
+          <form id="form-google" name="form-google" :action ="loginWithGoogleUrl" method="post">
+            <input type="hidden" name="success_url" :value="googleSuccessCallbackUrl">
+          </form>
           <Form ref="formLogin" :model="formLogin" :rules="ruleLogin">
             <FormItem class="animate0 bounceIn">
 							<div class="pageheader">
@@ -27,14 +33,28 @@
               </Input>
             </FormItem>
             <FormItem class="animate3 bounceIn">
-              <Button type="primary" long @click="handleSubmit('formLogin')" :loading="loading" class="login-btn">
+              <Button type="primary" @click="handleSubmit('formLogin')" :loading="loading" class="login-btn" long>
                 <span v-if="!loading">SIGN IN</span>
                 <span v-else>Loading...</span>
               </Button>
             </FormItem>
 						<FormItem  class="animate4 bounceIn redirectlink">
-							<Row type="flex" justify="end" align="middle">
-								<Col>
+							<Row>
+								<Col style="float:left;">
+                  <Tooltip content="Facebook">
+                    <span @click="handleFacebook" class="fa-stack fa-lg animated fadeInRight social-icon" style="-webkit-animation-delay: 1s;animation-delay: 1s;-moz-animation-delay: 1s;">
+                      <i class="fa fa-square-o fa-stack-2x"></i>
+                      <i class="fa fa-facebook fa-stack-1x"></i>
+                    </span>
+                  </Tooltip>
+                  <Tooltip content="Google">
+                    <span @click="handleGoogle" class="fa-stack fa-lg animated fadeInRight social-icon" style="-webkit-animation-delay: 2s;animation-delay: 2s;-moz-animation-delay: 2s;">
+                      <i class="fa fa-square-o fa-stack-2x"></i>
+                      <i class="fa fa-google fa-stack-1x"></i>
+                    </span>
+                  </Tooltip>
+								</Col>
+								<Col  style="float:right;">
 									Not a member?&nbsp;
 									<router-link to="/register" >Sign Up</router-link>
 								</Col>
@@ -60,7 +80,7 @@
 // import axios from 'axios'
 import modelAuthentication from '@/api/authentication'
 import modelUser from '@/api/user'
-
+import config from '@/config'
 import psl from 'psl'
 export default {
   name: 'login',
@@ -79,7 +99,11 @@ export default {
         password: [
           { required: true, message: 'Please fill in the password.', trigger: 'blur' }
         ]
-      }
+      },
+      facebookSuccessCallbackUrl : config.facebookSuccessCallbackUrl,
+      googleSuccessCallbackUrl : config.googleSuccessCallbackUrl,
+      loginWithFacebookUrl : config.loginWithFacebookUrl,
+      loginWithGoogleUrl : config.loginWithGoogleUrl
     }
   },
   methods: {
@@ -105,6 +129,14 @@ export default {
           // this.$Message.error('Form validation failed!')
         }
       })
+    },
+    handleFacebook () {
+      console.log('connect facebook')
+      document.getElementById('form-facebook').submit()
+    },
+    handleGoogle () {
+      console.log('connect google')
+      document.getElementById('form-google').submit()
     }
   }
 }
@@ -125,6 +157,9 @@ export default {
   .loginpage {
       background: #0866c6;
       min-height: 100vh;
+  }
+  .loginpage .social-icon {
+    cursor: pointer;
   }
 	.loginpage .pageheader{
     background: none;
