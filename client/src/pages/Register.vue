@@ -93,13 +93,7 @@ export default {
             if (response) {
               modelUser.post(this.formRegister).then(response => {
                 if (response) {
-                  modelUser.post(this.formRegister).then(response => {
-                    if (response) {
-                      this.loading = false
-                    }
-                  }).catch(e => {
-                    this.loading = false
-                  })
+                  this.loading = false
                 }
               }).catch(e => {
                 this.loading = false

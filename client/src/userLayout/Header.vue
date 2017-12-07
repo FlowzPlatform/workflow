@@ -20,7 +20,7 @@
               <Submenu name="1">
                 <template slot="title">
                   <Icon type="person" :size="16"></Icon>
-                  Kavi Bhavsar
+                  {{$store.state.user.fullname}}
                 </template>
                 <Menu-item name="1-1">
                   <a @click="handleRemove()">
