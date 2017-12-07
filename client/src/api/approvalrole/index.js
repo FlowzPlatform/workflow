@@ -3,7 +3,7 @@ import config from '../../config'
 export default {
   get: (roleName) => {
     if (!roleName) {
-      return axios.get(config.approvalRoleURI + 'getgroups')
+      return axios.get(config.approvalRoleURI + 'getroles')
         .then(response => {
           return response.data.data.roles
         })
