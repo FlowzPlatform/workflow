@@ -87,17 +87,23 @@ var router = new VueRouter({
   }
 })
 
+import psl from 'psl'
 // Some middleware to help us ensure the user is authenticated.
 router.beforeEach((to, from, next) => {
   iView.LoadingBar.config({ color: '#0e406d' })
     // window.console.log('Transition', transition)
     // router.app.$store.state.token
+  if (to.query.ob_id) {
+    let location = psl.parse(window.location.hostname) // get parent domain
+    location = location.domain === null ? location.input : location.domain
+    router.app.$cookie.set('auth_token', to.query.ob_id, { expires: 1, domain: location })
+  }
   const token = router.app.$cookie.get('auth_token')
   if (to.matched.some(record => record.meta.requiresAuth) && (!token || token === 'null')) {
     window.console.log('Not authenticated')
     next({
-      path: '/login',
-      query: { redirect: to.fullPath }
+      path: '/login'
+        // query: { redirect: to.fullPath }
     })
   } else {
     if (to.matched.some(record => record.meta.requiresAuth)) {
@@ -106,21 +112,26 @@ router.beforeEach((to, from, next) => {
           // get user role
         if (to.matched.some(record => record.meta.role)) {
           store.dispatch('getUser', response.email).then(user => {
-            if (store.state.role !== null) {
-              store.commit('SET_ROLE', user.role)
-              if (to.matched.find(record => record.meta.role).meta.role.indexOf(parseInt(user.role)) === -1) {
-                next({
-                  path: '/login',
-                  query: { redirect: to.fullPath }
-                })
+            if (user) {
+              if (store.state.role !== null) {
+                store.commit('SET_ROLE', user.role)
+                if (to.matched.find(record => record.meta.role).meta.role.indexOf(parseInt(user.role)) === -1) {
+                  // next({
+                  //   path: '/login'
+                  //     // query: { redirect: to.fullPath }
+                  // })
+                  next()
+                } else {
+                  next()
+                }
               } else {
-                next()
+                store.commit('SET_ROLE', user.role)
+                next({
+                  path: parseInt(user.role) === 1 ? '/admin/dashboard' : '/'
+                })
               }
             } else {
-              store.commit('SET_ROLE', user.role)
-              next({
-                path: parseInt(user.role) === 1 ? '/admin/dashboard' : '/'
-              })
+              next()
             }
           })
         } else {
@@ -130,8 +141,8 @@ router.beforeEach((to, from, next) => {
         console.log(error.message)
           // window.console.log('Not authenticated')
         next({
-          path: '/login',
-          query: { redirect: to.fullPath }
+          path: '/login'
+            // query: { redirect: to.fullPath }
         })
       })
     } else {

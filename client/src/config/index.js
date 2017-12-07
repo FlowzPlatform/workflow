@@ -4,5 +4,9 @@ export default {
   approvalRoleURI: 'http://172.16.160.32:3000/',
   loginURL: 'http://ec2-54-88-11-110.compute-1.amazonaws.com/api',
   fixedLayout: false,
-  hideLogoOnMobile: false
+  hideLogoOnMobile: false,
+  facebookSuccessCallbackUrl: 'http://localhost:8000',
+  loginWithFacebookUrl: 'http://ec2-54-88-11-110.compute-1.amazonaws.com/auth/facebook',
+  googleSuccessCallbackUrl: 'http://localhost:8000',
+  loginWithGoogleUrl: 'http://ec2-54-88-11-110.compute-1.amazonaws.com/auth/Gplus'
 }
