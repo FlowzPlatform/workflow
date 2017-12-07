@@ -1,5 +1,6 @@
+const fs = require('fs')
 module.exports = {
-  plugins : {
+  plugins: {
     createPattern: "role:job,cmd:create",
     findPattern: "role:job,cmd:findjob",
     queuePattern: "role:job,cmd:queue",
@@ -10,13 +11,13 @@ module.exports = {
     host: process.env.host || "localhost",
     port: process.env.port || 28015,
     db: process.env.db || "FlowzEngine",
-    user: process.env.user,
-    password: process.env.password
+    authKey: process.env.authDB,
+    ssl: process.env.cert ? { ca: fs.readFileSync('./ca.cer') } : null
   },
   symmetricWorker: {
-    port : process.env.symmetric_port || 9000,
-    table : "symmetricWorkers",
-    executeWorkerURL: "http://localhost:9000",
+    port: process.env.symmetric_port || 4003,
+    table: "symmetricWorkers",
+    executeWorkerURL: "http://localhost:4003",
     executeWorkerService: "/execute-worker",
     childProcessFile: "start-child-worker.js"
   },
@@ -31,15 +32,15 @@ module.exports = {
   },
   registerWorker: {
     table: "registerWorkers",
-    port: process.env.register_port || 3000,
-    getJobModuleApiURL: "http://localhost:3000",
+    port: process.env.register_port || 4001,
+    getJobModuleApiURL: "http://localhost:4001",
     getJobModuleApiService: "/job-module/"
   },
   web_option: {
-    port: process.env.job_port || 5000,
+    port: process.env.job_port || 4002,
     urlPrefix: "/job"
   },
-  defaultQueue : {
+  defaultQueue: {
     name: "start",
     masterInterval: 60000,
     changeFeed: true,
@@ -49,7 +50,7 @@ module.exports = {
   defaultSubscription: {
     enable: true
   },
-  defaultCreateJob : {
+  defaultCreateJob: {
     priority: "normal",
     timeout: 300000,
     retrymax: 3,

@@ -44,7 +44,7 @@
                       <Submenu name="1">
                         <template slot="title">
                           <Icon type="person" :size="16"></Icon>
-                          Krunal Mahera
+                          {{$store.state.user.fullname}}
                         </template>
                         <Menu-item name="1-1">
                             <router-link to="/admin/bpmn-plugin">
@@ -77,13 +77,12 @@
     },
     methods:{
       handleRemove () {
-        this.$store.state.isLoggedIn = false
-        localStorage.removeItem('authUser')
-        localStorage.removeItem('auth_token')
         let location = psl.parse(window.location.hostname)
         location = location.domain === null ? location.input : location.domain
-        this.$cookie.delete('authUser', {domain: location});
         this.$cookie.delete('auth_token', {domain: location});
+        this.$store.commit('SET_TOKEN', null)
+        this.$store.commit('SET_USER', null)
+        this.$store.commit('SET_ROLE', null)
         this.$router.push('/login')
       }
     }

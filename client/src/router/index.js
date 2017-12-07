@@ -2,7 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 // Layout
 import Layout from '@/layout/Master'
-// import userLayout from '@/layout/user/Master'
+import userLayout from '@/layout/user/Master'
 // userLayout
 import userLayout from '@/userLayout/Master'
 import UserDashboard from '@/pages/user/dashboard'
@@ -36,13 +36,17 @@ import Reply from '@/pages/approval/MailReply'
 import FormReply from '@/pages/approval/FormReply'
 // User area
 // import UserDashboard from '@/pages/user/dashboard'
+// import ManageBPMNPlugin from '@/pages/BPMNPlugins/Manage'
+
+import UserDashboard from '@/pages/user/dashboard'
+// import UserProcesslist from '@/pages/user/processlist'
 import ManageBPMNPlugin from '@/pages/BPMNPlugins/Manage'
 Vue.use(VueRouter)
 const routes = [{
   path: '/admin',
   name: 'Layout',
   component: Layout,
-  meta: { requireAuth: true, userAuth: false, adminAuth: true },
+  meta: { requiresAuth: true, role: [1] },
   children: [{
     path: 'dashboard',
     alias: '',
@@ -189,6 +193,36 @@ const routes = [{
       }
     }]
   }]
+}, { // Enduser Dashboard
+  path: '/',
+  name: 'User',
+  component: userLayout,
+  meta: { requiresAuth: true, role: [2, 3] },
+  children: [{
+    path: '/',
+    name: 'approval',
+    component: UserDashboard,
+    meta: { description: 'DashBoard' }
+  }, {
+    path: 'approval/:id',
+    name: 'Process',
+    component: UserDashboard,
+    meta: { description: 'List' },
+    props: {
+      id: String,
+      required: false
+    }
+  }]
+    // }, {
+    //   path: 'approval/:id',
+    //   name: 'Process',
+    //   component: UserProcesslist,
+    //   meta: { description: 'List' },
+    //   props: {
+    //     id: String,
+    //     required: false
+    //   }
+    // }]
 }, {
   path: '/Login',
   name: 'Login',

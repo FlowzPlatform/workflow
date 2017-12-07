@@ -16,7 +16,8 @@
   "dependencies": {
     "@deveodk/vue-tinymce": "^1.0.0",
     "FormData": "^0.10.1",
-    "aws-sdk": "^2.162.0",
+    "animate.css": "^3.5.2",
+    "aws-sdk": "^2.130.0",
     "axios": "^0.16.2",
     "babel-plugin-syntax-jsx": "^6.18.0",
     "babel-plugin-transform-vue-jsx": "^3.5.0",
@@ -129,6 +130,7 @@
     "sinon-chai": "^2.8.0",
     "url-loader": "^0.5.8",
     "vue-loader": "^12.1.0",
+    "vue-particles": "^1.0.9",
     "vue-style-loader": "^3.0.1",
     "vue-template-compiler": "^2.5.9",
     "webpack": "^2.6.1",

@@ -1,10 +1,11 @@
+const fs = require('fs')
 module.exports = {
   rethinkdb: {
     host: process.env.host || "localhost",
     port: process.env.port || 28015,
     db: process.env.db || "FlowzEngine",
-    user: process.env.user,
-    password: process.env.password
+    authKey: process.env.authDB,
+    ssl: process.env.cert ? { ca: fs.readFileSync('./ca.cer') } : null
   },
   qOptions: {
     name: process.env.scheduler || "scheduler",
@@ -13,6 +14,6 @@ module.exports = {
     concurrency: 1,
     removeFinishedJobs: false
   },
-  serviceURL: process.env.serviceURL || "http://localhost:5000",
-  jobURL : process.env.jobURL || "http://localhost:3000"
+  serviceURL: process.env.serviceURL || "http://localhost:4002",
+  jobURL: process.env.jobURL || "http://localhost:4001"
 }
