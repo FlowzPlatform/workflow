@@ -9,6 +9,9 @@ export default {
   SET_TOKEN (state, token) {
     state.token = token
   },
+  SET_ROLE (state, role) {
+    state.role = role
+  },
   SET_SCHEMA (state, schema) {
     state.schema = schema
   },
@@ -18,6 +21,9 @@ export default {
   SET_TABDATA (state, tabdata) {
     // console.log('SET_TABDATA', tabdata)
     state.tabdata.push(tabdata)
+  },
+  SET_FLOWZDATA (state, flowz) {
+    state.flowz = flowz
   },
   SET_MAPTEMP (state, data) {
     // console.log(_.find(state.mappingTemp, { 'producer': data.producer }))

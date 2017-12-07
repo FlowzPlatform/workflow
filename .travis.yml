@@ -1,0 +1,40 @@
+sudo: required
+
+language: node
+
+services:
+  - docker
+
+branches:
+  only:
+  - master
+
+jobs:
+  include:
+    - stage: Seneca-Jobqueue-Flowz
+      script:
+      - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+      - docker build -t seneca_jobqueue_flowz:"$DOCKER_IMAGE_TAG" ./JobQue/
+      - docker images
+      - docker tag seneca_jobqueue_flowz:"$DOCKER_IMAGE_TAG" $DOCKER_USERNAME/seneca_jobqueue_flowz:"$DOCKER_IMAGE_TAG"
+      - docker push $DOCKER_USERNAME/seneca_jobqueue_flowz:"$DOCKER_IMAGE_TAG"
+    - stage: Flowz-Frontend-Flowz
+      script:
+      - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+      - docker build -t flowz_frontend_flowz:"$DOCKER_IMAGE_TAG" ./client/
+      - docker images
+      - docker tag flowz_frontend_flowz:"$DOCKER_IMAGE_TAG" $DOCKER_USERNAME/flowz_frontend_flowz:"$DOCKER_IMAGE_TAG"
+      - docker push $DOCKER_USERNAME/flowz_frontend_flowz:"$DOCKER_IMAGE_TAG"
+    - stage: Flowz-Backend-Flowz
+      script:
+      - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+      - docker build -t flowz_backend_flowz:"$DOCKER_IMAGE_TAG" ./service/
+      - docker images
+      - docker tag flowz_backend_flowz:"$DOCKER_IMAGE_TAG" $DOCKER_USERNAME/flowz_backend_flowz:"$DOCKER_IMAGE_TAG"
+      - docker push $DOCKER_USERNAME/flowz_backend_flowz:"$DOCKER_IMAGE_TAG"
+    - stage: Upgrade Rancher Service
+      script:
+      - bash ./upgrade.sh
+    - stage: Finish Rancher Service
+      script:
+      - bash ./finish.sh

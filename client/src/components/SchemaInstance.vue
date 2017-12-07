@@ -1,4 +1,4 @@
-<template>
+f<template>
   <div class="schema-instance">
     <Form ref="formSchemaInstance" :model="formSchemaInstance">
       <!-- <Form-item 
@@ -21,8 +21,8 @@
      <!--  <Form-item>
         <Row>
           <Col span="24"> -->
-            <!-- <Button type="dashed" long @click="handleAdd" icon="plus-round">Add</Button>
-            </Col>
+            <Button type="dashed" long @click="handleAdd" icon="plus-round">Add</Button>
+            <!-- </Col>
           </Row>
         </Form-item> -->
       <Form-item>
@@ -91,8 +91,8 @@ export default {
           var _res = response.data
           var obj = {}
           // obj.id = self.getGuid();
-          obj.database = _res.database
-          obj.Schemaid = _res._id
+          // obj.database = _res.database
+          // obj.Schemaid = _res._id
           _.forEach(_res.entity, function (v) {
             if (v.customtype) {
               obj[v.name] = self.getChildData(v.type)
@@ -109,7 +109,7 @@ export default {
           arrObj.push(obj)
         })
         .catch(error => {
-          console.log('Errorrr', error)
+          console.log('Error', error)
         })
       return arrObj
     },
@@ -169,11 +169,16 @@ export default {
       var self = this
       var obj = {}
       if (this.lastLog !== undefined && this.lastLog.input.length !== 0) {
-        obj = this.lastLog.input[0]
-        obj.database = this.schema.database
-        obj.Schemaid = this.schema._id
+        _.forEach(self.lastLog.input, (obj) => {
+          // obj = this.lastLog.input[0]
+          // obj.database = this.schema.database
+          obj.Schemaid = self.schema._id
+          delete obj.id
+          delete obj._id
+          self.formSchemaInstance.data.push(obj)
+        })
       } else {
-        obj.database = this.schema.database
+        // obj.database = this.schema.database
         obj.Schemaid = this.schema._id
         // console.log('this.entity', this.entity)
         _.forEach(this.entity, function (v) {
@@ -189,9 +194,9 @@ export default {
             }
           }
         })
+        this.formSchemaInstance.data.push(obj)
       }
       // console.log('obj', obj)
-      this.formSchemaInstance.data.push(obj)
     },
     makeObj () {
       var obj = this.schema
@@ -205,18 +210,18 @@ export default {
       this.validFlag = true
       this.validErr = []
       var check = this.checkValidation(obj.data[0], this.entity)
-      console.log('checkkkkkkkkkkkk', check)
+      // console.log('checkkkkkkkkkkkk', check)
       this.$Loading.start()
       if (check) {
-        Instance.post({ instanceid: this.instanceid, processid: this.processid, data: obj.data[0] })
+        Instance.post({ instanceid: this.instanceid, processid: this.processid, jobId: this.lastLog.jobId, data: obj.data })
         .then(response => {
-          console.log('response', response.data)
-          this.$Notice.success({title: 'success!', desc: 'Instance Saved...'})
+          // console.log('response', response.data)
+          this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
           this.$Loading.finish()
         })
         .catch(error => {
           console.log('Error', error)
-          this.$Notice.error({title: 'Error!', desc: 'Instance Not Saved...'})
+          this.$Notice.error({title: 'Error!', desc: 'Instance not saved...'})
           this.$Loading.error()
         })
       } else {
@@ -279,6 +284,9 @@ export default {
     '$route.params.schemaid' (newId, oldId) {
       // fetch data
       this.fetch(newId)
+    },
+    'lastLog' (newData) {
+      this.fetch(this.id)
     }
   }
 }

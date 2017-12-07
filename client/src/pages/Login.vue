@@ -1,92 +1,275 @@
-<template id="M_Login">
-    <div class="content-part">
-    <Card style="width:35%;margin-left:30%;margin-top:10%">
-        <!-- include ../partials/flash-->
-        <div>
-          <div>
-            <div style="box-shadow: 10px 10px 10px rgba(0,0,0,0.05);">
-              <!-- Form header-->
-              <div style="border-top-left-radius: 3px; border-top-right-radius: 3px; padding: 10px 15px; border-bottom: 1px solid transparent;text-align: center;color: rgb(255, 255, 255); border-bottom: 7px solid rgb(238, 238, 238); background: rgb(17, 55, 95);height: 100px">
-                <h2>Login</h2>
-                <p>Don't have an account?<a href="/Register" style="color:#5B97D6"> Create one.</a></p>
+<template>
+  <div class="loginpage">
+    <div class="loginpanel">
+      <vue-particles color="#dedede">
+      </vue-particles>
+      <Row type="flex" justify="center" align="middle">
+        <Col :span="6" offset="1">
+          <Form ref="formLogin" :model="formLogin" :rules="ruleLogin">
+            <FormItem class="animate0 bounceIn">
+							<div class="pageheader">
+                <div class="pageicon"><i class="fa fa-unlock-alt"></i></div>
+                <div class="pagetitle">
+                  <h5>Your Login Information</h5>
+                  <h1>Login</h1>
+                </div>
               </div>
-              <div style="height:220px">
-                <Form ref="formInline" :model="formInline" :rules="ruleInline" inline>
-                    <FormItem prop="Email" style="width:98%" label="Email">
-                        <Input type="email" v-model="formInline.Email" placeholder="Email">
-                          <Icon type="ios-person-outline" slot="prepend"></Icon>
-                        </Input>
-                    </FormItem>
-                    <FormItem prop="Password" style="width:98%" label="Password">
-                        <Input type="password" v-model="formInline.Password" placeholder="Password">
-                          <Icon type="ios-locked-outline" slot="prepend"></Icon>
-                        </Input>
-                    </FormItem>
-                    <FormItem>
-                        <Button type="primary" @click="handleSubmit('formInline')">Login</Button>
-                    </FormItem>
-                </Form>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Card>
-      </div>
+              <!-- <div style="text-align: center;">
+                <img src="../assets/images/Flowz-Icon.png" style="width:60%;"/>
+              </div> -->
+            </FormItem>
+            <FormItem prop="email" class="animate1 bounceIn">
+              <Input type="text" v-model="formLogin.email" placeholder="Email ID">
+              </Input>
+            </FormItem>
+            <FormItem prop="password" class="animate2 bounceIn">
+              <Input type="password" v-model="formLogin.password" placeholder="Password">
+              </Input>
+            </FormItem>
+            <FormItem class="animate3 bounceIn">
+              <Button type="primary" long @click="handleSubmit('formLogin')" :loading="loading" class="login-btn">
+                <span v-if="!loading">SIGN IN</span>
+                <span v-else>Loading...</span>
+              </Button>
+            </FormItem>
+						<FormItem  class="animate4 bounceIn redirectlink">
+							<Row type="flex" justify="end" align="middle">
+								<Col>
+									Not a member?&nbsp;
+									<router-link to="/register" >Sign Up</router-link>
+								</Col>
+							</Row>
+            </FormItem>
+          </Form>
+        </Col>
+        <Col :span="1">
+          <div style="height: 100vh"></div>
+        </Col>
+      </Row>
+    </div>
+
+    <div class="loginfooter">
+        <p>© 2017. Flowz technology. All Rights Reserved.</p>
+    </div>
+    
+  </div>
 </template>
 
 <script>
- /*eslint-disable*/
- import axios from 'axios'
+/*eslint-disable*/
+// import axios from 'axios'
+import modelAuthentication from '@/api/authentication'
+import modelUser from '@/api/user'
 
+import psl from 'psl'
 export default {
-  name: 'M_Login',
+  name: 'login',
   data () {
     return {
-                formInline: {
-                    Email: '',
-                    Password: ''
-                },
-                ruleInline: {
-                    Email: [
-                        { required: true, message: 'Please Fill Email', trigger: 'blur' },
-                        { type: 'email', message: 'Please input correct email address', trigger: 'blur,change' }
-                    ],
-                    Password: [
-                        { required: true, message: 'Please Fill Password', trigger: 'blur' }
-                    ]
-                }
-            }
+      loading: false,
+      formLogin: {
+        email: '',
+        password: ''
+      },
+      ruleLogin: {
+        email: [
+          { required: true, message: 'Please fill in the email id', trigger: 'blur' },
+          { type: 'email', message: 'Please input correct email address', trigger: 'blur,change' }
+        ],
+        password: [
+          { required: true, message: 'Please fill in the password.', trigger: 'blur' }
+        ]
+      }
+    }
   },
   methods: {
-            handleSubmit(name) {
-                this.$refs[name].validate((valid) => {
-                    if (valid) {
-                      let self = this
-                      axios({
-                         method: 'post',
-                         url: 'http://ec2-54-88-11-110.compute-1.amazonaws.com/api/login',
-                         data: {
-                           email: self.formInline.Email,
-                           password: self.formInline.Password
-                         }
-                       })
-                       .then(response => {
-                        //  console.log(response)
-                         localStorage.setItem("logintoken", response.data.logintoken)
-                       })
-                      if(localStorage.getItem("logintoken")){
-                        console.log(localStorage.getItem("logintoken"));
-                        this.$router.push('dashboard')
-                      }else{
-                        this.$router.push('Login')
-                      }
-                      // this.$Message.success('Submitted successfully!')
-
-                    } else {
-                      this.$Message.error('Form validation failed!')
-                    }
-                })
-            }
+    handleSubmit (name) {
+      this.$refs[name].validate(async (valid) => {
+        if (valid) {
+          this.loading = true
+          var auth = await modelAuthentication.login(this.formLogin).catch(error => {
+						this.$Message.error(error.response.data)
+            return
+          })
+          if (auth) {
+            this.$store.commit('SET_TOKEN', auth.logintoken)
+						// Token Store in cookie
+						let location = psl.parse(window.location.hostname)    // get parent domain
+						location = location.domain === null ? location.input : location.domain
+						this.$cookie.set('auth_token', auth.logintoken, {expires: 1, domain: location})    // Store in cookie
+						this.$store.commit('SET_ROLE', null)
+            this.$router.push({path: '/'}) // Redirect to dashbord
+          }
+          this.loading = false
+        } else {
+          // this.$Message.error('Form validation failed!')
         }
+      })
+    }
+  }
 }
 </script>
+<style>
+	.loginfooter {
+		font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    position: absolute;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-family: arial, sans-serif !important;
+    padding: 5px 0;
+	}
+  .loginpage {
+      background: #0866c6;
+      min-height: 100vh;
+  }
+	.loginpage .pageheader{
+    background: none;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding: 0 0 25px 0;
+  } 
+  .loginpage .pageicon {
+      width: 70px;
+      font-size: 42px;
+      padding: 10px;
+      color: #fff;
+      border: 3px solid #fff;
+      display: inline-block;
+      -moz-border-radius: 50px;
+      -webkit-border-radius: 50px;
+      border-radius: 50px;
+      float: left;
+      text-align: center;
+  }
+  .loginpage .pagetitle{
+    margin-left: 90px;
+    padding-top: 5px;
+  }
+  .loginpage .pagetitle h5{
+    text-transform: uppercase;
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+  }
+  .loginpage .pagetitle h1{
+    color: #fff;
+    font-size: 32px;
+  }
+  .loginpage .ivu-input, .loginpage .login-btn {
+    border-radius: 0;
+    height: 40px;
+	}
+	.loginpage .login-btn{
+		border: 1px solid #0c57a3
+	}
+	.loginpage .redirectlink {
+		color: #ddd;
+		margin-top: -21px;
+	}
+	.loginpage .redirectlink a { 
+		color: #fff;
+	}
+  .animate0 {
+   	-webkit-animation-duration: .8s;
+	-webkit-animation-delay: 0s;
+	-webkit-animation-timing-function: ease;
+	-webkit-animation-fill-mode: both;
+	-moz-animation-duration: .8s;
+	-moz-animation-delay: 0s;
+	-moz-animation-timing-function: ease;
+	-moz-animation-fill-mode: both;
+	-ms-animation-duration: .8s;
+	-ms-animation-delay: 0s;
+	-ms-animation-timing-function: ease;
+	-ms-animation-fill-mode: both;
+	animation-duration: .8s;
+	animation-delay: 0s;
+	animation-timing-function: ease;
+	animation-fill-mode: both;	          
+}         
+
+.animate1{
+   	-webkit-animation-duration: .8s;
+	-webkit-animation-delay: .2s;
+	-webkit-animation-timing-function: ease;
+	-webkit-animation-fill-mode: both;
+	-moz-animation-duration: .8s;
+	-moz-animation-delay: .2s;
+	-moz-animation-timing-function: ease;
+	-moz-animation-fill-mode: both;
+	-ms-animation-duration: .8s;
+	-ms-animation-delay: .2s;
+	-ms-animation-timing-function: ease;
+	-ms-animation-fill-mode: both;
+	animation-duration: .8s;
+	animation-delay: .2s;
+	animation-timing-function: ease;
+	animation-fill-mode: both;	          
+} 
+
+.animate2{
+   	-webkit-animation-duration: .8s;
+	-webkit-animation-delay: .4s;
+	-webkit-animation-timing-function: ease;
+	-webkit-animation-fill-mode: both;
+	-moz-animation-duration: .8s;
+	-moz-animation-delay: .4s;
+	-moz-animation-timing-function: ease;
+	-moz-animation-fill-mode: both;
+	-ms-animation-duration: .8s;
+	-ms-animation-delay: .4s;
+	-ms-animation-timing-function: ease;
+	-ms-animation-fill-mode: both;
+	animation-duration: .8s;
+	animation-delay: .4s;
+	animation-timing-function: ease;
+	animation-fill-mode: both;	          
+} 
+
+.animate3{
+   	-webkit-animation-duration: .8s;
+	-webkit-animation-delay: .6s;
+	-webkit-animation-timing-function: ease;
+	-webkit-animation-fill-mode: both;
+	-moz-animation-duration: .8s;
+	-moz-animation-delay: .6s;
+	-moz-animation-timing-function: ease;
+	-moz-animation-fill-mode: both;
+	-ms-animation-duration: .8s;
+	-ms-animation-delay: .6s;
+	-ms-animation-timing-function: ease;
+	-ms-animation-fill-mode: both;
+	animation-duration: .8s;
+	animation-delay: .6s;
+	animation-timing-function: ease;
+	animation-fill-mode: both;	          
+}   
+
+.animate4{
+   	-webkit-animation-duration: .8s;
+	-webkit-animation-delay: .8s;
+	-webkit-animation-timing-function: ease;
+	-webkit-animation-fill-mode: both;
+	-moz-animation-duration: .8s;
+	-moz-animation-delay: .8s;
+	-moz-animation-timing-function: ease;
+	-moz-animation-fill-mode: both;
+	-ms-animation-duration: .8s;
+	-ms-animation-delay: .8s;
+	-ms-animation-timing-function: ease;
+	-ms-animation-fill-mode: both;
+	animation-duration: .8s;
+	animation-delay: .8s;
+	animation-timing-function: ease;
+	animation-fill-mode: both;	          
+}
+#particles-js {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+</style>

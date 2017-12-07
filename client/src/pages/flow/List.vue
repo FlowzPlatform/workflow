@@ -1,13 +1,14 @@
 <template>
   <div class="flow">
-    <row>
-      <Button type="primary" style="float: right;margin-bottom: 2px;" @click="addNewFlow"><Icon type="plus" size="16"></Icon> Add</Button>
+    <row type="flex" justify="end">
+      <Button type="primary" size="small" style="margin-bottom: 2px;" @click="addNewFlow" icon="plus"> Add</Button>
     </row>
-    <div slot="content">
+    <!-- <div slot="content">
         <div class="schema-form ivu-table-wrapper">
             <div class="ivu-table ivu-table-border">
-                <div class="ivu-table-body">
-                    <table cellspacing="0" cellpadding="0" border="0" style="width: 100%;">
+                <div class="ivu-table-body"> -->
+                    <Table size="small" :columns="columns10" :data="flowzList"></Table>
+                    <!-- <table cellspacing="0" cellpadding="0" border="0" style="width: 100%;">
                         <thead>
                             <tr>
                                 <th class="">
@@ -29,6 +30,11 @@
                         <tbody class="ivu-table-tbody">
                             <template v-if="flowzList.length > 0">
                             <tr class="ivu-table-row" v-for="(item, index) in flowzList">
+                                <td>
+                                <div class="ivu-table-cell">
+                                 {{columns10}}
+                                </div>
+                                </td>
                                 <td>
                                 <div class="ivu-table-cell">
                                     {{item.ProcessName}}
@@ -59,49 +65,170 @@
                               </tr>
                             </template>
                         </tbody>
-                    </table>
-                </div>
+                    </table> -->
+                <!-- </div>
             </div>
-        </div>
-    </div>
+        </div> -->
+    <!-- </div> -->
   </div>
 </template>
 <script>
 import flowz from '@/api/flowz'
 import _ from 'lodash'
-
 const X2JS = require('x2js')
 import schemamappingModel from '@/api/schemamapping'
 import schemaModel from '@/api/schema'
 import approvalModel from '@/api/approval'
 import instanceModel from '@/api/flowzinstance'
+import expandRow from './table-expand.vue'
 export default {
   name: 'Flowz',
+  components: { expandRow },
   data () {
     return {
-      flowzList: []
+      flowzList: [],
+      columns10: [
+        {
+          type: 'expand',
+          width: 50,
+          render: (h, params) => {
+            return h(expandRow, {
+              props: {
+                row: params.row
+              }
+            })
+          }
+        },
+        {
+          title: 'Name',
+          key: 'ProcessName'
+        },
+        {
+          title: 'Notes',
+          key: 'notes'
+        },
+        {
+          title: 'Action',
+          key: 'action',
+          width: 400,
+          align: 'center',
+          render: (h, params) => {
+            return h('div', [
+              h('Button', {
+                props: {
+                  type: 'text',
+                  size: 'large',
+                  icon: 'arrow-right-b'
+                },
+                style: {
+                  marginRight: '3px',
+                  padding: '0px',
+                  fontSize: '20px',
+                  color: '#2411c5'
+                },
+                on: {
+                  click: () => {
+                    this.createNewInstance(params.index, this.flowzList[params.index].id)
+                  }
+                }
+              }, ''),
+              h('Button', {
+                props: {
+                  type: 'text',
+                  size: 'large',
+                  icon: 'edit'
+                },
+                style: {
+                  color: '#7DE144',
+                  marginRight: '3px',
+                  padding: '0px',
+                  fontSize: '20px'
+                },
+                on: {
+                  click: () => {
+                    this.$router.push('flow/edit/' + this.flowzList[params.index].id)
+                  }
+                }
+              }, ''),
+              h('Button', {
+                props: {
+                  type: 'text',
+                  size: 'large',
+                  icon: 'android-delete'
+                },
+                style: {
+                  marginRight: '3px',
+                  padding: '0px',
+                  fontSize: '20px',
+                  color: '#e74c3c'
+                },
+                on: {
+                  click: () => {
+                    this.deleteFlow(this.flowzList[params.index].id)
+                  }
+                }
+              }, '')
+              // h('Button', {
+              //   props: {
+              //     type: 'text',
+              //     size: 'large',
+              //     icon: 'navicon-round'
+              //   },
+              //   style: {
+              //     marginRight: '3px',
+              //     padding: '0px',
+              //     fontSize: '20px',
+              //     color: '#00C851'
+              //   },
+              //   on: {
+              //     click: () => {
+              //       this.deleteFlow(this.flowzList[params.index].id)
+              //     }
+              //   }
+              // }, '')
+            ])
+          }
+        }
+      ]
     }
   },
   mounted () {
     flowz.get()
     .then(response => {
       this.flowzList = response.data.data
-      console.log('this.flowzList', this.flowzList)
+      // console.log('this.flowzList', this.flowzList)
     })
     .catch(error => {
       console.log(error)
     })
   },
+  feathers: {
+    'flowz-instance': {
+      created (data) { // update status using socket
+        console.log('New Data', data)
+        flowz.get()
+        .then(response => {
+          this.flowzList = response.data.data
+        })
+        .catch(error => {
+          console.log(error)
+        })
+      }
+    }
+  },
   methods: {
     async createNewInstance (index, id) {
-      let generatedJson = await this.generateJson(this.flowzList[index].xml)
+      // let generatedJson = await this.generateJson(this.flowzList[index].xml)
+      let generatedJson = this.flowzList[index].json
       // console.log('generatedJson', JSON.stringify(generatedJson))
       // console.log('generatedJson', generatedJson)
       generatedJson.fid = id
+      generatedJson.createdOn = Date()
+      // console.log('instanceModel', instanceModel)
       instanceModel.post(generatedJson)
       .then(response => {
         // console.log('response.data', response.data)
-        this.$router.push('/flow/instance/' + response.data.id)
+        this.$router.push('/admin/flow/instance/' + response.data.id)
       })
       .catch(error => {
         console.log(error)
@@ -109,7 +236,7 @@ export default {
     },
     addNewFlow () {
       this.$store.dispatch('removeXMLtoLocalStorage')
-      this.$router.push('/flow/new')
+      this.$router.push({name: 'flow/new'})
     },
     deleteFlow (id, inx) {
       this.$Modal.confirm({
@@ -173,28 +300,42 @@ export default {
       for (let d of process.target) {
       // _.forEach(process.target, (d) => {
         // merge all module
-        var mergeModules = _.chain(jsonXML).filter((m) => {
+        console.log('jsonXML', jsonXML)
+        var mergeModules = _.chain(jsonXML).map((m, k) => {
+          if (typeof m === 'object') {
+            m = _.isArray(m) ? m : [m]
+            m = _.map(m, im => {
+              im.workerType = k
+              return im
+            })
+          }
+          return m
+        }).filter((m, i) => {
           return typeof m === 'object'
         })
-        .map((m) => {
-          return _.isArray(m) ? m : [m]
-        })
+        // .map((m, i) => {
+        //   return _.isArray(m) ? m : [m]
+        // })
         .value()
+        // console.log('mergeModules', mergeModules)
         // generate process
         let result = await _.chain(_.union(...mergeModules))
-        .filter((f) => {
+        .filter((f, i, k) => {
+          // console.log('k', k)
           return f._id === d.id
         })
         .map(async (m) => {
+          // console.log('m', m)
           let _mapping = await self.getMapping(m, mergeModules)
+          console.log('m', m)
           return {
             id: m._id,
-            capacity: 1,
+            capacity: (m._isFormInput) ? m._capacity : false,
             name: m._name,
-            type: m.outgoing ? (m._name === 'recruiter' ? 'select' : 'task') : 'end',
+            type: m.workerType, // m.outgoing ? (m._name === 'recruiter' ? 'select' : 'task') : 'end',
             target: m.outgoing ? self.getTargetId(m, jsonXML) : [],
             mapping: (_.union(..._mapping)),
-            inputProperty: await self.getProperties(m),
+            inputProperty: await self.getInputProperties(m),
             outputProperty: await self.getOutputProperties(m)
           }
         }).head()
@@ -209,12 +350,12 @@ export default {
       .map(async (m) => {
         return {
           id: m._id,
-          capacity: 1,
+          capacity: (m._isFormInput) ? m._capacity : false,
           name: m._name,
           type: 'start',
           target: self.getTargetId(m, process),
           mapping: [],
-          inputProperty: await self.getProperties(m),
+          inputProperty: await self.getInputProperties(m),
           outputProperty: await self.getOutputProperties(m)
         }
       }).value())
@@ -228,18 +369,19 @@ export default {
           return ftr._id === targetMap.__text
         }).map((m) => {
           return {
-            id: m._targetRef
+            id: m._targetRef,
+            outputid: m.extensionElements !== undefined ? m.extensionElements.myIOMapping.mapping._producer : ''
           }
         }).value()[0]
         // return { id: targetMap.__text }
       })
     },
-    async getProperties (proccess) {
-      if (proccess.extensionElements && proccess.extensionElements.myProperty) {
-        if (!_.isArray(proccess.extensionElements.myProperty.property)) {
-          proccess.extensionElements.myProperty.property = [proccess.extensionElements.myProperty.property]
+    async getInputProperties (proccess) {
+      if (proccess.extensionElements && proccess.extensionElements.myInputs) {
+        if (!_.isArray(proccess.extensionElements.myInputs.input)) {
+          proccess.extensionElements.myInputs.input = [proccess.extensionElements.myInputs.input]
         }
-        return await Promise.all(_.map(proccess.extensionElements.myProperty.property, async (m) => {
+        return await Promise.all(_.map(proccess.extensionElements.myInputs.input, async (m) => {
           return {
             id: m._id,
             entityschema: await schemaModel.getAll(m._entityschema),

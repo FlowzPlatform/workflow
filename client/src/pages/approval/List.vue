@@ -1,12 +1,15 @@
 <template>
-  <div class="layout">
-    <div class="layout-header">
-        <div><h4>Approval</h4></div>
-        <Button type="primary" align="right" icon="plus" @click="addApproval" size="small" slot="extra">Add</Button>
-    </div>
-    <div>
-      <Table :columns="approvalCol" :data="approvalData"></Table>
-    </div>
+  <div>
+    <Row type="flex" justify="end">
+      <Col>
+        <Button type="primary" icon="plus" style="margin-bottom: 2px;" @click="addApproval" size="small">Add</Button>
+      </Col>
+    </Row>
+    <Row>
+      <Col>
+        <Table size="small" :columns="approvalCol" :data="approvalData"></Table>
+      </Col>
+    </Row>
   </div>
 </template>
 
@@ -114,10 +117,10 @@
           console.log(this.approvalData)
         },
         addApproval: function(){
-          this.$router.push('/approval/new')
+          this.$router.push('approval/new')
         },
         edit: function(rowId){
-          this.$router.push('/approval/edit/' + rowId)
+          this.$router.push('approval/edit/' + rowId)
         },
         removeRow: function(rowId,index){
           this.$Modal.confirm({

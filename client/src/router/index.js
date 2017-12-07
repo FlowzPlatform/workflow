@@ -1,49 +1,62 @@
 import Vue from 'vue'
-import Router from 'vue-router'
+import VueRouter from 'vue-router'
 // Layout
 import Layout from '@/layout/Master'
-
+import userLayout from '@/layout/user/Master'
+// userLayout
+import userLayout from '@/userLayout/Master'
+import UserDashboard from '@/pages/user/dashboard'
 // Area
 import Dashboard from '@/area/Dashboard'
 import Flow from '@/area/Flow'
 import DbSettings from '@/area/DbSettings'
 import Schema from '@/area/Schema'
 import Approval from '@/area/Approval'
-
 // Schema area
 import SchemaMapping from '@/pages/schema/Mapping'
 import SchemaMappingNew from '@/pages/schema/mapping/New'
 import SchemaMappingList from '@/pages/schema/mapping/List'
-
+import SchemaList from '@/pages/schema/schemaList'
 // Flow area
 import FlowzList from '@/pages/flow/List'
 import FlowNew from '@/pages/flow/New'
 import flowInstance from '@/pages/flow/instance/New'
-
+import flowLog from '@/pages/flow/systemLog'
 // DbSettings area
 import DbSettingsList from '@/pages/dbSettings/List'
 import DbSettingsNew from '@/pages/dbSettings/New'
 import SchemaNew from '@/pages/schema/New'
-
 // pages
 import Login from '@/pages/Login'
 import Register from '@/pages/Register'
-
 // Approval area
 import ApprovalList from '@/pages/approval/List'
 import ApprovalNew from '@/pages/approval/New'
+import Reply from '@/pages/approval/MailReply'
+import FormReply from '@/pages/approval/FormReply'
+// User area
+// import UserDashboard from '@/pages/user/dashboard'
+// import ManageBPMNPlugin from '@/pages/BPMNPlugins/Manage'
 
-Vue.use(Router)
+import UserDashboard from '@/pages/user/dashboard'
+// import UserProcesslist from '@/pages/user/processlist'
+import ManageBPMNPlugin from '@/pages/BPMNPlugins/Manage'
+Vue.use(VueRouter)
 const routes = [{
-  path: '/',
+  path: '/admin',
   name: 'Layout',
   component: Layout,
+  meta: { requiresAuth: true, role: [1] },
   children: [{
     path: 'dashboard',
     alias: '',
     component: Dashboard,
-    name: 'Dashboard',
-    meta: { description: 'Overview of environment' }
+    name: 'Dashboard'
+  }, { // Plugin
+    path: 'bpmn-plugin',
+    component: ManageBPMNPlugin,
+    name: 'bpmn-plugin',
+    meta: { description: 'Schema' }
   }, { // Schema
     path: 'schema',
     component: Schema,
@@ -58,6 +71,10 @@ const routes = [{
         id: String,
         required: true
       }
+    }, {
+      path: '',
+      component: SchemaList,
+      meta: { description: 'Schema' }
     }, {
       path: 'new',
       component: SchemaNew,
@@ -86,6 +103,15 @@ const routes = [{
         component: SchemaMappingNew,
         name: 'schema/mapping/new',
         meta: { description: 'SchemaMapping' },
+        props: {
+          id: Number,
+          required: false
+        }
+      }, {
+        path: 'edit/:mappingid',
+        component: SchemaMappingNew,
+        name: 'schema/mapping/edit',
+        meta: { description: 'SchemaMappingEdit' },
         props: {
           id: Number,
           required: false
@@ -124,6 +150,11 @@ const routes = [{
         id: Number,
         required: false
       }
+    }, {
+      path: 'instance/log/:id',
+      component: flowLog,
+      name: 'flow/systemlog',
+      meta: { description: 'Flowz Instance systemlog' }
     }]
   }, { // DB Settings
     path: 'DbSettings',
@@ -162,6 +193,36 @@ const routes = [{
       }
     }]
   }]
+}, { // Enduser Dashboard
+  path: '/',
+  name: 'User',
+  component: userLayout,
+  meta: { requiresAuth: true, role: [2, 3] },
+  children: [{
+    path: '/',
+    name: 'approval',
+    component: UserDashboard,
+    meta: { description: 'DashBoard' }
+  }, {
+    path: 'approval/:id',
+    name: 'Process',
+    component: UserDashboard,
+    meta: { description: 'List' },
+    props: {
+      id: String,
+      required: false
+    }
+  }]
+    // }, {
+    //   path: 'approval/:id',
+    //   name: 'Process',
+    //   component: UserProcesslist,
+    //   meta: { description: 'List' },
+    //   props: {
+    //     id: String,
+    //     required: false
+    //   }
+    // }]
 }, {
   path: '/Login',
   name: 'Login',
@@ -170,5 +231,37 @@ const routes = [{
   path: '/Register',
   name: 'Register',
   component: Register
+}, {
+  path: '/',
+  name: 'User',
+  component: userLayout,
+  meta: { requiresAuth: true, role: [2, 3] },
+  children: [{
+    path: '/',
+    name: 'approval',
+    component: UserDashboard,
+    meta: { description: 'DashBoard' }
+  }, {
+    path: 'approval/:id',
+    name: 'Process',
+    component: UserDashboard,
+    meta: { description: 'List' },
+    props: {
+      id: String,
+      required: false
+    }
+  }, {
+    path: '/mail/reply/:mailid/:pid/:jobid/:fiid',
+    name: 'mail/reply',
+    component: Reply
+  }, {
+    path: '/form/reply/:pid/:fiid',
+    name: 'form/reply',
+    component: FormReply
+  }]
+}, {
+  path: '/',
+  name: '',
+  redirect: '/Login'
 }]
 export default routes

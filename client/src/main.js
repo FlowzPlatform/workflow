@@ -46,7 +46,17 @@ import 'iview/dist/styles/iview.css' // CSS
 
 Vue.use(iView, { locale })
 
+import VueCodeMirror from 'vue-codemirror'
+Vue.use(VueCodeMirror)
+
 /* jquery-ui */
+
+import VueParticles from 'vue-particles'
+Vue.use(VueParticles)
+
+/* Animated css */
+
+import 'animate.css/animate.css'
 
 /* IView */
 // import 'bootstrap/dist/css/bootstrap.css'
@@ -55,9 +65,16 @@ Vue.use(iView, { locale })
 import AsyncComputed from 'vue-async-computed'
 Vue.use(AsyncComputed)
 
+/* vue-split-panel */
+import VueSplit from 'vue-split-panel'
+Vue.use(VueSplit)
+
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */
+// cookies
+var VueCookie = require('vue-cookie')
+Vue.use(VueCookie)
 
 // Routing logic
 Vue.use(VueRouter)
@@ -74,21 +91,57 @@ var router = new VueRouter({
 router.beforeEach((to, from, next) => {
   iView.LoadingBar.config({ color: '#0e406d' })
     // window.console.log('Transition', transition)
-    // console.log(to)
-  if (to.auth && (to.router.app.$store.state.token === 'null')) {
+    // router.app.$store.state.token
+  const token = router.app.$cookie.get('auth_token')
+  if (to.matched.some(record => record.meta.requiresAuth) && (!token || token === 'null')) {
     window.console.log('Not authenticated')
     next({
       path: '/login',
       query: { redirect: to.fullPath }
     })
   } else {
-    // window.console.log('authenticated')
-    next()
+    if (to.matched.some(record => record.meta.requiresAuth)) {
+      store.dispatch('authenticate', token).then(response => {
+        store.commit('SET_USER', response)
+          // get user role
+        if (to.matched.some(record => record.meta.role)) {
+          store.dispatch('getUser', response.email).then(user => {
+            if (store.state.role !== null) {
+              store.commit('SET_ROLE', user.role)
+              if (to.matched.find(record => record.meta.role).meta.role.indexOf(parseInt(user.role)) === -1) {
+                next({
+                  path: '/login',
+                  query: { redirect: to.fullPath }
+                })
+              } else {
+                next()
+              }
+            } else {
+              store.commit('SET_ROLE', user.role)
+              next({
+                path: parseInt(user.role) === 1 ? '/admin/dashboard' : '/'
+              })
+            }
+          })
+        } else {
+          next()
+        }
+      }).catch(error => {
+        console.log(error.message)
+          // window.console.log('Not authenticated')
+        next({
+          path: '/login',
+          query: { redirect: to.fullPath }
+        })
+      })
+    } else {
+      next()
+    }
   }
 })
 
 sync(store, router)
-
+  // console.log('process.env.accesskey', process.env.accesskey)
 new Vue({
   el: '#app',
   router,
@@ -96,14 +149,3 @@ new Vue({
   template: '<App/>',
   components: { App }
 })
-
-// Check local storage to handle refreshes
-if (window.localStorage) {
-  var localUserString = window.localStorage.getItem('user') || 'null'
-  var localUser = JSON.parse(localUserString)
-
-  if (localUser && store.state.user !== localUser) {
-    store.commit('SET_USER', localUser)
-    store.commit('SET_TOKEN', window.localStorage.getItem('token'))
-  }
-}

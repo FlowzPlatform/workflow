@@ -937,7 +937,35 @@
       ]
     },
     {
-      "name": "MyProperty",
+      "name": "Capacity",
+      "isAbstract": true,
+      "extends": [
+        "bpmn:FlowElement"
+      ],
+      "properties": [{
+        "name": "isFormInput",
+        "isAttr": true,
+        "type": "Boolean"
+      }, {
+        "name": "capacity",
+        "type": "String",
+        "isAttr": true
+      }, {
+        "name": "isProcessTask",
+        "type": "Boolean",
+        "isAttr": true
+      }, {
+        "name": "executeIfAny",
+        "isAttr": true,
+        "type": "Boolean"
+      }, {
+        "name": "countany",
+        "type": "String",
+        "isAttr": true
+      }]
+    },
+    {
+      "name": "MyConfigurations",
       "superClass": ["Element"],
       "meta": {
         "allowedIn": [
@@ -947,12 +975,40 @@
       },
       "properties": [{
         "name": "fields",
-        "type": "Property",
+        "type": "Configuration",
         "isMany": true
       }]
     },
     {
-      "name": "Property",
+      "name": "Configuration",
+      "superClass": ["Element"],
+      "properties": [{
+        "name": "key",
+        "type": "String",
+        "isAttr": true
+      }, {
+        "name": "value",
+        "type": "String",
+        "isAttr": true
+      }]
+    },
+    {
+      "name": "MyInputs",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": [
+          "bpmn:StartEvent",
+          "bpmn:UserTask"
+        ]
+      },
+      "properties": [{
+        "name": "fields",
+        "type": "Input",
+        "isMany": true
+      }]
+    },
+    {
+      "name": "Input",
       "superClass": ["Element"],
       "properties": [{
           "name": "id",
@@ -1031,6 +1087,11 @@
       "superClass": ["Element"],
       "properties": [{
           "name": "id",
+          "type": "String",
+          "isAttr": true
+        },
+        {
+          "name": "notes",
           "type": "String",
           "isAttr": true
         },

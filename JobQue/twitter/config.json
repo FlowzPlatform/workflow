@@ -1,0 +1,32 @@
+{
+  "serverURI": "http://172.16.160.117:3030",
+  "watcherPath": "../bpmnPlugin",
+  "tweetCredential": {
+    "consumer_key": "enter your key",
+    "consumer_secret": "enter your key",
+    "access_token": "enter your key",
+    "access_token_secret": "enter your key"
+  },
+  "flowid": "7f7556e6-dbc0-493e-8076-2ebc18cba3ae",
+  "rethinkdb": {
+    "host": "172.16.160.117",
+    "port": 28015,
+    "db": "FlowzEngine"
+  },
+  "qOptions": {
+    "name": "scheduler",
+    "masterInterval": 60000,
+    "changeFeed": true,
+    "concurrency": 1,
+    "removeFinishedJobs": false
+  },
+  "credential": {
+    "email": "your email",
+    "password": "your password"
+  },
+  "sendEmail": "http://localhost:3001/sendEmail",
+  "flowz_table": "flowzinstance",
+  "scheduler_table": "scheduler",
+  "qJobTimeout": 3600000,
+  "qJobRetryMax": 0
+}

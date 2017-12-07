@@ -3,6 +3,7 @@ export default {
   serverURI: 'http://10.110.1.136:8080',
   user: null,
   token: null,
+  role: null,
   userInfo: {
     messages: [{ 1: 'test', 2: 'test' }],
     notifications: [],
@@ -11,10 +12,12 @@ export default {
   schema: [],
   settings: [],
   tabdata: [],
+  flowz: [],
   activetab: '',
   editTemplate: null,
   sidenavtoggle: true,
   sidenavpin: true,
   mappingTemp: [],
-  BPMNxml: ''
+  BPMNxml: '',
+  isLoggedIn: false
 }

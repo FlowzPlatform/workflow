@@ -6,6 +6,7 @@
           <h5>Schema Mapping List</h5>
         </Col>
         <Col span="4">
+          <Button type="primary" size="small" @click="back()" icon="chevron-left" style="float:right; margin-left: 2px; margin-bottom: 2px;">Back</Button>
           <router-link :to="{name: 'schema/mapping/new', params: {id: $route.params.id}}">
             <Button type="primary" style="float:right" size="small" icon="plus-round">Add</Button>
           </router-link>
@@ -14,7 +15,6 @@
     <Table border :columns="columns5" :data="data5"></Table>
   </div>
 </template>
-
 <script>
 /*eslint-disable*/
 import api from '@/api'
@@ -22,11 +22,10 @@ import Schema from '@/api/schema'
 import schemamapping from '@/api/schemamapping'
 // import Tab from './Tab'
 import expandRow from '@/components/erow_mappinglist.vue'
-
 export default {
   name: 'instancelist',
   components: {
-    // 'f-Tab': Tab,  
+    // 'f-Tab': Tab,
     'expandRow': expandRow
   },
   computed: {
@@ -86,7 +85,7 @@ export default {
                 },
                 on: {
                   click: () => {
-                    this.show(params.index)
+                    this.show(this.$route.params.id,params.row.id)
                   }
                 }
               }, ''),
@@ -116,6 +115,9 @@ export default {
     }
   },
   methods: {
+    back () {
+      this.$router.go(-1)
+    },
     fetch (id) {
       var self = this
       // alert(id)
@@ -141,9 +143,8 @@ export default {
         console.log(error)
       })
     },
-    show (index) {
-    	console.log(this.data5[index].id)
-    	// this.$router.push('/schema-instance/edit/'+this.data5[index]._id)
+    show (schemaId,mappingId) {
+    	 this.$router.push('/admin/schema/'+ schemaId + '/mapping/edit/' + mappingId)
     },
     remove (index) {
       this.$Modal.confirm({
@@ -190,4 +191,3 @@ export default {
     color: #fff;
 }
 </style>
-  

@@ -21,9 +21,11 @@ var serviceTaskDelegateProps = require('./parts/ServiceTaskDelegateProps'),
   sequenceFlowProps = require('./parts/SequenceFlowProps'),
   scriptProps = require('./parts/ScriptTaskProps'),
   formProps = require('./parts/FormProps'),
-  myPropertiesProps = require('./parts/MyPropertiesProps'),
+  myInputProps = require('./parts/MyInputProps'),
   myPropertiesIOProps = require('./parts/myPropertiesIOProps'),
   myOutputProps = require('./parts/myOutputProps'),
+  myConfigProps = require('./parts/MyConfigProps'),
+  capacityProps = require('./parts/CapacityProps'),
   startEventInitiator = require('./parts/StartEventInitiator'),
   variableMapping = require('./parts/VariableMappingProps'),
   versionTag = require('./parts/VersionTagProps');
@@ -53,7 +55,7 @@ var getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject,
   eventDefinitionHelper = require('../../helper/EventDefinitionHelper'),
   implementationTypeHelper = require('../../helper/ImplementationTypeHelper');
 // helpers ////////////////////////////////////////
-var isExternalTaskPriorityEnabled = function(element) {
+var isExternalTaskPriorityEnabled = function (element) {
   var businessObject = getBusinessObject(element);
   // show only if element is a process, a participant ...
   if (is(element, 'bpmn:Process') || is(element, 'bpmn:Participant') && businessObject.get('processRef')) {
@@ -64,7 +66,7 @@ var isExternalTaskPriorityEnabled = function(element) {
   // ... or an external task with selected external implementation type
   return !!ImplementationTypeHelper.isExternalCapable(externalBo) && isExternalTask;
 };
-var isJobConfigEnabled = function(element) {
+var isJobConfigEnabled = function (element) {
   var businessObject = getBusinessObject(element);
   if (is(element, 'bpmn:Process') || is(element, 'bpmn:Participant') && businessObject.get('processRef')) {
     return true;
@@ -80,7 +82,7 @@ var isJobConfigEnabled = function(element) {
   }
   return false;
 };
-var getInputOutputParameterLabel = function(param, translate) {
+var getInputOutputParameterLabel = function (param, translate) {
   if (is(param, 'camunda:InputParameter')) {
     return translate('Input Parameter');
   }
@@ -89,7 +91,7 @@ var getInputOutputParameterLabel = function(param, translate) {
   }
   return '';
 };
-var getListenerLabel = function(param, translate) {
+var getListenerLabel = function (param, translate) {
   if (is(param, 'camunda:ExecutionListener')) {
     return translate('Execution Listener');
   }
@@ -107,6 +109,7 @@ function createGeneralTabGroups(element, bpmnFactory, elementRegistry, elementTe
   };
   idProps(generalGroup, element, translate);
   nameProps(generalGroup, element, translate);
+  capacityProps(generalGroup, element, translate);
   processProps(generalGroup, element, translate);
   versionTag(generalGroup, element, translate);
   executableProps(generalGroup, element, translate);
@@ -210,14 +213,14 @@ function createMyPropertiesTabGroups(element, bpmnFactory, elementRegistry, tran
   if (data != undefined) {
     options = data
   }
-  var propertiesGroup = {
-    id: 'Properties',
-    label: translate('Properties'),
+  var inputGroup = {
+    id: 'Input',
+    label: translate('Input'),
     entries: []
   };
-  myPropertiesProps(propertiesGroup, element, bpmnFactory, translate, options);
+  myInputProps(inputGroup, element, bpmnFactory, translate, options);
   return [
-    propertiesGroup
+    inputGroup
   ];
 }
 
@@ -251,6 +254,18 @@ function createOutputGroups(element, bpmnFactory, elementRegistry, translate, da
   ];
 }
 
+function createConfigGroups(element, bpmnFactory, elementRegistry, translate, data) {
+  var configGroup = {
+    id: 'configs',
+    label: translate('Config'),
+    entries: []
+  }
+  myConfigProps(configGroup, element, bpmnFactory, translate)
+  return [
+    configGroup
+  ]
+}
+
 function createListenersTabGroups(element, bpmnFactory, elementRegistry, translate) {
   var listenersGroup = {
     id: 'listeners',
@@ -261,10 +276,10 @@ function createListenersTabGroups(element, bpmnFactory, elementRegistry, transla
   var listenerDetailsGroup = {
     id: 'listener-details',
     entries: [],
-    enabled: function(element, node) {
+    enabled: function (element, node) {
       return options.getSelectedListener(element, node);
     },
-    label: function(element, node) {
+    label: function (element, node) {
       var param = options.getSelectedListener(element, node);
       return getListenerLabel(param, translate);
     }
@@ -274,7 +289,7 @@ function createListenersTabGroups(element, bpmnFactory, elementRegistry, transla
     id: 'listener-fields',
     label: translate('Field Injection'),
     entries: [],
-    enabled: function(element, node) {
+    enabled: function (element, node) {
       return options.getSelectedListener(element, node);
     }
   };
@@ -296,10 +311,10 @@ function createInputOutputTabGroups(element, bpmnFactory, elementRegistry, trans
   var inputOutputParameterGroup = {
     id: 'input-output-parameter',
     entries: [],
-    enabled: function(element, node) {
+    enabled: function (element, node) {
       return options.getSelectedParameter(element, node);
     },
-    label: function(element, node) {
+    label: function (element, node) {
       var param = options.getSelectedParameter(element, node);
       return getInputOutputParameterLabel(param, translate);
     }
@@ -327,10 +342,10 @@ function createConnectorTabGroups(element, bpmnFactory, elementRegistry, transla
   var connectorInputOutputParameterGroup = {
     id: 'connector-input-output-parameter',
     entries: [],
-    enabled: function(element, node) {
+    enabled: function (element, node) {
       return options.getSelectedParameter(element, node);
     },
-    label: function(element, node) {
+    label: function (element, node) {
       var param = options.getSelectedParameter(element, node);
       return getInputOutputParameterLabel(param, translate);
     }
@@ -379,7 +394,7 @@ function CamundaPropertiesProvider(eventBus, bpmnFactory, elementRegistry, eleme
     schema: []
   };
   PropertiesActivator.call(this, eventBus);
-  this.getTabs = function(element, data) {
+  this.getTabs = function (element, data) {
     var generalTab = {
       id: 'general',
       label: translate('General'),
@@ -393,8 +408,8 @@ function CamundaPropertiesProvider(eventBus, bpmnFactory, elementRegistry, eleme
       groups: createIOMappingGroups(element, bpmnFactory, elementRegistry, translate)
     };
     var propertiesTab = {
-      id: 'Properties',
-      label: translate('Properties'),
+      id: 'Input',
+      label: translate('Input'),
       groups: createMyPropertiesTabGroups(element, bpmnFactory, elementRegistry, translate, data)
     };
     var variablesTab = {
@@ -411,7 +426,7 @@ function CamundaPropertiesProvider(eventBus, bpmnFactory, elementRegistry, eleme
       id: 'listeners',
       label: translate('Listeners'),
       groups: createListenersTabGroups(element, bpmnFactory, elementRegistry, translate),
-      enabled: function(element) {
+      enabled: function (element) {
         return !eventDefinitionHelper.getLinkEventDefinition(element) ||
           (!is(element, 'bpmn:IntermediateThrowEvent') &&
             eventDefinitionHelper.getLinkEventDefinition(element));
@@ -426,7 +441,7 @@ function CamundaPropertiesProvider(eventBus, bpmnFactory, elementRegistry, eleme
       id: 'connector',
       label: translate('Connector'),
       groups: createConnectorTabGroups(element, bpmnFactory, elementRegistry, translate),
-      enabled: function(element) {
+      enabled: function (element) {
         var bo = implementationTypeHelper.getServiceTaskLikeBusinessObject(element);
         return bo && implementationTypeHelper.getImplementationType(bo) === 'connector';
       }
@@ -446,13 +461,19 @@ function CamundaPropertiesProvider(eventBus, bpmnFactory, elementRegistry, eleme
       label: translate('Output'),
       groups: createOutputGroups(element, bpmnFactory, elementRegistry, translate)
     };
+    var configTab = {
+      id: 'Configuration',
+      label: translate('Config'),
+      groups: createConfigGroups(element, bpmnFactory, elementRegistry, translate)
+    }
     return [
       generalTab,
       ioMapping,
       // variablesTab,
       // connectorTab,
       propertiesTab,
-      outputTab
+      outputTab,
+      configTab
       // formsTab,
       // listenersTab,
       // inputOutputTab,

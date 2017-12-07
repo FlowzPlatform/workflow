@@ -1,4 +1,7 @@
 import api from '../api'
+import axios from 'axios'
+import config from '@/config'
+import modelUser from '@/api/user'
 // import _ from 'lodash'
 export default {
   getSchema ({ commit }) {
@@ -28,6 +31,17 @@ export default {
     commit('SET_TABDATA', text)
     // console.log('getTabdata', text)
   },
+  getFlowzdata ({ commit }) {
+    commit('SET_FLOWZDATA', [])
+    api.request('get', '/flowz')
+      .then(response => {
+        commit('SET_FLOWZDATA', response.data.data)
+      })
+      .catch(error => {
+        console.log(error)
+        commit('SET_FLOWZDATA', [])
+      })
+  },
   setMapTemp ({commit}, text) {
     // console.log('getMapTempflag', text)
     commit('SET_MAPTEMP', text)
@@ -41,5 +55,28 @@ export default {
   },
   removeXMLtoLocalStorage ({commit}) {
     commit('REMOVE_XML')
+  },
+  authenticate ({ commit }, authToken) {
+    return axios({
+      method: 'get',
+      url: config.loginURL + '/userdetails',
+      headers: {
+        'authorization': authToken
+      }
+    })
+    .then(response => {
+      if (response) {
+        return response.data.data
+      } else {
+        return
+      }
+    })
+  },
+  getUser ({ commit }, email) {
+    return modelUser.getByParam(email).then((response) => {
+      if (response && response.data.data.length > 0) {
+        return response.data.data[0]
+      }
+    })
   }
 }
