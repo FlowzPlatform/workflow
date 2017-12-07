@@ -954,6 +954,14 @@
         "name": "isProcessTask",
         "type": "Boolean",
         "isAttr": true
+      }, {
+        "name": "executeIfAny",
+        "isAttr": true,
+        "type": "Boolean"
+      }, {
+        "name": "countany",
+        "type": "String",
+        "isAttr": true
       }]
     },
     {

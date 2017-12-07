@@ -15,16 +15,12 @@ img {
 .layout-nav > li.ivu-menu-item > a {
     color: #fff;
 }
-.f-logo {
-    padding: 0px 0px 0px 10px;
-}
+
 .stats-title {
     font-size: 14px;
-    font-weight: 500;
+    font-weight: bold;
 }
-.ivu-row-flex {
-    height: 100vh
-}
+
 .f-logo > img {
     vertical-align: middle;
     width:50%;
@@ -38,11 +34,11 @@ img {
 }
 
 .f-layout-content {
-    margin: 15px;
+    padding: 15px;
     background: #fff;
     border-radius: 4px;
     position: relative;
-    /* height: 100vh */
+    height: 100vh
 }
 
 .widget.info-widget {
@@ -55,8 +51,7 @@ img {
 .widget-body {
     background: #fff;
     box-shadow: 0px 4px 70px -18px #707070;
-    margin-bottom: 1.875rem;
-    padding: 10px;
+    padding: 15px;
 }
 
 .info-widget-inner{
@@ -93,16 +88,6 @@ img {
   .layout-breadcrumb{
       padding: 10px 15px 0;
   }
-  .layout-content{
-      min-height: 200px;
-      margin: 15px;
-      overflow: hidden;
-      background: #fff;
-      border-radius: 4px;
-  }
-  .layout-content-main{
-      padding: 10px;
-  }
   .layout-copy{
       text-align: center;
       padding: 10px 0 20px;
@@ -129,6 +114,4 @@ img {
   .layout-hide-text .layout-text{
       display: none;
   }
-  .ivu-col{
-      transition: width .2s ease-in-out;
-  }
+ 

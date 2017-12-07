@@ -1,7 +1,9 @@
 <template>
   <div class="loginpage">
     <div class="loginpanel">
-		  <Row type="flex" justify="center" align="middle">
+      <vue-particles color="#dedede">
+      </vue-particles>
+      <Row type="flex" justify="center" align="middle">
         <Col :span="6" offset="1">
           <form id="form-facebook" name="form-facebook" :action="loginWithFacebookUrl" method="post">
             <input type="hidden" name="success_url" :value="facebookSuccessCallbackUrl">
@@ -69,6 +71,7 @@
     <div class="loginfooter">
         <p>© 2017. Flowz technology. All Rights Reserved.</p>
     </div>
+    
   </div>
 </template>
 
@@ -296,5 +299,12 @@ export default {
 	animation-delay: .8s;
 	animation-timing-function: ease;
 	animation-fill-mode: both;	          
+}
+#particles-js {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 </style>

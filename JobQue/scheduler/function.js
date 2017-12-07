@@ -26,7 +26,7 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
   // -------- // -------- allProcessMappingDone -------- // -------- //
   this.constructor.prototype.allProcessMappingDone = async function (targetJob, capacity, targetSchemaIndex, fId, externalCheck) {
     return new Promise (async (resolve,reject) => {
-      let numberOfExternalSchema = (targetJob.data.mapping instanceof Array) ? targetJob.data.mapping.length : 1
+      let numberOfExternalSchema = targetJob.data.executeAny ? targetJob.data.executeAny : (targetJob.data.mapping instanceof Array) ? targetJob.data.mapping.length : 1
 
       if (targetJob.data.input.length < capacity && numberOfExternalSchema != 0 && !externalCheck) {
         await this.updateLog(targetJob, 'created', false)
@@ -37,7 +37,7 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
         if (numberOfExternalSchema != 0 && !externalCheck) {
 
           let sourceCounts = targetJob.data.sourceCount ? Object.values(targetJob.data.sourceCount) : []
-
+          
           if (sourceCounts.length < numberOfExternalSchema || (capacity && Math.min(...sourceCounts) != capacity)) {
             await this.updateProcess(targetJob, 'created')
             await this.updateLog(targetJob, 'created', false)

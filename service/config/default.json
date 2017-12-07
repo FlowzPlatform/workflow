@@ -14,6 +14,8 @@
   "system_logs_table": "system_logs",
   "rdb_host": "RDB_HOST",
   "rdb_port": "RDB_PORT",
+  "rdb_user": "",
+  "rdb_password": "",
   "rdb_db": "FlowzEngine",
   "registerWokerAPI": "http://172.16.230.253:3000/upload-worker-process", //live - http://api.flowz.com/jobqueue1/upload-worker-process
   "registerProcessAPI": "http://172.16.230.253:9000/register-jobtype/" //live - http://api.flowz.com/jobqueue3/register-jobtype/

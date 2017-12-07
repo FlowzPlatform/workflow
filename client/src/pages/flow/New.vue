@@ -216,12 +216,19 @@
           .map(async (m) => {
             let _mapping = await self.getMapping(m, mergeModules)
             console.log('m', m)
+            // console.log('m', m._isProcessTask)
+            // let processTask = m._isProcessTask !== undefined ? (m._isProcessTask === 'true') : (m['_camunda:isProcessTask'] === 'true')
+            // console.log('processTask', processTask)
+            // console.log('ex', m['_camunda:executeIfAny'])
+            // let executeAny = m._executeIfAny === undefined ? ((m['_camunda:executeIfAny']) ? m['_camunda:countany'] : false) : ((m._executeIfAny) ? m._countany : false)
+            console.log('executeAny', m['_camunda:executeIfAny'] !== undefined ? ((m['_camunda:executeIfAny']) ? m['_camunda:countany'] : false) : false)
             return {
               id: m._id,
               capacity: (m._isFormInput) ? m._capacity : false,
-              isProcessTask: (m._isProcessTask === 'true'),
+              isProcessTask: m._isProcessTask !== undefined ? (m._isProcessTask === 'true') : (m['_camunda:isProcessTask'] === 'true'),
               name: m._name,
               type: m.workerType.toLowerCase(),
+              executeAny: m['_camunda:executeIfAny'] !== undefined ? ((m['_camunda:executeIfAny']) ? m['_camunda:countany'] : false) : false,
               // isProcessTask: m.workerType.toLowerCase() === 'tweet' ? 'true' : false,
               target: m.outgoing ? self.getTargetId(m, jsonXML) : [],
               mapping: (_.union(..._mapping)),
@@ -243,7 +250,8 @@
           return {
             id: m._id,
             capacity: (m._isFormInput) ? m._capacity : false,
-            isProcessTask: (m._isProcessTask === 'true'),
+            isProcessTask: m._isProcessTask !== undefined ? (m._isProcessTask === 'true') : (m['_camunda:isProcessTask'] === 'true'),
+            executeAny: m['_camunda:executeIfAny'] !== undefined ? ((m['_camunda:executeIfAny']) ? m['_camunda:countany'] : false) : false,
             name: m._name,
             type: 'start',
             target: self.getTargetId(m, process),
