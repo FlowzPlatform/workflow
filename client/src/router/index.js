@@ -6,6 +6,7 @@ import userLayout from '@/layout/user/Master'
 // userLayout
 // import userLayout from '@/userLayout/Master'
 import UserDashboard from '@/pages/user/dashboard'
+
 // Area
 import Dashboard from '@/area/Dashboard'
 import Flow from '@/area/Flow'
@@ -125,6 +126,7 @@ const routes = [{
     meta: { description: 'Flow' },
     children: [{
       path: '',
+      name: 'flow/list',
       component: FlowzList,
       meta: { description: 'Flow' }
     }, {
