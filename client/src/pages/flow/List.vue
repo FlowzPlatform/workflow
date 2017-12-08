@@ -146,7 +146,7 @@ export default {
                 },
                 on: {
                   click: () => {
-                    this.$router.push('flow/edit/' + this.flowzList[params.index].id)
+                    this.$router.push({name: 'flow/edit', params: {id: this.flowzList[params.index].id}})
                   }
                 }
               }, ''),
