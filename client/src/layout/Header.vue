@@ -53,6 +53,12 @@
                             </router-link>
                         </Menu-item>
                         <Menu-item name="1-1">
+                            <router-link to="/admin/userconfig">
+                                <Icon type="person-stalker"></Icon>
+                                User Config
+                            </router-link>
+                        </Menu-item>
+                        <Menu-item name="1-1">
                             <a @click="handleRemove()">
                                 <Icon type="ios-locked-outline" :size="16"></Icon>
                                 Logout
