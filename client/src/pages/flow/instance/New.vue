@@ -109,9 +109,8 @@
                     <div style="padding:10px;">
                       <Tabs>
                         <TabPane label="Form Data" name="formtab">
-                          <template v-if="selectedProcess.inputProperty[0].entityschema.createTemplate.length > 0 && getCurrentStatus(selectedLogs) === 'inputRequired'">
-                            {{selectedProcess.inputProperty[0].entityschema.createTemplate[0].url}}
-                            <schemaTemplate :row="selectedProcess" :html="getHtml(selectedProcess.inputProperty[0].entityschema.createTemplate.url)"></schemaTemplate>
+                          <template v-if="selectedProcess.inputProperty[0].createTemplate && getCurrentStatus(selectedLogs) === 'inputRequired'">
+                            <schemaTemplate :row="selectedProcess" :html="html"></schemaTemplate>
                           </template>
                           <template v-else-if="getCurrentStatus(selectedLogs) === 'inputRequired'">
                             <expandRow :row="selectedProcess" :lastLog="getLastLog(selectedLogs)"></expandRow>
@@ -145,6 +144,7 @@ import instance from '@/api/flowzinstance'
 
 // Components
 import expandRow from '@/components/expand-process.vue'
+import schemaTemplate from '@/components/SchemaTemplate.vue'
 
 // Lib
 import _ from 'lodash'
@@ -155,7 +155,7 @@ import camundaModdleDescriptor from '../../../../static/bpmn/camunda-bpmn-moddle
 
 let viewer
 export default {
-  components: { expandRow },
+  components: { expandRow, schemaTemplate },
   data () {
     return {
       flowInstance: {},
@@ -231,7 +231,11 @@ export default {
       this.$router.go(-1)
     },
     async getHtml (url) {
-      return await axios.get(url)
+      let self = this
+      await axios.get(url)
+      .then(res => {
+        self.html = res.data
+      })
     },
     async init () {
       // Get Flow Instance
@@ -339,10 +343,10 @@ export default {
         return {title: m.name, key: m.name}
       })
     },
-    handleProcessClick (item, log) {
+    async handleProcessClick (item, log) {
       this.showProp = true
-      console.log('item', item)
-      this.selectedProcess = item
+      this.selectedProcess = await item
+      this.getHtml(this.selectedProcess.inputProperty[0].entityschema.createTemplate[0].url)
       this.selectedLogs = log
     },
     handleMappingRequireStatus (data) {

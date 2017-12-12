@@ -3,7 +3,7 @@
   <Card :bordered="false">
       <p slot="title">Confirm Approval</p>
       <p slot="extra" v-show="notes">Notes : {{notes}}</p>
-			<div v-html="viewTemplateHtml"></div>
+      <div v-html="viewTemplateHtml"></div>
       <ul class="error">
         <li v-for="item in err">{{item}}</li>
       </ul>
@@ -46,139 +46,143 @@ export default {
       let lastLogIndex
       let inputs = {}
       this.Aloading = true
-      for (var i = 0; i < self.process.inputProperty[0].entityschema.entity.length; i++) {
-        let element = self.process.inputProperty[0].entityschema.entity[i].name
-        $('input[name="' + element.toLowerCase() + '"]').each(async function () {
-          if (self.process.inputProperty[0].entityschema.entity[i].property.optional === false) {
-            // inputs[element] = await this.value
-            let result = self.process.inputProperty[0].entityschema.entity[i].property
-            let emailRegEx = '(\\w+)\\@(\\w+)\\.[a-zA-Z]'
-            let numberRegEx = '^[0-9]+$'
-            let dateRegEx = '(0?[1-9]|[12]\\d|30|31)[^\\w\\d\\r\\n:](0?[1-9]|1[0-2])[^\\w\\d\\r\\n:](\\d{4}|\\d{2})'
-            let val = this.value
-            if (val === '' || val === null || val === undefined) {
-              err.push(element + ' - is required..!')
-              // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
-              //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> required..!</div>')
-              // }
-            } else {
-              // $('input[name="' + element + '"]').parent().next('.validation').remove()
-            }
 
-            if (this.hasAttribute('pattern')) {
-              let pttrn = new RegExp(result.regEx)
-              let regEx = pttrn.test(val)
-              if (!regEx) {
-                err.push(element + ' - Enter proper format..!')
+      if (action === true) {
+        for (var i = 0; i < self.process.inputProperty[0].entityschema.entity.length; i++) {
+          let element = self.process.inputProperty[0].entityschema.entity[i].name
+          $('input[name="' + element.toLowerCase() + '"]').each(async function () {
+            if (self.process.inputProperty[0].entityschema.entity[i].property.optional === false) {
+              // inputs[element] = await this.value
+              let result = self.process.inputProperty[0].entityschema.entity[i].property
+              let emailRegEx = '(\\w+)\\@(\\w+)\\.[a-zA-Z]'
+              let numberRegEx = '^[0-9]+$'
+              let dateRegEx = '(0?[1-9]|[12]\\d|30|31)[^\\w\\d\\r\\n:](0?[1-9]|1[0-2])[^\\w\\d\\r\\n:](\\d{4}|\\d{2})'
+              let val = this.value
+              if (val === '' || val === null || val === undefined) {
+                err.push(element + ' - is required..!')
                 // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
-                //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Enter proper format..!</div>')
+                //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> required..!</div>')
                 // }
               } else {
-                // obj[element] = val
                 // $('input[name="' + element + '"]').parent().next('.validation').remove()
               }
-            }
-            if (this.type === 'date') {
-              let inputDate = new Date(val)
-              if (result.maxdate !== '') {
-                let maxDate = new Date(result.maxdate)
-                if (inputDate > maxDate) {
-                  err.push(element + ' - Enter minimum date then ' + maxDate)
+
+              if (this.hasAttribute('pattern')) {
+                let pttrn = new RegExp(result.regEx)
+                let regEx = pttrn.test(val)
+                if (!regEx) {
+                  err.push(element + ' - Enter proper format..!')
                   // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
-                  //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Enter minimum date then ' + maxDate + '</div>')
-                  // }
-                } else {
-                  // obj[element] = val
-                  // $('input[name="' + element + '"]').parent().next('.validation').remove()
-                }
-              } else if (result.mindate !== '') {
-                let minDate = new Date(result.mindate)
-                if (inputDate < minDate) {
-                  err.push(element + ' - Enter maximum date then ' + minDate)
-                  // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
-                  //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Enter minimum date then ' + minDate + '</div>')
+                  //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Enter proper format..!</div>')
                   // }
                 } else {
                   // obj[element] = val
                   // $('input[name="' + element + '"]').parent().next('.validation').remove()
                 }
               }
-            }
-            if (result.min !== 0 || result.max !== 0) {
-              if (val.length > result.min && val.length > result.max) {
-                err.push(element + ' - Minimum length :' + result.min + ' Maximum length :' + result.max)
-                // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
-                //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Minimum length :' + result.min + ' Maximum length :' + result.max + '</div>')
-                // }
-              } else if (val.length > result.max && val.length < result.min) {
-                err.push(element + ' - Minimum length :' + result.min + ' Maximum length :' + result.max)
-                // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
-                //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Minimum length :' + result.min + ' Maximum length :' + result.max + '</div>')
-                // }
-              } else {
-                // obj[element] = val
-                // $('input[name="' + element + '"]').parent().next('.validation').remove()
+              if (this.type === 'date') {
+                let inputDate = new Date(val)
+                if (result.maxdate !== '') {
+                  let maxDate = new Date(result.maxdate)
+                  if (inputDate > maxDate) {
+                    err.push(element + ' - Enter minimum date then ' + maxDate)
+                    // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
+                    //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Enter minimum date then ' + maxDate + '</div>')
+                    // }
+                  } else {
+                    // obj[element] = val
+                    // $('input[name="' + element + '"]').parent().next('.validation').remove()
+                  }
+                } else if (result.mindate !== '') {
+                  let minDate = new Date(result.mindate)
+                  if (inputDate < minDate) {
+                    err.push(element + ' - Enter maximum date then ' + minDate)
+                    // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
+                    //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Enter minimum date then ' + minDate + '</div>')
+                    // }
+                  } else {
+                    // obj[element] = val
+                    // $('input[name="' + element + '"]').parent().next('.validation').remove()
+                  }
+                }
+              }
+              if (result.min !== 0 || result.max !== 0) {
+                if (val.length > result.min && val.length > result.max) {
+                  err.push(element + ' - Minimum length :' + result.min + ' Maximum length :' + result.max)
+                  // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
+                  //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Minimum length :' + result.min + ' Maximum length :' + result.max + '</div>')
+                  // }
+                } else if (val.length > result.max && val.length < result.min) {
+                  err.push(element + ' - Minimum length :' + result.min + ' Maximum length :' + result.max)
+                  // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
+                  //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Minimum length :' + result.min + ' Maximum length :' + result.max + '</div>')
+                  // }
+                } else {
+                  // obj[element] = val
+                  // $('input[name="' + element + '"]').parent().next('.validation').remove()
+                }
+              }
+              if (result.allowedValue.length > 0) {
+                let check = _.includes(result.allowedValue, val)
+                if (!check) {
+                  err.push(element + ' - Allowed value are' + result.allowedValue)
+                  // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
+                  //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Allowed value are' + result.allowedValue + '</div>')
+                  // }
+                } else {
+                  // obj[element] = val
+                  // $('input[name="' + element + '"]').parent().next('.validation').remove()
+                }
+              }
+              switch (this.type) {
+                case 'email':
+                  let re = new RegExp(emailRegEx)
+                  let testEmail = re.test(val)
+                  if (testEmail) {
+                    inputs[element] = await val
+                    // $('input[name="' + element + '"]').parent().next('.validation').remove()
+                  } else {
+                    err.push(element + ' - Enter valid email address..!')
+                    // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
+                    //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Enter valid email address..!</div>')
+                    // }
+                  }
+                  break
+                case 'number':
+                  re = new RegExp(numberRegEx)
+                  testEmail = re.test(val)
+                  if (testEmail) {
+                    inputs[element] = await val
+                    $('input[name="' + element + '"]').parent().next('.validation').remove()
+                  } else {
+                    err.push(element + ' - Enter numbers only..!')
+                    // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
+                    //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Enter numbers only..!</div>')
+                    // }
+                  }
+                  break
+                case 'date':
+                  re = new RegExp(dateRegEx)
+                  testEmail = re.test(val)
+                  if (testEmail) {
+                    inputs[element] = await val
+                    // $('input[name="' + element + '"]').parent().next('.validation').remove()
+                  } else {
+                    err.push(element + ' - Invalid date format..!')
+                    // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
+                    //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Invalid date format..!</div>')
+                    // }
+                  }
+                  break
+                default:
+                  inputs[element] = await val
               }
             }
-            if (result.allowedValue.length > 0) {
-              let check = _.includes(result.allowedValue, val)
-              if (!check) {
-                err.push(element + ' - Allowed value are' + result.allowedValue)
-                // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
-                //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Allowed value are' + result.allowedValue + '</div>')
-                // }
-              } else {
-                // obj[element] = val
-                // $('input[name="' + element + '"]').parent().next('.validation').remove()
-              }
-            }
-            switch (this.type) {
-              case 'email':
-                let re = new RegExp(emailRegEx)
-                let testEmail = re.test(val)
-                if (testEmail) {
-                  inputs[element] = await val
-                  // $('input[name="' + element + '"]').parent().next('.validation').remove()
-                } else {
-                  err.push(element + ' - Enter valid email address..!')
-                  // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
-                  //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Enter valid email address..!</div>')
-                  // }
-                }
-                break
-              case 'number':
-                re = new RegExp(numberRegEx)
-                testEmail = re.test(val)
-                if (testEmail) {
-                  inputs[element] = await val
-                  $('input[name="' + element + '"]').parent().next('.validation').remove()
-                } else {
-                  err.push(element + ' - Enter numbers only..!')
-                  // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
-                  //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Enter numbers only..!</div>')
-                  // }
-                }
-                break
-              case 'date':
-                re = new RegExp(dateRegEx)
-                testEmail = re.test(val)
-                if (testEmail) {
-                  inputs[element] = await val
-                  // $('input[name="' + element + '"]').parent().next('.validation').remove()
-                } else {
-                  err.push(element + ' - Invalid date format..!')
-                  // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
-                  //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Invalid date format..!</div>')
-                  // }
-                }
-                break
-              default:
-                inputs[element] = await val
-            }
-          }
-        })
+          })
+        }
       }
-      if (err.length > 0) {
+
+      if (err.length > 0 && action === true) {
         self.$Notice.error({title: 'Error..!', desc: 'Fill all the details carefully.'})
         self.Aloading = false
       } else {

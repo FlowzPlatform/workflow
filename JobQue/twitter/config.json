@@ -1,15 +1,15 @@
 {
-  "serverURI": "http://172.16.160.117:3030",
+  "serverURI": "http://172.16.230.151:3030",
   "watcherPath": "../bpmnPlugin",
   "tweetCredential": {
-    "consumer_key": "enter your key",
-    "consumer_secret": "enter your key",
-    "access_token": "enter your key",
-    "access_token_secret": "enter your key"
+    "consumer_key": "TcVuvcy0O0prffK7yDBQ7gp7Q",
+    "consumer_secret": "Gqsa31Y2woRapitGucYKrJW5q4Kz6fqZ177gj73EILMRHOeZNP",
+    "access_token": "342663682-nQsA685vZLjgJoDlaIEh9hWSNpE6MAsaVzJqhLEN",
+    "access_token_secret": "nEFc1TQMdcJQRop4ByHHiSSz2d0A6a5ikV1QbbODB7Sc7"
   },
-  "flowid": "7f7556e6-dbc0-493e-8076-2ebc18cba3ae",
+  "flowid": "5eb46868-cf0e-41d4-9103-e06581b48009",
   "rethinkdb": {
-    "host": "172.16.160.117",
+    "host": "172.16.230.151",
     "port": 28015,
     "db": "FlowzEngine"
   },
@@ -20,9 +20,10 @@
     "concurrency": 1,
     "removeFinishedJobs": false
   },
+  "login": "http://auth.flowz.com/api/login",
   "credential": {
-    "email": "your email",
-    "password": "your password"
+    "email": "kmahera@officebrain.com",
+    "password": "123456"
   },
   "sendEmail": "http://localhost:3001/sendEmail",
   "flowz_table": "flowzinstance",

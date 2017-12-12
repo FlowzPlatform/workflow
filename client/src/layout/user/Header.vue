@@ -42,12 +42,12 @@
         </i-col>
         </Row>
       </Col>
-      <i-col :span="5" class="logo">
+      <!-- <i-col :span="5" class="logo">
         <div class="f-logo">
           <Icon type="navicon-round" :size="30"></Icon>  
           <img src="../../assets/images/Flowz-logo.png">
         </div>
-      </i-col>
+      </i-col> -->
       <i-col :span="18">
         <Row type="flex" justify="end">
           <div class="layout-nav">

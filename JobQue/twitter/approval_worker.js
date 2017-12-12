@@ -36,7 +36,7 @@ q.process(async(job, next) => {
     let rolesEmail = []
     await axios({
         method: 'get',
-        url: 'http://172.16.160.117:3030/flowz-instance/' + job.data.fId
+        url: 'http://172.16.230.151:3030/flowz-instance/' + job.data.fId
       })
       .then(async function(response) {
         runningProcess = _.find(response.data.processList, ['id', job.data.job])
@@ -46,14 +46,13 @@ q.process(async(job, next) => {
 
         await axios({
           method: 'get',
-          url: 'http://172.16.160.32:3000/userslist/' + processRoles
+          url: 'http://api.flowz.com/authldap/userslist/' + processRoles
         })
         .then(async function(res) {
           rolesEmail = await res.data.data.roles
         })
         emailTemplateUrl = _.find(runningProcess.inputProperty[0].entityschema.emailTemplate, ['filename', runningProcess.inputProperty[0].emailTemplate])
         emailTemplateUrl = emailTemplateUrl.url
-        console.log('URL', emailTemplateUrl)
       })
     await axios({
         method: 'get',
@@ -65,9 +64,9 @@ q.process(async(job, next) => {
         processLog = _.chain(processLog).orderBy(['lastModified'], ['asc']).findLast((f) => { return f.jobId === job.data.jobId }).value()
         for(var i = 0; i < runningProcess.inputProperty[0].entityschema.entity.length; i++) {
           let element = runningProcess.inputProperty[0].entityschema.entity[i].name
-          element = element.toLowerCase()
+          // element = element.toLowerCase()
           let index = emailTemplateHtml.search('"' + element + '"')
-          element = _.capitalize(element)
+          // element = _.capitalize(element)
           emailTemplateHtml = emailTemplateHtml.substr(0, index + element.length + 3) + processLog.input[0][element] + emailTemplateHtml.substr(index + element.length + 3)
         }
         emailTemplateHtml = mjml2html(emailTemplateHtml)
@@ -75,7 +74,6 @@ q.process(async(job, next) => {
       .catch(function(error) {
         console.log('Error : ', error)
       })
-    // console.log('rolesEmail', rolesEmail)
     if (rolesEmail.length > 0) {
       for(var j = 0; j < rolesEmail.length; j++)
       {
@@ -87,7 +85,7 @@ q.process(async(job, next) => {
         }
         await axios({
           method: 'post',
-          url: 'http://ec2-54-88-11-110.compute-1.amazonaws.com/api/login', 
+          url: app.login,
           data: app.credential
         })
         .then(async function(response) {
@@ -106,13 +104,16 @@ q.process(async(job, next) => {
               console.log('Error : ', error)
             })
         })
+        .catch(error => {
+          console.log('Error :', error)
+        })
       }  
     }
     await job.update()
     return next(null, 'success')
   } catch (err) {
-    console.log('==>', err)
-    pino().error('... error in process',err)
+    console.log(err)
+    pino().error('Error in process',err)
     return next(new Error('error'))
   }
 })

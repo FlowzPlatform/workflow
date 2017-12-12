@@ -20,7 +20,6 @@ export default {
   },
   data () {
     return {
-      htmlTemplate: this.html,
       entitySchema: {},
       customEntity: {'entity': []},
       formSchemaInstance: {

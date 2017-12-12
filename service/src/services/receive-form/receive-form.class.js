@@ -6,7 +6,7 @@ var axios = require('axios');
 
 var tName = 'receive_form';
 var r = require('rethinkdbdash')({
-    host: '172.16.160.117',
+    host: '172.16.230.151',
     port: '28015',
     db: 'FlowzEngine'
 });
