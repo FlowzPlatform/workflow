@@ -28,6 +28,7 @@ import DbSettingsNew from '@/pages/dbSettings/New'
 import SchemaNew from '@/pages/schema/New'
 // pages
 import Login from '@/pages/Login'
+import EmailVerification from '@/pages/EmailVerification'
 import Register from '@/pages/Register'
 // Approval area
 import ApprovalList from '@/pages/approval/List'
@@ -217,6 +218,10 @@ const routes = [{
   path: '/Login',
   name: 'Login',
   component: Login
+}, {
+  path: '/email-verification',
+  name: 'email-verification',
+  component: EmailVerification
 }, {
   path: '/Register',
   name: 'Register',

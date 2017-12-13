@@ -5,7 +5,7 @@ export default {
   login: (params) => {
     return axios({
       method: 'post',
-      url: config.loginURL + '/login',
+      url: config.loginURL + '/googleauthprocess',
       data: params
     }).then(response => {
       if (response) {
