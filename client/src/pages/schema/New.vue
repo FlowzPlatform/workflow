@@ -748,7 +748,7 @@ export default {
               // this.toggleLoading()
               // this.$router.push(data.redirect)
               // console.log('Response Schema ... ', response.data)
-              this.$Notice.success({title: 'success!'})
+              this.$Message.success('Schema updated..!')
               this.loading = false
               this.viewTemplate = []
               this.createTemplate = []
@@ -771,9 +771,9 @@ export default {
               // this.toggleLoading()
               // this.$router.push(data.redirect)
               console.log(response)
-              this.$Message.success('success!')
+              this.$Message.success('Schema updated..!')
               this.loading = false
-              this.$router.push('/')
+              this.$router.go(-1)
             })
             .catch(error => {
               console.log(error)

@@ -6,8 +6,8 @@ var axios = require('axios');
 
 var tName = 'receive_form';
 var r = require('rethinkdbdash')({
-    host: '172.16.160.117',
-    port: '28015',
+    host: 'aws-us-east-1-portal.30.dblayer.com',
+    port: '16868',
     db: 'FlowzEngine'
 });
 
