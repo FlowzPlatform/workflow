@@ -124,43 +124,33 @@ router.beforeEach((to, from, next) => {
     })
   } else {
     if (to.matched.some(record => record.meta.requiresAuth)) {
-      console.log('1')
       store.dispatch('authenticate', token).then(response => {
         store.commit('SET_USER', response)
           // get user role
         if (to.matched.some(record => record.meta.role)) {
-          console.log('2', response.email)
           store.dispatch('getUser', response.email).then(user => {
-            console.log('3')
             if (user) {
-              console.log('4')
               if (store.state.role !== null) {
-                console.log('5')
                 store.commit('SET_ROLE', user.role)
                 if (to.matched.find(record => record.meta.role).meta.role.indexOf(parseInt(user.role)) === -1) {
-                  console.log('6')
                   // next({
                   //   path: '/login'
                   //     // query: { redirect: to.fullPath }
                   // })
                   next()
                 } else {
-                  console.log('7')
                   next()
                 }
               } else {
-                console.log('8')
                 store.commit('SET_ROLE', user.role)
                 next({
                   path: parseInt(user.role) === 1 ? '/admin/dashboard' : '/'
                 })
               }
             } else {
-              console.log('9')
               next()
             }
           }).catch(error => {
-            console.log('13')
             console.log(error)
               // window.console.log('Not authenticated')
             next({
@@ -169,11 +159,9 @@ router.beforeEach((to, from, next) => {
             })
           })
         } else {
-          console.log('10')
           next()
         }
       }).catch(error => {
-        console.log('11')
         console.log(error.message)
           // window.console.log('Not authenticated')
         next({
@@ -182,7 +170,6 @@ router.beforeEach((to, from, next) => {
         })
       })
     } else {
-      console.log('12')
       next()
     }
   }
