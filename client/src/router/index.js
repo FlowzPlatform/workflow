@@ -9,6 +9,10 @@ import commonLayout from '@/layout/user/Common.vue'
 // import userLayout from '@/userLayout/Master'
 import UserDashboard from '@/pages/user/dashboard'
 
+import Userconfig from '@/pages/user/UserConfig.vue'
+// userLayout
+// import userLayout from '@/userLayout/Master'
+// import UserDashboard from '@/pages/user/dashboard'
 // Area
 import Dashboard from '@/area/Dashboard'
 import Flow from '@/area/Flow'
@@ -60,6 +64,11 @@ const routes = [{
     component: ManageBPMNPlugin,
     name: 'bpmn-plugin',
     meta: { description: 'Schema' }
+  }, { // UserConfig
+    path: 'userconfig',
+    component: Userconfig,
+    name: 'userconfig',
+    meta: { description: 'Userconfig' }
   }, { // Schema
     path: 'schema',
     component: Schema,
