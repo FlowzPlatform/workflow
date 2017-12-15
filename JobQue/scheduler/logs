@@ -1,1 +1,1 @@
-{"level":30,"time":1513080991011,"msg":"next job","pid":26610,"hostname":"OBLAP-51","fId":"7e0d66cb-df65-4f24-91e6-559b137be902","job":"StartEvent_1","jobId":"929362dd-9f3f-4216-bd0c-b012994bc4d5","v":1}
+{"level":50,"time":1513316626135,"msg":"... error in process\nError: socket hang up","pid":18313,"hostname":"OBLAP-51","v":1}

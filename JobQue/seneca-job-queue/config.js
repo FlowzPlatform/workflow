@@ -8,7 +8,7 @@ module.exports = {
     subscriptionCreatePattern: "role:subscription,cmd:created"
   },
   cxnOptions: {
-    host: process.env.host || "172.16.230.151",
+    host: process.env.host || "localhost",
     port: process.env.port || 28015,
     db: process.env.db || "FlowzEngine",
     authKey: process.env.authDB,

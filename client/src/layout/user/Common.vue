@@ -16,7 +16,7 @@
 
 <script>
 // eslint-disable
-import Header from './Header'
+import Header from './CommonHeader'
 import Footer from './Footer'
 // import Vue from 'vue'
 // let events = new Vue({})

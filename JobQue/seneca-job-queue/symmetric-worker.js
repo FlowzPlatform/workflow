@@ -86,7 +86,7 @@ function generateQueueObjectByJobTypeWithOutSave (jobDetails) {
 
 function generateQueueObjectByJobTypeWithSaveToDB (jobType, options) {
   return new Promise((resolve, reject) => {
-    let connection = options
+    let connection = options.connection
     let key = connection.host+':'+connection.port+':'+connection.db+':'+jobType
     if (registeredJobTypeQueueObj[key]) {
       resolve('JobType already registered')

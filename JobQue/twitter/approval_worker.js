@@ -36,7 +36,7 @@ q.process(async(job, next) => {
     let rolesEmail = []
     await axios({
         method: 'get',
-        url: 'http://172.16.230.151:3030/flowz-instance/' + job.data.fId
+        url: 'http://localhost:3030/flowz-instance/' + job.data.fId
       })
       .then(async function(response) {
         runningProcess = _.find(response.data.processList, ['id', job.data.job])

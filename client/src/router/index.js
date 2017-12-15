@@ -3,7 +3,7 @@ import VueRouter from 'vue-router'
 // Layout
 import Layout from '@/layout/Master'
 import userLayout from '@/layout/user/Master'
-import Userconfig from '@/pages/user/UserConfig.vue'
+
 import commonLayout from '@/layout/user/Common.vue'
 // userLayout
 // import userLayout from '@/userLayout/Master'
@@ -60,11 +60,6 @@ const routes = [{
     component: ManageBPMNPlugin,
     name: 'bpmn-plugin',
     meta: { description: 'Schema' }
-  }, { // UserConfig
-    path: 'userconfig',
-    component: Userconfig,
-    name: 'userconfig',
-    meta: { description: 'Userconfig' }
   }, { // Schema
     path: 'schema',
     component: Schema,

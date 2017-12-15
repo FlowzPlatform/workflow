@@ -1,5 +1,5 @@
 {
-  "serverURI": "http://172.16.230.151:3030",
+  "serverURI": "http://localhost:3030",
   "watcherPath": "../bpmnPlugin",
   "tweetCredential": {
     "consumer_key": "TcVuvcy0O0prffK7yDBQ7gp7Q",
@@ -9,8 +9,8 @@
   },
   "flowid": "5eb46868-cf0e-41d4-9103-e06581b48009",
   "rethinkdb": {
-    "host": "172.16.230.151",
-    "port": 28015,
+    "host": "aws-us-east-1-portal.30.dblayer.com",
+    "port": 16868,
     "db": "FlowzEngine"
   },
   "qOptions": {
