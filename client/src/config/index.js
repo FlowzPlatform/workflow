@@ -1,6 +1,6 @@
 console.log('process.env.NODE_ENV', process.env.NODE_ENV)
 var temp = {
-  serverURI: 'http://172.16.230.86:3030',
+  serverURI: 'http://localhost:3030',
   workerRegisterURL: 'http://172.16.230.253:4001',
   approvalRoleURI: 'http://api.flowz.com/authldap/',
   loginURL: 'http://auth.flowz.com/api',
@@ -16,7 +16,7 @@ if (process.env.NODE_ENV !== 'development') {
     serverURI: 'http://api.flowz.com/eng',
     workerRegisterURL: 'http://api.flowz.com/jobqueue1',
     approvalRoleURI: 'http://api.flowz.com/authldap/',
-    loginURL: 'http://ec2-54-88-11-110.compute-1.amazonaws.com/api',
+    loginURL: 'http://auth.flowz.com/api',
     fixedLayout: false,
     hideLogoOnMobile: false
   }
