@@ -3,20 +3,31 @@ let _ = require('lodash');
 let async = require('asyncawait/async');
 let await = require('asyncawait/await');
 var endecrypt = require('../encryption/security')
+var fs = require('fs')
 var r = []
 var dr = []
 
 db.rethink.dbinstance.forEach(function (instance, inx) {
-    if (instance.isenable) {
-
-      var connection = require('rethinkdbdash')({
-        username: instance.username,
-        password: endecrypt.decrypt(instance.password),
-        port: instance.port,
-        host: instance.host,
-        db: instance.dbname
-      });
-
+  var connection;  
+  if (instance.isenable) {
+      if(instance.hasOwnProperty('authKey') && instance.hasOwnProperty('ssl')) {
+        connection = require('rethinkdbdash')({
+          port: instance.port,
+          host: instance.host,
+          db: instance.dbname,
+          authKey: instance.authKey,
+          ssl: process.env.cert ? { ca: fs.readFileSync(__dirname+process.env.cert) } : null
+        });
+      } else {
+        connection = require('rethinkdbdash')({
+          username: instance.username,
+          password: endecrypt.decrypt(instance.password),
+          port: instance.port,
+          host: instance.host,
+          db: instance.dbname
+        });
+      }
+      
       var yes = connection.dbList().contains(instance.dbname) // create db if not exists
         .do(function (dbExists) {
           return connection.branch(dbExists, { created: 0 }, connection.dbCreate(instance.dbname));
@@ -35,13 +46,23 @@ db.rethink.dbinstance.forEach(function (instance, inx) {
     }
     if (instance.isdefault) {
 
-      var connection = require('rethinkdbdash')({
-        username: instance.username,
-        password: endecrypt.decrypt(instance.password),
-        port: instance.port,
-        host: instance.host,
-        db: instance.dbname
-      });
+      if(instance.hasOwnProperty('authKey') && instance.hasOwnProperty('ssl')) {
+        connection = require('rethinkdbdash')({
+          port: instance.port,
+          host: instance.host,
+          db: instance.dbname,
+          authKey: instance.authKey,
+          ssl: process.env.cert ? { ca: fs.readFileSync(__dirname+process.env.cert) } : null
+        });
+      } else {
+        connection = require('rethinkdbdash')({
+          username: instance.username,
+          password: endecrypt.decrypt(instance.password),
+          port: instance.port,
+          host: instance.host,
+          db: instance.dbname
+        });
+      }
 
       var yes = connection.dbList().contains(instance.dbname) // create db if not exists
         .do(function (dbExists) {
