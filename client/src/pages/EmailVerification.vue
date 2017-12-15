@@ -78,7 +78,13 @@ export default {
           })
           console.log(auth)
           if (auth) {
-            modelUser.post(this.formLogin).then(response => {
+            let userInfo = {
+              email: this.formLogin.email,
+              id: this.formLogin.id,
+              role: '3',
+              userGroup: '1'
+            }
+            modelUser.post(userInfo).then(response => {
               if (response) {
                 console.log(response)
               }
