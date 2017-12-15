@@ -7,7 +7,7 @@
             {
               "isenable": true,
               "connection_name": "Rethink",
-              "host": "localhost",
+              "host": "159.203.134.27",
               "port": "28015",
               "dbname": "FlowzEngine",
               "username": "",
