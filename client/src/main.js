@@ -94,23 +94,37 @@ var router = new VueRouter({
 import psl from 'psl'
 // Some middleware to help us ensure the user is authenticated.
 router.beforeEach((to, from, next) => {
+  console.log('before load')
   iView.LoadingBar.config({ color: '#0e406d' })
     // window.console.log('Transition', transition)
     // router.app.$store.state.token
+  let obId = false
+  let location = psl.parse(window.location.hostname) // get parent domain
+  location = location.domain === null ? location.input : location.domain
   if (to.query.ob_id) {
-    let location = psl.parse(window.location.hostname) // get parent domain
-    location = location.domain === null ? location.input : location.domain
-    router.app.$cookie.set('auth_token', to.query.ob_id, { expires: 1, domain: location })
+    // let location = psl.parse(window.location.hostname) // get parent domain
+    // location = location.domain === null ? location.input : location.domain
+    // router.app.$cookie.set('auth_token', to.query.ob_id, { expires: 1, domain: location })
+    obId = to.query.ob_id
+  }
+  if (to.query.token) {
+    router.app.$cookie.set('auth_token', to.query.token, { expires: 1, domain: location })
   }
   const token = router.app.$cookie.get('auth_token')
-  if (to.matched.some(record => record.meta.requiresAuth) && (!token || token === 'null')) {
+  if (to.matched.some(record => record.meta.requiresAuth) && obId) {
+    window.console.log('ob_id obtained')
+    next({
+      path: '/email-verification',
+      query: { ob_id: obId }
+    })
+  } else if (to.matched.some(record => record.meta.requiresAuth) && (!token || token === 'null')) {
     window.console.log('Not authenticated')
     next({
       path: '/login'
         // query: { redirect: to.fullPath }
     })
   } else {
-    if (to.matched.some(record => record.meta.requiresAuth)) {
+    if (to.matched.some(record => record.meta.requiresAuth) || (to.path === '/login')) {
       store.dispatch('authenticate', token).then(response => {
         store.commit('SET_USER', response)
           // get user role
@@ -120,11 +134,11 @@ router.beforeEach((to, from, next) => {
               if (store.state.role !== null) {
                 store.commit('SET_ROLE', user.role)
                 if (to.matched.find(record => record.meta.role).meta.role.indexOf(parseInt(user.role)) === -1) {
-                  // next({
-                  //   path: '/login'
-                  //     // query: { redirect: to.fullPath }
-                  // })
-                  next()
+                  next({
+                    path: '/login'
+                      // query: { redirect: to.fullPath }
+                  })
+                  // next()
                 } else {
                   next()
                 }
@@ -137,19 +151,46 @@ router.beforeEach((to, from, next) => {
             } else {
               next()
             }
+          }).catch(error => {
+            console.log(error)
+              // window.console.log('Not authenticated')
+            next({
+              path: '/login'
+                // query: { redirect: to.fullPath }
+            })
+          })
+        } else {
+          next({
+            path: (to.path === '/login') ? (parseInt(store.state.role) === 1 ? '/admin/dashboard' : '/') : to.path
+          })
+          // next()
+        }
+      }).catch(error => {
+        console.log(error.message)
+        // window.console.log('Not authenticated')
+        router.app.$cookie.delete('auth_token', {domain: location})
+        store.commit('SET_TOKEN', null)
+        store.commit('SET_USER', null)
+        store.commit('SET_ROLE', null)
+        if (to.path !== '/login') {
+          next({
+            path: '/login'
+              // query: { redirect: to.fullPath }
           })
         } else {
           next()
         }
-      }).catch(error => {
-        console.log(error.message)
-          // window.console.log('Not authenticated')
-        next({
-          path: '/login'
-            // query: { redirect: to.fullPath }
-        })
       })
     } else {
+      // let path = token ? ((to.path === '/login') ? (parseInt(store.state.role) === 1 ? '/admin/dashboard' : '/') : to.path) : '/login'
+      // console.log(path)
+      // path: (token ? ((to.path === '/login') ? (parseInt(store.state.role) === 1 ? '/admin/dashboard' : '/') : to.path) : '/login')
+
+      // console.log('login ===> ')
+      // next({
+      //   path: '/login'
+      // })
+
       next()
     }
   }

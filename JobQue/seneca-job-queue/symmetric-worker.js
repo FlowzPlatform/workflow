@@ -86,6 +86,7 @@ function generateQueueObjectByJobTypeWithOutSave (jobDetails) {
 
 function generateQueueObjectByJobTypeWithSaveToDB (jobType, options) {
   return new Promise((resolve, reject) => {
+
     let connection = options.connection
     let key = connection.host+':'+connection.port+':'+connection.db+':'+jobType
     if (registeredJobTypeQueueObj[key]) {
@@ -184,7 +185,7 @@ async function getSummary () {
       } catch (err) {
         deadQueueObj[jKey] = registeredJobTypeQueueObj[jKey]
         delete registeredJobTypeQueueObj[jKey]
-        pino(PINO).error('host : ' + cOptions.host + ' port : ' + cOptions.port + ' db : ' + cOptions.db + ' connection error')
+        pino(PINO).error('key : ' + jKey + ' connection error')
       }
     }
   } catch (e) {
@@ -228,7 +229,15 @@ async function startAllRegisteredJobType () {
 
 app.put('/register-jobtype/:jobtype', async function (req, res) {
   try {
-    let newConnection = _.extend({'connection':cxnOptions},{'queue': {'name': req.params.jobtype}})
+    let cOption = cxnOptions
+    if (cOption.authKey && cOption.ssl) {
+      if (cOption.user) delete cOption.user
+      if (cOption.password) delete cOption.password
+    } else {
+      if (cOption.authKey) delete cOption.authKey
+      if (cOption.ssl) delete cOption.ssl
+    }
+    let newConnection = _.extend({'connection':cOption},{'queue': {'name': req.params.jobtype}})
     generateQueueObjectByJobTypeWithSaveToDB(req.params.jobtype, newConnection)
       .then(result => { res.send(result) })
       .catch(err => { res.send(err) })

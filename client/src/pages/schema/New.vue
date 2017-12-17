@@ -748,6 +748,7 @@ export default {
               // this.toggleLoading()
               // this.$router.push(data.redirect)
               // console.log('Response Schema ... ', response.data)
+
               this.$Notice.success({title: 'Schema saved..!'})
               this.loading = false
               this.viewTemplate = []

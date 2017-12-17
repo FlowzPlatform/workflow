@@ -7,9 +7,9 @@ var temp = {
   fixedLayout: false,
   hideLogoOnMobile: false,
   facebookSuccessCallbackUrl: 'http://localhost:8000',
-  loginWithFacebookUrl: 'http://ec2-54-88-11-110.compute-1.amazonaws.com/auth/facebook',
+  loginWithFacebookUrl: 'http://auth.flowz.com/auth/facebook',
   googleSuccessCallbackUrl: 'http://localhost:8000',
-  loginWithGoogleUrl: 'http://ec2-54-88-11-110.compute-1.amazonaws.com/auth/Gplus'
+  loginWithGoogleUrl: 'http://auth.flowz.com/auth/Gplus'
 }
 if (process.env.NODE_ENV !== 'development') {
   temp = {
