@@ -1,7 +1,7 @@
 console.log('process.env.NODE_ENV', process.env.NODE_ENV)
 var temp = {
   serverURI: 'http://localhost:3030',
-  socketURI: 'http://localhost:3030',
+  socketURI: 'http://localhost:4033',
   workerRegisterURL: 'http://172.16.230.253:4001',
   approvalRoleURI: 'http://api.flowz.com/authldap/',
   loginURL: 'http://auth.flowz.com/api',
@@ -27,13 +27,13 @@ if (process.env.NODE_ENV !== 'development') {
     loginURL: 'http://auth.flowz.com/api',
     fixedLayout: false,
     hideLogoOnMobile: false,
-    facebookSuccessCallbackUrl: 'http://dbetl.flowz.com/',
+    facebookSuccessCallbackUrl: 'http://engine.flowz.com/',
     loginWithFacebookUrl: 'http://auth.flowz.com/api/facebook',
-    googleSuccessCallbackUrl: 'http://dbetl.flowz.com/',
+    googleSuccessCallbackUrl: 'http://engine.flowz.com/',
     loginWithGoogleUrl: 'http://auth.flowz.com/api/Gplus',
-    linkedinSuccessCallbackUrl: 'http://dbetl.flowz.com/',
+    linkedinSuccessCallbackUrl: 'http://engine.flowz.com/',
     loginWithLinkedinUrl: 'http://auth.flowz.com/api/linkedin',
-    githubSuccessCallbackUrl: 'http://dbetl.flowz.com/',
+    githubSuccessCallbackUrl: 'http://engine.flowz.com/',
     loginWithGithubUrl: 'http://auth.flowz.com/api/github'
   }
 }
