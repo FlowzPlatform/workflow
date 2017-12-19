@@ -36,7 +36,7 @@ q.process(async(job, next) => {
     let rolesEmail = []
     await axios({
         method: 'get',
-        url: 'http://172.16.160.117:3030/flowz-instance/' + job.data.fId
+        url: 'http://localhost:3030/flowz-instance/' + job.data.fId
       })
       .then(async function(response) {
         runningProcess = _.find(response.data.processList, ['id', job.data.job])
@@ -46,7 +46,7 @@ q.process(async(job, next) => {
 
         await axios({
           method: 'get',
-          url: 'http://172.16.160.32:3000/userslist/' + processRoles
+          url: app.roleURI + processRoles
         })
         .then(async function(res) {
           rolesEmail = await res.data.data.roles
@@ -87,7 +87,7 @@ q.process(async(job, next) => {
         }
         await axios({
           method: 'post',
-          url: 'http://ec2-54-88-11-110.compute-1.amazonaws.com/api/login', 
+          url: app.login, 
           data: app.credential
         })
         .then(async function(response) {

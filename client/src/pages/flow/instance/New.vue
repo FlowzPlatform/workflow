@@ -109,9 +109,9 @@
                     <div style="padding:10px;">
                       <Tabs>
                         <TabPane label="Form Data" name="formtab">
-                          <template v-if="selectedProcess.inputProperty[0].entityschema.createTemplate.length > 0 && getCurrentStatus(selectedLogs) === 'inputRequired'">
-                            {{selectedProcess.inputProperty[0].entityschema.createTemplate[0].url}}
-                            <schemaTemplate :row="selectedProcess" :html="getHtml(selectedProcess.inputProperty[0].entityschema.createTemplate.url)"></schemaTemplate>
+                          <template v-if="selectedProcess.inputProperty[0].createTemplate && getCurrentStatus(selectedLogs) === 'inputRequired'">
+                            <schemaTemplate :row="selectedProcess" :html="html" :log="lastLog"></schemaTemplate>
+                          <!-- {{selectedProcess.inputProperty[0].createTemplate}} -->
                           </template>
                           <template v-else-if="getCurrentStatus(selectedLogs) === 'inputRequired'">
                             <expandRow :row="selectedProcess" :lastLog="getLastLog(selectedLogs)"></expandRow>
@@ -145,6 +145,7 @@ import instance from '@/api/flowzinstance'
 
 // Components
 import expandRow from '@/components/expand-process.vue'
+import schemaTemplate from '@/components/SchemaTemplate.vue'
 
 // Lib
 import _ from 'lodash'
@@ -155,15 +156,15 @@ import camundaModdleDescriptor from '../../../../static/bpmn/camunda-bpmn-moddle
 
 let viewer
 export default {
-  components: { expandRow },
+  components: { expandRow, schemaTemplate },
   data () {
     return {
       flowInstance: {},
       graph: false,
       list: true,
-      html: '',
       showProp: false,
       selectedProcess: {},
+      lastLog: {},
       selectedLogs: [],
       iconList: {
         running: 'ios-ionic-outline ivu-load-loop',
@@ -192,8 +193,20 @@ export default {
     }
   },
   async mounted () {
-    console.log('-->', this.selectedProcess)
+    // console.log('-->', this.selectedProcess)
     await this.init()
+  },
+  asyncComputed: {
+    async html () {
+      if (this.selectedProcess.inputProperty) {
+        let index = await _.findIndex(this.selectedProcess.inputProperty[0].entityschema.createTemplate, ['filename', this.selectedProcess.inputProperty[0].createTemplate])
+        var url = this.selectedProcess.inputProperty[0].entityschema.createTemplate[index].url
+        url = url.substr(0, 4) + url.substr(5)
+        // var promise = await axios.get(url)
+        // return promise.data
+        return url
+      }
+    }
   },
   feathers: {
     'flowz-instance': {
@@ -229,9 +242,6 @@ export default {
   methods: {
     back () {
       this.$router.go(-1)
-    },
-    async getHtml (url) {
-      return await axios.get(url)
     },
     async init () {
       // Get Flow Instance
@@ -326,7 +336,7 @@ export default {
       }
     },
     getCurrentStatus (log) {
-      return (log.length > 0) ? _.head(log).status : ''
+      return (log && log.length > 0) ? _.head(log).status : ''
     },
     getLastLog (logs) {
       return _.head(logs)
@@ -341,9 +351,10 @@ export default {
     },
     handleProcessClick (item, log) {
       this.showProp = true
-      console.log('item', item)
+      console.log('item ', item)
       this.selectedProcess = item
       this.selectedLogs = log
+      this.lastLog = this.getLastLog(this.selectedLogs)
     },
     handleMappingRequireStatus (data) {
       // handle mapping required

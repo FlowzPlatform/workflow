@@ -3,13 +3,11 @@
     "dbinstance": []
   },
   "rethink": {
-    "dbinstance": [{
+    "dbinstance": [ {
       "isenable": true,
       "connection_name": "Rethink",
-      "host": "aws-us-east-1-portal.30.dblayer.com",
-      "port": "16868",
-      "authKey": "51b2885598be1c2c1243a5c9c3548ad2",
-      "ssl": "/ca.crt",
+      "host": "159.203.134.27",
+      "port": "28015", 
       "dbname": "FlowzEngine",
       "username": "",
       "password": "",
