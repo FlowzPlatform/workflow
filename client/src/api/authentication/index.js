@@ -20,7 +20,7 @@ export default {
   social: (params) => {
     return axios({
       method: 'post',
-      url: config.loginURL + '/googleauthprocess',
+      url: config.loginURL + '/verifyemail',
       data: params
     }).then(response => {
       if (response) {
