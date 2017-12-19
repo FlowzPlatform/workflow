@@ -135,10 +135,10 @@ router.beforeEach((to, from, next) => {
                 store.commit('SET_ROLE', user.role)
                 if (to.matched.find(record => record.meta.role).meta.role.indexOf(parseInt(user.role)) === -1) {
                   next({
-                      path: '/login'
-                        // query: { redirect: to.fullPath }
-                    })
-                    // next()
+                    path: '/login'
+                    // query: { redirect: to.fullPath }
+                  })
+                  // next()
                 } else {
                   next()
                 }
@@ -161,9 +161,9 @@ router.beforeEach((to, from, next) => {
           })
         } else {
           next({
-              path: (to.path === '/login') ? (parseInt(store.state.role) === 1 ? '/admin/dashboard' : '/') : to.path
-            })
-            // next()
+            path: (to.path === '/login') ? (parseInt(store.state.role) === 1 ? '/admin/dashboard' : '/') : to.path
+          })
+          // next()
         }
       }).catch(error => {
         console.log(error.message)
