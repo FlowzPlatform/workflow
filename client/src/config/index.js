@@ -1,6 +1,7 @@
 console.log('process.env.NODE_ENV', process.env.NODE_ENV)
 var temp = {
   serverURI: 'http://localhost:3030',
+  socketURI: 'http://localhost:3030',
   workerRegisterURL: 'http://172.16.230.253:4001',
   approvalRoleURI: 'http://api.flowz.com/authldap/',
   loginURL: 'http://auth.flowz.com/api',
@@ -20,19 +21,20 @@ var temp = {
 if (process.env.NODE_ENV !== 'development') {
   temp = {
     serverURI: 'http://api.flowz.com/eng',
+    socketURI: 'http://ws.flowz.com:4033',
     workerRegisterURL: 'http://api.flowz.com/jobqueue1',
     approvalRoleURI: 'http://api.flowz.com/authldap/',
-    loginURL: 'http://ec2-54-88-11-110.compute-1.amazonaws.com/api',
+    loginURL: 'http://auth.flowz.com/api',
     fixedLayout: false,
     hideLogoOnMobile: false,
     facebookSuccessCallbackUrl: 'http://dbetl.flowz.com/',
-    loginWithFacebookUrl: 'http://ec2-54-88-11-110.compute-1.amazonaws.com/api/facebook',
+    loginWithFacebookUrl: 'http://auth.flowz.com/api/facebook',
     googleSuccessCallbackUrl: 'http://dbetl.flowz.com/',
-    loginWithGoogleUrl: 'http://ec2-54-88-11-110.compute-1.amazonaws.com/api/Gplus',
+    loginWithGoogleUrl: 'http://auth.flowz.com/api/Gplus',
     linkedinSuccessCallbackUrl: 'http://dbetl.flowz.com/',
-    loginWithLinkedinUrl: 'http://ec2-54-88-11-110.compute-1.amazonaws.com/api/linkedin',
+    loginWithLinkedinUrl: 'http://auth.flowz.com/api/linkedin',
     githubSuccessCallbackUrl: 'http://dbetl.flowz.com/',
-    loginWithGithubUrl: 'http://ec2-54-88-11-110.compute-1.amazonaws.com/api/github'
+    loginWithGithubUrl: 'http://auth.flowz.com/api/github'
   }
 }
 export default temp
