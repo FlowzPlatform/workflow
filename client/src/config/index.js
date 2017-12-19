@@ -28,13 +28,13 @@ if (process.env.NODE_ENV !== 'development') {
     fixedLayout: false,
     hideLogoOnMobile: false,
     facebookSuccessCallbackUrl: 'http://engine.flowz.com/',
-    loginWithFacebookUrl: 'http://auth.flowz.com/api/facebook',
+    loginWithFacebookUrl: 'http://auth.flowz.com/auth/facebook',
     googleSuccessCallbackUrl: 'http://engine.flowz.com/',
-    loginWithGoogleUrl: 'http://auth.flowz.com/api/Gplus',
+    loginWithGoogleUrl: 'http://auth.flowz.com/auth/Gplus',
     linkedinSuccessCallbackUrl: 'http://engine.flowz.com/',
-    loginWithLinkedinUrl: 'http://auth.flowz.com/api/linkedin',
+    loginWithLinkedinUrl: 'http://auth.flowz.com/auth/linkedin',
     githubSuccessCallbackUrl: 'http://engine.flowz.com/',
-    loginWithGithubUrl: 'http://auth.flowz.com/api/github'
+    loginWithGithubUrl: 'http://auth.flowz.com/auth/github'
   }
 }
 export default temp
