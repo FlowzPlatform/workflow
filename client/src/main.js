@@ -16,12 +16,12 @@ const hooks = require('feathers-hooks')
   // const authentication = require('feathers-authentication/client')
 const socketio = require('feathers-socketio/client')
 const io = require('socket.io-client')
-let socket
-if (process.env.NODE_ENV !== 'development') {
-  socket = io(config.serverURI, {path: '/eng/socket.io'})
-} else {
-  socket = io(config.serverURI)
-}
+let socket = io(config.socketURI)
+  // if (process.env.NODE_ENV !== 'development') {
+  //   socket = io(config.serverURI, {path: '/eng/socket.io'})
+  // } else {
+  //   socket = io(config.serverURI)
+  // }
 const feathers = Feathers()
   .configure(socketio(socket))
   .configure(hooks())
@@ -135,10 +135,10 @@ router.beforeEach((to, from, next) => {
                 store.commit('SET_ROLE', user.role)
                 if (to.matched.find(record => record.meta.role).meta.role.indexOf(parseInt(user.role)) === -1) {
                   next({
-                    path: '/login'
-                      // query: { redirect: to.fullPath }
-                  })
-                  // next()
+                      path: '/login'
+                        // query: { redirect: to.fullPath }
+                    })
+                    // next()
                 } else {
                   next()
                 }
@@ -161,14 +161,14 @@ router.beforeEach((to, from, next) => {
           })
         } else {
           next({
-            path: (to.path === '/login') ? (parseInt(store.state.role) === 1 ? '/admin/dashboard' : '/') : to.path
-          })
-          // next()
+              path: (to.path === '/login') ? (parseInt(store.state.role) === 1 ? '/admin/dashboard' : '/') : to.path
+            })
+            // next()
         }
       }).catch(error => {
         console.log(error.message)
-        // window.console.log('Not authenticated')
-        router.app.$cookie.delete('auth_token', {domain: location})
+          // window.console.log('Not authenticated')
+        router.app.$cookie.delete('auth_token', { domain: location })
         store.commit('SET_TOKEN', null)
         store.commit('SET_USER', null)
         store.commit('SET_ROLE', null)
