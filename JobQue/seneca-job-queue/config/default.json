@@ -7,8 +7,8 @@
     "subscriptionCreatePattern": "role:subscription,cmd:created"
   },
   "cxnOptions" : {
-    "host": "localhost",
-    "port": 28015,
+    "host": "aws-us-east-1-portal.30.dblayer.com",
+    "port": 16868,
     "db": "FlowzEngine"
   },
   "symmetricWorker": {

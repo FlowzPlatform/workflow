@@ -1,1 +1,1 @@
-{"level":50,"time":1513324739814,"msg":"... error in process\nError: connect ECONNREFUSED 127.0.0.1:4002","pid":14978,"hostname":"OBLAP-71","v":1}
+{"level":50,"time":1513316626135,"msg":"... error in process\nError: socket hang up","pid":18313,"hostname":"OBLAP-51","v":1}

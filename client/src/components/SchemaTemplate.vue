@@ -20,7 +20,6 @@ export default {
   },
   data () {
     return {
-      htmlTemplate: this.html,
       entitySchema: {},
       customEntity: {'entity': []},
       formSchemaInstance: {
@@ -38,6 +37,7 @@ export default {
       this.entitySchema = response
       _.forEach(response.data.entity, function (result) {
         result.name = result.name.toLowerCase()
+        console.log('===FromSchemaTemplate===>', result)
         $('input#custom_input').each(function () {
           let element = this
           if (result.name === element.name.slice(0, result.name.length)) {
@@ -428,7 +428,7 @@ export default {
       let validate = await this.checkData()
       console.log('validated data', validate)
       if (validate) {
-        console.log('Submitted Data', obj)
+        console.log('Submitted Data', this.$route.params.id, this.row.id, obj.data[0])
         Instance.post({ instanceid: this.$route.params.id, processid: this.row.id, data: obj.data[0] })
           .then(response => {
             this.$Notice.success({title: 'success!', desc: 'Instance Saved...'})

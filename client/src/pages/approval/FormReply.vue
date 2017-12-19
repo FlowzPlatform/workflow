@@ -1,6 +1,6 @@
 <template>
 <div>
-    <iframe id="filecontainer" allowtransparency="true" frameborder="0" :src="'http://s3-us-west-2.amazonaws.com/airflowbucket1/obexpense/expenses/CRMReceiveForm.html?fiid=' + this.$route.params.fiid + '&&pid=' + this.$route.params.pid + ''"></iframe>
+    <iframe id="filecontainer" allowtransparency="true" frameborder="0" :src="URL + this.$route.params.fiid + '&&pid=' + this.$route.params.pid + ''"></iframe>
 </div>
 </template>
 <script>
@@ -20,6 +20,7 @@ export default {
       input: [],
       flowInstanceLog: [],
       createTemplateHtml: '',
+      URL: '',
       process: '',
       err: []
     }
@@ -267,8 +268,10 @@ export default {
         })
         createTemplate = await _.find(self.process.inputProperty[0].entityschema.createTemplate, ['filename', self.process.inputProperty[0].createTemplate])
         createTemplate = createTemplate.url
+        createTemplate = createTemplate.slice(0, 4) + createTemplate.slice(5)
+        self.URL = createTemplate + '?fiid='
+
         // self.htmlUrl = createTemplate.url
-        console.log('createTemplate', createTemplate)
         await axios({
           method: 'get',
           url: createTemplate

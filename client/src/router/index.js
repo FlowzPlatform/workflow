@@ -3,11 +3,16 @@ import VueRouter from 'vue-router'
 // Layout
 import Layout from '@/layout/Master'
 import userLayout from '@/layout/user/Master'
-import Userconfig from '@/pages/user/UserConfig.vue'
 
+import commonLayout from '@/layout/user/Common.vue'
 // userLayout
 // import userLayout from '@/userLayout/Master'
 import UserDashboard from '@/pages/user/dashboard'
+
+import Userconfig from '@/pages/user/UserConfig.vue'
+// userLayout
+// import userLayout from '@/userLayout/Master'
+// import UserDashboard from '@/pages/user/dashboard'
 // Area
 import Dashboard from '@/area/Dashboard'
 import Flow from '@/area/Flow'
@@ -133,6 +138,7 @@ const routes = [{
     meta: { description: 'Flow' },
     children: [{
       path: '',
+      name: 'flow/list',
       component: FlowzList,
       meta: { description: 'Flow' }
     }, {
@@ -252,7 +258,16 @@ const routes = [{
       id: String,
       required: false
     }
-  }, {
+  }]
+}, {
+  path: '/',
+  name: '',
+  redirect: '/Login'
+}, {
+  path: '/',
+  name: 'Reply',
+  component: commonLayout,
+  children: [{
     path: '/mail/reply/:mailid/:pid/:jobid/:fiid',
     name: 'mail/reply',
     component: Reply
@@ -261,9 +276,5 @@ const routes = [{
     name: 'form/reply',
     component: FormReply
   }]
-}, {
-  path: '/',
-  name: '',
-  redirect: '/Login'
 }]
 export default routes

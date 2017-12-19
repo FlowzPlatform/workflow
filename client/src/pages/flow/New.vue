@@ -81,12 +81,12 @@
             result = flowz.post(flowObject)
           }
           result.then(response => {
-            this.$Notice.success({title: 'Success!!', desc: 'Mapping Saved...'})
+            this.$Notice.success({title: 'Success..!', desc: 'Flow Saved..'})
+            this.$router.push({name: 'flow/list'})
             localStorage.removeItem('BPMNXml')
-            this.$router.push({name: 'flow'})
           }).catch(error => {
             console.log(error)
-            this.$Notice.error({title: 'Error!!', desc: 'Mapping Not Saved...'})
+            this.$Notice.error({title: 'Error..!', desc: 'Flow Not Saved...'})
           })
         } else {
           this.$Message.error('Please Add Process name !')

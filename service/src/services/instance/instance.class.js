@@ -84,7 +84,7 @@ chokidar.watch(path.join(__dirname, '../DBConnection/db.json'), { ignored: /(^|[
  //  delete require.cache[require.resolve('../DBConnection/mysqlapi')];
   var checking = await (readfile());
   if (checking == 'nodata') {
-    console.log('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ from instance');
+    console.log('$$$$$$$ from instance');
     await (readfile);
   }
 }))
@@ -128,7 +128,7 @@ var checkFlagforGet = async(function(mObj) {
   return flag
 })
 var checkDataObj = async(function(data, id, res) {
-  console.log("calling >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+  console.log("calling >>>>>>>>>>>>>>>>>>>>>>>>>")
   for (let [dIndex, dObj] of data.entries()) {
     // if(dObj.hasOwnProperty('Schemaid')) {
     //   // console.log('{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{')
