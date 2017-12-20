@@ -1,8 +1,9 @@
 <template>
-        <div>
-          <div v-html="html"></div>
-          <Button type="primary" @click="handleSubmit('formSchemaInstance')">Submit</Button>
-        </div>
+  <div>
+    <iframe id="filecontainer" allowtransparency="true" frameborder="0" :src="html" @load="iframeload(formSchemaInstance.entity, log)"></iframe>
+    <!-- <div v-html="html"></div> 
+    <Button type="primary" @click="handleSubmit('formSchemaInstance')">Submit</Button>-->
+  </div>
 </template>
 
 <script>
@@ -16,7 +17,8 @@ export default {
     html: {
       type: String
     },
-    row: Object
+    row: Object,
+    log: Object
   },
   data () {
     return {
@@ -26,116 +28,31 @@ export default {
         data: [],
         entity: []
       },
+      inputs: [],
       schema: {},
       err: []
     }
   },
   async created () {
-    // let self = this
     this.fetch(this.row.inputProperty[0].entityschema._id)
     Schema.getThis(this.row.inputProperty[0].entityschema._id).then((response) => {
       this.entitySchema = response
-      _.forEach(response.data.entity, function (result) {
-        result.name = result.name.toLowerCase()
-        console.log('===FromSchemaTemplate===>', result)
-        $('input#custom_input').each(function () {
-          let element = this
-          if (result.name === element.name.slice(0, result.name.length)) {
-            if (result.property.placeholder !== undefined && result.property.placeholder !== '') {
-              element.placeholder = result.property.placeholder
-            }
-            if (result.property.defaultValue !== undefined && result.property.defaultValue !== '') {
-              element.value = result.property.defaultValue
-            }
-
-            if (result.type === 'date') {
-              element.setAttribute('type', 'date')
-            }
-
-            if (result.property.optional === false) {
-              element.setAttribute('required', '')
-            }
-
-            if (result.property.regEx !== '') {
-              if (element.type === 'text' || element.type === 'number' || element.type === 'phone' || element.type === 'date' || element.type === 'select-one') {
-                element.setAttribute('pattern', result.property.regEx)
-              }
-            }
-          }
-        })
-        $('select#select1').each(function () {
-          let element = this
-          if (result.name === element.name.slice(0, result.name.length)) {
-            if (result.property.optional === false) {
-              element.setAttribute('required', '')
-            }
-            if (element.type === 'select-one') {
-              _.forEach(result.property.options, function (value, key) {
-                let opt = document.createElement('option')
-                opt.value = key
-                opt.textContent = value
-                element.appendChild(opt)
-              })
-            }
-          }
-        })
-        // if (result.type.length > 30) {
-        //   Schema.getThis(result.type).then((res) => {
-        //     _.forEach(res.data.entity, function (rslt) {
-        //       self.customEntity.entity.push(rslt)
-        //     })
-        //   })
-        // }
-      })
-      // _.forEach(self.customEntity.entity, function (result) {
-      //   console.log('---->>', self.customEntity.entity)
-      //   result.name = result.name.toLowerCase()
-      //   console.log('property', result.property)
-      //   $('input#custom_input').each(function () {
-      //     let element = this
-      //     if (result.name === element.name.slice(0, result.name.length)) {
-      //       if (result.property.placeholder !== undefined && result.property.placeholder !== '') {
-      //         element.placeholder = result.property.placeholder
-      //       }
-      //       if (result.property.defaultValue !== undefined && result.property.defaultValue !== '') {
-      //         element.value = result.property.defaultValue
-      //       }
-
-      //       if (result.type === 'date') {
-      //         element.setAttribute('type', 'date')
-      //       }
-
-      //       if (result.property.optional === false) {
-      //         element.setAttribute('required', '')
-      //       }
-
-      //       if (result.property.regEx !== '') {
-      //         if (element.type === 'text' || element.type === 'number' || element.type === 'phone' || element.type === 'date' || element.type === 'select-one') {
-      //           element.setAttribute('pattern', result.property.regEx)
-      //         }
-      //       }
-      //     }
-      //   })
-      //   $('select#select1').each(function () {
-      //     let element = this
-      //     if (result.name === element.name.slice(0, result.name.length)) {
-      //       if (result.property.optional === false) {
-      //         element.setAttribute('required', '')
-      //       }
-      //       if (element.type === 'select-one') {
-      //         _.forEach(result.property.options, function (value, key) {
-      //           let opt = document.createElement('option')
-      //           opt.value = key
-      //           opt.textContent = value
-      //           element.appendChild(opt)
-      //         })
-      //       }
-      //     }
-      //   })
-      // })
     })
   },
   methods: {
+    iframeload (entities, log) {
+      let array = []
+      let data = []
+      _.forEach(entities, function (value) {
+        array.push({name: value.name})
+      })
+      _.forEach(log.input, function (item) {
+        // _.forEach(item, function (value) {
+        data.push(item)
+        // })
+      })
+      document.getElementById('filecontainer').contentWindow.postMessage({entity: array, formData: data}, '*')
+    },
     async fetch (id) {
       var response = await Schema.getThis(id)
       this.formSchemaInstance.data = []
@@ -143,10 +60,9 @@ export default {
       this.formSchemaInstance.entity = this.schema.entity
     },
     makeObj () {
-      this.formSchemaInstance.data = []
       var obj = this.schema
-      this.formSchemaInstance.data.push({ 'schemaid': this.schema._id, 'database': this.schema.database })
-      obj.data = this.formSchemaInstance.data
+      obj.Schemaid = this.schema._id
+      obj.data = this.inputs
       return obj
     },
     async checkData () {
@@ -157,150 +73,150 @@ export default {
       let obj = {}
 
       $('input#custom_input').each(function () {
-        let element = this
-        _.forEach(self.entitySchema.data.entity, function (result) {
-          result.name = result.name.toLowerCase()
-          if (result.name === element.name.slice(0, result.name.length)) {
-            let emailRegEx = '(\\w+)\\@(\\w+)\\.[a-zA-Z]'
-            let numberRegEx = '^[0-9]+$'
-            let dateRegEx = '(0?[1-9]|[12]\\d|30|31)[^\\w\\d\\r\\n:](0?[1-9]|1[0-2])[^\\w\\d\\r\\n:](\\d{4}|\\d{2})'
-            val = element.value
-            // document.getElementsByName(element.name)[0].hasAttribute('required') result.property.optional === false
-            if (result.property.optional === false) {
-            // if (element.hasAttribute('required')) {
-              if (val === '' || val === null || val === undefined) {
-                err.push(element.name + ' - is required..!')
-                if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
-                  $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> required..!</div>')
-                }
-              } else {
-                // obj[element.name] = val
-                // self.formSchemaInstance.data[0][element.name] = val
-                $('input[name="' + element.name + '"]').parent().next('.validation').remove()
-              }
+        // let element = this
+        // _.forEach(self.entitySchema.data.entity, function (result) {
+        //   result.name = result.name.toLowerCase()
+        //   if (result.name === element.name.slice(0, result.name.length)) {
+        //     let emailRegEx = '(\\w+)\\@(\\w+)\\.[a-zA-Z]'
+        //     let numberRegEx = '^[0-9]+$'
+        //     let dateRegEx = '(0?[1-9]|[12]\\d|30|31)[^\\w\\d\\r\\n:](0?[1-9]|1[0-2])[^\\w\\d\\r\\n:](\\d{4}|\\d{2})'
+        //     val = element.value
+        //     // document.getElementsByName(element.name)[0].hasAttribute('required') result.property.optional === false
+        //     if (result.property.optional === false) {
+        //     // if (element.hasAttribute('required')) {
+        //       if (val === '' || val === null || val === undefined) {
+        //         err.push(element.name + ' - is required..!')
+        //         if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
+        //           $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> required..!</div>')
+        //         }
+        //       } else {
+        //         // obj[element.name] = val
+        //         // self.formSchemaInstance.data[0][element.name] = val
+        //         $('input[name="' + element.name + '"]').parent().next('.validation').remove()
+        //       }
 
-              if (element.hasAttribute('pattern')) {
-                let pttrn = new RegExp(result.property.regEx)
-                let regEx = pttrn.test(val)
-                if (!regEx) {
-                  err.push(element.name + ' - Enter proper format..!')
-                  if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
-                    $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Enter proper format..!</div>')
-                  }
-                } else {
-                  // obj[element.name] = val
-                  // self.formSchemaInstance.data[0][element.name] = val
-                  $('input[name="' + element.name + '"]').parent().next('.validation').remove()
-                }
-              }
-              if (element.type === 'date') {
-                let inputDate = new Date(val)
-                if (result.property.maxdate !== '') {
-                  let maxDate = new Date(result.property.maxdate)
-                  if (inputDate > maxDate) {
-                    err.push(element.name + ' - Enter minimum date then ' + maxDate)
-                    if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
-                      $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Enter minimum date then ' + maxDate + '</div>')
-                    }
-                  } else {
-                    // obj[element.name] = val
-                    // self.formSchemaInstance.data[0][element.name] = val
-                    $('input[name="' + element.name + '"]').parent().next('.validation').remove()
-                  }
-                } else if (result.property.mindate !== '') {
-                  let minDate = new Date(result.property.mindate)
-                  if (inputDate < minDate) {
-                    err.push(element.name + ' - Enter maximum date then ' + minDate)
-                    if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
-                      $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Enter minimum date then ' + minDate + '</div>')
-                    }
-                  } else {
-                    // obj[element.name] = val
-                    // self.formSchemaInstance.data[0][element.name] = val
-                    $('input[name="' + element.name + '"]').parent().next('.validation').remove()
-                  }
-                }
-              }
-              if (result.property.min !== 0 || result.property.max !== 0) {
-                if (val.length > result.property.min && val.length > result.property.max) {
-                  err.push(element.name + ' - Minimum length :' + result.property.min + ' Maximum length :' + result.property.max)
-                  if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
-                    $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Minimum length :' + result.property.min + ' Maximum length :' + result.property.max + '</div>')
-                  }
-                } else if (val.length > result.property.max && val.length < result.property.min) {
-                  err.push(element.name + ' - Minimum length :' + result.property.min + ' Maximum length :' + result.property.max)
-                  if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
-                    $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Minimum length :' + result.property.min + ' Maximum length :' + result.property.max + '</div>')
-                  }
-                } else {
-                  // obj[element.name] = val
-                  // self.formSchemaInstance.data[0][element.name] = val
-                  $('input[name="' + element.name + '"]').parent().next('.validation').remove()
-                }
-              }
-              if (result.property.allowedValue.length > 0) {
-                let check = _.includes(result.property.allowedValue, val)
-                if (!check) {
-                  err.push(element.name + ' - Allowed value are' + result.property.allowedValue)
-                  if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
-                    $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Allowed value are' + result.property.allowedValue + '</div>')
-                  }
-                } else {
-                  // obj[element.name] = val
-                  // self.formSchemaInstance.data[0][element.name] = val
-                  $('input[name="' + element.name + '"]').parent().next('.validation').remove()
-                }
-              }
-            }
-            switch (element.type) {
-              case 'email':
-                let re = new RegExp(emailRegEx)
-                let testEmail = re.test(val)
-                if (testEmail) {
-                  obj[element.name] = val
-                  // self.formSchemaInstance.data[0][element.name] = val
-                  $('input[name="' + element.name + '"]').parent().next('.validation').remove()
-                } else {
-                  err.push(element.name + ' - Enter valid email address..!')
-                  if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
-                    $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Enter valid email address..!</div>')
-                  }
-                }
-                break
-              case 'number':
-                re = new RegExp(numberRegEx)
-                testEmail = re.test(val)
-                if (testEmail) {
-                  obj[element.name] = val
-                  // self.formSchemaInstance.data[0][element.name] = val
-                  $('input[name="' + element.name + '"]').parent().next('.validation').remove()
-                } else {
-                  err.push(element.name + ' - Enter numbers only..!')
-                  if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
-                    $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Enter numbers only..!</div>')
-                  }
-                }
-                break
-              case 'date':
-                re = new RegExp(dateRegEx)
-                testEmail = re.test(val)
-                if (testEmail) {
-                  obj[element.name] = val
-                  // self.formSchemaInstance.data[0][element.name] = val
-                  $('input[name="' + element.name + '"]').parent().next('.validation').remove()
-                } else {
-                  err.push(element.name + ' - Invalid date format..!')
-                  if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
-                    $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Invalid date format..!</div>')
-                  }
-                }
-                break
-              default:
-                obj[element.name] = val
-                // self.formSchemaInstance.data[0][element.name] = val
-            }
-          }
-        })
+        //       if (element.hasAttribute('pattern')) {
+        //         let pttrn = new RegExp(result.property.regEx)
+        //         let regEx = pttrn.test(val)
+        //         if (!regEx) {
+        //           err.push(element.name + ' - Enter proper format..!')
+        //           if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
+        //             $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Enter proper format..!</div>')
+        //           }
+        //         } else {
+        //           // obj[element.name] = val
+        //           // self.formSchemaInstance.data[0][element.name] = val
+        //           $('input[name="' + element.name + '"]').parent().next('.validation').remove()
+        //         }
+        //       }
+        //       if (element.type === 'date') {
+        //         let inputDate = new Date(val)
+        //         if (result.property.maxdate !== '') {
+        //           let maxDate = new Date(result.property.maxdate)
+        //           if (inputDate > maxDate) {
+        //             err.push(element.name + ' - Enter minimum date then ' + maxDate)
+        //             if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
+        //               $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Enter minimum date then ' + maxDate + '</div>')
+        //             }
+        //           } else {
+        //             // obj[element.name] = val
+        //             // self.formSchemaInstance.data[0][element.name] = val
+        //             $('input[name="' + element.name + '"]').parent().next('.validation').remove()
+        //           }
+        //         } else if (result.property.mindate !== '') {
+        //           let minDate = new Date(result.property.mindate)
+        //           if (inputDate < minDate) {
+        //             err.push(element.name + ' - Enter maximum date then ' + minDate)
+        //             if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
+        //               $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Enter minimum date then ' + minDate + '</div>')
+        //             }
+        //           } else {
+        //             // obj[element.name] = val
+        //             // self.formSchemaInstance.data[0][element.name] = val
+        //             $('input[name="' + element.name + '"]').parent().next('.validation').remove()
+        //           }
+        //         }
+        //       }
+        //       if (result.property.min !== 0 || result.property.max !== 0) {
+        //         if (val.length > result.property.min && val.length > result.property.max) {
+        //           err.push(element.name + ' - Minimum length :' + result.property.min + ' Maximum length :' + result.property.max)
+        //           if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
+        //             $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Minimum length :' + result.property.min + ' Maximum length :' + result.property.max + '</div>')
+        //           }
+        //         } else if (val.length > result.property.max && val.length < result.property.min) {
+        //           err.push(element.name + ' - Minimum length :' + result.property.min + ' Maximum length :' + result.property.max)
+        //           if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
+        //             $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Minimum length :' + result.property.min + ' Maximum length :' + result.property.max + '</div>')
+        //           }
+        //         } else {
+        //           // obj[element.name] = val
+        //           // self.formSchemaInstance.data[0][element.name] = val
+        //           $('input[name="' + element.name + '"]').parent().next('.validation').remove()
+        //         }
+        //       }
+        //       if (result.property.allowedValue.length > 0) {
+        //         let check = _.includes(result.property.allowedValue, val)
+        //         if (!check) {
+        //           err.push(element.name + ' - Allowed value are' + result.property.allowedValue)
+        //           if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
+        //             $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Allowed value are' + result.property.allowedValue + '</div>')
+        //           }
+        //         } else {
+        //           // obj[element.name] = val
+        //           // self.formSchemaInstance.data[0][element.name] = val
+        //           $('input[name="' + element.name + '"]').parent().next('.validation').remove()
+        //         }
+        //       }
+        //     }
+        //     switch (element.type) {
+        //       case 'email':
+        //         let re = new RegExp(emailRegEx)
+        //         let testEmail = re.test(val)
+        //         if (testEmail) {
+        //           obj[element.name] = val
+        //           // self.formSchemaInstance.data[0][element.name] = val
+        //           $('input[name="' + element.name + '"]').parent().next('.validation').remove()
+        //         } else {
+        //           err.push(element.name + ' - Enter valid email address..!')
+        //           if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
+        //             $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Enter valid email address..!</div>')
+        //           }
+        //         }
+        //         break
+        //       case 'number':
+        //         re = new RegExp(numberRegEx)
+        //         testEmail = re.test(val)
+        //         if (testEmail) {
+        //           obj[element.name] = val
+        //           // self.formSchemaInstance.data[0][element.name] = val
+        //           $('input[name="' + element.name + '"]').parent().next('.validation').remove()
+        //         } else {
+        //           err.push(element.name + ' - Enter numbers only..!')
+        //           if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
+        //             $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Enter numbers only..!</div>')
+        //           }
+        //         }
+        //         break
+        //       case 'date':
+        //         re = new RegExp(dateRegEx)
+        //         testEmail = re.test(val)
+        //         if (testEmail) {
+        //           obj[element.name] = val
+        //           // self.formSchemaInstance.data[0][element.name] = val
+        //           $('input[name="' + element.name + '"]').parent().next('.validation').remove()
+        //         } else {
+        //           err.push(element.name + ' - Invalid date format..!')
+        //           if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
+        //             $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Invalid date format..!</div>')
+        //           }
+        //         }
+        //         break
+        //       default:
+        //         obj[element.name] = val
+        //         // self.formSchemaInstance.data[0][element.name] = val
+        //     }
+        //   }
+        // })
       })
       $('input#radio1').each(function () {
         let element = this
@@ -423,22 +339,170 @@ export default {
         return true
       }
     },
-    async handleSubmit (name) {
+    async handleSubmit () {
       let obj = await this.makeObj()
-      let validate = await this.checkData()
-      console.log('validated data', validate)
-      if (validate) {
-        console.log('Submitted Data', this.$route.params.id, this.row.id, obj.data[0])
-        Instance.post({ instanceid: this.$route.params.id, processid: this.row.id, data: obj.data[0] })
-          .then(response => {
-            this.$Notice.success({title: 'success!', desc: 'Instance Saved...'})
-          })
-          .catch(error => {
-            console.log('Error', error)
-            this.$Notice.error({title: 'Error!', desc: 'Instance Not Saved...'})
-          })
-      }
+      console.log('Submitted Data', obj.data)
+      Instance.post({ instanceid: this.$route.params.id, processid: this.log.job, jobId: this.log.jobId, data: obj.data })
+      .then(response => {
+        this.$Notice.success({title: 'success!', desc: 'Instance Saved...'})
+      })
+      .catch(error => {
+        console.log('Error', error)
+        this.$Notice.error({title: 'Error!', desc: 'Instance Not Saved...'})
+      })
     }
+  },
+  mounted () {
+    let val
+    let self = this
+    let temp = {}
+    this.err = []
+    let err = this.err
+    this.inputs = []
+    let finalInputs = this.inputs
+
+    window.addEventListener('message', function (event) {
+      for (let j = 0; j < event.data.length; j++) {
+        Object.keys(event.data[j]).forEach(function (key) {
+          for (let i = 0; i < self.entitySchema.data.entity.length; i++) {
+            let result = self.entitySchema.data.entity[i]
+            let element = {value: event.data[j][key], name: key, type: result.type}
+            let emailRegEx = '(\\w+)\\@(\\w+)\\.[a-zA-Z]'
+            let numberRegEx = '^[0-9]+$'
+            let dateRegEx = '(0?[1-9]|[12]\\d|30|31)[^\\w\\d\\r\\n:](0?[1-9]|1[0-2])[^\\w\\d\\r\\n:](\\d{4}|\\d{2})'
+            val = element.value
+            if (result.property.optional === false) {
+              if (val === '' || val === null || val === undefined) {
+                err.push(element.name + ' - is required..!')
+                if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
+                  $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> required..!</div>')
+                }
+              } else {
+                $('input[name="' + element.name + '"]').parent().next('.validation').remove()
+              }
+
+              if (result.property.regEx !== null || result.property.regEx !== undefined) {
+                let pttrn = new RegExp(result.property.regEx)
+                let regEx = pttrn.test(val)
+                if (!regEx) {
+                  err.push(element.name + ' - Enter proper format..!')
+                  if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
+                    $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Enter proper format..!</div>')
+                  }
+                } else {
+                  $('input[name="' + element.name + '"]').parent().next('.validation').remove()
+                }
+              }
+              if (element.type === 'date') {
+                let inputDate = new Date(val)
+                if (result.property.maxdate !== '') {
+                  let maxDate = new Date(result.property.maxdate)
+                  if (inputDate > maxDate) {
+                    err.push(element.name + ' - Enter minimum date then ' + maxDate)
+                    if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
+                      $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Enter minimum date then ' + maxDate + '</div>')
+                    }
+                  } else {
+                    $('input[name="' + element.name + '"]').parent().next('.validation').remove()
+                  }
+                } else if (result.property.mindate !== '') {
+                  let minDate = new Date(result.property.mindate)
+                  if (inputDate < minDate) {
+                    err.push(element.name + ' - Enter maximum date then ' + minDate)
+                    if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
+                      $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Enter minimum date then ' + minDate + '</div>')
+                    }
+                  } else {
+                    $('input[name="' + element.name + '"]').parent().next('.validation').remove()
+                  }
+                }
+              }
+              if (result.property.min !== 0 || result.property.max !== 0) {
+                if (val.length > result.property.min && val.length > result.property.max) {
+                  err.push(element.name + ' - Minimum length :' + result.property.min + ' Maximum length :' + result.property.max)
+                  if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
+                    $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Minimum length :' + result.property.min + ' Maximum length :' + result.property.max + '</div>')
+                  }
+                } else if (val.length > result.property.max && val.length < result.property.min) {
+                  err.push(element.name + ' - Minimum length :' + result.property.min + ' Maximum length :' + result.property.max)
+                  if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
+                    $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Minimum length :' + result.property.min + ' Maximum length :' + result.property.max + '</div>')
+                  }
+                } else {
+                  $('input[name="' + element.name + '"]').parent().next('.validation').remove()
+                }
+              }
+              if (result.property.allowedValue.length > 0) {
+                let check = _.includes(result.property.allowedValue, val)
+                if (!check) {
+                  err.push(element.name + ' - Allowed value are' + result.property.allowedValue)
+                  if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
+                    $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Allowed value are' + result.property.allowedValue + '</div>')
+                  }
+                } else {
+                  $('input[name="' + element.name + '"]').parent().next('.validation').remove()
+                }
+              }
+            }
+            switch (element.type) {
+              case 'email':
+                let re = new RegExp(emailRegEx)
+                let testEmail = re.test(val)
+                if (testEmail) {
+                  temp[element.name] = val
+                  $('input[name="' + element.name + '"]').parent().next('.validation').remove()
+                } else {
+                  err.push(element.name + ' - Enter valid email address..!')
+                  if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
+                    $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Enter valid email address..!</div>')
+                  }
+                }
+                break
+              case 'number':
+                re = new RegExp(numberRegEx)
+                testEmail = re.test(val)
+                if (testEmail) {
+                  temp[element.name] = val
+                  $('input[name="' + element.name + '"]').parent().next('.validation').remove()
+                } else {
+                  err.push(element.name + ' - Enter numbers only..!')
+                  if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
+                    $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Enter numbers only..!</div>')
+                  }
+                }
+                break
+              case 'date':
+                re = new RegExp(dateRegEx)
+                testEmail = re.test(val)
+                if (testEmail) {
+                  temp[element.name] = val
+                  $('input[name="' + element.name + '"]').parent().next('.validation').remove()
+                } else {
+                  err.push(element.name + ' - Invalid date format..!')
+                  if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
+                    $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Invalid date format..!</div>')
+                  }
+                }
+                break
+              default:
+                temp[element.name] = val
+            }
+            // }
+          }
+        })
+        temp.Schemaid = self.entitySchema.data.id
+        finalInputs.push(temp)
+        temp = {}
+      }
+      console.log('event listner inputs', finalInputs)
+      self.handleSubmit()
+    })
   }
 }
 </script>
+<style scoped>
+#filecontainer {
+  min-height: 500px;
+  min-width: 100%; 
+}
+</style>

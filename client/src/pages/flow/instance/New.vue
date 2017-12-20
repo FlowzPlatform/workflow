@@ -110,7 +110,8 @@
                       <Tabs>
                         <TabPane label="Form Data" name="formtab">
                           <template v-if="selectedProcess.inputProperty[0].createTemplate && getCurrentStatus(selectedLogs) === 'inputRequired'">
-                            <schemaTemplate :row="selectedProcess" :html="html"></schemaTemplate>
+                            <schemaTemplate :row="selectedProcess" :html="html" :log="lastLog"></schemaTemplate>
+                          <!-- {{selectedProcess.inputProperty[0].createTemplate}} -->
                           </template>
                           <template v-else-if="getCurrentStatus(selectedLogs) === 'inputRequired'">
                             <expandRow :row="selectedProcess" :lastLog="getLastLog(selectedLogs)"></expandRow>
@@ -161,9 +162,9 @@ export default {
       flowInstance: {},
       graph: false,
       list: true,
-      html: '',
       showProp: false,
       selectedProcess: {},
+      lastLog: {},
       selectedLogs: [],
       iconList: {
         running: 'ios-ionic-outline ivu-load-loop',
@@ -192,8 +193,20 @@ export default {
     }
   },
   async mounted () {
-    console.log('-->', this.selectedProcess)
+    // console.log('-->', this.selectedProcess)
     await this.init()
+  },
+  asyncComputed: {
+    async html () {
+      if (this.selectedProcess.inputProperty) {
+        let index = await _.findIndex(this.selectedProcess.inputProperty[0].entityschema.createTemplate, ['filename', this.selectedProcess.inputProperty[0].createTemplate])
+        var url = this.selectedProcess.inputProperty[0].entityschema.createTemplate[index].url
+        url = url.substr(0, 4) + url.substr(5)
+        // var promise = await axios.get(url)
+        // return promise.data
+        return url
+      }
+    }
   },
   feathers: {
     'flowz-instance': {
@@ -229,13 +242,6 @@ export default {
   methods: {
     back () {
       this.$router.go(-1)
-    },
-    async getHtml (url) {
-      let self = this
-      await axios.get(url)
-      .then(res => {
-        self.html = res.data
-      })
     },
     async init () {
       // Get Flow Instance
@@ -345,9 +351,10 @@ export default {
     },
     async handleProcessClick (item, log) {
       this.showProp = true
-      this.selectedProcess = await item
-      this.getHtml(this.selectedProcess.inputProperty[0].entityschema.createTemplate[0].url)
+      console.log('item ', item)
+      this.selectedProcess = item
       this.selectedLogs = log
+      this.lastLog = this.getLastLog(this.selectedLogs)
     },
     handleMappingRequireStatus (data) {
       // handle mapping required

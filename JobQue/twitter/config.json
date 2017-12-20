@@ -26,6 +26,8 @@
     "password": "123456"
   },
   "sendEmail": "http://localhost:3001/sendEmail",
+  "login": "http://auth.flowz.com/api/login",
+  "roleURI": "http://api.flowz.com/authldap/userslist/",
   "flowz_table": "flowzinstance",
   "scheduler_table": "scheduler",
   "qJobTimeout": 3600000,
