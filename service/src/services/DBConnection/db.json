@@ -1,14 +1,28 @@
 {
-  "mongo": {
-    "dbinstance": []
-  },
-  "rethink": {
-    "dbinstance": []
-  },
-  "elastic": {
-    "dbinstance": []
-  },
-  "nedb": {
-    "dbinstance": []
-  }
+    "mongo": {
+        "dbinstance": []
+    },
+    "rethink": {
+        "dbinstance": [
+            {
+              "isenable": true,
+              "connection_name": "Rethink",
+              "host": "159.203.134.27",
+              "port": "28015",
+              "dbname": "FlowzEngine",
+              "username": "",
+              "password": "",
+              "upldIcn": "",
+              "notes": "By default",
+              "isdefault": true,
+              "id": "f613518b-200b-46ca-bebd-90db7d45c553"
+            }
+        ]
+    },
+    "elastic": {
+        "dbinstance": []
+    },
+    "nedb": {
+        "dbinstance": []
+    }
 }

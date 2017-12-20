@@ -9,8 +9,8 @@
   },
   "flowid": "5eb46868-cf0e-41d4-9103-e06581b48009",
   "rethinkdb": {
-    "host": "aws-us-east-1-portal.30.dblayer.com",
-    "port": 16868,
+    "host": "159.203.134.27",
+    "port": "28015",
     "db": "FlowzEngine"
   },
   "qOptions": {

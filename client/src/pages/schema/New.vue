@@ -933,69 +933,28 @@ export default {
           /* Making API call to authenticate a user */
           this.loading = true
           if (this.formSchema._id === undefined) {
-            var viewValid = false
-            var editValid = false
-            if (this.vtemplate.viewtemplate.length === 0) {
-              viewValid = true
-            } else if (this.vtemplate.viewtemplate.length === 1 && this.vtemplate.viewtemplate[0].filename === '' && this.vtemplate.viewtemplate[0].url.length === 0) {
-              this.vtemplate.viewtemplate.splice(0, 1)
-              viewValid = true
-            } else {
-                this.$refs['vtemplate'].validate((valid) => {
-                  if (valid) {
-                    // this.$Message.success('Success!');
-                    viewValid = true
-                  } else {
-                      this.$Message.error('Viewtemplate validation Fail!');
-                      this.loading = false
-                      this.templates = '1'
-                      this.activetab = 'view'
-                  }
-                })
-            }
-            if (this.etemplate.createtemplate.length === 0) {
-              editValid = true
-            } else if (this.etemplate.createtemplate.length === 1 && this.etemplate.createtemplate[0].filename === '' && this.etemplate.createtemplate[0].url.length === 0) {
-              this.etemplate.createtemplate.splice(0, 1)
-              editValid = true
-            } else {
-                this.$refs['etemplate'].validate((valid) => {
-                  if (valid) {
-                    // this.$Message.success('Success!');
-                    editValid = true
-                  } else {
-                      this.$Message.error('Edittemplate validation Fail!');
-                      this.templates = '1'
-                      this.activetab = 'edit'
-                  }
-                })
-            }
-            if (viewValid && editValid) {
-              this.formSchema['viewTemplate'] = this.vtemplate.viewtemplate
-              this.formSchema['createTemplate'] = this.etemplate.createtemplate
-              this.formSchema['emailTemplate'] = this.mjmlUpload
-              // console.log(this.formSchema)
-              api.request('post', '/schema', this.formSchema)
-              .then(response => {
-                // this.toggleLoading()
-                // this.$router.push(data.redirect)
-                // console.log('Response Schema ... ', response.data)
-                this.$Notice.success({title: 'success!'})
-                this.loading = false
-                this.viewTemplate = []
-                this.createTemplate = []
-                this.mjmlUpload = []
-                this.$store.dispatch('getSchema')
-                this.$router.go(-1)
-                // this.$router.push('/')
-              })
-              .catch(error => {
-                console.log(error)
-                this.loading = false
-              })
-            } else {
-              // alert('error')
-            }
+            this.formSchema['viewTemplate'] = this.viewtemplate
+            this.formSchema['createTemplate'] = this.createtemplate
+            this.formSchema['emailTemplate'] = this.mjmlUpload
+            api.request('post', '/schema', this.formSchema)
+            .then(response => {
+              // this.toggleLoading()
+              // this.$router.push(data.redirect)
+              // console.log('Response Schema ... ', response.data)
+
+              this.$Notice.success({title: 'Schema saved..!'})
+              this.loading = false
+              this.viewTemplate = []
+              this.createTemplate = []
+              this.mjmlUpload = []
+              this.$store.dispatch('getSchema')
+              this.$router.go(-1)
+              // this.$router.push('/')
+            })
+            .catch(error => {
+              console.log(error)
+              this.loading = false
+            })
           } else {
             // alert(this.formSchema._id)
             // this.formSchema['viewTemplate'] = this.viewtemplate

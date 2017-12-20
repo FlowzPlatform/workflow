@@ -60,7 +60,6 @@ q.process(async(job, next) => {
       })
       .then(function(response) {
         emailTemplateHtml = response.data
-        console.log(response.data)
         processLog = _.chain(processLog).orderBy(['lastModified'], ['asc']).findLast((f) => { return f.jobId === job.data.jobId }).value()
         for(var i = 0; i < runningProcess.inputProperty[0].entityschema.entity.length; i++) {
           let element = runningProcess.inputProperty[0].entityschema.entity[i].name
@@ -83,6 +82,7 @@ q.process(async(job, next) => {
           "subject": "From " + rolesEmail[j],
           "body": emailTemplateHtml.html + '<br><button><a href="' + submitLink + '" style="text-decoration:none; color:#000">Submit</a></button>'
         }
+        console.log(myData)
         await axios({
           method: 'post',
           url: app.login,
