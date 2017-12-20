@@ -2,7 +2,7 @@
   <div class="flow">
     <div style="margin:-15px;">
       <Row>
-        <Col v-show="loading" class="demo-spin-col" span="24">
+        <Col v-show="loading" class="demo-spin-col" span="24" style="margin-top:35px;">
             <Spin fix>
                 <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
                 <div>Loading</div>
@@ -38,12 +38,12 @@
   import schemamappingModel from '@/api/schemamapping'
   import modelBpmnplugin from '@/api/bpmnplugins'
   import flowz from '@/api/flowz'
-  
+
   import 'diagram-js/assets/diagram-js.css'
   import 'bpmn-js/assets/bpmn-font/css/bpmn-embedded.css'
-  
+
   import BpmnModeler from 'bpmn-js/lib/Modeler'
-  
+
   import propertiesPanelModule from '../../../static/bpmn/bpmn-js-properties-panel'
   import propertiesProviderModule from '../../../static/bpmn/bpmn-js-properties-panel/lib/provider/camunda'
   import camundaModdleDescriptor from '../../../static/bpmn/camunda-bpmn-moddle/resources/camunda'
@@ -52,9 +52,15 @@
   // let bpmnModeler = null
   export default {
     name: 'flow',
+    watch: {
+      '$route.params.id': function (newId, oldId) {
+        this.initFlow()
+      }
+    },
     data () {
       return {
         loading: true,
+        processVar: null,
         bpmnModeler: null,
         bpmnXML: '<?xml version="1.0" encoding="UTF-8"?><bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn"><bpmn:process id="Process_1" isExecutable="false"><bpmn:startEvent id="StartEvent_1" /></bpmn:process><bpmndi:BPMNDiagram id="BPMNDiagram_1"><bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1"><bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1"><dc:Bounds x="173" y="102" width="36" height="36" /></bpmndi:BPMNShape></bpmndi:BPMNPlane></bpmndi:BPMNDiagram></bpmn:definitions>'
       }
@@ -105,6 +111,7 @@
         })
         if (types !== undefined) {
           camundaModdleDescriptor.types = _.concat(camundaModdleDescriptor.types, types)
+          document.getElementById('js-canvas').innerHTML = ''
           this.bpmnModeler = new BpmnModeler({
             container: '#js-canvas',
             propertiesPanel: {
@@ -417,48 +424,67 @@
           // obj[consumer.data.title] = schema.ctype ? (await self.getMapData(schema.consumerField)) : _.first(schema.consumerField)
           return obj
         }))
-      }
-    },
-    mounted () {
-      var process = [
-        new Promise((resolve, reject) => {
-          schemaModel.get().then((response) => {
-            response.data.splice(0, 0, { title: '---select---', id: 0 })
-            resolve(response.data)
-          }).catch(error => {
-            reject(error)
+      },
+      initFlow () {
+        this.processVar = [
+          new Promise((resolve, reject) => {
+            schemaModel.get().then((response) => {
+              response.data.splice(0, 0, { title: '---select---', id: 0 })
+              resolve(response.data)
+            }).catch(error => {
+              reject(error)
+            })
+          }),
+          new Promise((resolve, reject) => {
+            approvalModel.get().then((response) => {
+              resolve(response.map(f => ({ value: f.id, name: f.proccessname })))
+            }).catch(error => {
+              reject(error)
+            })
+          }),
+          new Promise((resolve, reject) => {
+            emailtemplate.get().then((response) => {
+              resolve(response.data.data.map(f => ({ value: f.id, name: f.name })))
+            }).catch(error => {
+              reject(error)
+            })
+          }),
+          new Promise((resolve, reject) => {
+            schemamappingModel.get().then((response) => {
+              resolve(response.data.data)
+            }).catch(error => {
+              reject(error)
+            })
           })
-        }),
-        new Promise((resolve, reject) => {
-          approvalModel.get().then((response) => {
-            resolve(response.map(f => ({ value: f.id, name: f.proccessname })))
-          }).catch(error => {
-            reject(error)
-          })
-        }),
-        new Promise((resolve, reject) => {
-          emailtemplate.get().then((response) => {
-            resolve(response.data.data.map(f => ({ value: f.id, name: f.name })))
-          }).catch(error => {
-            reject(error)
-          })
-        }),
-        new Promise((resolve, reject) => {
-          schemamappingModel.get().then((response) => {
-            resolve(response.data.data)
-          }).catch(error => {
-            reject(error)
-          })
-        })
-      ]
+        ]
 
-      Promise.all(process).then(async (response) => {
-        // response[0].splice(0, 0, { name: '---select---', value: 0 })
-        response[1].splice(0, 0, { name: '---select---', value: 0 })
-        response[2].splice(0, 0, { name: '---select---', value: 0 })
-        if (this.$route.params.id !== undefined) {
-          this.bpmnXML = flowz.get(this.$route.params.id).then(async (result) => {
-            this.bpmnXML = result.data.xml
+        Promise.all(this.processVar).then(async (response) => {
+          // response[0].splice(0, 0, { name: '---select---', value: 0 })
+          response[1].splice(0, 0, { name: '---select---', value: 0 })
+          response[2].splice(0, 0, { name: '---select---', value: 0 })
+          if (this.$route.params.id !== undefined) {
+            this.bpmnXML = flowz.get(this.$route.params.id).then(async (result) => {
+              this.bpmnXML = result.data.xml
+              await this.initBPMN({
+                schema: response[0],
+                approval: response[1],
+                emailtemplate: response[2],
+                schemamapping: response[3],
+                AddEntity: () => {
+                  this.storeXMLtolocalStorage()
+                  this.$router.push('/schema/new')
+                },
+                createTemplate: () => {
+                  this.storeXMLtolocalStorage()
+                  this.$router.push('/schema/edit/717fde77-032f-4ac0-bebe-7f5b16a658e5')
+                },
+                openApprovalClass: () => {
+                  this.storeXMLtolocalStorage()
+                  this.$router.push('/approval')
+                }
+              }) // Create bpmn
+            })
+          } else {
             await this.initBPMN({
               schema: response[0],
               approval: response[1],
@@ -468,53 +494,37 @@
                 this.storeXMLtolocalStorage()
                 this.$router.push('/schema/new')
               },
-              createTemplate: () => {
+              openTemplate: (selectedEntity) => {
                 this.storeXMLtolocalStorage()
-                this.$router.push('/schema/edit/717fde77-032f-4ac0-bebe-7f5b16a658e5')
+                this.$router.push('/schema/edit/' + selectedEntity)
               },
               openApprovalClass: () => {
                 this.storeXMLtolocalStorage()
                 this.$router.push('/approval')
               }
             }) // Create bpmn
+          }
+          let self = this
+          if (self.$store.getters.getXML !== undefined && self.$store.getters.getXML !== '') {
+            this.bpmnXML = self.$store.getters.getXML
+            this.bpmnModeler.importXML(this.bpmnXML, function (err) {
+              if (err) {
+                console.error(err)
+              } else {
+              }
+            })
+          }
+        }, reason => {
+          this.$Notice.error({
+            title: reason.message,
+            desc: 'connection to the server timed out',
+            duration: 0
           })
-        } else {
-          await this.initBPMN({
-            schema: response[0],
-            approval: response[1],
-            emailtemplate: response[2],
-            schemamapping: response[3],
-            AddEntity: () => {
-              this.storeXMLtolocalStorage()
-              this.$router.push('/schema/new')
-            },
-            openTemplate: (selectedEntity) => {
-              this.storeXMLtolocalStorage()
-              this.$router.push('/schema/edit/' + selectedEntity)
-            },
-            openApprovalClass: () => {
-              this.storeXMLtolocalStorage()
-              this.$router.push('/approval')
-            }
-          }) // Create bpmn
-        }
-        let self = this
-        if (self.$store.getters.getXML !== undefined && self.$store.getters.getXML !== '') {
-          this.bpmnXML = self.$store.getters.getXML
-          this.bpmnModeler.importXML(this.bpmnXML, function (err) {
-            if (err) {
-              console.error(err)
-            } else {
-            }
-          })
-        }
-      }, reason => {
-        this.$Notice.error({
-          title: reason.message,
-          desc: 'connection to the server timed out',
-          duration: 0
         })
-      })
+      }
+    },
+    mounted () {
+      this.initFlow()
     }
   }
 </script>
