@@ -8,9 +8,9 @@ var rethinkdb = {
     db: 'FlowzEngine',
     servers: [{
       host: config.get('rdb_host').trim(),
-      port: config.get('rdb_port').trim(),
-      authKey: rauth,
-      ssl: ssl
+      port: config.get('rdb_port').trim()
+      // authKey: rauth,
+      // ssl: ssl
     }]
   }
 };

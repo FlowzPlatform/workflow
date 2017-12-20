@@ -16,7 +16,8 @@ var temp = {
   linkedinSuccessCallbackUrl: 'http://localhost:8000',
   loginWithLinkedinUrl: 'http://auth.flowz.com/auth/linkedin',
   githubSuccessCallbackUrl: 'http://localhost:8000',
-  loginWithGithubUrl: 'http://auth.flowz.com/auth/github'
+  loginWithGithubUrl: 'http://auth.flowz.com/auth/github',
+  grapesUrl: 'http://172.16.230.133:3032'
 }
 if (process.env.NODE_ENV !== 'development') {
   temp = {
@@ -34,7 +35,8 @@ if (process.env.NODE_ENV !== 'development') {
     linkedinSuccessCallbackUrl: 'http://engine.flowz.com/',
     loginWithLinkedinUrl: 'http://auth.flowz.com/auth/linkedin',
     githubSuccessCallbackUrl: 'http://engine.flowz.com/',
-    loginWithGithubUrl: 'http://auth.flowz.com/auth/github'
+    loginWithGithubUrl: 'http://auth.flowz.com/auth/github',
+    grapesUrl: 'http://webbuilder.flowz.com'
   }
 }
 export default temp

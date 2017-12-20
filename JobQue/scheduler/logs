@@ -1,1 +1,1 @@
-{"level":50,"time":1513324739814,"msg":"... error in process\nError: connect ECONNREFUSED 127.0.0.1:4002","pid":14978,"hostname":"OBLAP-71","v":1}
+{"level":30,"time":1513686378990,"msg":"next job","pid":9177,"hostname":"OBLAP-51","fId":"69a4455c-eb02-40f0-a579-7f349f65740d","job":"StartEvent_1","jobId":"2a124b20-4e57-493d-815b-abb027bd358f","v":1}

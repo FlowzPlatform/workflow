@@ -56,7 +56,7 @@
     "jsonfile": "^3.0.1",
     "lodash": "^4.17.4",
     "mongodb": "^2.2.31",
-    "mongoose": "^4.11.13",
+    "mongoose": "^4.13.7",
     "nedb": "^1.8.0",
     "nedb-promise": "^2.0.1",
     "path": "^0.12.7",
@@ -68,7 +68,7 @@
     "winston": "^2.3.1"
   },
   "devDependencies": {
-    "eslint": "^4.7.2",
+    "eslint": "^4.13.1",
     "mocha": "^3.5.3",
     "request": "^2.82.0",
     "request-promise": "^4.2.2"

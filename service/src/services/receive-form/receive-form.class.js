@@ -3,14 +3,16 @@ let async = require('asyncawait/async');
 let await = require('asyncawait/await');
 let config = require('config');
 var axios = require('axios');
-
+// host=aws-us-east-1-portal.30.dblayer.com port=16868 
 var tName = 'receive_form';
 var r = require('rethinkdbdash')({
   host: '159.203.134.27',
   port: '28015',
   db: 'FlowzEngine'
+    // rauth: "51b2885598be1c2c1243a5c9c3548ad2",
+    // cert: "/ca.crt"
 });
-
+// host: '159.203.134.27',port: '28015',
 class Service {
   constructor(options) {
     this.options = options || {};

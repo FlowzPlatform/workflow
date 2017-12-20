@@ -120,6 +120,7 @@ export default {
     let self = this
     api.get()
     .then(response => {
+      console.log('Response :', response.data.data)
       self.userList = response.data.data
     })
     .catch(error => {

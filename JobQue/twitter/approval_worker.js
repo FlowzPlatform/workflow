@@ -36,83 +36,83 @@ q.process(async(job, next) => {
     let rolesEmail = []
     await axios({
         method: 'get',
-        url: 'http://172.16.160.117:3030/flowz-instance/' + job.data.fId
+        url: 'http://localhost:3030/flowz-instance/' + job.data.fId
       })
-      .then(async function(response) {
+      .then(async function (response) {
         runningProcess = _.find(response.data.processList, ['id', job.data.job])
         processLog = response.data.process_log
         emailTemplate = runningProcess.inputProperty[0].entityschema.emailTemplate
         let processRoles = runningProcess.inputProperty[0].approvalClass.items[0].role
 
         await axios({
-          method: 'get',
-          url: 'http://172.16.160.32:3000/userslist/' + processRoles
-        })
-        .then(async function(res) {
-          rolesEmail = await res.data.data.roles
-        })
+            method: 'get',
+            url: app.roleURI + processRoles
+          })
+          .then(async function (res) {
+            rolesEmail = await res.data.data.roles
+          })
         emailTemplateUrl = _.find(runningProcess.inputProperty[0].entityschema.emailTemplate, ['filename', runningProcess.inputProperty[0].emailTemplate])
         emailTemplateUrl = emailTemplateUrl.url
-        console.log('URL', emailTemplateUrl)
       })
     await axios({
         method: 'get',
         url: emailTemplateUrl
       })
-      .then(function(response) {
+      .then(function (response) {
         emailTemplateHtml = response.data
-        console.log(response.data)
         processLog = _.chain(processLog).orderBy(['lastModified'], ['asc']).findLast((f) => { return f.jobId === job.data.jobId }).value()
-        for(var i = 0; i < runningProcess.inputProperty[0].entityschema.entity.length; i++) {
+        for (var i = 0; i < runningProcess.inputProperty[0].entityschema.entity.length; i++) {
           let element = runningProcess.inputProperty[0].entityschema.entity[i].name
-          element = element.toLowerCase()
+            // element = element.toLowerCase()
           let index = emailTemplateHtml.search('"' + element + '"')
-          element = _.capitalize(element)
+            // element = _.capitalize(element)
           emailTemplateHtml = emailTemplateHtml.substr(0, index + element.length + 3) + processLog.input[0][element] + emailTemplateHtml.substr(index + element.length + 3)
         }
         emailTemplateHtml = mjml2html(emailTemplateHtml)
       })
-      .catch(function(error) {
+      .catch(function (error) {
         console.log('Error : ', error)
       })
-    // console.log('rolesEmail', rolesEmail)
     if (rolesEmail.length > 0) {
-      for(var j = 0; j < rolesEmail.length; j++)
-      {
+      for (var j = 0; j < rolesEmail.length; j++) {
         let submitLink = 'http://localhost:8000/mail/reply/' + rolesEmail[j] + '/' + job.data.job + '/' + job.data.jobId + '/' + job.data.fId
         let myData = {
           "to": rolesEmail[j],
           "subject": "From " + rolesEmail[j],
           "body": emailTemplateHtml.html + '<br><button><a href="' + submitLink + '" style="text-decoration:none; color:#000">Submit</a></button>'
         }
+        console.log(myData)
         await axios({
-          method: 'post',
-          url: 'http://ec2-54-88-11-110.compute-1.amazonaws.com/api/login', 
-          data: app.credential
-        })
-        .then(async function(response) {
-          await axios({
-              method: 'post',
-              url: app.sendEmail,
-              data: myData,
-              headers: {
-                'authorization': response.data.logintoken
-              }
-            })
-            .then(function(response) {
-              console.log('Mail Sent to ' + rolesEmail[j])
-            })
-            .catch(function(error) {
-              console.log('Error : ', error)
-            })
-        })
-      }  
+            method: 'post',
+            url: app.login,
+            data: app.credential
+          })
+          .then(async function (response) {
+            await axios({
+                method: 'post',
+                url: app.sendEmail,
+                data: myData,
+                headers: {
+                  'authorization': response.data.logintoken
+                }
+              })
+              .then(function (response) {
+                console.log('Mail Sent to ' + rolesEmail[j])
+              })
+              .catch(function (error) {
+                console.log('Error : ', error)
+              })
+          })
+          .catch(error => {
+            console.log('Error :', error)
+          })
+      }
     }
     await job.update()
     return next(null, 'success')
   } catch (err) {
-    console.log('==>', err)
-    pino().error('... error in process',err)
+    console.log(err)
+    pino().error('Error in process', err)
     return next(new Error('error'))
   }
 })

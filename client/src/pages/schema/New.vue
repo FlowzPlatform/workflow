@@ -31,7 +31,7 @@
 <template>
   <div class="schema">
     <Row>
-      <Button type="primary" @click="back()" icon="chevron-left" style="float:right;">Back</Button>
+      <Button type="primary" size="small" @click="back()" icon="chevron-left" style="float:right;">Back</Button>
     </Row>
     <Row v-if="isGridManager">
       <grid-manager></grid-manager>
@@ -205,36 +205,170 @@
                         <TabPane label="View" icon="eye" name="view">
                           <!-- <Button type="ghost" @click="opengrapesjs(true)">Using Grapes</Button>
                           <Button type="ghost" @click="openGridManager(true)">Using Grid Manager</Button> -->
-                          <div class="schema-form ivu-table-wrapper" style="margin-top:10px">
-                            <div class="ivu-table ivu-table-border">
-                                <div class="ivu-table-body">
-                                    <table cellspacing="0" cellpadding="0" border="0" style="width: 100%;">
-                                        <thead>
-                                            <tr>
-                                                <th class="">
+                          <Form ref="vtemplate" :model="vtemplate" >
+                              <div class="schema-form ivu-table-wrapper" style="margin-top:10px">
+                                <div class="ivu-table ivu-table-border">
+                                    <div class="ivu-table-body">
+                                        <table cellspacing="0" class="dropdown-opensparts" cellpadding="0" border="0" style="width: 100%;">
+                                            <thead>
+                                                <tr>
+                                                    <th class="">
+                                                        <div class="ivu-table-cell">
+                                                            <span>Name</span>
+                                                        </div>
+                                                    </th>
+                                                    <th class="">
+                                                        <div class="ivu-table-cell">
+                                                            <span>Pages</span>
+                                                        </div>
+                                                    </th>
+                                                    <th class="">
+                                                        <div class="ivu-table-cell"><span>Notes</span>
+                                                        </div>
+                                                    </th>
+                                                    <th class="ivu-table-column-center">
+                                                        <div class="ivu-table-cell">
+                                                            <span>Action</span>
+                                                        </div>
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="ivu-table-tbody">
+                                              <template>
+                                                <tr class="ivu-table-row" v-for="(item, inx) in vtemplate.viewtemplate">
+                                                    <td>
+                                                      <div class="ivu-table-cell">
+                                                        <!-- {{item.filename}} -->
+                                                        <Form-item
+                                                        :key="inx"
+                                                        :prop="'viewtemplate.' + inx + '.filename'"
+                                                        :rules="viewtrule"
+                                                        >
+                                                          <Input type="text" v-model="item.filename" placeholder="Project Name" class=""></Input>
+                                                        </Form-item>
+                                                      </div>
+                                                    </td>
+                                                    <td>
+                                                      <div class="ivu-table-cell">
+                                                        <Form-item
+                                                        :key="inx"
+                                                        :prop="'viewtemplate.' + inx + '.url[1]'"
+                                                        :rules="{required: true, message: 'Page required', trigger: 'blur'}"
+                                                        >
+                                                          <Cascader :data="GrapesListData" filterable v-model='item.url'></Cascader>
+                                                        </Form-item>
+                                                      </div>
+                                                    </td>
+                                                    <td class="">
+                                                        <div class="ivu-table-cell">
+                                                            <!-- {{item.notes}} -->
+                                                            <Form-item>
+                                                              <Input type="textarea" v-model="item.notes" placeholder="Notes..." size="small" class="schema-form-input"></Input>
+                                                            </Form-item>
+                                                        </div>
+                                                    </td>
+                                                    <td class="ivu-table-column-center">
+                                                        <div class="ivu-table-cell" style="">
+                                                          <!-- <a style="margin-right:8px" @click="editViewTemplate(index , true)"><Icon type="edit" size="17"></Icon></a> -->
+                                                          <a @click="deleteViewTemplate('view', inx)"><Icon type="android-delete" size="20" color="#e74c3c"></Icon></a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr class="ivu-table-row">
+                                                  <td  colspan="4">
+                                                    <Button type="dashed" long @click="addRowViewTemplate('vtemplate')" icon="plus-round">Add</Button>
+                                                  </td>
+                                                </tr>
+                                              </template>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                              </div>
+                          </Form>
+                        </TabPane>
+
+                        <!-- <Button type="info" v-if="activetab == 'view'" @click="opengrapesjs(true)" slot="extra"  size="small" style="margin-right:5px">Using Grapes</Button>
+                        <Button type="info" v-if="activetab == 'view'" @click="openGridManager(true)" slot="extra" size="small">Using Grid Manager</Button> -->
+                        <Button type="info" icon="plus" v-if="activetab == 'view'" slot="extra" size="small" style="margin-right:5px" @click="viewAdd">Add</Button>
+
+                        <TabPane label="Edit" icon="edit" name="edit">
+                          <!-- <Button type="info" @click="opengrapesjs(false)">Using Grapes</Button>
+                          <Button type="info" @click="openGridManager(false)">Using Grid Manager</Button> -->
+                          <Form ref="etemplate" :model="etemplate" >
+                            <div class="schema-form ivu-table-wrapper" style="margin-top:10px">
+                              <div class="ivu-table ivu-table-border">
+                                  <div class="ivu-table-body">
+                                      <table cellspacing="0" class="dropdown-opensparts" cellpadding="0" border="0" style="width: 100%;">
+                                          <thead>
+                                              <tr>
+                                                  <th class="">
+                                                      <div class="ivu-table-cell">
+                                                          <span>Name</span>
+                                                      </div>
+                                                  </th>
+                                                  <th class="">
+                                                      <div class="ivu-table-cell">
+                                                          <span>Url</span>
+                                                      </div>
+                                                  </th>
+                                                  <th class="">
+                                                      <div class="ivu-table-cell"><span>Notes</span>
+                                                      </div>
+                                                  </th>
+                                                  <th class="">
+                                                      <div class="ivu-table-cell">
+                                                          <span>Action</span>
+                                                      </div>
+                                                  </th>
+                                              </tr>
+                                          </thead>
+                                          <tbody class="ivu-table-tbody">
+                                          <template>
+                                            <tr class="ivu-table-row" v-for="(item, inx) in etemplate.createtemplate">
+                                                <td>
+                                                  <div class="ivu-table-cell">
+                                                    <Form-item
+                                                    :key="inx"
+                                                    :prop="'createtemplate.' + inx + '.filename'"
+                                                    :rules="editrule"
+                                                    >
+                                                      <Input type="text" v-model="item.filename" placeholder="Project Name" class=""></Input>
+                                                    </Form-item>
+                                                  </div>
+                                                </td>
+                                                <td>
+                                                  <div class="ivu-table-cell">
+                                                    <Form-item
+                                                    :key="inx"
+                                                    :prop="'createtemplate.' + inx + '.url[1]'"
+                                                    :rules="{required: true, message: 'Page required', trigger: 'blur'}"
+                                                    >
+                                                      <Cascader :data="GrapesListData" filterable v-model='item.url'></Cascader>
+                                                    </Form-item>
+                                                  </div>
+                                                </td>
+                                                <td class="">
                                                     <div class="ivu-table-cell">
-                                                        <span>Name</span>
+                                                        <Form-item>
+                                                          <Input type="textarea" v-model="item.notes" placeholder="Notes..." size="small" class="schema-form-input"></Input>
+                                                        </Form-item>
                                                     </div>
-                                                </th>
-                                                <th class="">
-                                                    <div class="ivu-table-cell">
-                                                        <span>Url</span>
+                                                </td>
+                                                <td class="ivu-table-column-center">
+                                                    <div class="ivu-table-cell" style="">
+                                                      <a @click="deleteViewTemplate('edit', inx)"><Icon type="android-delete" size="20" color="#e74c3c"></Icon></a>
                                                     </div>
-                                                </th>
-                                                <th class="">
-                                                    <div class="ivu-table-cell"><span>Notes</span>
-                                                    </div>
-                                                </th>
-                                                <th class="">
-                                                    <div class="ivu-table-cell">
-                                                        <span>Action</span>
-                                                    </div>
-                                                </th>
+                                                </td>
                                             </tr>
-                                        </thead>
-                                        <tbody class="ivu-table-tbody">
-                                          <template v-if="viewtemplate.length > 0">
-                                            <tr class="ivu-table-row" v-for="(item, index) in viewtemplate">
+                                            <tr class="ivu-table-row">
+                                              <td  colspan="4">
+                                                <Button type="dashed" long @click="addRowViewTemplate('etemplate')" icon="plus-round">Add</Button>
+                                              </td>
+                                            </tr>
+                                          </template>
+                                            <!-- <template v-if="createtemplate.length > 0">
+                                            <tr class="ivu-table-row" v-for="(item, index) in createtemplate">
                                                 <td>
                                                   <div class="ivu-table-cell">
                                                     {{item.filename}}
@@ -252,105 +386,32 @@
                                                 </td>
                                                 <td>
                                                     <div class="ivu-table-cell">
-                                                      <a style="margin-right:8px" @click="editViewTemplate(index , true)"><Icon type="edit" size="17"></Icon></a>
-                                                      <a @click="deleteViewTemplate(index)"><Icon type="android-delete" size="20" color="#e74c3c"></Icon></a>
+                                                      <a style="margin-right:8px" @click="editViewTemplate(index , false)"><Icon type="edit" size="17"></Icon></a>
+                                                      <a @click="deleteCreateTemplate(index)"><Icon type="android-delete" size="20" color="#e74c3c"></Icon></a>
                                                     </div>
                                                 </td>
                                             </tr>
-                                          </template>
-                                          <template v-else>
-                                            <tr class="ivu-table-row">
-                                              <td colspan="4">
-                                                <div class="ivu-table-cell" align="center">
-                                                  No templates found
-                                                </div>
-                                              </td>
-                                            </tr>
-                                          </template>
-                                        </tbody>
-                                    </table>
-                                </div>
+                                            </template>
+                                            <template v-else>
+                                              <tr class="ivu-table-row">
+                                                <td colspan="4">
+                                                  <div class="ivu-table-cell" align="center">
+                                                    No templates found
+                                                  </div>
+                                                </td>
+                                              </tr>
+                                            </template> -->
+                                          </tbody>
+                                      </table>
+                                  </div>
+                              </div>
                             </div>
-                          </div>
+                          </Form>
                         </TabPane>
 
-                        <Button type="info" v-if="activetab == 'view'" @click="opengrapesjs(true)" slot="extra"  size="small" style="margin-right:5px">Using Grapes</Button>
-                        <Button type="info" v-if="activetab == 'view'" @click="openGridManager(true)" slot="extra" size="small">Using Grid Manager</Button>
-
-                        <TabPane label="Edit" icon="edit" name="edit">
-                          <!-- <Button type="info" @click="opengrapesjs(false)">Using Grapes</Button>
-                          <Button type="info" @click="openGridManager(false)">Using Grid Manager</Button> -->
-                          <div class="schema-form ivu-table-wrapper" style="margin-top:10px">
-                            <div class="ivu-table ivu-table-border">
-                                <div class="ivu-table-body">
-                                    <table cellspacing="0" cellpadding="0" border="0" style="width: 100%;">
-                                        <thead>
-                                            <tr>
-                                                <th class="">
-                                                    <div class="ivu-table-cell">
-                                                        <span>Name</span>
-                                                    </div>
-                                                </th>
-                                                <th class="">
-                                                    <div class="ivu-table-cell">
-                                                        <span>Url</span>
-                                                    </div>
-                                                </th>
-                                                <th class="">
-                                                    <div class="ivu-table-cell"><span>Notes</span>
-                                                    </div>
-                                                </th>
-                                                <th class="">
-                                                    <div class="ivu-table-cell">
-                                                        <span>Action</span>
-                                                    </div>
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="ivu-table-tbody">
-                                          <template v-if="createtemplate.length > 0">
-                                          <tr class="ivu-table-row" v-for="(item, index) in createtemplate">
-                                              <td>
-                                                <div class="ivu-table-cell">
-                                                  {{item.filename}}
-                                                </div>
-                                              </td>
-                                              <td>
-                                                <div class="ivu-table-cell">
-                                                  <a :href="item.url">{{item.url}}</a>
-                                                </div>
-                                              </td>
-                                              <td class="">
-                                                  <div class="ivu-table-cell">
-                                                      {{item.notes}}
-                                                  </div>
-                                              </td>
-                                              <td>
-                                                  <div class="ivu-table-cell">
-                                                    <a style="margin-right:8px" @click="editViewTemplate(index , false)"><Icon type="edit" size="17"></Icon></a>
-                                                    <a @click="deleteCreateTemplate(index)"><Icon type="android-delete" size="20" color="#e74c3c"></Icon></a>
-                                                  </div>
-                                              </td>
-                                          </tr>
-                                          </template>
-                                          <template v-else>
-                                            <tr class="ivu-table-row">
-                                              <td colspan="4">
-                                                <div class="ivu-table-cell" align="center">
-                                                  No templates found
-                                                </div>
-                                              </td>
-                                            </tr>
-                                          </template>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                          </div>
-                        </TabPane>
-
-                        <Button type="info" v-if="activetab == 'edit'" @click="opengrapesjs(false)" slot="extra" size="small" style="margin-right:5px">Using Grapes</Button>
-                        <Button type="info" v-if="activetab == 'edit'" @click="openGridManager(false)" slot="extra" size="small">Using Grid Manager</Button>
+                        <!-- <Button type="info" v-if="activetab == 'edit'" @click="opengrapesjs(false)" slot="extra" size="small" style="margin-right:5px">Using Grapes</Button>
+                        <Button type="info" v-if="activetab == 'edit'" @click="openGridManager(false)" slot="extra" size="small">Using Grid Manager</Button> -->
+                        <Button type="info" icon="plus" v-if="activetab == 'edit'" slot="extra" size="small" style="margin-right:5px" @click="viewAdd()">Add</Button>
 
                         <TabPane label="Email" icon="email" name="email">
                           <!-- <Button type="ghost" @click="openMjmlEditor">Add Template</Button> -->
@@ -440,7 +501,9 @@
         </Form>
       </Col>
     </Row>
-    <!-- {{formSchema}} -->
+    <!-- {{GrapesListData}} -->
+    <!-- <hr> -->
+    <!-- {{etemplate}} -->
     <!-- <div class="">
     <GrapesComponent :is='active'></GrapesComponent>
     </div> -->
@@ -456,6 +519,8 @@ import gridmanager from '@/components/gridmanager'
 import GrapesComponent from '@/components/GrapesComponent'
 import MjmlEditor from '@/components/MjmlEditor.vue'
 import Emitter from '@/mixins/emitter'
+import config from '@/config'
+import axios from 'axios'
 var file = []
 
 export default {
@@ -491,6 +556,33 @@ export default {
         }
       }
     };
+    const validateViewTemplateTitle = async(rule, value, callback) => {
+      var count = 0
+      for(let [i, mObj] of this.vtemplate.viewtemplate.entries()) {
+        if(mObj.filename === value) {
+          count++
+        }
+      }
+      if (count > 1) {
+        callback(new Error('Same Name Not Allowed..'))
+      } else {
+        callback();
+      }
+    };
+    const validateEditTemplateTitle = async(rule, value, callback) => {
+      var count = 0
+      for(let [i, mObj] of this.etemplate.createtemplate.entries()) {
+        if(mObj.filename === value) {
+          count++
+        }
+      }
+      if (count > 1) {
+        callback(new Error('Same Name Not Allowed..'))
+      } else {
+        callback();
+      }
+    };
+    
     return {
       loading: false,
       isGridManager: false,
@@ -521,7 +613,20 @@ export default {
       CascaderData: [],
       scdata: [],
       createtemplate: [],
-      viewtemplate: [],
+      vtemplate: {
+        viewtemplate: [{
+          filename: '',
+          url: [],
+          notes: ''
+        }]
+      },
+      etemplate: {
+        createtemplate: [{
+          filename: '',
+          url: [],
+          notes: ''
+        }]
+      },
       mjmlUpload: [],
       isViewTemplate: false,
       upload: [],
@@ -547,7 +652,24 @@ export default {
         validator: validateEntField,
         trigger: 'blur'
       }
-      ]
+      ],
+      GrapesListData: [],
+      viewtrule: [{
+        required: true, 
+        message: 'Name can not be empty', 
+        trigger: 'blur'
+      }, {
+        validator: validateViewTemplateTitle,
+        trigger: 'blur'
+      }],
+      editrule: [{
+        required: true, 
+        message: 'Name can not be empty', 
+        trigger: 'blur'
+      }, {
+        validator: validateEditTemplateTitle,
+        trigger: 'blur'
+      }]
     }
   },
   mounted () {
@@ -599,6 +721,47 @@ export default {
       // }
   },
   methods: {
+    addRowViewTemplate (name) {
+      // console.log(name)
+      if (this.vtemplate.viewtemplate.length === 0) {
+        this.vtemplate.viewtemplate.push({
+          filename: '',
+          url: [],
+          notes: ''
+        })
+      } else if (this.etemplate.createtemplate.length === 0) {
+        this.etemplate.createtemplate.push({
+          filename: '',
+          url: [],
+          notes: ''
+        })
+      } else {
+        this.$refs[name].validate((valid) => {
+          if (valid) {
+            // this.$Message.success('Success!');
+            if(name === 'vtemplate') {
+              this.vtemplate.viewtemplate.push({
+                filename: '',
+                url: [],
+                notes: ''
+              })
+            } else if (name === 'etemplate') {
+              this.etemplate.createtemplate.push({
+                filename: '',
+                url: [],
+                notes: ''
+              })
+            }
+            
+          } else {
+              this.$Message.error('Fail!');
+          }
+        })
+      }
+    },
+    viewAdd () {
+      window.open(config.grapesUrl, '_blank')
+    },
     validateTitle: async function(title) {
       var res = await (api.request('get', '/schema'))
       for (let [inx, obj] of res.data.entries()) {
@@ -622,12 +785,16 @@ export default {
       console.log('defaultType', val)
       // alert(type)
     },
-    deleteViewTemplate(index) {
+    deleteViewTemplate(name, index) {
       this.$Modal.confirm({
         title: 'Confirm',
         content: '<p>Are you sure you want to delete?</p>',
         onOk: () => {
-          this.viewtemplate.splice(index, 1)
+          if (name === 'view') {
+            this.vtemplate.viewtemplate.splice(index, 1)
+          } else if (name == 'edit') {
+            this.etemplate.createtemplate.splice(index, 1)
+          }
         },
         onCancel: () => {
         }
@@ -698,10 +865,36 @@ export default {
           ]
         }
         this.createtemplate = []
-        this.viewtemplate = []
+        // this.viewtemplate = []
         this.mjmlUpload = []
         // this.fetchSchemaType(id)
         this.$Loading.finish()
+        this.GrapesListData = []
+        axios.get(config.grapesUrl + '/project-configuration?userEmail=' + this.$store.state.user.email).then(res => {
+          // console.log('res', res.data.data)
+          // return res.data.data
+          var _res = res.data.data
+          for (let [i, mobj] of _res.entries()) {
+            // console.log(i)
+            var obj = {}
+            obj.label = mobj.configData[1].projectSettings[0].ProjectName
+            obj.value = mobj.configData[1].projectSettings[0].ProjectName
+            obj.children = []
+            for (let [inx, sObj] of mobj.configData[1].pageSettings.entries()) {
+              // console.log(inx)
+              var s = {}
+              s.label = sObj.PageName
+              var a = sObj.PageName.split('.')
+              // console.log(a)
+              s.value = a[0]
+              obj.children.push(s)
+            }
+            this.GrapesListData.push(obj)
+          }
+        }).catch(err => {
+          console.log(err)
+        })
+        
       } else {
         api.request('get', '/schema/' + id)
         .then(response => {
@@ -748,7 +941,8 @@ export default {
               // this.toggleLoading()
               // this.$router.push(data.redirect)
               // console.log('Response Schema ... ', response.data)
-              this.$Message.success('Schema updated..!')
+
+              this.$Notice.success({title: 'Schema saved..!'})
               this.loading = false
               this.viewTemplate = []
               this.createTemplate = []
@@ -855,8 +1049,11 @@ export default {
 
     },
     opengrapesjs (isViewTemplate) {
-      this.isViewTemplate = isViewTemplate
-      this.isGrapesComponent = !this.isGrapesComponent
+
+      // this.$router.push('/admin/schema/Grapeslist')
+      // console.log('>>>>>>>>>>')
+      // this.isViewTemplate = isViewTemplate
+      // this.isGrapesComponent = !this.isGrapesComponent
     },
     handleCloseGrapesClick (self) {
       if(self != false && self != undefined) {
@@ -956,12 +1153,12 @@ export default {
     'formSchema.title' : function(v) {
        this.formSchema.title = v.toLowerCase().trim();
     },
-    '$route.params.id' (newId, oldId) {
+    '$route.params.id': function(newId, oldId) {
       this.setTypes(newId)
       // fetch data
       this.fetch(newId)
     },
-    '$store.getters.allSchema' () {
+    '$store.getters.allSchema': function() {
       this.$store.getters.allSchema.forEach((schema) => {
         if (this.$route.params.id !== schema._id) {
           this.types.push({
@@ -974,3 +1171,9 @@ export default {
   }
 }
 </script>
+<style >
+  .ivu-form-item-error-tip {
+    position: relative;
+  }
+  .dropdown-opensparts .ivu-select-dropdown {position: relative;}
+</style>
