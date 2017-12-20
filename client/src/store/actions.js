@@ -32,7 +32,7 @@ export default {
     // console.log('getTabdata', text)
   },
   getFlowzdata ({ commit }) {
-    commit('SET_FLOWZDATA', [])
+    // commit('SET_FLOWZDATA', [])
     api.request('get', '/flowz')
       .then(response => {
         commit('SET_FLOWZDATA', response.data.data)
