@@ -54,6 +54,7 @@
     name: 'flow',
     watch: {
       '$route.params.id': function (newId, oldId) {
+        this.loading = true
         this.initFlow()
       }
     },
