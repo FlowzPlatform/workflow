@@ -56,6 +56,15 @@
         </Col>
       </Row>
       <Menu theme="dark" width="auto" style="overflow: auto;height: calc(100% - 104px);">
+        <template v-if="loading" align="center">
+          <div class="demo-spin-col">
+            <Spin size="large">
+              <div class="loader">
+                <icon type="load-c" size=18 class="demo-spin-icon-load"></icon>
+              </div>
+            </Spin>
+          </div>
+        </template>
         <Menu-item :name="index" v-for="(item, index) in flowz" :key="index">
               <img :src="rethink" class="schema-icon">
               <!-- <img v-else-if="item.iconpath === 'rethink'" :src="rethink" class="schema-icon">
@@ -121,7 +130,8 @@
         rethink,
         elastic,
         nedb,
-        deleteSchemaValue: 'softdel'
+        deleteSchemaValue: 'softdel',
+        loading: true
       }
     },
     created () {
@@ -139,7 +149,7 @@
       //       // console.log('obj', obj)
       //         _.forEach(_settings[obj.database[0]], function(res, i){
       //           var instance = _.find(res, {id: obj.database[1]})
-                  
+
       //             if (instance.upldIcn === '') {
       //               obj.iconpath = obj.database[0]
       //             } else {
@@ -158,10 +168,12 @@
         this.flowzList = _flowz
         if(_flowz.length > 0) {
           console.log('flowz data', _flowz)
+          this.loading = false
           return _.orderBy(_flowz, [checkcase => checkcase.ProcessName.toLowerCase()], [this.orderby])
         } else {
+          this.loading = false
           return []
-        }        
+        }
       },
       stylesPin () {
         let style = {}
@@ -230,7 +242,7 @@
                 .catch(error => {
                   this.$Notice.error({title: 'Error!!', desc:'Schema Not Deleted...'});
                   console.log(error)
-                })  
+                })
             }
             else if(this.deleteSchemaValue == 'harddel') {
               // alert(this.deleteSchemaValue)
@@ -242,7 +254,7 @@
                 .catch(error => {
                   console.log(error)
                 })
-            } 
+            }
             else {
               this.$Message.error('Error!!');
             }
@@ -596,5 +608,17 @@
   }
   .ivu-select-dropdown {
     z-index: 905;
+  }
+  .demo-spin-col{
+    height: auto;
+    margin-top: 10px;
+  }
+  .demo-spin-icon-load{
+    animation: ani-demo-spin 1s linear infinite;
+  }
+  @keyframes ani-demo-spin {
+    from { transform: rotate(0deg);}
+    50%  { transform: rotate(180deg);}
+    to   { transform: rotate(360deg);}
   }
 </style>

@@ -7,7 +7,7 @@
         <div class="schema-form ivu-table-wrapper">
             <div class="ivu-table ivu-table-border">
                 <div class="ivu-table-body"> -->
-                    <Table size="small" :columns="columns10" :data="flowzList"></Table>
+                    <Table size="small" :loading="loading" :columns="columns10" :data="flowzList"></Table>
                     <!-- <table cellspacing="0" cellpadding="0" border="0" style="width: 100%;">
                         <thead>
                             <tr>
@@ -86,6 +86,7 @@ export default {
   components: { expandRow },
   data () {
     return {
+      loading: true,
       flowzList: [],
       columns10: [
         {
@@ -196,6 +197,7 @@ export default {
     flowz.get()
     .then(response => {
       this.flowzList = response.data.data
+      this.loading = false
       // console.log('this.flowzList', this.flowzList)
     })
     .catch(error => {

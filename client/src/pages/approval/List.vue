@@ -7,7 +7,7 @@
     </Row>
     <Row>
       <Col>
-        <Table size="small" :columns="approvalCol" :data="approvalData"></Table>
+        <Table size="small" :loading="loading" :columns="approvalCol" :data="approvalData"></Table>
       </Col>
     </Row>
   </div>
@@ -23,6 +23,7 @@
       components: { expandRowView },
       data () {
         return {
+          loading: true,
           approvalCol: [
               {
                 type: 'expand',
@@ -114,6 +115,7 @@
       methods:{
         getapproval: async function(){
           this.approvalData = await approval.get()
+          this.loading = false
           console.log(this.approvalData)
         },
         addApproval: function(){
