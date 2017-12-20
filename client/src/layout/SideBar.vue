@@ -134,9 +134,6 @@
         loading: true
       }
     },
-    mounted () {
-      setInterval(console.log(this.loading), 100)
-    },
     created () {
       // this.$store.dispatch('getSchema')
       // this.$store.dispatch('getSettings')
