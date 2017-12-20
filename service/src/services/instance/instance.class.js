@@ -126,15 +126,7 @@ var checkFlagforGet = async(function (mObj) {
     // }))  alterTableAndAddField
   return flag
 })
-var checkDataObj = async(function (data, id, res) { <<
-  <<
-  << < HEAD
-  console.log("calling >>>>>>>>>>>>>>>>>>>>>>>>>") ===
-    ===
-    =
-    console.log("calling >>>>>>>>>>>>>>>>>>>>>>>>>>>>>") >>>
-    >>>
-    > issue - grapes - template - rendering
+var checkDataObj = async(function (data, id, res) {
   for (let [dIndex, dObj] of data.entries()) {
     // if(dObj.hasOwnProperty('Schemaid')) {
     //   // console.log('{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{')
