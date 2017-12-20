@@ -21,12 +21,12 @@
            <FormItem>
             <Button type="primary" @click="handleSubmit('formConfig')">Submit</Button>
           </FormItem>
-        </Row>  
+        </Row>
       </Form> -->
       <row type="flex" justify="end">
         <Button type="primary" size="small" style="margin-bottom: 8px;" @click="changeRole()"> Update</Button>
       </row>
-      <Table size="small" :columns="columns10" :data="userList"></Table>
+      <Table size="small" :loading="loading" :columns="columns10" :data="userList"></Table>
     </div>
 </template>
 <script>
@@ -35,6 +35,7 @@ import api from '@/api/user'
 export default {
   data () {
     return {
+      loading: true,
       userList: [],
       columns10: [{
         title: 'User Name',
@@ -122,6 +123,7 @@ export default {
     .then(response => {
       console.log('Response :', response.data.data)
       self.userList = response.data.data
+      self.loading = false
     })
     .catch(error => {
       console.log('Error : ', error)
