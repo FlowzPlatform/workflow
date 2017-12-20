@@ -21,7 +21,7 @@ jobs:
     - stage: Flowz-Frontend-Flowz
       script:
       - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
-      - docker build -t flowz_frontend_flowz:"$DOCKER_IMAGE_TAG" ./client/
+      - docker build -t flowz_frontend_flowz:"$DOCKER_IMAGE_TAG" --build-arg accesskey="$AWS_ACCESSKEY" --build-arg secretkey="$AWS_SECRETKEY" ./client/
       - docker images
       - docker tag flowz_frontend_flowz:"$DOCKER_IMAGE_TAG" $DOCKER_USERNAME/flowz_frontend_flowz:"$DOCKER_IMAGE_TAG"
       - docker push $DOCKER_USERNAME/flowz_frontend_flowz:"$DOCKER_IMAGE_TAG"

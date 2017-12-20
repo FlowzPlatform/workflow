@@ -11,6 +11,15 @@
           <form id="form-google" name="form-google" :action ="loginWithGoogleUrl" method="post">
             <input type="hidden" name="success_url" :value="googleSuccessCallbackUrl">
           </form>
+          <form id="form-twitter" name="form-twitter" :action="loginWithTwitterUrl" method="post">
+            <input type="hidden" name="success_url" :value="twitterSuccessCallbackUrl">
+          </form>
+          <form id="form-linkedin" name="form-linkedin" :action ="loginWithLinkedinUrl" method="post">
+            <input type="hidden" name="success_url" :value="linkedinSuccessCallbackUrl">
+          </form>
+          <form id="form-github" name="form-github" :action ="loginWithGithubUrl" method="post">
+            <input type="hidden" name="success_url" :value="githubSuccessCallbackUrl">
+          </form>
           <Form ref="formLogin" :model="formLogin" :rules="ruleLogin">
             <FormItem class="animate0 bounceIn">
 							<div class="pageheader">
@@ -53,6 +62,24 @@
                       <i class="fa fa-google fa-stack-1x"></i>
                     </span>
                   </Tooltip>
+                  <Tooltip content="Twitter">
+                    <span @click="handleTwitter" class="fa-stack fa-lg animated fadeInRight social-icon" style="-webkit-animation-delay: 2.5s;animation-delay: 2.5s;-moz-animation-delay: 2.5s;">
+                      <i class="fa fa-square-o fa-stack-2x"></i>
+                      <i class="fa fa-twitter fa-stack-1x"></i>
+                    </span>
+                  </Tooltip>
+                  <Tooltip content="Github">
+                    <span @click="handleGithub" class="fa-stack fa-lg animated fadeInRight social-icon" style="-webkit-animation-delay: 3s;animation-delay: 3s;-moz-animation-delay: 3s;">
+                      <i class="fa fa-square-o fa-stack-2x"></i>
+                      <i class="fa fa-github fa-stack-1x"></i>
+                    </span>
+                  </Tooltip>
+                  <Tooltip content="Linkedin">
+                    <span @click="handleLinkedin" class="fa-stack fa-lg animated fadeInRight social-icon" style="-webkit-animation-delay: 3.5s;animation-delay: 3.5s;-moz-animation-delay: 3.5s;">
+                      <i class="fa fa-square-o fa-stack-2x"></i>
+                      <i class="fa fa-linkedin fa-stack-1x"></i>
+                    </span>
+                  </Tooltip>
 								</Col>
 								<Col  style="float:right;">
 									Not a member?&nbsp;
@@ -71,7 +98,7 @@
     <div class="loginfooter">
         <p>© 2017. Flowz technology. All Rights Reserved.</p>
     </div>
-    
+
   </div>
 </template>
 
@@ -103,7 +130,13 @@ export default {
       facebookSuccessCallbackUrl : config.facebookSuccessCallbackUrl,
       googleSuccessCallbackUrl : config.googleSuccessCallbackUrl,
       loginWithFacebookUrl : config.loginWithFacebookUrl,
-      loginWithGoogleUrl : config.loginWithGoogleUrl
+      loginWithGoogleUrl : config.loginWithGoogleUrl,
+      twitterSuccessCallbackUrl : config.twitterSuccessCallbackUrl,
+      loginWithTwitterUrl : config.loginWithTwitterUrl,
+      linkedinSuccessCallbackUrl : config.linkedinSuccessCallbackUrl,
+      loginWithLinkedinUrl : config.loginWithLinkedinUrl,
+      githubSuccessCallbackUrl : config.githubSuccessCallbackUrl,
+      loginWithGithubUrl : config.loginWithGithubUrl
     }
   },
   methods: {
@@ -137,6 +170,15 @@ export default {
     handleGoogle () {
       console.log('connect google')
       document.getElementById('form-google').submit()
+    },
+    handleTwitter () {
+      document.getElementById('form-twitter').submit()
+    },
+    handleLinkedin () {
+      document.getElementById('form-linkedin').submit()
+    },
+    handleGithub () {
+      document.getElementById('form-github').submit()
     }
   }
 }
@@ -165,7 +207,7 @@ export default {
     background: none;
     border-bottom: 1px solid rgba(255,255,255,0.1);
     padding: 0 0 25px 0;
-  } 
+  }
   .loginpage .pageicon {
       width: 70px;
       font-size: 42px;
@@ -203,7 +245,7 @@ export default {
 		color: #ddd;
 		margin-top: -21px;
 	}
-	.loginpage .redirectlink a { 
+	.loginpage .redirectlink a {
 		color: #fff;
 	}
   .animate0 {
@@ -222,8 +264,8 @@ export default {
 	animation-duration: .8s;
 	animation-delay: 0s;
 	animation-timing-function: ease;
-	animation-fill-mode: both;	          
-}         
+	animation-fill-mode: both;
+}
 
 .animate1{
    	-webkit-animation-duration: .8s;
@@ -241,8 +283,8 @@ export default {
 	animation-duration: .8s;
 	animation-delay: .2s;
 	animation-timing-function: ease;
-	animation-fill-mode: both;	          
-} 
+	animation-fill-mode: both;
+}
 
 .animate2{
    	-webkit-animation-duration: .8s;
@@ -260,8 +302,8 @@ export default {
 	animation-duration: .8s;
 	animation-delay: .4s;
 	animation-timing-function: ease;
-	animation-fill-mode: both;	          
-} 
+	animation-fill-mode: both;
+}
 
 .animate3{
    	-webkit-animation-duration: .8s;
@@ -279,8 +321,8 @@ export default {
 	animation-duration: .8s;
 	animation-delay: .6s;
 	animation-timing-function: ease;
-	animation-fill-mode: both;	          
-}   
+	animation-fill-mode: both;
+}
 
 .animate4{
    	-webkit-animation-duration: .8s;
@@ -298,7 +340,7 @@ export default {
 	animation-duration: .8s;
 	animation-delay: .8s;
 	animation-timing-function: ease;
-	animation-fill-mode: both;	          
+	animation-fill-mode: both;
 }
 #particles-js {
   position: fixed;

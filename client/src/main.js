@@ -16,12 +16,12 @@ const hooks = require('feathers-hooks')
   // const authentication = require('feathers-authentication/client')
 const socketio = require('feathers-socketio/client')
 const io = require('socket.io-client')
-let socket
-if (process.env.NODE_ENV !== 'development') {
-  socket = io(config.serverURI, {path: '/eng/socket.io'})
-} else {
-  socket = io(config.serverURI)
-}
+let socket = io(config.socketURI)
+  // if (process.env.NODE_ENV !== 'development') {
+  //   socket = io(config.serverURI, {path: '/eng/socket.io'})
+  // } else {
+  //   socket = io(config.serverURI)
+  // }
 const feathers = Feathers()
   .configure(socketio(socket))
   .configure(hooks())
@@ -136,7 +136,7 @@ router.beforeEach((to, from, next) => {
                 if (to.matched.find(record => record.meta.role).meta.role.indexOf(parseInt(user.role)) === -1) {
                   next({
                     path: '/login'
-                      // query: { redirect: to.fullPath }
+                    // query: { redirect: to.fullPath }
                   })
                   // next()
                 } else {
@@ -167,8 +167,8 @@ router.beforeEach((to, from, next) => {
         }
       }).catch(error => {
         console.log(error.message)
-        // window.console.log('Not authenticated')
-        router.app.$cookie.delete('auth_token', {domain: location})
+          // window.console.log('Not authenticated')
+        router.app.$cookie.delete('auth_token', { domain: location })
         store.commit('SET_TOKEN', null)
         store.commit('SET_USER', null)
         store.commit('SET_ROLE', null)

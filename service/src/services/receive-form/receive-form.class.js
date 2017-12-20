@@ -53,72 +53,72 @@ class Service {
 var findFunction = async function () {
   let result
   await r.table(tName)
-  .run()
-  .then(async function(response){
-    console.log(response);
-    result = await response
-  })
-  .error(function(err){
-    console.log(err);
-  })
+    .run()
+    .then(async function (response) {
+      console.log(response);
+      result = await response
+    })
+    .error(function (err) {
+      console.log(err);
+    })
   return result
 }
 
 var getFunction = async function (id) {
   let result
   await r.table(tName)
-  .get(id)
-  .run()
-  .then(async function(response){
-    console.log(response);
-    result = await response
-  })
-  .error(function(err){
-    console.log(err);
-  })
+    .get(id)
+    .run()
+    .then(async function (response) {
+      console.log(response);
+      result = await response
+    })
+    .error(function (err) {
+      console.log(err);
+    })
   return result
 }
 
 var createFunction = async function (data) {
   r.table(tName)
-  .insert(data)
-  .run()
-  .then(function(response){
-    console.log('Success ',response);
-  })
-  .error(function(err){
-    console.log('error occurred ',err);
-  })
+    .insert(data)
+    .run()
+    .then(function (response) {
+      console.log('Success ', response);
+    })
+    .error(function (err) {
+      console.log('error occurred ', err);
+    })
   return data
 }
 
 var updateFunction = async function (id, data) {
-  
+
   return id
 }
 
 var patchFunction = async function (id, data) {
-  
+
   return id
 }
 
 var removeFunction = async function (id) {
   let result
   await r.table(tName)
-  .get(id)
-  .delete()
-  .run()
-  .then(async function(response){
-    console.log(response);
-    result = await response
-  })
-  .error(function(err){
-    console.log(err);
-  })
+    .get(id)
+    .delete()
+    .run()
+    .then(async function (response) {
+      console.log(response);
+      result = await response
+    })
+    .error(function (err) {
+      console.log(err);
+    })
   return result
 }
 
-module.exports = function(options) {
+module.exports = function (options) {
   return new Service(options);
 };
 module.exports.Service = Service;

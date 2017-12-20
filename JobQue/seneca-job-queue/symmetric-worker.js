@@ -16,14 +16,14 @@ const maxWorker = config.maxWorker
 const PINO = config.pino
 const r = require('rethinkdb')
 let wCount = 1
-let registeredJobTypeQueueObj = {}     // register job type queue object
+let registeredJobTypeQueueObj = {} // register job type queue object
 let deadQueueObj = {}
 var connected = false
 
 checkTableExistsOrNot(symmetricWorker.table)
   .then(res => {
     pino(PINO).info(res)
-    connected=true
+    connected = true
   })
 
 app.use(cors())
@@ -35,7 +35,7 @@ socketObj.on('connection', function (socket) {
 
 server.listen(symmetricWorker.port)
 
-function checkTableExistsOrNot (table) {
+function checkTableExistsOrNot(table) {
   return new Promise((resolve, reject) => {
     rdash.tableList().run().then(function (tableNames) {
       if (_.includes(tableNames, table)) {
@@ -48,33 +48,33 @@ function checkTableExistsOrNot (table) {
   })
 }
 
-function deleteDataJobType (table, jobType) {
-  return new Promise(async (resolve, reject) => {
+function deleteDataJobType(table, jobType) {
+  return new Promise(async(resolve, reject) => {
     await rdash.table(table)
-    .filter(rdash.row('jobType').eq(jobType))
-    .delete()
-    .run()
-    .then(function (result) {
-      resolve(null)
-    })
-    .error(function (err) {
-      reject(null)
-    })
+      .filter(rdash.row('jobType').eq(jobType))
+      .delete()
+      .run()
+      .then(function (result) {
+        resolve(null)
+      })
+      .error(function (err) {
+        reject(null)
+      })
   })
 }
 
-function generateQueueObjectByJobTypeWithOutSave (jobDetails) {
+function generateQueueObjectByJobTypeWithOutSave(jobDetails) {
   return new Promise((resolve, reject) => {
     let jobType = jobDetails.jobType
     let options = jobDetails.options
-    //let key = jobDetails.jobKey
-    let key = options.connection.host+':'+options.connection.port+':'+options.connection.db+':'+jobType
+      //let key = jobDetails.jobKey
+    let key = options.connection.host + ':' + options.connection.port + ':' + options.connection.db + ':' + jobType
     if (registeredJobTypeQueueObj[key]) {
       resolve('JobType registered successfully')
     } else {
       common.getJobQueue(options).then(result => {
         try {
-          registeredJobTypeQueueObj[key] = {'qObj': result.q, 'options': options, 'jobType': jobType}
+          registeredJobTypeQueueObj[key] = { 'qObj': result.q, 'options': options, 'jobType': jobType }
           resolve('JobType registered successfully')
         } catch (e) {
           reject(e)
@@ -84,9 +84,8 @@ function generateQueueObjectByJobTypeWithOutSave (jobDetails) {
   })
 }
 
-function generateQueueObjectByJobTypeWithSaveToDB (jobType, options) {
+function generateQueueObjectByJobTypeWithSaveToDB(jobType, options) {
   return new Promise((resolve, reject) => {
-
     let connection = options.connection
     let key = connection.host+':'+connection.port+':'+connection.db+':'+jobType
     if (registeredJobTypeQueueObj[key]) {
@@ -100,7 +99,7 @@ function generateQueueObjectByJobTypeWithSaveToDB (jobType, options) {
             jobKey: key
           }
           await saveToRethinkDB(symmetricWorker.table, registeredJobType)
-          registeredJobTypeQueueObj[key] = {'qObj': result.q, 'options': options, 'jobType': jobType}
+          registeredJobTypeQueueObj[key] = { 'qObj': result.q, 'options': options, 'jobType': jobType }
           resolve('JobType successfully registered')
         } catch (e) {
           reject(e)
@@ -110,26 +109,26 @@ function generateQueueObjectByJobTypeWithSaveToDB (jobType, options) {
   })
 }
 
-function getAllJobType (table) {
-  return new Promise(async (resolve, reject) => {
+function getAllJobType(table) {
+  return new Promise(async(resolve, reject) => {
     await rdash.table(table)
-    .run()
-    .then(function (result) {
-      resolve(result)
-    })
-    .error(function (err) {
-      reject(err)
-    })
+      .run()
+      .then(function (result) {
+        resolve(result)
+      })
+      .error(function (err) {
+        reject(err)
+      })
   })
 }
 
-async function getCount (cOptions, jobType) {
-  return new Promise ((resolve, reject)=>{
+async function getCount(cOptions, jobType) {
+  return new Promise((resolve, reject) => {
     r.connect(cOptions, function (err, conn) {
       if (err) {
         resolve(0)
       } else {
-        r.table(jobType).filter((r.row('status').eq('waiting')).and(r.row('dateEnable').gt(r.now()))).count().run(conn, function(err, result) {
+        r.table(jobType).filter((r.row('status').eq('waiting')).and(r.row('dateEnable').gt(r.now()))).count().run(conn, function (err, result) {
           if (err) resolve(0)
           resolve(result)
         })
@@ -138,25 +137,25 @@ async function getCount (cOptions, jobType) {
   })
 }
 
-function getDataJobType (table, jobType) {
-  return new Promise(async (resolve, reject) => {
+function getDataJobType(table, jobType) {
+  return new Promise(async(resolve, reject) => {
     await rdash.table(table)
-    .filter(rdash.row('jobType').eq(jobType))
-    .run()
-    .then(function (result) {
-      if (result.length > 0) {
-        resolve(result[0])
-      } else {
-        resolve(result)
-      }
-    })
-    .error(function (err) {
-      reject(err)
-    })
+      .filter(rdash.row('jobType').eq(jobType))
+      .run()
+      .then(function (result) {
+        if (result.length > 0) {
+          resolve(result[0])
+        } else {
+          resolve(result)
+        }
+      })
+      .error(function (err) {
+        reject(err)
+      })
   })
 }
 
-async function getSummary () {
+async function getSummary() {
   try {
     for (let jKey in registeredJobTypeQueueObj) {
       let cOptions = registeredJobTypeQueueObj[jKey].options.connection
@@ -168,19 +167,19 @@ async function getSummary () {
 
         let concurrency = objQ.concurrency
         let summary = await objQ.summary()
-        pino(PINO).info('\n' + 'job-type : ' + jobType  + ' | host : ' + cOptions.host + ' | port : ' + cOptions.port + ' | db : ' + cOptions.db + '\n\x1b[33m' + JSON.stringify(summary) + '\x1b[0m' + '\n')
+        pino(PINO).info('\n' + 'job-type : ' + jobType + ' | host : ' + cOptions.host + ' | port : ' + cOptions.port + ' | db : ' + cOptions.db + '\n\x1b[33m' + JSON.stringify(summary) + '\x1b[0m' + '\n')
 
         let sWaiting = await getCount(cOptions, jobType)
-        // let sCreated = summary.created ? summary.created : 0
-        // let sIR = summary.inputRequired ? summary.inputRequired : 0
-        // let sMR = summary.mappingRequired ? summary.mappingRequired : 0
-        // let denominator = (summary.total - (summary.active + summary.completed + summary.cancelled + summary.failed + summary.terminated + sCreated + sIR + sMR))
-        // let waitingRatio = denominator != 0 ? (summary.waiting - sWaiting) / denominator : 0
-        // pino(PINO).warn('waiting-ratio : '+waitingRatio)
+          // let sCreated = summary.created ? summary.created : 0
+          // let sIR = summary.inputRequired ? summary.inputRequired : 0
+          // let sMR = summary.mappingRequired ? summary.mappingRequired : 0
+          // let denominator = (summary.total - (summary.active + summary.completed + summary.cancelled + summary.failed + summary.terminated + sCreated + sIR + sMR))
+          // let waitingRatio = denominator != 0 ? (summary.waiting - sWaiting) / denominator : 0
+          // pino(PINO).warn('waiting-ratio : '+waitingRatio)
         let waitingJobs = summary.waiting - sWaiting
         if (waitingJobs >= 1) {
           pino(PINO).info(jobType + " worker required")
-          socketObj.emit('worker', {'jobType': jobType, 'options': registeredJobTypeQueueObj[jKey].options})
+          socketObj.emit('worker', { 'jobType': jobType, 'options': registeredJobTypeQueueObj[jKey].options })
         }
       } catch (err) {
         deadQueueObj[jKey] = registeredJobTypeQueueObj[jKey]
@@ -194,7 +193,7 @@ async function getSummary () {
   setTimeout(() => { getSummary() }, 10000)
 }
 
-async function saveToRethinkDB (table, data) {
+async function saveToRethinkDB(table, data) {
   return new Promise(async(resolve, reject) => {
     let result = await getDataJobType(table, data.jobType)
     let messageData = data
@@ -202,21 +201,21 @@ async function saveToRethinkDB (table, data) {
     if (result.id === undefined) {
       saveData = rdash.table(table).insert(messageData)
     } else {
-      saveData = rdash.table(table).filter({id: result.id}).update(messageData)
+      saveData = rdash.table(table).filter({ id: result.id }).update(messageData)
     }
     saveData.run()
-    .then(function (result) {
-      pino(PINO).info('data inserted')
-      resolve(result)
-    })
-    .error(function (err) {
-      reject(err)
-    })
+      .then(function (result) {
+        pino(PINO).info('data inserted')
+        resolve(result)
+      })
+      .error(function (err) {
+        reject(err)
+      })
   })
 }
 
-async function startAllRegisteredJobType () {
-  if(!connected) {
+async function startAllRegisteredJobType() {
+  if (!connected) {
     setTimeout(() => { startAllRegisteredJobType() }, 1000)
   } else {
     let jobTypes = await getAllJobType(symmetricWorker.table)
@@ -237,7 +236,7 @@ app.put('/register-jobtype/:jobtype', async function (req, res) {
       if (cOption.authKey) delete cOption.authKey
       if (cOption.ssl) delete cOption.ssl
     }
-    let newConnection = _.extend({'connection':cOption},{'queue': {'name': req.params.jobtype}})
+    let newConnection = _.extend({ 'connection': cOption }, { 'queue': { 'name': req.params.jobtype } })
     generateQueueObjectByJobTypeWithSaveToDB(req.params.jobtype, newConnection)
       .then(result => { res.send(result) })
       .catch(err => { res.send(err) })
@@ -264,7 +263,7 @@ app.delete('/register-jobtype/:jobtype', async function (req, res) {
 
 app.post('/register-jobtype/:jobtype', async function (req, res) {
   try {
-    let newConnection = _.extend({connection: defaultConnection}, {
+    let newConnection = _.extend({ connection: defaultConnection }, {
       connection: req.body.connection
     })
     generateQueueObjectByJobTypeWithSaveToDB(req.param.jobtype, newConnection)

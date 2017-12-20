@@ -1,4 +1,9 @@
-FROM ubuntu:16.04
+FROM whiledo/letsencrypt-apache-ubuntu
+
+ARG accesskey
+ARG secretkey
+
+#FROM ubuntu:16.04
 
 # install dependencies
 RUN apt-get update \
@@ -36,4 +41,4 @@ RUN service apache2 restart
 
 
 # Ports
-EXPOSE 80
+EXPOSE 80 443

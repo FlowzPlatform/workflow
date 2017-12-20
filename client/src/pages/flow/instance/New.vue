@@ -330,7 +330,7 @@ export default {
       }
     },
     getCurrentStatus (log) {
-      return (log.length > 0) ? _.head(log).status : ''
+      return (log && log.length > 0) ? _.head(log).status : ''
     },
     getLastLog (logs) {
       return _.head(logs)
