@@ -192,7 +192,7 @@ export default {
             // self.process = await _.find(response.data.processList, ['id', self.$route.params.pid])
             _.forEach(self.process.target, function (item) {
               lastLogIndex = _.findIndex(response.data.process_log, self.getLastLog(item.jobid))
-              response.data.process_log[lastLogIndex].status = 'inputRequired'
+              // response.data.process_log[lastLogIndex].status = 'inputRequired'
               _.forEach(response.data.process_log[lastLogIndex].input, function (inputs) {
                 if (inputs.Email === self.$route.params.mailid) {
                   inputs.Approved = action

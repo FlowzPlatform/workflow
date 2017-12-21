@@ -7,8 +7,8 @@
 </template>
 
 <script>
-import Instance from '../api/instance'
-import Schema from '../api/schema'
+import Instance from '@/api/instance'
+import Schema from '@/api/schema'
 import _ from 'lodash'
 import $ from 'jquery'
 
