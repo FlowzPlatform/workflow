@@ -8,36 +8,46 @@ services:
 branches:
   only:
   - master
+  - demo
 
 jobs:
   include:
     - stage: Seneca-Jobqueue-Flowz
       script:
       - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
-      - docker build -t seneca_jobqueue_flowz:"$DOCKER_IMAGE_TAG" ./JobQue/
+      - docker build -t seneca_jobqueue_flowz:$TRAVIS_BRANCH ./JobQue/
       - docker images
-      - docker tag seneca_jobqueue_flowz:"$DOCKER_IMAGE_TAG" $DOCKER_USERNAME/seneca_jobqueue_flowz:"$DOCKER_IMAGE_TAG"
-      - docker push $DOCKER_USERNAME/seneca_jobqueue_flowz:"$DOCKER_IMAGE_TAG"
+      - docker tag seneca_jobqueue_flowz:$TRAVIS_BRANCH $DOCKER_USERNAME/seneca_jobqueue_flowz:$TRAVIS_BRANCH
+      - docker push $DOCKER_USERNAME/seneca_jobqueue_flowz:$TRAVIS_BRANCH
     - stage: Flowz-Frontend-Flowz
       script:
       - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
-      - docker build -t flowz_frontend_flowz:"$DOCKER_IMAGE_TAG" --build-arg accesskey="$AWS_ACCESSKEY" --build-arg secretkey="$AWS_SECRETKEY" ./client/
+      - docker build -t flowz_frontend_flowz:$TRAVIS_BRANCH --build-arg accesskey="$AWS_ACCESSKEY" --build-arg secretkey="$AWS_SECRETKEY" ./client/
       - docker images
-      - docker tag flowz_frontend_flowz:"$DOCKER_IMAGE_TAG" $DOCKER_USERNAME/flowz_frontend_flowz:"$DOCKER_IMAGE_TAG"
-      - docker push $DOCKER_USERNAME/flowz_frontend_flowz:"$DOCKER_IMAGE_TAG"
+      - docker tag flowz_frontend_flowz:$TRAVIS_BRANCH $DOCKER_USERNAME/flowz_frontend_flowz:$TRAVIS_BRANCH
+      - docker push $DOCKER_USERNAME/flowz_frontend_flowz:$TRAVIS_BRANCH
     - stage: Flowz-Backend-Flowz
       script:
       - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
-      - docker build -t flowz_backend_flowz:"$DOCKER_IMAGE_TAG" ./service/
+      - docker build -t flowz_backend_flowz:$TRAVIS_BRANCH ./service/
       - docker images
-      - docker tag flowz_backend_flowz:"$DOCKER_IMAGE_TAG" $DOCKER_USERNAME/flowz_backend_flowz:"$DOCKER_IMAGE_TAG"
-      - docker push $DOCKER_USERNAME/flowz_backend_flowz:"$DOCKER_IMAGE_TAG"
+      - docker tag flowz_backend_flowz:$TRAVIS_BRANCH $DOCKER_USERNAME/flowz_backend_flowz:$TRAVIS_BRANCH
+      - docker push $DOCKER_USERNAME/flowz_backend_flowz:$TRAVIS_BRANCH
     - stage: Upgrade Rancher Service
       script:
-      - bash ./upgrade.sh
+      - 'if [ ${TRAVIS_BRANCH} = "demo" ]; then
+            bash ./upgrade_demo.sh;
+         else
+            bash ./upgrade.sh;
+         fi'
+
     - stage: Finish Rancher Service
       script:
-      - bash ./finish.sh
+      - 'if [ ${TRAVIS_BRANCH} = "demo" ]; then
+            bash ./finish_demo.sh;
+         else
+            bash ./finish.sh;
+         fi'
 
 notifications:
   email:
@@ -48,4 +58,4 @@ notifications:
       - naveeng@officebrain.com
       - rbajaniya@officebrain.com
     on_success: always
-    on_failure: always
+    on_failure: always         
