@@ -14,11 +14,15 @@ jobs:
   include:
     - stage: Seneca-Jobqueue-Flowz
       script:
-      - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
-      - docker build -t seneca_jobqueue_flowz:$TRAVIS_BRANCH ./JobQue/
-      - docker images
-      - docker tag seneca_jobqueue_flowz:$TRAVIS_BRANCH $DOCKER_USERNAME/seneca_jobqueue_flowz:$TRAVIS_BRANCH
-      - docker push $DOCKER_USERNAME/seneca_jobqueue_flowz:$TRAVIS_BRANCH
+      - 'if [ ${TRAVIS_BRANCH} = "demo" ]; then
+            echo "not build seneca_jobqueue_flowz image";
+        else
+            docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+            docker build -t seneca_jobqueue_flowz:$TRAVIS_BRANCH ./JobQue/;
+            docker images;
+            docker tag seneca_jobqueue_flowz:$TRAVIS_BRANCH $DOCKER_USERNAME/seneca_jobqueue_flowz:$TRAVIS_BRANCH;
+            docker push $DOCKER_USERNAME/seneca_jobqueue_flowz:$TRAVIS_BRANCH;
+        fi'
     - stage: Flowz-Frontend-Flowz
       script:
       - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
@@ -28,11 +32,15 @@ jobs:
       - docker push $DOCKER_USERNAME/flowz_frontend_flowz:$TRAVIS_BRANCH
     - stage: Flowz-Backend-Flowz
       script:
-      - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
-      - docker build -t flowz_backend_flowz:$TRAVIS_BRANCH ./service/
-      - docker images
-      - docker tag flowz_backend_flowz:$TRAVIS_BRANCH $DOCKER_USERNAME/flowz_backend_flowz:$TRAVIS_BRANCH
-      - docker push $DOCKER_USERNAME/flowz_backend_flowz:$TRAVIS_BRANCH
+      - 'if [ ${TRAVIS_BRANCH} = "demo" ]; then
+            echo "not build flowz_backend_flowz image";
+        else
+            docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+            docker build -t flowz_backend_flowz:$TRAVIS_BRANCH ./service/;
+            docker images;
+            docker tag flowz_backend_flowz:$TRAVIS_BRANCH $DOCKER_USERNAME/flowz_backend_flowz:$TRAVIS_BRANCH;
+            docker push $DOCKER_USERNAME/flowz_backend_flowz:$TRAVIS_BRANCH;
+        fi'
     - stage: Upgrade Rancher Service
       script:
       - 'if [ ${TRAVIS_BRANCH} = "demo" ]; then
@@ -58,4 +66,4 @@ notifications:
       - naveeng@officebrain.com
       - rbajaniya@officebrain.com
     on_success: always
-    on_failure: always         
+    on_failure: always
