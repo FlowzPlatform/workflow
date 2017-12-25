@@ -157,7 +157,7 @@
         var _flowz = this.$store.getters.flowzData
         this.flowzList = _flowz
         if(_flowz.length > 0) {
-          console.log('flowz data', _flowz)
+          // console.log('flowz data', _flowz)
           return _.orderBy(_flowz, [checkcase => checkcase.ProcessName.toLowerCase()], [this.orderby])
         } else {
           return []

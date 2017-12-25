@@ -102,6 +102,7 @@
             <FormItem>
                 <Button type="primary" @click="saveMapping('formMapping')">Save</Button>
                 <Button type="ghost" @click="resetForm">Reset</Button>
+                <Button type="ghost" icon="chevron-left" @click="back()">Back</Button>
             </FormItem>
           </Row>
         </Form>
@@ -170,7 +171,7 @@ export default {
     }
   },
   async mounted () {
-    console.log('Calling..1', this.formMapping.MapData)
+    // console.log('Calling..1', this.formMapping.MapData)
     let schemaId = (this.$route.params.id !== '') ? this.$route.params.id : this.$route.params.mappingid
     let fetchData = await this.fetch(schemaId)
     console.log('fetchData', fetchData)
@@ -197,9 +198,12 @@ export default {
       //   this.formMapping.MapData = MapDataArray
       // }
     }
-    console.log('Calling..2', this.formMapping.MapData)
+    // console.log('Calling..2', this.formMapping.MapData)
   },
   methods: {
+    back () {
+      this.$router.go(-1)
+    },
     saveTostore (nPath) {
       // alert('saveTostore')
       var self = this
@@ -224,7 +228,7 @@ export default {
       // setTimeout(function () {
         // alert('Routee')
         // self.$router.push('/schema-mapping/' + nPath + '/new')
-      window.location.href = '/schema-mapping/' + nPath + '/new'
+      window.location.href = '/admin/schema/' + nPath + '/mapping/new'
       // }, 10000)
     },
     openTrasformEditor (index) {

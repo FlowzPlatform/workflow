@@ -156,7 +156,7 @@ export default {
           		this.data5.splice(index, 1)
     		      this.$Notice.success({
     		          title: 'Success',
-    		          desc: 'SchemaInstance Deleted.....',
+    		          desc: 'SchemaInstance Deleted...!',
     		          duration: 2
     		      })
             })
@@ -164,7 +164,7 @@ export default {
               console.log(error)
               this.$Notice.error({
     		          title: 'Error',
-    		          desc: 'SchemaInstance Not Deleted.....',
+    		          desc: 'SchemaInstance Not Deleted...!',
     		          duration: 2
     		      })
             })

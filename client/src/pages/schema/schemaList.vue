@@ -47,8 +47,6 @@
                   },
                   on: {
                     click: () => {
-                      console.log(params.index)
-                      console.log(this.schemaName[params.index])
                       this.$router.push('schema/edit/' + this.schemaName[params.index]._id)
                     }
                   }
@@ -67,8 +65,6 @@
                   },
                   on: {
                     click: () => {
-                      console.log(params.index)
-                      console.log(this.schemaName[params.index])
                       this.$router.push('schema/' + this.schemaName[params.index]._id + '/mapping')
                     }
                   }
@@ -87,6 +83,7 @@
                   },
                   on: {
                     click: () => {
+                      console.log('removed')
                       this.handleRemove(params.index)
                     }
                   }
@@ -183,14 +180,13 @@
     },
     mounted () {
       schema.get().then(response => {
-        console.log(response.data)
         this.schemaName = _.reject(response.data, { 'isdeleted': true })
         // this.schemaData = _.map(this.schemaName, m => {
         //   return {
         //     title: m.title
         //   }
         // })
-        this.schemaData = response.data
+        this.schemaData = this.schemaName
       })
     }
   }

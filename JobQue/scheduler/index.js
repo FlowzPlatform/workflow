@@ -58,7 +58,7 @@ module.exports = function (options) {
 
       const fId = job.data.fId
       const flowInstance = await func.getFlowInstance(fId) //get flow instance from db
-
+      // pino(PINO_C_OPTION).info(job.data)
       if (job.data.processNotification) {
         //the condition will be satisfied if the job is created by some process worker as a part
         //of notifying schcduler that the process completed succesfully a that particular worker
