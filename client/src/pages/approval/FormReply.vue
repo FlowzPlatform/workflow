@@ -74,7 +74,6 @@ export default {
         data.push(item)
       })
       self.customSchema = customSchema
-      console.log('customSchema', customSchema)
       document.getElementById('filecontainer').contentWindow.postMessage({entity: array, formData: data}, '*')
     },
     async getCustom (id, flag) {
@@ -293,11 +292,12 @@ export default {
       if (_.isArray(event.data)) {
         // checkCustom = await _.find(self.entitySchema.entity, ['customtype', true])
         for (let j = 0; j < event.data.length; j++) {
-          console.log('event.data', event.data)
+          // console.log('event.data', event.data)
           // checkCustom !== undefined ? validated = await self.getValidate(event.data[j], true) : validated = await self.getValidate(event.data[j], false)
 
           // temp.Schemaid = self.entitySchema.id
           temp.type = 'ReceiveForm'
+          console.log('event[j] ', event.data[j])
           finalInputs.push(event.data[j])
           temp = {}
         }

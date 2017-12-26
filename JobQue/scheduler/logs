@@ -1,1 +1,1 @@
-{"level":30,"time":1514198123980,"msg":"End Process","pid":23670,"hostname":"OBLAP-51","fId":"1d6670ae-76e3-476f-866a-76a66a3cb6ef","jobId":"EndEvent_1j1ltxc","v":1}
+{"level":30,"time":1514290287325,"msg":"next job","pid":882,"hostname":"OBLAP-51","fId":"1ea8cf39-3f13-4262-b5d6-a09fedc5bc87","job":"StartEvent_1","jobId":"11ee8646-7b76-4ed6-a10a-0dd9639b4ea9","v":1}

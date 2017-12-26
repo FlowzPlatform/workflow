@@ -414,7 +414,8 @@ export default {
           }
           if (actionResponse.status === 'success') {
             this.$Notice.success({duration: 3, title: 'Success!!', desc: actionResponse.message})
-            this.$router.push('/schema/' + this.$route.params.id + '/mapping/')
+            this.$router.go(-1)
+            // this.$router.push('/schema/' + this.$route.params.id + '/mapping/')
           } else {
             this.$Notice.error({duration: 3, title: 'Error!!', desc: actionResponse.message})
           }
