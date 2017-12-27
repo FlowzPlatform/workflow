@@ -5,7 +5,7 @@
       <Button type="primary" size="small" style="margin-bottom: 2px;" icon="plus">Add</Button>
     </router-link>
   </row>
-    <Table size="small" :columns="schemaCol" :data="schemaData"></Table>
+    <Table size="small" :loading="loading" :columns="schemaCol" :data="schemaData"></Table>
   </div>
 </template>
 <script type="text/javascript">
@@ -15,6 +15,7 @@
   export default {
     data () {
       return {
+        loading: true,
         schemaName: [],
         schemaData: [],
         deleteSchemaValue: 'softdel',
@@ -186,7 +187,8 @@
         //     title: m.title
         //   }
         // })
-        this.schemaData = this.schemaName
+        this.schemaData = response.data
+        this.loading = false
       })
     }
   }

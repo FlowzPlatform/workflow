@@ -5,16 +5,16 @@
     </router-link> -->
       <Tabs  v-model="tabPane">
         <TabPane label="Mongo DB" name="mongo">
-            <Table size="small" :columns="mongoCol" :data="mongoDt"></Table>
+            <Table size="small" :loading="loading" :columns="mongoCol" :data="mongoDt"></Table>
         </TabPane>
         <TabPane label="Rethink DB" name="rethink">
-            <Table size="small" :columns="rethinkCol" :data="rethinkDt"></Table>
+            <Table size="small" :loading="loading" :columns="rethinkCol" :data="rethinkDt"></Table>
         </TabPane>
         <TabPane label="Elastic Search" name="elastic">
-            <Table size="small" :columns="esCol" :data="elasticDt"></Table>
+            <Table size="small" :loading="loading" :columns="esCol" :data="elasticDt"></Table>
         </TabPane>
         <TabPane label="Ne DB" name="nedb">
-            <Table size="small" :columns="neCol" :data="nedbDt"></Table>
+            <Table size="small" :loading="loading" :columns="neCol" :data="nedbDt"></Table>
         </TabPane>
         <Button type="primary" icon="plus" @click="addSettings" size="small" slot="extra">Add</Button>
       </Tabs>
@@ -26,6 +26,7 @@ import _ from 'lodash'
 export default {
   data () {
     return {
+      loading: true,
       tabPane: 'mongo',
       row: '',
       mongoCol: [{
@@ -457,6 +458,7 @@ export default {
     .then(response => {
       _.forEach(response.data, (instances, db) => {
         self[db + 'Dt'] = response.data[db].dbinstance
+        self.loading = false
       })
     })
     .catch(error => {
