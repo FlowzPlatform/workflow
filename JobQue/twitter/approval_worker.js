@@ -81,7 +81,6 @@ q.process(async(job, next) => {
           "subject": "From " + rolesEmail[j],
           "body": emailTemplateHtml.html + '<br><button><a href="' + submitLink + '" style="text-decoration:none; color:#000">Submit</a></button>'
         }
-        console.log(myData)
         await axios({
             method: 'post',
             url: app.login,

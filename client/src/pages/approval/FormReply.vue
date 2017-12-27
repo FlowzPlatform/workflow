@@ -1,291 +1,309 @@
 <template>
-<div>
-    <iframe id="filecontainer" allowtransparency="true" frameborder="0" :src="URL + this.$route.params.fiid + '&&pid=' + this.$route.params.pid + ''"></iframe>
+<div style="background:#eee;padding: 20px">
+  <Card :bordered="false">
+    <p slot="title">Make Request</p>
+    <p slot="extra" v-show="notes">Notes : {{ notes }}</p>
+    <iframe id="filecontainer" allowtransparency="true" frameborder="0" @load="iframeload()" :src="html"></iframe>
+    <!--  + this.$route.params.fiid + '&&pid=' + this.$route.params.pid + '' -->
+    <ul class="error">
+      <li v-for="item in err">{{item}}</li>
+    </ul>
+  </Card>
 </div>
 </template>
 <script>
-import flowInstance from '../../api/flowzinstance'
-// import config from '../../config'
+import flowInstance from '@/api/flowzinstance'
 import _ from 'lodash'
-import axios from 'axios'
-// import $ from 'jquery'
+import Schema from '@/api/schema'
+import ReceiveForm from '@/api/receiveform'
+import $ from 'jquery'
 
 export default {
   data () {
     return {
       Aloading: false,
-      Rloading: false,
-      htmlUrl: '',
       notes: '',
       input: [],
-      flowInstanceLog: [],
-      createTemplateHtml: '',
+      selectedProcess: {},
+      entitySchema: [],
+      customSchema: [],
       URL: '',
-      process: '',
-      err: []
+      err: [],
+      log: {}
+    }
+  },
+  asyncComputed: {
+    async html () {
+      if (this.selectedProcess.inputProperty) {
+        let index = await _.findIndex(this.selectedProcess.inputProperty[0].entityschema.createTemplate, ['filename', this.selectedProcess.inputProperty[0].createTemplate])
+        var url = this.selectedProcess.inputProperty[0].entityschema.createTemplate[index].url
+        url = url.substr(0, 4) + url.substr(5)
+        return url
+      }
     }
   },
   methods: {
-    // async handleApproval (action) {
-    //   let self = this
-    //   this.err = []
-    //   let err = this.err
-    //   let lastLogIndex
-    //   let inputs = {}
-    //   this.Aloading = true
-    //   for (var i = 0; i < self.process.inputProperty[0].entityschema.entity.length; i++) {
-    //     let element = self.process.inputProperty[0].entityschema.entity[i].name
-    //     $('input[name="' + element.toLowerCase() + '"]').each(async function () {
-    //       if (self.process.inputProperty[0].entityschema.entity[i].property.optional === false) {
-    //         // inputs[element] = await this.value
-    //         let result = self.process.inputProperty[0].entityschema.entity[i].property
-    //         let emailRegEx = '(\\w+)\\@(\\w+)\\.[a-zA-Z]'
-    //         let numberRegEx = '^[0-9]+$'
-    //         let dateRegEx = '(0?[1-9]|[12]\\d|30|31)[^\\w\\d\\r\\n:](0?[1-9]|1[0-2])[^\\w\\d\\r\\n:](\\d{4}|\\d{2})'
-    //         let val = this.value
-    //         if (val === '' || val === null || val === undefined) {
-    //           err.push(element + ' - is required..!')
-    //           // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
-    //           //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> required..!</div>')
-    //           // }
-    //         } else {
-    //           // $('input[name="' + element + '"]').parent().next('.validation').remove()
-    //         }
+    async iframeload () {
+      let self = this
+      let array = []
+      let data = []
+      let custom = []
+      let customSchema = []
 
-    //         if (this.hasAttribute('pattern')) {
-    //           let pttrn = new RegExp(result.regEx)
-    //           let regEx = pttrn.test(val)
-    //           if (!regEx) {
-    //             err.push(element + ' - Enter proper format..!')
-    //             // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
-    //             //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Enter proper format..!</div>')
-    //             // }
-    //           } else {
-    //             // obj[element] = val
-    //             // $('input[name="' + element + '"]').parent().next('.validation').remove()
-    //           }
-    //         }
-    //         if (this.type === 'date') {
-    //           let inputDate = new Date(val)
-    //           if (result.maxdate !== '') {
-    //             let maxDate = new Date(result.maxdate)
-    //             if (inputDate > maxDate) {
-    //               err.push(element + ' - Enter minimum date then ' + maxDate)
-    //               // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
-    //               //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Enter minimum date then ' + maxDate + '</div>')
-    //               // }
-    //             } else {
-    //               // obj[element] = val
-    //               // $('input[name="' + element + '"]').parent().next('.validation').remove()
-    //             }
-    //           } else if (result.mindate !== '') {
-    //             let minDate = new Date(result.mindate)
-    //             if (inputDate < minDate) {
-    //               err.push(element + ' - Enter maximum date then ' + minDate)
-    //               // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
-    //               //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Enter minimum date then ' + minDate + '</div>')
-    //               // }
-    //             } else {
-    //               // obj[element] = val
-    //               // $('input[name="' + element + '"]').parent().next('.validation').remove()
-    //             }
-    //           }
-    //         }
-    //         if (result.min !== 0 || result.max !== 0) {
-    //           if (val.length > result.min && val.length > result.max) {
-    //             err.push(element + ' - Minimum length :' + result.min + ' Maximum length :' + result.max)
-    //             // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
-    //             //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Minimum length :' + result.min + ' Maximum length :' + result.max + '</div>')
-    //             // }
-    //           } else if (val.length > result.max && val.length < result.min) {
-    //             err.push(element + ' - Minimum length :' + result.min + ' Maximum length :' + result.max)
-    //             // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
-    //             //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Minimum length :' + result.min + ' Maximum length :' + result.max + '</div>')
-    //             // }
-    //           } else {
-    //             // obj[element] = val
-    //             // $('input[name="' + element + '"]').parent().next('.validation').remove()
-    //           }
-    //         }
-    //         if (result.allowedValue.length > 0) {
-    //           let check = _.includes(result.allowedValue, val)
-    //           if (!check) {
-    //             err.push(element + ' - Allowed value are' + result.allowedValue)
-    //             // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
-    //             //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Allowed value are' + result.allowedValue + '</div>')
-    //             // }
-    //           } else {
-    //             // obj[element] = val
-    //             // $('input[name="' + element + '"]').parent().next('.validation').remove()
-    //           }
-    //         }
-    //         switch (this.type) {
-    //           case 'email':
-    //             let re = new RegExp(emailRegEx)
-    //             let testEmail = re.test(val)
-    //             if (testEmail) {
-    //               inputs[element] = await val
-    //               // $('input[name="' + element + '"]').parent().next('.validation').remove()
-    //             } else {
-    //               err.push(element + ' - Enter valid email address..!')
-    //               // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
-    //               //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Enter valid email address..!</div>')
-    //               // }
-    //             }
-    //             break
-    //           case 'number':
-    //             re = new RegExp(numberRegEx)
-    //             testEmail = re.test(val)
-    //             if (testEmail) {
-    //               inputs[element] = await val
-    //               $('input[name="' + element + '"]').parent().next('.validation').remove()
-    //             } else {
-    //               err.push(element + ' - Enter numbers only..!')
-    //               // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
-    //               //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Enter numbers only..!</div>')
-    //               // }
-    //             }
-    //             break
-    //           case 'date':
-    //             re = new RegExp(dateRegEx)
-    //             testEmail = re.test(val)
-    //             if (testEmail) {
-    //               inputs[element] = await val
-    //               // $('input[name="' + element + '"]').parent().next('.validation').remove()
-    //             } else {
-    //               err.push(element + ' - Invalid date format..!')
-    //               // if ($('input[name="' + element + '"]').parent().next('.validation').length === 0) {
-    //               //   $('input[name="' + element + '"]').parent().after('<div class="validation" style="color:red;"> Invalid date format..!</div>')
-    //               // }
-    //             }
-    //             break
-    //           default:
-    //             inputs[element] = await val
-    //         }
-    //       }
-    //     })
-    //   }
-    //   if (err.length > 0) {
-    //     self.$Notice.error({title: 'Error..!', desc: 'Fill all the details carefully.'})
-    //     self.Aloading = false
-    //   } else {
-    //     self.input.inputs = inputs
-    //     await flowInstance.getThis(self.$route.params.fiid)
-    //       .then(async function (response) {
-    //         // self.process = await _.find(response.data.processList, ['id', self.$route.params.pid])
-    //         _.forEach(self.process.target, function (item) {
-    //           lastLogIndex = _.findIndex(response.data.process_log, self.getLastLog(item.jobid))
-    //           response.data.process_log[lastLogIndex].status = 'inputRequired'
-    //           _.forEach(response.data.process_log[lastLogIndex].input, function (inputs) {
-    //             if (inputs.Email === self.$route.params.mailid) {
-    //               inputs.Approved = action
-    //             }
-    //           })
-    //         })
-
-    //         await self.addToJobQue()
-    //         flowInstance.put(self.$route.params.fiid, response.data)
-    //           .then(async function (res) {
-    //             self.Aloading = false
-    //             self.$Notice.success({title: 'Approval confirmed...!'})
-    //           })
-    //           .catch(function (error) {
-    //             self.$Notice.error({title: 'Error..!', desc: 'Server is busy please try again after some time'})
-    //             console.log('Error..!', error)
-    //             self.Aloading = false
-    //           })
-    //       })
-    //       .catch(function (error) {
-    //         self.$Notice.error({title: 'Error..!', desc: 'Action can not perform please try again...'})
-    //         console.log('Error..!', error)
-    //         self.Aloading = false
-    //       })
-    //   }
-    // },
-    // async addToJobQue () {
-    //   let self = this
-    //   let lastLog = await self.getLastLog(self.$route.params.jobid)
-    //   if (lastLog !== undefined && lastLog.status === 'sendForApproval') {
-    //     let dataObject = await {
-    //       'fId': self.$route.params.fiid,
-    //       'input': self.input,
-    //       'isExternalInput': true,
-    //       'job': lastLog.job,
-    //       'jobId': lastLog.jobId
-    //     }
-    //     let uri = await config.serverURI + '/addInputToJobQue'
-    //     axios.post(uri, dataObject)
-    //     .then(function (response) {
-    //       console.log(response)
-    //     })
-    //     .catch(function (error) {
-    //       console.log(error)
-    //     })
-    //   }
-    // },
-    // getLastLog (item) {
-    //   return _.chain(this.flowInstanceLog).orderBy(['lastModified'], ['asc']).findLast((f) => { return f.jobId === item }).value()
-    // },
-    // fillForm (log) {
-    //   for (var i = 0; i < this.process.inputProperty[0].entityschema.entity.length; i++) {
-    //     let element = this.process.inputProperty[0].entityschema.entity[i].name
-    //     let result = this.process.inputProperty[0].entityschema.entity[i].property
-    //     $('input[name="' + element.toLowerCase() + '"]').each(function () {
-    //       if (log.input[0][element] !== undefined) {
-    //         this.value = log.input[0][element]
-    //       }
-    //       if (result.type === 'date') {
-    //         this.setAttribute('type', 'date')
-    //       }
-    //       if (result.regEx !== '') {
-    //         if (this.type === 'text' || this.type === 'number' || this.type === 'phone' || this.type === 'date' || this.type === 'select-one') {
-    //           this.setAttribute('pattern', result.property.regEx)
-    //         }
-    //       }
-    //     })
-    //   }
-    // }
-    getLastLog (item) {
-      return _.chain(this.flowInstanceLog).orderBy(['lastModified'], ['asc']).findLast((f) => { return f.jobId === item }).value()
-    }
-  },
-  async mounted () {
-    let self = this
-    let lastLogIndex, createTemplate
-    // , processLog
-    await flowInstance.getThis(self.$route.params.fiid)
+      await flowInstance.getThis(self.$route.params.fiid)
       .then(async function (response) {
-        self.flowInstanceLog = await response.data.process_log
-        self.process = await _.find(response.data.processList, ['id', self.$route.params.pid])
-        // processLog = await self.getLastLog(self.$route.params.jobid)
-        _.forEach(self.process.target, async function (item) {
-          lastLogIndex = await _.findIndex(response.data.process_log, self.getLastLog(item.id))
-          _.forEach(response.data.process_log[lastLogIndex].input, function (inputs) {
-            if (inputs.Email === self.$route.params.mailid) {
-              self.notes = inputs.Notes
-            }
-          })
-        })
-        createTemplate = await _.find(self.process.inputProperty[0].entityschema.createTemplate, ['filename', self.process.inputProperty[0].createTemplate])
-        createTemplate = createTemplate.url
-        createTemplate = createTemplate.slice(0, 4) + createTemplate.slice(5)
-        self.URL = createTemplate + '?fiid='
-
-        // self.htmlUrl = createTemplate.url
-        await axios({
-          method: 'get',
-          url: createTemplate
-        })
-        .then(async function (res) {
-          self.createTemplateHtml = res.data
-          self.createTemplateHtml = await self.createTemplateHtml.split('./assets/main.css').join('')
-        })
+        self.selectedProcess = await _.find(response.data.processList, ['id', self.$route.params.pid])
+        self.entitySchema = await self.getSchema(self.selectedProcess.inputProperty[0].entityschema._id)
+        self.log = await _.chain(response.data.process_log).orderBy(['lastModified'], ['asc']).findLast((f) => { return f.job === self.$route.params.pid }).value()
       })
       .catch(function (error) {
         self.$Notice.error({title: 'Error..!', desc: error})
-        console.log('Error : ', error)
       })
-    // this.fillForm(processLog)
+      for (let i = 0; i < self.entitySchema.entity.length; i++) {
+        if (self.entitySchema.entity[i].customtype === true) {
+          custom = await self.getCustom(self.entitySchema.entity[i].type, true)
+          array.push({customtype: true, name: self.entitySchema.entity[i].name, entity: custom})
+          custom = await self.getCustom(self.entitySchema.entity[i].type, false)
+          customSchema.push(custom)
+        } else {
+          array.push({name: self.entitySchema.entity[i].name})
+          customSchema.push(self.entitySchema.entity[i])
+        }
+      }
+      _.forEach(self.log.input, function (item) {
+        data.push(item)
+      })
+      self.customSchema = customSchema
+      document.getElementById('filecontainer').contentWindow.postMessage({entity: array, formData: data}, '*')
+    },
+    async getCustom (id, flag) {
+      let tempSchema
+      let tempData = []
+      let customData = []
+      let data = []
+      let self = this
+      tempSchema = await self.getSchema(id)
+      for (let i = 0; i < tempSchema.entity.length; i++) {
+        if (tempSchema.entity[i].customtype === true) {
+          tempData = await self.getCustom(tempSchema.entity[i].type, true)
+          data.push({customtype: true, name: tempSchema.entity[i].name, entity: tempData})
+          tempData = await self.getCustom(tempSchema.entity[i].type, false)
+          customData.push(tempData)
+        } else {
+          data.push({name: tempSchema.entity[i].name})
+          customData.push(tempSchema.entity[i])
+        }
+      }
+      return flag ? data : customData
+    },
+    async getSchema (id) {
+      let data
+      await Schema.getThis(id).then((res) => {
+        data = res.data
+      })
+      return data
+    },
+    async handleSubmit () {
+      let dataObject = {
+        'fId': this.$route.params.fiid,
+        'inputs': this.input,
+        'job': this.$route.params.pid
+      }
+      console.log('submit', dataObject)
+      ReceiveForm.post(dataObject)
+      .then(response => {
+        this.$Notice.success({title: 'Success..!', desc: 'Form request sent.'})
+        console.log('res', response.data)
+      })
+      .catch(err => {
+        this.$Notice.success({title: 'Error..!', desc: err})
+        console.log('err', err)
+      })
+      this.input = []
+    }, // sub method for validation purpose
+    async validator (result, element, flag) {
+      let err = this.err
+      let val = element.value
+      let temp = {}
+      let emailRegEx = '(\\w+)\\@(\\w+)\\.[a-zA-Z]'
+      let numberRegEx = '^[0-9]+$'
+      let dateRegEx = '(0?[1-9]|[12]\\d|30|31)[^\\w\\d\\r\\n:](0?[1-9]|1[0-2])[^\\w\\d\\r\\n:](\\d{4}|\\d{2})'
+
+      if (result.property.optional === false) {
+        if (val === '' || val === null || val === undefined) {
+          err.push(element.name + ' - is required..!')
+          if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
+            $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> required..!</div>')
+          }
+        } else {
+          $('input[name="' + element.name + '"]').parent().next('.validation').remove()
+        }
+
+        if (result.property.regEx !== null || result.property.regEx !== undefined) {
+          let pttrn = new RegExp(result.property.regEx)
+          let regEx = pttrn.test(val)
+          if (!regEx) {
+            err.push(element.name + ' - Enter proper format..!')
+            if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
+              $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Enter proper format..!</div>')
+            }
+          } else {
+            $('input[name="' + element.name + '"]').parent().next('.validation').remove()
+          }
+        }
+        if (element.type === 'date') {
+          let inputDate = new Date(val)
+          if (result.property.maxdate !== '') {
+            let maxDate = new Date(result.property.maxdate)
+            if (inputDate > maxDate) {
+              err.push(element.name + ' - Enter minimum date then ' + maxDate)
+              if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
+                $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Enter minimum date then ' + maxDate + '</div>')
+              }
+            } else {
+              $('input[name="' + element.name + '"]').parent().next('.validation').remove()
+            }
+          } else if (result.property.mindate !== '') {
+            let minDate = new Date(result.property.mindate)
+            if (inputDate < minDate) {
+              err.push(element.name + ' - Enter maximum date then ' + minDate)
+              if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
+                $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Enter minimum date then ' + minDate + '</div>')
+              }
+            } else {
+              $('input[name="' + element.name + '"]').parent().next('.validation').remove()
+            }
+          }
+        }
+        if (result.property.min !== 0 || result.property.max !== 0) {
+          if (val.length > result.property.min && val.length > result.property.max) {
+            err.push(element.name + ' - Minimum length :' + result.property.min + ' Maximum length :' + result.property.max)
+            if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
+              $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Minimum length :' + result.property.min + ' Maximum length :' + result.property.max + '</div>')
+            }
+          } else if (val.length > result.property.max && val.length < result.property.min) {
+            err.push(element.name + ' - Minimum length :' + result.property.min + ' Maximum length :' + result.property.max)
+            if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
+              $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Minimum length :' + result.property.min + ' Maximum length :' + result.property.max + '</div>')
+            }
+          } else {
+            $('input[name="' + element.name + '"]').parent().next('.validation').remove()
+          }
+        }
+        if (result.property.allowedValue.length > 0) {
+          let check = _.includes(result.property.allowedValue, val)
+          if (!check) {
+            err.push(element.name + ' - Allowed value are' + result.property.allowedValue)
+            if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
+              $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Allowed value are' + result.property.allowedValue + '</div>')
+            }
+          } else {
+            $('input[name="' + element.name + '"]').parent().next('.validation').remove()
+          }
+        }
+      }
+      switch (element.type) {
+        case 'email':
+          let re = new RegExp(emailRegEx)
+          let testEmail = re.test(val)
+          if (testEmail) {
+            temp[element.name] = val
+            $('input[name="' + element.name + '"]').parent().next('.validation').remove()
+          } else {
+            err.push(element.name + ' - Enter valid email address..!')
+            if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
+              $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Enter valid email address..!</div>')
+            }
+          }
+          break
+        case 'number':
+          re = new RegExp(numberRegEx)
+          testEmail = re.test(val)
+          if (testEmail) {
+            temp[element.name] = val
+            $('input[name="' + element.name + '"]').parent().next('.validation').remove()
+          } else {
+            err.push(element.name + ' - Enter numbers only..!')
+            if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
+              $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Enter numbers only..!</div>')
+            }
+          }
+          break
+        case 'date':
+          re = new RegExp(dateRegEx)
+          testEmail = re.test(val)
+          if (testEmail) {
+            temp[element.name] = val
+            $('input[name="' + element.name + '"]').parent().next('.validation').remove()
+          } else {
+            err.push(element.name + ' - Invalid date format..!')
+            if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
+              $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Invalid date format..!</div>')
+            }
+          }
+          break
+        default:
+          // temp[element.name] = await val
+          console.log('val', val)
+          return val
+      }
+    }, // method for validation purpos
+    async getValidate (event, flag) {
+      let schema = []
+      let obj = {}
+      let temp = {}
+      let tempElement = {}
+      let self = this
+
+      flag ? schema = await self.customSchema : schema = await self.entitySchema.entity
+      Object.keys(event).forEach(async function (key, index) {
+        let validation
+        Array.isArray(schema[index]) ? validation = schema[index] : validation = await _.find(schema, ['name', key])
+        let element = {value: event[key], name: key, type: Array.isArray(event[key]) ? 'customtype' : validation.type}
+
+        if (element.type === 'customtype') {
+          for (let i = 0; i < element.value.length; i++) {
+            Object.keys(element.value[i]).forEach(async function (key, index) {
+              if (Array.isArray(element.value[i][key])) {
+                tempElement = {value: element.value[i][key], name: key, type: Array.isArray(element.value[i][key]) ? 'customtype' : element.type}
+                temp[key] = self.validator(schema[index], tempElement, true)
+              } else {
+                temp[key] = self.validator(schema[index], tempElement, false)
+              }
+            })
+          }
+          obj[element.name] = self.validator(validation, element, true)
+        } else {
+          obj[element.name] = self.validator(validation, element, false)
+        }
+      })
+      console.log('obj', obj)
+      return obj
+    }
+  },
+  async mounted () {
+    let temp = {}
+    this.err = []
+    let self = this
+    this.input = []
+    let finalInputs = this.input
+    // let validated, checkCustom
+    window.addEventListener('message', async function (event) {
+      if (_.isArray(event.data)) {
+        // checkCustom = await _.find(self.entitySchema.entity, ['customtype', true])
+        for (let j = 0; j < event.data.length; j++) {
+          // console.log('event.data', event.data)
+          // checkCustom !== undefined ? validated = await self.getValidate(event.data[j], true) : validated = await self.getValidate(event.data[j], false)
+
+          // temp.Schemaid = self.entitySchema.id
+          temp.type = 'ReceiveForm'
+          console.log('event[j] ', event.data[j])
+          finalInputs.push(event.data[j])
+          temp = {}
+        }
+        self.handleSubmit()
+      }
+    })
   }
 }
 </script>

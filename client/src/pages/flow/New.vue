@@ -410,6 +410,7 @@
         return newMapData
       },
       async getMapData (mapId) {
+        let self = this
         var content = await schemamappingModel.get(mapId)
         let producer = await schemaModel.get(content.data.producer)
         let consumer = await schemaModel.get(content.data.consumer)
@@ -421,8 +422,6 @@
             producerField: schema.producerField,
             consumerField: schema.ctype ? (await self.getMapData(schema.consumerField)) : _.first(schema.consumerField)
           }
-          // obj[producer.data.title] = schema.producerField
-          // obj[consumer.data.title] = schema.ctype ? (await self.getMapData(schema.consumerField)) : _.first(schema.consumerField)
           return obj
         }))
       },

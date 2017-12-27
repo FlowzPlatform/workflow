@@ -911,6 +911,7 @@ export default {
       }
     },
     setTypes (id) {
+      this.$store.dispatch('getSchema')
       let type = []
       _.forEach(this.defaultType, function (t) {
         type.push(t)
