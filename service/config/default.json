@@ -17,6 +17,6 @@
   "rdb_user": "",
   "rdb_password": "",
   "rdb_db": "FlowzEngine",
-  "registerWokerAPI": "http://172.16.230.253:3000/upload-worker-process",
-  "registerProcessAPI": "http://172.16.230.253:9000/register-jobtype/"
+  "registerWokerAPI": "http://localhost:4001/upload-worker-process",
+  "registerProcessAPI": "http://localhost:4003/register-jobtype/"
 }

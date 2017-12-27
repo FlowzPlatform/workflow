@@ -51,6 +51,7 @@ export default {
         data.push(item)
         // })
       })
+      console.log('data==>', data)
       document.getElementById('filecontainer').contentWindow.postMessage({entity: array, formData: data}, '*')
     },
     async fetch (id) {

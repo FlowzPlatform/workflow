@@ -30,7 +30,7 @@ let executeProcess = async function (jobType) {
     pino(PINO).info({Process: jobType, fId: process.argv[6], pId: process.pid}, 'process created')
   } catch (e) {
     pino(PINO).error(e)
-    pino(PINO).error('unable to load child worker')
+    pino(PINO).error('unable to load child process')
   }
 }
 

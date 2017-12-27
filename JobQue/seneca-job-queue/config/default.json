@@ -7,14 +7,14 @@
     "subscriptionCreatePattern": "role:subscription,cmd:created"
   },
   "cxnOptions" : {
-    "host": "aws-us-east-1-portal.30.dblayer.com",
-    "port": 16868,
+    "host": "47.254.27.134",
+    "port": 28015,
     "db": "FlowzEngine"
   },
   "symmetricWorker": {
-    "port" : 9000,
+    "port" : 4003,
     "table" : "symmetricWorkers",
-    "executeWorkerURL": "http://localhost:9000/execute-worker",
+    "executeWorkerURL": "http://localhost:4003/execute-worker",
     "childProcessFile": "start-child-worker.js"
   },
   "waitingThreshold": 0.40,
@@ -28,11 +28,11 @@
   },
   "registerWorker": {
     "table": "registerWorkers",
-    "port": 3000,
-    "getJobModuleApiURL": "http://localhost:3000/job-module/"
+    "port": 4001,
+    "getJobModuleApiURL": "http://localhost:4001/job-module/"
   },
   "web-option": {
-    "port": 5000,
+    "port": 4002,
     "urlPrefix": "/job"
   },
   "defaultQueue" : {
