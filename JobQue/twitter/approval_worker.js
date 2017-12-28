@@ -36,7 +36,7 @@ q.process(async(job, next) => {
     let rolesEmail = []
     await axios({
         method: 'get',
-        url: 'http://localhost:3030/flowz-instance/' + job.data.fId
+        url: app.serverURI + '/flowz-instance/' + job.data.fId
       })
       .then(async function (response) {
         runningProcess = _.find(response.data.processList, ['id', job.data.job])
@@ -75,7 +75,7 @@ q.process(async(job, next) => {
       })
     if (rolesEmail.length > 0) {
       for (var j = 0; j < rolesEmail.length; j++) {
-        let submitLink = 'http://localhost:8000/mail/reply/' + rolesEmail[j] + '/' + job.data.job + '/' + job.data.jobId + '/' + job.data.fId
+        let submitLink = app.clientURI + '/mail/reply/' + rolesEmail[j] + '/' + job.data.job + '/' + job.data.jobId + '/' + job.data.fId
         let myData = {
           "to": rolesEmail[j],
           "subject": "engine.flowz.com | " + rolesEmail[j],
@@ -85,7 +85,8 @@ q.process(async(job, next) => {
         }
         await axios({
             method: 'post',
-            url: app.login
+            url: app.login,
+            data: app.credential
           })
           .then(async function (response) {
             await axios({

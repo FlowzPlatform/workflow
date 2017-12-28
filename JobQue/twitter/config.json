@@ -1,4 +1,5 @@
 {
+  "clientURI": "http://localhost:8000",
   "serverURI": "http://localhost:3030",
   "watcherPath": "../bpmnPlugin",
   "tweetCredential": {
@@ -25,7 +26,7 @@
     "email": "kmahera@officebrain.com",
     "password": "123456"
   },
-  "sendEmail": "http://devapi.flowz.com/vmailmicro/sendEmail",
+  "sendEmail": "http://api.flowz.com/vmailmicro/sendEmail",
   "login": "http://auth.flowz.com/api/login",
   "roleURI": "http://api.flowz.com/authldap/userslist/",
   "flowz_table": "flowzinstance",
