@@ -78,13 +78,14 @@ q.process(async(job, next) => {
         let submitLink = 'http://localhost:8000/mail/reply/' + rolesEmail[j] + '/' + job.data.job + '/' + job.data.jobId + '/' + job.data.fId
         let myData = {
           "to": rolesEmail[j],
-          "subject": "From " + rolesEmail[j],
-          "body": emailTemplateHtml.html + '<br><button><a href="' + submitLink + '" style="text-decoration:none; color:#000">Submit</a></button>'
+          "subject": "engine.flowz.com | " + rolesEmail[j],
+          "body": emailTemplateHtml.html + '<br><button><a href="' + submitLink + '" style="text-decoration:none; color:#000">Submit</a></button>',
+          "from": rolesEmail[j],
+          "replyTo": rolesEmail[j]
         }
         await axios({
             method: 'post',
-            url: app.login,
-            data: app.credential
+            url: app.login
           })
           .then(async function (response) {
             await axios({

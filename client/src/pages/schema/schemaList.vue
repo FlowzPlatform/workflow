@@ -187,7 +187,7 @@
         //     title: m.title
         //   }
         // })
-        this.schemaData = response.data
+        this.schemaData = this.schemaName
         this.loading = false
       })
     }

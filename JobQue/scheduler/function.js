@@ -729,7 +729,7 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
       if (sourceOutput || targetSchema.isProcessTask) {
         if (targetSchema.isProcessTask) {
           await this.updateLog(targetSchema, 'running', null, true, fId)
-          let type = targetSchema.type.toLowerCase() + '_wprker'
+          let type = targetSchema.type.toLowerCase() + '_worker'
           targetSchema = JSON.stringify(targetSchema)
           c_options = JSON.stringify(cxnOptions)
           q_options = JSON.stringify(qOptions)

@@ -9,7 +9,7 @@
   },
   "flowid": "5eb46868-cf0e-41d4-9103-e06581b48009",
   "rethinkdb": {
-    "host": "159.203.134.27",
+    "host": "47.254.27.134",
     "port": "28015",
     "db": "FlowzEngine"
   },
@@ -25,7 +25,7 @@
     "email": "kmahera@officebrain.com",
     "password": "123456"
   },
-  "sendEmail": "http://localhost:3001/sendEmail",
+  "sendEmail": "http://devapi.flowz.com/vmailmicro/sendEmail",
   "login": "http://auth.flowz.com/api/login",
   "roleURI": "http://api.flowz.com/authldap/userslist/",
   "flowz_table": "flowzinstance",
