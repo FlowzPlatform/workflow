@@ -1,6 +1,6 @@
 console.log('process.env.NODE_ENV', process.env.NODE_ENV)
 var temp = {
-  serverURI: 'http://localhost:3030',
+  serverURI: 'http://localhost:3030', // 'http://172.16.230.86:3030'
   socketURI: 'http://localhost:4033',
   workerRegisterURL: 'http://localhost:4001',
   approvalRoleURI: 'http://api.flowz.com/authldap/',
