@@ -1,6 +1,9 @@
 <template>
   <div>
     <iframe id="filecontainer" allowtransparency="true" frameborder="0" :src="html" @load="iframeload(formSchemaInstance.entity, log)"></iframe>
+    <ul class="error">
+      <li v-for="item in err">{{item}}</li>
+    </ul>
     <!-- <div v-html="html"></div> 
     <Button type="primary" @click="handleSubmit('formSchemaInstance')">Submit</Button>-->
   </div>
@@ -383,6 +386,7 @@ export default {
     async handleSubmit (validated) {
       let obj = await this.makeObj()
       console.log('Submitted Data', obj.data)
+      console.log()
       if (validated && this.inputs.length > 0) {
         Instance.post({ instanceid: this.$route.params.id, processid: this.log.job, jobId: this.log.jobId, data: obj.data })
         .then(response => {
@@ -395,9 +399,9 @@ export default {
       } else {
         this.$Notice.error({
           title: 'Error..!',
-          desc: 'Details are in bottom of page.',
-          duration: 0
+          desc: 'Details are in bottom of page.'
         })
+        this.inputs = []
       }
     },
     async getValidate (event, schema) {
@@ -541,8 +545,6 @@ export default {
   },
   async mounted () {
     let self = this
-    this.inputs = []
-    let finalInputs = this.inputs
     let validated
 
     window.addEventListener('message', async function (event) {
@@ -551,7 +553,7 @@ export default {
         for (let j = 0; j < event.data.length; j++) {
           validated = await self.getValidate(event.data[j])
           event.data[j].Schemaid = self.entitySchema.data.id
-          finalInputs.push(event.data[j])
+          self.inputs.push(event.data[j])
         }
         self.handleSubmit(validated)
       }
@@ -560,6 +562,9 @@ export default {
 }
 </script>
 <style scoped>
+.error {
+  color: red;
+}
 #filecontainer {
   min-height: 500px;
   min-width: 100%; 

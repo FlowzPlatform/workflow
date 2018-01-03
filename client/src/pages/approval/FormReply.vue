@@ -109,11 +109,12 @@ export default {
         'inputs': this.input,
         'job': this.$route.params.pid
       }
+      console.log(validated, this.input.length)
       if (validated && this.input.length > 0) {
         ReceiveForm.post(dataObject)
         .then(response => {
           this.$Notice.success({title: 'Success..!', desc: 'Form request sent.'})
-          console.log('res', response.data)
+          this.$router.push('/')
         })
         .catch(err => {
           this.$Notice.success({title: 'Error..!', desc: err})
@@ -121,11 +122,10 @@ export default {
       } else {
         this.$Notice.error({
           title: 'Error..!',
-          desc: 'Details are in bottom of page.',
-          duration: 0
+          desc: 'Details are in bottom of page.'
         })
+        this.input = []
       }
-      this.$router.push(-1)
     }, // method for validation purpos
     async getValidate (event, schema) {
       let self = this
@@ -268,8 +268,6 @@ export default {
   },
   async mounted () {
     let self = this
-    this.inputs = []
-    let finalInputs = this.inputs
     let validated
 
     window.addEventListener('message', async function (event) {
@@ -277,7 +275,7 @@ export default {
       if (_.isArray(event.data)) {
         for (let j = 0; j < event.data.length; j++) {
           validated = await self.getValidate(event.data[j])
-          finalInputs.push(event.data[j])
+          self.input.push(event.data[j])
         }
         self.handleSubmit(validated)
       }
