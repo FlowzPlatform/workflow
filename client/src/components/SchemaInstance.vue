@@ -210,7 +210,7 @@ export default {
       this.validFlag = true
       this.validErr = []
       var check = this.checkValidation(obj.data[0], this.entity)
-      // console.log('checkkkkkkkkkkkk', check)
+      // console.log('checkkkkkkkkkkkk', check, obj.data[0], this.entity)
       this.$Loading.start()
       if (check) {
         Instance.post({ instanceid: this.instanceid, processid: this.processid, jobId: this.lastLog.jobId, data: obj.data })

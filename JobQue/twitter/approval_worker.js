@@ -61,11 +61,13 @@ q.process(async(job, next) => {
       .then(function (response) {
         emailTemplateHtml = response.data
         processLog = _.chain(processLog).orderBy(['lastModified'], ['asc']).findLast((f) => { return f.jobId === job.data.jobId }).value()
+        // console.log('plog', processLog)
         for (var i = 0; i < runningProcess.inputProperty[0].entityschema.entity.length; i++) {
           let element = runningProcess.inputProperty[0].entityschema.entity[i].name
             // element = element.toLowerCase()
           let index = emailTemplateHtml.search('"' + element + '"')
             // element = _.capitalize(element)
+          // console.log('-> ', element, processLog.input[0][element])
           emailTemplateHtml = emailTemplateHtml.substr(0, index + element.length + 3) + processLog.input[0][element] + emailTemplateHtml.substr(index + element.length + 3)
         }
         emailTemplateHtml = mjml2html(emailTemplateHtml)

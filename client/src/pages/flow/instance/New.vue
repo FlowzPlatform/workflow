@@ -198,7 +198,7 @@ export default {
   },
   asyncComputed: {
     async html () {
-      if (this.selectedProcess.inputProperty && this.selectedProcess.inputProperty[0].entityschema.createTemplate) {
+      if (this.selectedProcess.inputProperty && this.selectedProcess.inputProperty[0].createTemplate) {
         let index = await _.findIndex(this.selectedProcess.inputProperty[0].entityschema.createTemplate, ['filename', this.selectedProcess.inputProperty[0].createTemplate])
         var url = this.selectedProcess.inputProperty[0].entityschema.createTemplate[index].url
         url = url.substr(0, 4) + url.substr(5)
