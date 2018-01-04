@@ -38,11 +38,11 @@ module.exports = {
     remove: []
   }
 };
-var updateProcesslogforMappingRequired = async(function(hook) {
+var updateProcesslogforMappingRequired = async(function (hook) {
   for (let [key, m] of hook.result.processList.entries()) {
-    m.log = _.chain(hook.result.process_log).filter(f => {
+    m['log'] = _.chain(hook.result.process_log).filter(f => {
       return f.job === m.id
-    }).orderBy(['lastModified'], ['desc']).groupBy('jobId').value()
+    }).sortBy(['lastModified'], ['desc']).reverse().groupBy('jobId').value()
     await (handleMappingRequireStatus(m, hook.result.id))
   }
 })
@@ -54,7 +54,7 @@ function getCurrentStatus(log) {
 function getLastLog(logs) {
   return _.head(logs)
 }
-var handleMappingRequireStatus = async(function(data, fid) {
+var handleMappingRequireStatus = async(function (data, fid) {
   // handle mapping required
   if (data.log && _.keys(data.log).length > 0) {
     for (var [key, f] of _.values(data.log).entries()) {

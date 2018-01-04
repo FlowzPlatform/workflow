@@ -1,8 +1,8 @@
 {
   "rethinkdb": {
-    "host": "aws-us-east-1-portal.30.dblayer.com",
-    "port": 16868,
-    "db": "workers"
+    "host": "47.254.27.134",
+    "port": 28015,
+    "db": "FlowzEngine"
   },
   "qOptions": {
     "name": "scheduler",
@@ -49,8 +49,8 @@
     "create": "/job/create/",
     "job_module": "/job-module/"
   },
-  "serviceURL": "http://localhost:5000",
-  "jobURL": "http://localhost:3000",
+  "serviceURL": "http://localhost:4002",
+  "jobURL": "http://localhost:4001",
   "cache_size": 20,
   "runtime_process_table": "runtime_process"
 }

@@ -1,7 +1,7 @@
 const fs = require('fs')
 module.exports = {
   rethinkdb: {
-    host: process.env.host || "localhost",
+    host: process.env.host || "47.254.27.134",
     port: process.env.port || 28015,
     db: process.env.db || "FlowzEngine",
     authKey: process.env.authDB,

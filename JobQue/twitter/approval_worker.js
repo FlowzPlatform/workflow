@@ -36,7 +36,7 @@ q.process(async(job, next) => {
     let rolesEmail = []
     await axios({
         method: 'get',
-        url: 'http://localhost:3030/flowz-instance/' + job.data.fId
+        url: app.serverURI + '/flowz-instance/' + job.data.fId
       })
       .then(async function (response) {
         runningProcess = _.find(response.data.processList, ['id', job.data.job])
@@ -61,11 +61,13 @@ q.process(async(job, next) => {
       .then(function (response) {
         emailTemplateHtml = response.data
         processLog = _.chain(processLog).orderBy(['lastModified'], ['asc']).findLast((f) => { return f.jobId === job.data.jobId }).value()
+        // console.log('plog', processLog)
         for (var i = 0; i < runningProcess.inputProperty[0].entityschema.entity.length; i++) {
           let element = runningProcess.inputProperty[0].entityschema.entity[i].name
             // element = element.toLowerCase()
           let index = emailTemplateHtml.search('"' + element + '"')
             // element = _.capitalize(element)
+          // console.log('-> ', element, processLog.input[0][element])
           emailTemplateHtml = emailTemplateHtml.substr(0, index + element.length + 3) + processLog.input[0][element] + emailTemplateHtml.substr(index + element.length + 3)
         }
         emailTemplateHtml = mjml2html(emailTemplateHtml)
@@ -75,13 +77,14 @@ q.process(async(job, next) => {
       })
     if (rolesEmail.length > 0) {
       for (var j = 0; j < rolesEmail.length; j++) {
-        let submitLink = 'http://localhost:8000/mail/reply/' + rolesEmail[j] + '/' + job.data.job + '/' + job.data.jobId + '/' + job.data.fId
+        let submitLink = app.clientURI + '/mail/reply/' + rolesEmail[j] + '/' + job.data.job + '/' + job.data.jobId + '/' + job.data.fId
         let myData = {
           "to": rolesEmail[j],
-          "subject": "From " + rolesEmail[j],
-          "body": emailTemplateHtml.html + '<br><button><a href="' + submitLink + '" style="text-decoration:none; color:#000">Submit</a></button>'
+          "subject": "engine.flowz.com | " + rolesEmail[j],
+          "body": emailTemplateHtml.html + '<br><button><a href="' + submitLink + '" style="text-decoration:none; color:#000">Submit</a></button>',
+          "from": rolesEmail[j],
+          "replyTo": rolesEmail[j]
         }
-        console.log(myData)
         await axios({
             method: 'post',
             url: app.login,

@@ -6,8 +6,8 @@ var axios = require('axios');
 // host=aws-us-east-1-portal.30.dblayer.com port=16868 
 var tName = 'receive_form';
 var r = require('rethinkdbdash')({
-  host: '159.203.134.27',
-  port: '28015',
+  host: config.get('rdb_host').trim(),
+  port: config.get('rdb_port').trim(),
   db: 'FlowzEngine'
     // rauth: "51b2885598be1c2c1243a5c9c3548ad2",
     // cert: "/ca.crt"

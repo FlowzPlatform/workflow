@@ -6,7 +6,7 @@
     "dbinstance": [{
       "isenable": true,
       "connection_name": "Rethink",
-      "host": "159.203.134.27",
+      "host": "47.254.27.134",
       "port": "28015",
       "dbname": "FlowzEngine",
       "username": "",

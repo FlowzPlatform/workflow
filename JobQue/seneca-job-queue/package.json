@@ -4,7 +4,12 @@
   "description": "",
   "main": "symmetric-worker.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node symmetric-worker.js && node worker-web.js && node job-web.js && node worker-need.js",
+    "symmetric:worker": "node symmetric-worker.js",
+    "worker:web": "node worker-web.js",
+    "job:web": "node job-web.js",
+    "worker:need": "node worker-need.js"
   },
   "author": "",
   "license": "ISC",
