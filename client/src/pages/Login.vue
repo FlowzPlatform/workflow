@@ -1,5 +1,5 @@
 <template>
-  <div class="loginpage">
+  <div class="loginpage" id="main-panel">
     <div class="loginpanel">
       <vue-particles color="#dedede">
       </vue-particles>
@@ -179,6 +179,13 @@ export default {
     },
     handleGithub () {
       document.getElementById('form-github').submit()
+    }
+  },
+  mounted () {
+    var mainDiv = document.getElementById('main-panel')
+    let self = this
+    mainDiv.onkeypress = function (e) {
+      if (e.key == 'Enter') self.handleSubmit('formLogin')
     }
   }
 }

@@ -492,11 +492,13 @@ var compareData = async(function (id, old_data, new_data, res) {
   }
 })
 var singleLevelsave = async(function (data) {
+  // console.log('singleLevelsave', data)
     var id = data[0].Schemaid
     var res = await (getSchemaData(id))
     var arr = []
     for (let [inx, sObj] of data.entries()) {
       var _res = await (saveData(sObj, res))
+      console.log('_res....................', _res)
       arr.push({ refid: _res })
     }
     return arr
@@ -748,7 +750,13 @@ class Service {
         // return _data
         // return saveData(data.data[0])
         var response = singleLevelsave(data.data)
-        return Promise.resolve(response)
+        return Promise.resolve(response).then(res => {
+          console.log('response..............', res)
+          return res
+        }).catch(err => {
+          console.log('Error', err)
+          return err
+        })
       } else {
         // var id = data.data[0].Schemaid
         // console.log('.............id ', id)
