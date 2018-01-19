@@ -46,7 +46,7 @@
       <Col>
         <Form ref="formSchema" :model="formSchema">
           <Form-item
-            v-if="!formSchema._id"
+            v-if="!formSchema.id"
             label="Schema Title"
             prop="title"
             :label-width="100"
@@ -54,7 +54,7 @@
               <Input type="text" v-model.trim="formSchema.title"></Input>
           </Form-item>
           <Form-item
-            v-if="formSchema._id"
+            v-if="formSchema.id"
             label="Schema Title"
             :label-width="100"
             >
@@ -192,8 +192,8 @@
           prop="database"
           :label-width="115"
           :rules="{required: true, message: 'Please select Database'}">
-            <Cascader v-if="formSchema._id" :data="CascaderData" filterable v-model='formSchema.database' disabled></Cascader>
-            <Cascader v-if="!formSchema._id" :data="CascaderData" filterable v-model='formSchema.database'></Cascader>
+            <Cascader v-if="formSchema.id" :data="CascaderData" filterable v-model='formSchema.database' disabled></Cascader>
+            <Cascader v-if="!formSchema.id" :data="CascaderData" filterable v-model='formSchema.database'></Cascader>
 
           </Form-item>
           <Form-item>
@@ -492,8 +492,8 @@
           </Form-item>
           <Form-item>
             <Button type="primary" :loading="loading" @click="handleSubmit('formSchema')">
-                <span v-if="!loading && !formSchema._id">Save</span>
-                <span v-else-if="!loading && formSchema._id">Update</span>
+                <span v-if="!loading && !formSchema.id">Save</span>
+                <span v-else-if="!loading && formSchema.id">Update</span>
                 <span v-else>Loading...</span>
             </Button>
             <Button type="ghost" @click="handleReset('formSchema')" style="margin-left: 8px">Reset</Button>
@@ -764,7 +764,7 @@ export default {
     },
     validateTitle: async function(title) {
       var res = await (api.request('get', '/schema'))
-      for (let [inx, obj] of res.data.entries()) {
+      for (let [inx, obj] of res.data.data.entries()) {
         if (obj.title === title) {
           return 'yes'
         } 
@@ -918,9 +918,9 @@ export default {
       })
       // let checkType = '';
       this.$store.getters.allSchema.forEach((schema) => {
-        if (id !== schema._id) {
+        if (id !== schema.id) {
           type.push({
-            value: schema._id,
+            value: schema.id,
             label: schema.title
           })
         }
@@ -933,12 +933,15 @@ export default {
         if (valid) {
           /* Making API call to authenticate a user */
           this.loading = true
-          if (this.formSchema._id === undefined) {
+          if (this.formSchema.id === undefined) {
             this.formSchema['viewTemplate'] = this.viewtemplate
             this.formSchema['createTemplate'] = this.createtemplate
             this.formSchema['emailTemplate'] = this.mjmlUpload
+            this.formSchema['createdAt'] = new Date()
+            this.formSchema['isdeleted'] = false
             api.request('post', '/schema', this.formSchema)
             .then(response => {
+              // console.log('response', response)
               // this.toggleLoading()
               // this.$router.push(data.redirect)
               // console.log('Response Schema ... ', response.data)
@@ -948,7 +951,7 @@ export default {
               this.viewTemplate = []
               this.createTemplate = []
               this.mjmlUpload = []
-              this.$store.dispatch('getSchema')
+              // this.$store.dispatch('getSchema')
               this.$router.go(-1)
               // this.$router.push('/')
             })
@@ -962,7 +965,7 @@ export default {
             // this.formSchema['createTemplate'] = this.createtemplate
             // this.formSchema['_id'] = this.formSchema._id
             // console.log('aaa', this.formSchema)
-            api.request('put', '/schema/' + this.formSchema._id, this.formSchema).then(response => {
+            api.request('put', '/schema/' + this.formSchema.id, this.formSchema).then(response => {
               // this.toggleLoading()
               // this.$router.push(data.redirect)
               console.log(response)
@@ -1161,9 +1164,9 @@ export default {
     },
     '$store.getters.allSchema': function() {
       this.$store.getters.allSchema.forEach((schema) => {
-        if (this.$route.params.id !== schema._id) {
+        if (this.$route.params.id !== schema.id) {
           this.types.push({
-            value: schema._id,
+            value: schema.id,
             label: schema.title
           })
         }

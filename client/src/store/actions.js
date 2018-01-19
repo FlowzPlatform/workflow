@@ -9,7 +9,7 @@ export default {
     api.request('get', '/schema')
       .then(response => {
         // console.log('hdhd::', _.reject(response.data, { 'isdeleted': true }))
-        commit('SET_SCHEMA', response.data)
+        commit('SET_SCHEMA', response.data.data)
       })
       .catch(error => {
         console.log(error)

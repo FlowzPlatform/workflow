@@ -1,24 +1,24 @@
 <template>
   <div class="SchemaMapping">
-    <h5>Schema Mapping</h5>
+    <h4>Schema Mapping</h4>
     <Row style="padding:20px;">
         <Form ref="formMapping" :model="formMapping" :rules="ruleMapping" inline>
           <Row>
-            <FormItem :label-width="75" prop="title" label="Title">
+            <FormItem :label-width="80" prop="title" label="Title">
                 <Input type="text" v-model="formMapping.title" placeholder="Title"></Input>
             </FormItem>
-            <FormItem :label-width="75" prop="producer" label="producer ">
+            <FormItem :label-width="80" prop="producer" label="producer ">
                     <Select v-model="formMapping.producer" disabled style="width:200px">
                         <Option v-for="item in SourceOptionDt" :value="item.value" :key="item.value">{{ item.label }}</Option>
                     </Select>
             </FormItem>
             <!-- {{TargetOptionDt}} -->
-            <FormItem :label-width="75" prop="consumer" label="consumer">
+            <FormItem :label-width="80" prop="consumer" label="consumer">
                   <Select v-model="formMapping.consumer" style="width:200px"  @on-change="mapStart">
                       <Option v-for="item in TargetOptionDt" :value="item.value" :key="item.value">{{ item.label }}</Option>
                   </Select>
             </FormItem>
-            <FormItem :label-width="75" label="Notes">
+            <FormItem :label-width="80" label="Notes">
                 <Input v-model="formMapping.notes" type="textarea" placeholder="Notes..."></Input>
             </FormItem>
           </Row>
@@ -241,23 +241,34 @@ export default {
     onEditorCodeChange (newCode, index) {
       this.formMapping.MapData[index].transform = newCode
     },
-    fetch (id) {
+    async getTotalSchema () {
+      let count = schema.getCustom('?isdeleted=false&$limit=0').then(res => {
+        return res.data.total
+      }).catch(err => {
+        console.log(err)
+        return 0
+      })
+      return count
+    },
+    async fetch (id) {
       var self = this
       this.rid = id
-      self.resetData()
-      return schema.get().then((response) => {
+      let totalrecords = await this.getTotalSchema()
+      // console.log('totalrecords:: ', totalrecords)
+      return schema.getCustom('?isdeleted=false&$limit=' + totalrecords).then((response) => {
         // console.log('mapping', this.formMapping)
         // console.log('response from fetch', response)
         // var _formMapping = {}
-        self.allSchema = response.data
-        self._sourceSchema = _.find(self.allSchema, {_id: self.rid})
+        // console.log(response.data.data, self.rid)
+        self.allSchema = response.data.data
+        self._sourceSchema = _.find(self.allSchema, {id: self.rid})
+        // console.log('this.sourceSchemaEntity', self._sourceSchema)
         self.sourceSchemaEntity = self._sourceSchema.entity
-        // console.log('this.sourceSchemaEntity', this.sourceSchemaEntity)
-        self.SourceOptionDt.push({value: self._sourceSchema._id, label: self._sourceSchema.title})
-        self.formMapping.producer = self._sourceSchema._id
+        self.SourceOptionDt.push({value: self._sourceSchema.id, label: self._sourceSchema.title})
+        self.formMapping.producer = self._sourceSchema.id
         self._targetSchema = self.allSchema // _.reject(self.allSchema, {_id: self.rid})
         self.TargetOptionDt = _.map(self._targetSchema, (m) => {
-          return {value: m._id, label: m.title}
+          return {value: m.id, label: m.title}
         })
 
         var checkDt = _.find(this.$store.state.mappingTemp, { 'producer': self.rid })
@@ -301,7 +312,7 @@ export default {
         self.formMapping.MapData = this.testStoreAvail.MapData
         self.customDtRecord = []
         self.cascadDt = []
-        self.targetSchemaEntity = (_.find(self._targetSchema, {_id: this.testStoreAvail.consumer})).entity
+        self.targetSchemaEntity = (_.find(self._targetSchema, {id: this.testStoreAvail.consumer})).entity
         _.forEach(self._sourceSchema.entity, function (ent) {
           if (ent.customtype) {
             var data5 = []
@@ -339,7 +350,7 @@ export default {
         }
         self.customDtRecord = []
         self.cascadDt = []
-        self.targetSchemaEntity = (_.find(self._targetSchema, {_id: self.formMapping.consumer})).entity
+        self.targetSchemaEntity = (_.find(self._targetSchema, {id: self.formMapping.consumer})).entity
         _.forEach(self._sourceSchema.entity, function (ent, index) {
           if (!self.$route.params.mappingid) {
             self.formMapping.MapData.push({producerField: ent.name, consumerField: [], transform: '', ctype: ent.customtype})
@@ -380,9 +391,9 @@ export default {
     getChildren (id) {
       var self = this
       let child = []
-      schema.getThis(id).then((res) => {
+      schema.get(id).then((res) => {
         // console.log('ssf', res)
-        _.forEach(res.data.entity, function (e, i) {
+        _.forEach(res.data.data.entity, function (e, i) {
           // alert(e.customtype)
           if (e.customtype) {
             var s = self.getChildren(e.type)
