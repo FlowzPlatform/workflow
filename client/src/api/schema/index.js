@@ -24,6 +24,14 @@ export default {
       return api.request('get', '/' + model + '/' + id)
     }
   },
+  getCustom: (string) => {
+    // console.log('string', string)
+    if (!string) {
+      return api.request('get', '/' + model + '?isdeleted=false')
+    } else {
+      return api.request('get', '/' + model + string)
+    }
+  },
   getAll: getAllEntity,
   getThis: (id) => {
     return api.request('get', '/' + model + '/' + id)

@@ -3,7 +3,9 @@
 module.exports = {
   before: {
     all: [],
-    find: [],
+    find: [
+      hook => beforeFind(hook)
+    ],
     get: [],
     create: [],
     update: [],
@@ -31,3 +33,15 @@ module.exports = {
     remove: []
   }
 };
+
+
+let beforeFind = function(hook) {
+  const query = hook.params.query
+  if (query.isdeleted != undefined) {
+    if (hook.params.query.isdeleted == 'true') {
+      hook.params.query.isdeleted = true
+    } else if (hook.params.query.isdeleted == 'false') {
+      hook.params.query.isdeleted = false
+    }
+  }
+}
