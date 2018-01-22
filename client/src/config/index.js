@@ -4,7 +4,7 @@ var temp = {
   socketURI: 'http://localhost:4033',
   workerRegisterURL: 'http://localhost:4001',
   approvalRoleURI: 'http://api.flowz.com/authldap/',
-  loginURL: 'http://auth.flowz.com/api',
+  loginURL: 'http://auth.flowzcluster.tk/api',
   fixedLayout: false,
   hideLogoOnMobile: false,
   facebookSuccessCallbackUrl: 'http://localhost:8000',
@@ -17,7 +17,8 @@ var temp = {
   loginWithLinkedinUrl: 'http://auth.flowz.com/auth/linkedin',
   githubSuccessCallbackUrl: 'http://localhost:8000',
   loginWithGithubUrl: 'http://auth.flowz.com/auth/github',
-  grapesUrl: 'http://172.16.230.133:3032'
+  grapesAPI: 'http://api.flowzcluster.tk/serverapi',
+  grapesUrl: 'http://webbuilder.flowzcluster.tk'
 }
 if (process.env.NODE_ENV !== 'development') {
   temp = {
@@ -36,7 +37,8 @@ if (process.env.NODE_ENV !== 'development') {
     loginWithLinkedinUrl: 'http://auth.flowz.com/auth/linkedin',
     githubSuccessCallbackUrl: 'http://engine.flowz.com/',
     loginWithGithubUrl: 'http://auth.flowz.com/auth/github',
-    grapesUrl: 'http://webbuilder.flowz.com'
+    grapesAPI: 'http://api.flowzcluster.tk/serverapi',
+    grapesUrl: 'http://webbuilder.flowzcluster.tk'
   }
 }
 export default temp
