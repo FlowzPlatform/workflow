@@ -17,9 +17,12 @@ let getAllEntity = async(id) => {
   return response.data
 }
 export default {
-  get: (id) => {
-    if (id === undefined) {
-      return api.request('get', '/' + model)
+  get: (id = null, params = null) => {
+    if (id === null) {
+      console.log('params', params)
+      return api.request('get', '/' + model, null, params).then(response => {
+        return response.data
+      })
     } else {
       return api.request('get', '/' + model + '/' + id)
     }

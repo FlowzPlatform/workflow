@@ -428,9 +428,14 @@
       initFlow () {
         this.processVar = [
           new Promise((resolve, reject) => {
-            schemaModel.get().then((response) => {
-              response.data.splice(0, 0, { title: '---select---', id: 0 })
-              resolve(response.data)
+            schemaModel.get(null, {
+              $paginate: false,
+              isdeleted: false
+              // $limit: 0,
+              // $skip: 0
+            }).then((response) => {
+              response.splice(0, 0, { title: '---select---', id: 0 })
+              resolve(response)
             }).catch(error => {
               reject(error)
             })
@@ -470,11 +475,12 @@
                 approval: response[1],
                 emailtemplate: response[2],
                 schemamapping: response[3],
+                createTemplate: [],
                 AddEntity: () => {
                   this.storeXMLtolocalStorage()
                   this.$router.push('/schema/new')
                 },
-                createTemplate: () => {
+                openTemplate: () => {
                   this.storeXMLtolocalStorage()
                   this.$router.push('/schema/edit/717fde77-032f-4ac0-bebe-7f5b16a658e5')
                 },

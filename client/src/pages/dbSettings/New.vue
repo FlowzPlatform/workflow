@@ -159,7 +159,7 @@ export default{
                             }
                             else {
                                 this.$Notice.success({duration: 3, title:'Success!!', desc:'Connection Created...'})
-                                this.$router.push('/db');
+                                this.$router.push({name: 'list'});
                             }
                         })
                         .catch(error => {
