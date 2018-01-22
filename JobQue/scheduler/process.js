@@ -2,6 +2,7 @@ const vm = require('vm')
 const rp = require('request-promise')
 const pino = require('pino')
 const config = require('./default.json')
+const { exec, fork } = require('child_process')
 const PINO = config.pinoConsole
 
 global.options = []
@@ -29,7 +30,7 @@ let executeProcess = async function (jobType) {
     script.runInThisContext()(require)
     pino(PINO).info({ Process: jobType, fId: process.argv[6], pId: process.pid }, 'process created')
   } catch (e) {
-    let file = './process'
+    let file = '../scheduler/process'
     pino(PINO).error(e.message)
     let error = e.message.split("'");
     error[0] = error[0].slice(0, -1);

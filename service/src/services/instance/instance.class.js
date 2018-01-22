@@ -231,11 +231,11 @@ var getSchemaData = async(function (id) {
   var res = await (axios.get('http://' + config.get('host') + ':' + config.get('port') + '/schema/' + id))
     // console.log('res', res)
     // postSchemaData = res.data 
-  return res.data
+  return res.data.data
 })
 var getallSchemaData = async(function () {
   var res = await (axios.get('http://' + config.get('host') + ':' + config.get('port') + '/schema/'))
-  return res.data
+  return res.data.data
 })
 var giveDatabase = async(function (schemaid) {
   var res = await (axios.get('http://' + config.get('host') + ':' + config.get('port') + '/schema/' + schemaid))
@@ -492,7 +492,7 @@ var compareData = async(function (id, old_data, new_data, res) {
   }
 })
 var singleLevelsave = async(function (data) {
-  // console.log('singleLevelsave', data)
+    // console.log('singleLevelsave', data)
     var id = data[0].Schemaid
     var res = await (getSchemaData(id))
     var arr = []
