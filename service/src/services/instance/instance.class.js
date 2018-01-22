@@ -241,7 +241,7 @@ var giveDatabase = async(function (schemaid) {
   var res = await (axios.get('http://' + config.get('host') + ':' + config.get('port') + '/schema/' + schemaid))
   console.log('response from giveDatabase', res.data)
     // postSchemaData = res.data 
-  return res.data.database
+  return res.data.data.database
 })
 var saveData = async(function (data, res) {
   console.log('save calling...................', data, res)
@@ -269,7 +269,7 @@ var saveData = async(function (data, res) {
   //   }
   // }
 
-  if (typeof res._id !== 'undefined') {
+  if (typeof res.id !== 'undefined') {
     var dbdata = await (dbapi[_dbindex].api.postflowsInstance(data, res.database[1], res.title));
   } else {
     var dbdata = await (dbapi[_dbindex].api.postflowsInstance(data, res.database[1]));
@@ -700,6 +700,7 @@ class Service {
   get(id, params) {
     console.log('Get Instance feathers...');
     if (params.query.schemaid != undefined) {
+      console.log('id::: from Get Instance::: ', id)
       var res = getIdbySchemaId(id, params.query.schemaid)
       return Promise.resolve(res)
     } else if (params.query.schemaname != undefined) {

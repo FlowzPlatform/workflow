@@ -142,6 +142,7 @@ export default {
       //     this.formSchemaInstance.data = this.lastLog.input
       //   }
       // }
+      // console.log('response.data', response.data)
       this.schema = response.data
       this.entity = this.schema.entity
       this.formSchemaInstance.entity = this.schema.entity
@@ -172,14 +173,14 @@ export default {
         _.forEach(self.lastLog.input, (obj) => {
           // obj = this.lastLog.input[0]
           // obj.database = this.schema.database
-          obj.Schemaid = self.schema._id
+          obj.Schemaid = self.schema.id
           delete obj.id
           delete obj._id
           self.formSchemaInstance.data.push(obj)
         })
       } else {
         // obj.database = this.schema.database
-        obj.Schemaid = this.schema._id
+        obj.Schemaid = this.schema.id
         // console.log('this.entity', this.entity)
         _.forEach(this.entity, function (v) {
           if (v.customtype) {
@@ -199,14 +200,15 @@ export default {
       // console.log('obj', obj)
     },
     makeObj () {
+      // console.log('this.schema', this.schema)
       var obj = this.schema
-      obj.Schemaid = this.schema._id
+      obj.Schemaid = this.schema.id
       obj.data = this.formSchemaInstance.data
       return obj
     },
     handleSubmit (name) {
       var obj = this.makeObj()
-      // console.log('QQQQQQQQQQQQ', obj.data[0])
+      console.log('QQQQQQQQQQQQ', obj.data)
       this.validFlag = true
       this.validErr = []
       var check = this.checkValidation(obj.data[0], this.entity)
@@ -229,7 +231,7 @@ export default {
       }
     },
     checkValidation (data, ent) {
-      console.log('Validation....', data, ent)
+      // console.log('Validation....', data, ent)
       var self = this
       // var flag = true
       _.forEach(ent, function (v) {
