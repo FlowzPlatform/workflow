@@ -39,10 +39,11 @@ module.exports = {
 var aftercreateInstance = async(function(hook) {
   let outputObject = [];
   // console.log('hook.result', hook.result)
+  // console.log('hook.data', hook.data)
   let flowinstace = await (axios.get(serverUrl + 'flowz-instance/' + hook.data.instanceid))
   let process = _.find(flowinstace.data.processList, function(o) { return o.id == hook.data.processid; });
   for (var element in hook.result) {
-    let object = await (getinstancevalue(hook.result[element].refid, process.inputProperty[0].entityschema._id))
+    let object = await (getinstancevalue(hook.result[element].refid, process.inputProperty[0].entityschema.id))
     outputObject.push(object);
   }
   // console.log('hook.data.processid', hook.data.processid)
@@ -100,8 +101,9 @@ var addtoApprovalClass = async(function(instanceid, inputdata, processid, jobId)
     })
 })
 var getinstancevalue = async(function(id, schemaid) {
+  console.log('id::: ', id, 'schemaid::: ', schemaid)
   var response = await (axios.get(serverUrl + 'instance/' + id + '?schemaid=' + schemaid))
-    // console.log('response', response)
+  // console.log('response', response)
   return response.data
 });
 
