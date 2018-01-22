@@ -17,7 +17,8 @@ var temp = {
   loginWithLinkedinUrl: 'http://auth.' + process.env.domainkey + '/auth/linkedin',
   githubSuccessCallbackUrl: 'http://localhost:8000',
   loginWithGithubUrl: 'http://auth.' + process.env.domainkey + '/auth/github',
-  grapesUrl: 'http://webbuilder.qaflowz.tk/'
+  grapesUrl: 'http://webbuilder.qaflowz.tk/',
+  grapesAPI: 'http://api.' + process.env.domainkey + '/serverapi'
 }
 if (process.env.NODE_ENV !== 'development') {
   temp = {
@@ -36,7 +37,8 @@ if (process.env.NODE_ENV !== 'development') {
     loginWithLinkedinUrl: 'http://auth.' + process.env.domainkey + '/auth/linkedin',
     githubSuccessCallbackUrl: 'http://engine.' + process.env.domainkey + '/',
     loginWithGithubUrl: 'http://auth.' + process.env.domainkey + '/auth/github',
-    grapesUrl: 'http://webbuilder.' + process.env.domainkey
+    grapesUrl: 'http://webbuilder.qaflowz.tk/',
+    grapesAPI: 'http://api.' + process.env.domainkey + '/serverapi'
   }
 }
 export default temp
