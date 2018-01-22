@@ -501,7 +501,7 @@
         </Form>
       </Col>
     </Row>
-    <!-- {{GrapesListData}} -->
+    <!-- {{this.formSchema}} -->
     <!-- <hr> -->
     <!-- {{etemplate}} -->
     <!-- <div class="">
@@ -870,7 +870,7 @@ export default {
         // this.fetchSchemaType(id)
         this.$Loading.finish()
         this.GrapesListData = []
-        axios.get(config.grapesUrl + '/project-configuration?userEmail=' + this.$store.state.user.email).then(res => {
+        axios.get(config.grapesAPI + '/project-configuration?userEmail=' + this.$store.state.user.email).then(res => {
           // console.log('res', res.data.data)
           // return res.data.data
           var _res = res.data.data
@@ -896,11 +896,35 @@ export default {
         })
         
       } else {
+        axios.get(config.grapesAPI + '/project-configuration?userEmail=' + this.$store.state.user.email).then(res => {
+          // console.log('res', res.data.data)
+          // return res.data.data
+          var _res = res.data.data
+          for (let [i, mobj] of _res.entries()) {
+            // console.log(i)
+            var obj = {}
+            obj.label = mobj.configData[1].projectSettings[0].ProjectName
+            obj.value = mobj.configData[1].projectSettings[0].ProjectName
+            obj.children = []
+            for (let [inx, sObj] of mobj.configData[1].pageSettings.entries()) {
+              // console.log(inx)
+              var s = {}
+              s.label = sObj.PageName
+              var a = sObj.PageName.split('.')
+              // console.log(a)
+              s.value = a[0]
+              obj.children.push(s)
+            }
+            this.GrapesListData.push(obj)
+          }
+        }).catch(err => {
+          console.log(err)
+        })
         api.request('get', '/schema/' + id)
         .then(response => {
           this.formSchema = response.data
-          this.createtemplate = this.formSchema.createTemplate
-          this.viewtemplate = this.formSchema.viewTemplate
+          this.etemplate.createtemplate = this.formSchema.createTemplate
+          this.vtemplate.viewtemplate = this.formSchema.viewTemplate
           this.mjmlUpload = this.formSchema.emailTemplate
           this.$Loading.finish()
         })
@@ -934,8 +958,8 @@ export default {
           /* Making API call to authenticate a user */
           this.loading = true
           if (this.formSchema.id === undefined) {
-            this.formSchema['viewTemplate'] = this.viewtemplate
-            this.formSchema['createTemplate'] = this.createtemplate
+            this.formSchema['viewTemplate'] = this.vtemplate.viewtemplate
+            this.formSchema['createTemplate'] = this.etemplate.createtemplate
             this.formSchema['emailTemplate'] = this.mjmlUpload
             this.formSchema['createdAt'] = new Date()
             this.formSchema['isdeleted'] = false
