@@ -30,14 +30,15 @@ let executeProcess = async function (jobType) {
     script.runInThisContext()(require)
     pino(PINO).info({ Process: jobType, fId: process.argv[6], pId: process.pid }, 'process created')
   } catch (e) {
-    let file = '../scheduler/process'
+    let file = __filename;
     pino(PINO).error(e.message)
     let error = e.message.split("'");
     error[0] = error[0].slice(0, -1);
     if (error[0] === 'Cannot find module') {
-      exec('npm i ' + error[1], (error, stdout, stderr) => {
+      exec('cd ../scheduler && npm i ' + error[1], (error, stdout, stderr) => {
         console.log(`${stdout}`);
-        fork(`${file}`)
+        process.argv.splice(0, 2);
+        fork(`${file}`, process.argv)
       })
     } else {
       pino(PINO).error('unable to load child worker', jobType)

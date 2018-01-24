@@ -231,7 +231,7 @@ var getSchemaData = async(function (id) {
   var res = await (axios.get('http://' + config.get('host') + ':' + config.get('port') + '/schema/' + id))
     // console.log('res', res)
     // postSchemaData = res.data 
-  return res.data.data
+  return res.data
 })
 var getallSchemaData = async(function () {
   var res = await (axios.get('http://' + config.get('host') + ':' + config.get('port') + '/schema/'))
