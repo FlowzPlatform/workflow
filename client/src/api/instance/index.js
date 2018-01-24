@@ -12,7 +12,6 @@ export default {
     return api.request('get', '/' + model + '/' + id + '?schemaid=' + Schemaid)
   },
   post: (data) => {
-    console.log('data', data)
     return api.request('post', '/' + model, data)
   },
   put: (id, data) => {

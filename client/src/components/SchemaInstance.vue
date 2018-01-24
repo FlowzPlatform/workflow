@@ -166,18 +166,43 @@ export default {
       this.handleAdd()
       // }
     },
+    deleteId (obj) {
+      let self = this
+      return _.map(obj, (entry) => {
+        entry.Schemaid = self.schema.id
+        return _.chain(entry).omit(['id', '_id']).reduce((result, value, key) => {
+          if (_.isArray(value)) {
+            result[key] = self.deleteId(value)
+          } else {
+            result[key] = value
+          }
+          return result
+        }, {}).value()
+      })
+    },
     handleAdd () {
       var self = this
       var obj = {}
       if (this.lastLog !== undefined && this.lastLog.input.length !== 0) {
-        _.forEach(self.lastLog.input, (obj) => {
-          // obj = this.lastLog.input[0]
-          // obj.database = this.schema.database
-          obj.Schemaid = self.schema.id
-          delete obj.id
-          delete obj._id
-          self.formSchemaInstance.data.push(obj)
+        self.formSchemaInstance.data = _.map(self.lastLog.input, (entry) => {
+          entry.Schemaid = self.schema.id
+          return _.chain(entry).omit(['id', '_id']).reduce((result, value, key) => {
+            if (_.isArray(value)) {
+              result[key] = self.deleteId(value)
+            } else {
+              result[key] = value
+            }
+            return result
+          }, {}).value()
         })
+        // _.forEach(self.lastLog.input, (obj) => {
+        //   // obj = this.lastLog.input[0]
+        //   // obj.database = this.schema.database
+        //   obj.Schemaid = self.schema.id
+        //   delete obj.id
+        //   delete obj._id
+        //   self.formSchemaInstance.data.push(obj)
+        // })
       } else {
         // obj.database = this.schema.database
         obj.Schemaid = this.schema.id
@@ -208,7 +233,6 @@ export default {
     },
     handleSubmit (name) {
       var obj = this.makeObj()
-      console.log('QQQQQQQQQQQQ', obj.data)
       this.validFlag = true
       this.validErr = []
       var check = this.checkValidation(obj.data[0], this.entity)
@@ -235,7 +259,6 @@ export default {
       var self = this
       // var flag = true
       _.forEach(ent, function (v) {
-        console.log(JSON.stringify(v))
         if (v.customtype) {
           // console.log('data[v.name]', data[v.name])
           _.forEach(data[v.name], (d) => {

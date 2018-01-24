@@ -2,6 +2,7 @@ import api from '../../api'
 let model = 'schema'
 let getAllEntity = async(id) => {
   let response = await api.request('get', '/' + model + '/' + id)
+  console.log('response', response)
   for (let [index, item] of response.data.entity.entries()) {
     if (item.customtype) {
       response.data.entity[index] = await getAllEntity(item.type)

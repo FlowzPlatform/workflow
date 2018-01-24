@@ -52,6 +52,7 @@ export default {
 
       await flowInstance.getThis(self.$route.params.fiid)
       .then(async function (response) {
+        console.log('self.selectedProcess.inputProperty[0].entityschema', self.selectedProcess.inputProperty[0].entityschema)
         self.selectedProcess = await _.find(response.data.processList, ['id', self.$route.params.pid])
         self.entitySchema = await self.getSchema(self.selectedProcess.inputProperty[0].entityschema._id)
         self.log = await _.chain(response.data.process_log).orderBy(['lastModified'], ['asc']).findLast((f) => { return f.job === self.$route.params.pid }).value()

@@ -345,8 +345,9 @@ export default {
       return _.size(log)
     },
     getInputColumns (entity) {
+      let self = this
       if (this.selectedProcess.inputProperty && this.selectedProcess.inputProperty.length > 0 && this.selectedProcess.inputProperty[0].entityschema.entity) {
-        return _.map(entity, m => {
+        return _.map(self.selectedProcess.inputProperty[0].entityschema.entity, m => {
           return {title: m.name, key: m.name}
         })
       } else {
