@@ -8,6 +8,9 @@ export default {
       return api.request('get', '/' + model + '/' + id)
     }
   },
+  getCustom: (string) => {
+    return api.request('get', '/' + model + string)
+  },
   post: (data) => {
     return api.request('post', '/' + model, data)
   },
