@@ -44,18 +44,3 @@
       }
     }
 </script>
-<style>
-    .expand-row{
-        margin-bottom: 16px;
-    }
-    .ivu-table-small th {
-      height: 32px;
-      background-color: #394263;
-      color: #fff;
-    }
-    .ivu-table-small td {
-      height: 32px;
-      background-color: #fff;
-      /*color: #fff;*/
-    }
-</style>

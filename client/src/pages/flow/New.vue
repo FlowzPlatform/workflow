@@ -223,13 +223,11 @@
           })
           .map(async (m) => {
             let _mapping = await self.getMapping(m, mergeModules)
-            console.log('m', m)
             // console.log('m', m._isProcessTask)
             // let processTask = m._isProcessTask !== undefined ? (m._isProcessTask === 'true') : (m['_camunda:isProcessTask'] === 'true')
             // console.log('processTask', processTask)
             // console.log('ex', m['_camunda:executeIfAny'])
             // let executeAny = m._executeIfAny === undefined ? ((m['_camunda:executeIfAny']) ? m['_camunda:countany'] : false) : ((m._executeIfAny) ? m._countany : false)
-            console.log('executeAny', m['_camunda:executeIfAny'] !== undefined ? ((m['_camunda:executeIfAny']) ? m['_camunda:countany'] : false) : false)
             return {
               id: m._id,
               capacity: (m._isFormInput) ? m._capacity : false,
@@ -254,7 +252,6 @@
         let self = this
         return await Promise.all(_.chain(process.startEvent)
         .map(async (m) => {
-          console.log('m', m)
           return {
             id: m._id,
             capacity: (m._isFormInput) ? m._capacity : false,
@@ -291,7 +288,6 @@
           if (!_.isArray(proccess.extensionElements.myConfigurations.configuration)) {
             proccess.extensionElements.myConfigurations.configuration = [proccess.extensionElements.myConfigurations.configuration]
           }
-          console.log('proccess.extensionElements.myConfigurations', proccess.extensionElements.myConfigurations)
           return _.map(proccess.extensionElements.myConfigurations.configuration, (m) => {
             return {
               key: m._key,
