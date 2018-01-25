@@ -39,10 +39,10 @@ module.exports = {
   }
 };
 
-var beforeCreate = async(function(hook) {
+var beforeCreate = async(function (hook) {
   // console.log('Hook Data.......................', hook.data)
   var n = await (checkpulginexist(hook.data))
-  // console.log('checkpulginexist::: ', n)
+    // console.log('checkpulginexist::: ', n)
     // console.log('checkpulginexist...................', n)
   if (n.status) {
     // throw new Error('Message text can not be empty')
@@ -54,27 +54,31 @@ var beforeCreate = async(function(hook) {
   } else {
     // console.log('Here.....................')
     for (let [inx, iObj] of hook.data.input.entries()) {
-      // iObj['i_id'] = iObj.id
-      var s = await (schemaequalChecker(iObj.entityschema[0]))
-      if (s.status) {
-        console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> input isEqual :: ', s.id)
-        iObj.entityschema = s.id
-      } else {
-        var res = await (checkSchemaObj(iObj.entityschema[0]))
-        // console.log('>>>>>>>>>>>>>>>> :: ', res, '  :: >>>>>>>>>>>>>')
-        iObj.entityschema = res
+      if (_.isArray(iObj.entityschema)) {
+        // iObj['i_id'] = iObj.id
+        var s = await (schemaequalChecker(iObj.entityschema[0]))
+        if (s.status) {
+          console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> input isEqual :: ', s.id)
+          iObj.entityschema = s.id
+        } else {
+          var res = await (checkSchemaObj(iObj.entityschema[0]))
+            // console.log('>>>>>>>>>>>>>>>> :: ', res, '  :: >>>>>>>>>>>>>')
+          iObj.entityschema = res
+        }
       }
     }
     for (let [inx, oObj] of hook.data.output.entries()) {
-      for (var [i, obj] of oObj.entityschema.entries()) {
-        var s = await (schemaequalChecker(obj))
-        if (s.status) {
-          console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> output isEqual :: ', s.id)
-          oObj.entityschema = s.id
-        } else {
-          var s = await (checkSchemaObj(obj))
-          // console.log('>>>>>>>>>>>>>>>> :: ', res, '  :: >>>>>>>>>>>>>')
-          oObj.entityschema = s
+      if (_.isArray(oObj.entityschema)) {
+        for (var [i, obj] of oObj.entityschema.entries()) {
+          var s = await (schemaequalChecker(obj))
+          if (s.status) {
+            console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> output isEqual :: ', s.id)
+            oObj.entityschema = s.id
+          } else {
+            var s = await (checkSchemaObj(obj))
+              // console.log('>>>>>>>>>>>>>>>> :: ', res, '  :: >>>>>>>>>>>>>')
+            oObj.entityschema = s
+          }
         }
       }
     }
@@ -103,13 +107,13 @@ var beforeCreate = async(function(hook) {
 })
 
 /* ------------ Check whole Plugins Schema object and Check already exist or not  ----------------- */
-var checkSchemaObj = async(function(obj) {
+var checkSchemaObj = async(function (obj) {
   obj['createTemplate'] = []
   obj['emailTemplate'] = []
   obj['viewTemplate'] = []
   obj['isdeleted'] = false
   obj['createdAt'] = new Date()
-  // console.log('previous obj...', obj)
+    // console.log('previous obj...', obj)
   var m = _.cloneDeep(obj)
   var flag = await (checkFlag(obj))
   if (!flag) {
@@ -131,8 +135,8 @@ var checkSchemaObj = async(function(obj) {
     }
   }
   var rs = await (schemaequalChecker(m))
-  // console.log('after rs obj...', obj)
-  // console.log('rs.... >>>>>>>>>>>>>> ', rs)
+    // console.log('after rs obj...', obj)
+    // console.log('rs.... >>>>>>>>>>>>>> ', rs)
   if (rs.status) {
     return rs.id
   } else {
@@ -142,20 +146,20 @@ var checkSchemaObj = async(function(obj) {
 })
 
 /* --------------------------- Check object match with already existing schema  -------------------- */
-var schemaequalChecker = function(item) {
+var schemaequalChecker = function (item) {
 
   var allschema = await (getallSchema())
   var flag = false
   for (let [i, obj] of allschema.entries()) {
     var sid = obj.id
-    // delete obj._id
+      // delete obj._id
     delete obj.id
     delete obj.createTemplate
     delete obj.emailTemplate
     delete obj.viewTemplate
     delete obj.createdAt
     delete obj.isdeleted
-    // var checktype = false
+      // var checktype = false
     for (let [k, iobj] of obj.entity.entries()) {
       if (iobj.customtype) {
         // checktype = true
@@ -178,7 +182,7 @@ var schemaequalChecker = function(item) {
 }
 
 /* ------------- make schema object into whole schema to match the plugin schema obj  -------------- */
-let makeEntireSchema = async(function(id) {
+let makeEntireSchema = async(function (id) {
   var obj = await (getThisSchema(id))
   delete obj.id
   delete obj.createTemplate
@@ -186,7 +190,7 @@ let makeEntireSchema = async(function(id) {
   delete obj.viewTemplate
   delete obj.createdAt
   delete obj.isdeleted
-  // var checktype = false
+    // var checktype = false
   for (let [k, iobj] of obj.entity.entries()) {
     if (iobj.customtype) {
       // checktype = true
@@ -200,7 +204,7 @@ let makeEntireSchema = async(function(id) {
 })
 
 /* ------------------- check plugins with their type already exist in database --------------------- */
-var checkpulginexist = async(function(sdata) {
+var checkpulginexist = async(function (sdata) {
   var _pdata = await (axios.get(serverUrl + '/bpmnplugins'))
   var flag = false;
   for (let i = 0; i < _pdata.data.data.length; i++) {
@@ -218,11 +222,11 @@ var checkpulginexist = async(function(sdata) {
 })
 
 /* ------------------- error when plugins already exist in database -------------------------------- */
-var sendError = function(hook) {
+var sendError = function (hook) {
   throw new Error('Plugin Already Imported.')
 }
 
-var registerWorkerProcess = async(function(obj, src) {
+var registerWorkerProcess = async(function (obj, src) {
   // console.log('inside registerWorkerProcess', obj, '  ::src:: ' ,src)
   let workerparameter = {}
   workerparameter.jobtype = obj.pluginType + '_worker'
@@ -233,7 +237,7 @@ var registerWorkerProcess = async(function(obj, src) {
   const config1 = { headers: form.getHeaders() };
   // console.log('inner 111111111111111111', config.registerWokerAPI)
   let registeredWorker = await (axios.post(config.registerWokerAPI, form, config1))
-  // console.log('inner 222222222222222222')
+    // console.log('inner 222222222222222222')
 
   if (registeredWorker.err) {
     return undefined
@@ -247,7 +251,7 @@ var registerWorkerProcess = async(function(obj, src) {
 })
 
 /* ------------------- To check that plugins schema contains type custom or not -------------------- */
-var checkFlag = function(obj) {
+var checkFlag = function (obj) {
   var status = false
   for (let [i, sObj] of obj.entity.entries()) {
     if (typeof sObj.type === 'object') {
@@ -258,22 +262,22 @@ var checkFlag = function(obj) {
 }
 
 /* ------------------- To save schema to database -------------------------------------------------- */
-var saveSchemaObj = async(function(obj) {
+var saveSchemaObj = async(function (obj) {
   var res = await (axios.post(serverUrl + '/schema', obj))
   console.log('......................................................id:::: ', res.data.id)
   return res.data.id
 })
 
 /* ------------------- Get all schema from database ------------------------------------------------ */
-var getallSchema = async(function() {
-  var count = await(axios.get(serverUrl + '/schema?$limit=0'))
+var getallSchema = async(function () {
+  var count = await (axios.get(serverUrl + '/schema?$limit=0'))
   var limit = count.data.total
-  var res = await (axios.get(serverUrl + '/schema?$limit='+ limit ))
+  var res = await (axios.get(serverUrl + '/schema?$limit=' + limit))
   return res.data.data
 })
 
 /* ------------------- Get schema with id from database -------------------------------------------- */
-var getThisSchema = async(function(id) {
+var getThisSchema = async(function (id) {
   var res = await (axios.get(serverUrl + '/schema/' + id))
   return res.data
 })
