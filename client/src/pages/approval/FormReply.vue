@@ -3,7 +3,12 @@
   <Card :bordered="false">
     <p slot="title">Make Request</p>
     <p slot="extra" v-show="notes">Notes : {{ notes }}</p>
-    <iframe id="filecontainer" allowtransparency="true" frameborder="0" @load="iframeload()" :src="html"></iframe>
+    <div v-if="isdefault">
+      <schema-instance :id="entitySchema.id" :processid="$route.params.pid" :instanceid="$route.params.fiid" :lastLog="log"></schema-instance>
+    </div>
+    <div v-else >
+      <iframe id="filecontainer" allowtransparency="true" frameborder="0" @load="iframeload()" :src="html"></iframe>
+    </div>
     <!--  + this.$route.params.fiid + '&&pid=' + this.$route.params.pid + '' -->
     <ul class="error">
       <li v-for="item in err">{{item}}</li>
@@ -17,8 +22,10 @@ import _ from 'lodash'
 import Schema from '@/api/schema'
 import ReceiveForm from '@/api/receiveform'
 import $ from 'jquery'
+import SchemaInstance from '../../components/SchemaInstance.vue'
 
 export default {
+  components: {'schema-instance': SchemaInstance},
   data () {
     return {
       Aloading: false,
@@ -29,21 +36,27 @@ export default {
       customSchema: [],
       URL: '',
       err: [],
-      log: {}
+      log: {},
+      isdefault: false
     }
   },
-  asyncComputed: {
-    async html () {
+  computed: {
+    html () {
       if (this.selectedProcess.inputProperty) {
-        let index = await _.findIndex(this.selectedProcess.inputProperty[0].entityschema.createTemplate, ['filename', this.selectedProcess.inputProperty[0].createTemplate])
-        var url = this.selectedProcess.inputProperty[0].entityschema.createTemplate[index].url
-        url = url.substr(0, 4) + url.substr(5)
+        let index = _.findIndex(this.selectedProcess.inputProperty[0].entityschema.createTemplate, ['filename', this.selectedProcess.inputProperty[0].createTemplate])
+        // console.log('index', index)
+        let url = ''
+        if (index === -1) {
+          url = this.selectedProcess.inputProperty[0].entityschema.createTemplate[index].url
+          url = url.substr(0, 4) + url.substr(5)
+        }
         return url
       }
     }
   },
   methods: {
     async iframeload () {
+      // alert('1')
       let self = this
       let array = []
       let data = []
@@ -52,9 +65,10 @@ export default {
 
       await flowInstance.getThis(self.$route.params.fiid)
       .then(async function (response) {
-        console.log('self.selectedProcess.inputProperty[0].entityschema', self.selectedProcess.inputProperty[0].entityschema)
-        self.selectedProcess = await _.find(response.data.processList, ['id', self.$route.params.pid])
-        self.entitySchema = await self.getSchema(self.selectedProcess.inputProperty[0].entityschema._id)
+        // console.log('self.selectedProcess.inputProperty[0].entityschema', self.selectedProcess.inputProperty[0].entityschema)
+        // self.selectedProcess = await _.find(response.data.processList, ['id', self.$route.params.pid])
+        // self.entitySchema = await self.getSchema(self.selectedProcess.inputProperty[0].entityschema.id)
+        // console.log('response.data.process_log', response.data.process_log)
         self.log = await _.chain(response.data.process_log).orderBy(['lastModified'], ['asc']).findLast((f) => { return f.job === self.$route.params.pid }).value()
       })
       .catch(function (error) {
@@ -265,12 +279,40 @@ export default {
         }
       })
       if (err.length > 0) { return false } else { return true }
+    },
+    async init (fid) {
+      let self = this
+      let response = await flowInstance.getThis(fid)
+      .then(function (response) {
+        // self.selectedProcess = _.find(response.data.processList, ['id', self.$route.params.pid])
+        // console.log('self.selectedProcess.inputProperty[0].entityschema', self.selectedProcess.inputProperty[0].entityschema)
+        // self.entitySchema = self.getSchema(self.selectedProcess.inputProperty[0].entityschema._id)
+        // console.log('this.selectedProcess.inputProperty[0].entityschema.createTemplate', self.selectedProcess.inputProperty[0].entityschema.createTemplate, self.selectedProcess.inputProperty[0].entityschema.createTemplate.length)
+        // self.log = await _.chain(response.data.process_log).orderBy(['lastModified'], ['asc']).findLast((f) => { return f.job === self.$route.params.pid }).value()
+        return response
+      })
+      .catch(function (error) {
+        console.log('Error', error)
+        self.$Notice.error({title: 'Error..!', desc: error})
+        return []
+      })
+      self.selectedProcess = _.find(response.data.processList, ['id', self.$route.params.pid])
+      // console.log('self.selectedProcess', self.selectedProcess)
+      // console.log('self.log', self.log)
+      self.entitySchema = await self.getSchema(self.selectedProcess.inputProperty[0].entityschema.id)
+      // console.log('Schema', self.entitySchema)
+      // console.log('createTemplate length', self.selectedProcess.inputProperty[0].entityschema.createTemplate, self.selectedProcess.inputProperty[0].entityschema.createTemplate.length)
+      let index = _.findIndex(this.selectedProcess.inputProperty[0].entityschema.createTemplate, ['filename', self.selectedProcess.inputProperty[0].createTemplate])
+      // console.log('index................', index)
+      if (index < 0) {
+        this.isdefault = true
+      }
     }
   },
   async mounted () {
     let self = this
     let validated
-
+    this.init(self.$route.params.fiid)
     window.addEventListener('message', async function (event) {
       self.err = []
       if (_.isArray(event.data)) {
