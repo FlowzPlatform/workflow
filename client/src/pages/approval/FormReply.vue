@@ -53,7 +53,8 @@ export default {
           // url = 'http://' + this.$store.state.user._id + '.' + temp.url[0] + '.flowzcluster.tk/' + temp.url[1] + '.html'
           // url = this.selectedProcess.inputProperty[0].entityschema.createTemplate[index].url
           // url = url.substr(0, 4) + url.substr(5)
-          url = 'http://172.16.230.133/websites/59a8e0dd41dc17001aeb1e67/c6f938a9-41f0-49e1-aaf1-65f8ce94b4e9/public/index.html'
+          // url = 'http://172.16.230.133/websites/59a8e0dd41dc17001aeb1e67/c6f938a9-41f0-49e1-aaf1-65f8ce94b4e9/public/index.html'
+          url = 'http://172.16.230.176/demo.html'
         }
         // console.log('url', url)
         return url
@@ -94,7 +95,8 @@ export default {
         data.push(item)
       })
       self.customSchema = customSchema
-      document.getElementById('filecontainer').contentWindow.postMessage({entity: array, formData: data}, '*')
+      console.log('Schema.............', self.entitySchema)
+      document.getElementById('filecontainer').contentWindow.postMessage({entity: array, formData: data, schema: self.entitySchema.entity}, '*')
     },
     async getCustom (id, flag) {
       let tempSchema
@@ -142,7 +144,7 @@ export default {
       }
       console.log(validated, this.input.length)
       if (validated && this.input.length > 0) {
-        console.log('dataObject1', dataObject1)
+        // console.log('dataObject1', dataObject1)
         Instance.post(dataObject1)
         .then(response => {
           // console.log('response', response.data)
