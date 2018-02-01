@@ -54,7 +54,8 @@ export default {
           // url = this.selectedProcess.inputProperty[0].entityschema.createTemplate[index].url
           // url = url.substr(0, 4) + url.substr(5)
           // url = 'http://172.16.230.133/websites/59a8e0dd41dc17001aeb1e67/c6f938a9-41f0-49e1-aaf1-65f8ce94b4e9/public/index.html'
-          url = 'http://172.16.230.176/demo.html'
+          url = 'http://localhost/person.html'
+          // url = 'http://172.16.230.133/websites/59fb06376adc6b00242a5533/f3455e59-b6b5-4b74-b02b-f39038f73bd7/public/index.html'
         }
         // console.log('url', url)
         return url
@@ -95,8 +96,8 @@ export default {
         data.push(item)
       })
       self.customSchema = customSchema
-      console.log('Schema.............', self.entitySchema)
-      document.getElementById('filecontainer').contentWindow.postMessage({entity: array, formData: data, schema: self.entitySchema.entity}, '*')
+      console.log('Schema.............', self.entitySchema, self.customSchema)
+      document.getElementById('filecontainer').contentWindow.postMessage({entity: array, formData: data, schema: self.customSchema}, '*')
     },
     async getCustom (id, flag) {
       let tempSchema
