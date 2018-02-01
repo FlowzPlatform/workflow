@@ -521,12 +521,13 @@ import MjmlEditor from '@/components/MjmlEditor.vue'
 import Emitter from '@/mixins/emitter'
 import config from '@/config'
 import axios from 'axios'
+import vue2Dropzone from 'vue2-dropzone'
+import 'vue2-dropzone/dist/vue2Dropzone.css'
 var file = []
-
 export default {
   name: 'schema',
   mixins: [Emitter],
-  components: {'input-tag': InputTag, 'grid-manager': gridmanager, 'GrapesComponent': GrapesComponent,  'MjmlEditor': MjmlEditor},
+  components: {'input-tag': InputTag, 'grid-manager': gridmanager, 'GrapesComponent': GrapesComponent,  'MjmlEditor': MjmlEditor, vueDropzone: vue2Dropzone},
   data () {
     const validateTitle = async(rule, value, callback) => {
       var patt = new RegExp(/^_|\`|\~|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\+|\=|\[|\{|\]|\}|\||\\|\'|\<|\,|\.|\>|\?|\/|\"|\;|\:|\-|\s/)
@@ -608,6 +609,9 @@ export default {
       }, {
         value: 'dropdown',
         label: 'DropDown'
+      }, {
+        value: 'file',
+        label: 'File'
       }],
       types: [],
       CascaderData: [],
@@ -1052,7 +1056,8 @@ export default {
         'phone': ['allowedValue', 'defaultValue', 'placeholder', 'regEx', 'optional'],
         'boolean': ['defaultValue', 'placeholder', 'optional'],
         'date': ['allowedValue', 'defaultValue', 'mindate', 'maxdate', 'placeholder', 'regEx', 'optional'],
-        'dropdown': ['allowedValue', 'options', 'defaultValue', 'placeholder', 'regEx', 'optional']
+        'dropdown': ['allowedValue', 'options', 'defaultValue', 'placeholder', 'regEx', 'optional'],
+        'file': []
       }
       if (typePropertys[this.formSchema.entity[index].type] === undefined) {
         return ['IsArray'].indexOf(property) >= 0
