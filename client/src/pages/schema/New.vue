@@ -128,6 +128,14 @@
                                           <Form-item v-if="activatedProperty(index,'max')" label="Max" :label-width="80" class="no-margin">
                                             <Input-number size="small" v-model="item.property.max"></Input-number>
                                           </Form-item>
+                                          <Form-item v-if="activatedProperty(index,'mindate')" label="Min Date" :label-width="80" class="no-margin">
+                                            <!-- <Input-number size="small" v-model="item.property.mindate"></Input-number> -->
+                                            <DatePicker type="date" placeholder="Select date"  v-model="item.property.mindate"></DatePicker>
+                                          </Form-item>
+                                          <Form-item v-if="activatedProperty(index,'maxdate')" label="Max Date" :label-width="80" class="no-margin">
+                                            <!-- <Input-number size="small" v-model="item.property.maxdate"></Input-number> -->
+                                            <DatePicker type="date" placeholder="Select date"  v-model="item.property.maxdate"></DatePicker>
+                                          </Form-item>
                                           <Form-item v-if="activatedProperty(index,'allowedValue')" label="Allowed Value" :label-width="80" class="no-margin">
                                             <input-tag  :tags="item.property.allowedValue"></input-tag>
                                           </Form-item>
@@ -501,7 +509,7 @@
         </Form>
       </Col>
     </Row>
-    <!-- {{this.formSchema}} -->
+    {{this.formSchema.entity}}
     <!-- <hr> -->
     <!-- {{etemplate}} -->
     <!-- <div class="">
@@ -1055,8 +1063,8 @@ export default {
         'number': ['min', 'max', 'allowedValue', 'defaultValue', 'placeholder', 'regEx', 'optional'],
         'phone': ['allowedValue', 'defaultValue', 'placeholder', 'regEx', 'optional'],
         'boolean': ['defaultValue', 'placeholder', 'optional'],
-        'date': ['allowedValue', 'defaultValue', 'mindate', 'maxdate', 'placeholder', 'regEx', 'optional'],
-        'dropdown': ['allowedValue', 'options', 'defaultValue', 'placeholder', 'regEx', 'optional'],
+        'date': ['defaultValue', 'mindate', 'maxdate', 'placeholder', 'optional'],
+        'dropdown': ['options', 'defaultValue', 'placeholder', 'optional']
         'file': []
       }
       if (typePropertys[this.formSchema.entity[index].type] === undefined) {
