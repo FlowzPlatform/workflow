@@ -10,27 +10,20 @@
         </Col>
         <i-col :span="5">
             <div class="f-logo">
-                <img src="../../assets/images/Flowz-logo.png">
+                <img src="../../assets/images/logo.png" style="width:100%;vertical-align: inherit;">
             </div>
         </i-col>
-        <!-- <i-col :span="5" class="logo">
-            <div class="f-logo">
-                <Icon type="navicon-round" :size="30"></Icon>  
-                <img src="../../assets/images/Flowz-logo.png">
-            </div>
-        </i-col> -->
         <i-col :span="18">
             <Row type="flex" justify="end">
                 <div class="layout-nav">
-                    
                     <Menu-item name="1">
                       <Submenu name="1">
                         <template slot="title">
                           <Icon type="person" :size="16"></Icon>
-                          Krunal Mahera
+                          {{$store.state.user.fullname}}
                         </template>
                         <Menu-item name="1-1">
-                            <a>
+                            <a @click="handleRemove">
                                 <Icon type="ios-locked-outline" :size="16"></Icon>
                                 Logout
                             </a>
@@ -41,45 +34,26 @@
                 </Row>
         </i-col>
         </Row>
-      </Col>
-      <!-- <i-col :span="5" class="logo">
-        <div class="f-logo">
-          <Icon type="navicon-round" :size="30"></Icon>  
-          <img src="../../assets/images/Flowz-logo.png">
-        </div>
-      </i-col> -->
-      <i-col :span="18">
-        <Row type="flex" justify="end">
-          <div class="layout-nav">
-            <Menu-item name="1">
-              <Submenu name="1">
-                <template slot="title">
-                  <Icon type="person" :size="16"></Icon>
-                  Kavi Bhavsar
-                </template>
-                <Menu-item name="1-1">
-                  <a @click="handleRemove()">
-                    <Icon type="ios-locked-outline" :size="16"></Icon>
-                    Logout
-                  </a>
-                </Menu-item>
-              </Submenu>
-            </Menu-item>
-          </div>
-        </Row>
-      </i-col>
-    </Row>
-  </Menu>
+    </Menu>
 </template>
-
 <script>
-/*eslint-disable*/
+  import psl from 'psl'
   export default {
     computed: {
       toggeleEnable () {
         return !this.$store.state.sidenavpin || (!this.$store.state.sidenavtoggle)
       }
+    },
+    methods: {
+      handleRemove () {
+        let location = psl.parse(window.location.hostname)
+        location = location.domain === null ? location.input : location.domain
+        this.$cookie.delete('auth_token', {domain: location})
+        this.$store.commit('SET_TOKEN', null)
+        this.$store.commit('SET_USER', null)
+        this.$store.commit('SET_ROLE', null)
+        this.$router.push('/login')
+      }
     }
   }
 </script>
-
