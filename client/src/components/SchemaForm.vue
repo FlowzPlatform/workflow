@@ -55,7 +55,9 @@
                   <Option v-for="dpd in field.property.options" :value="dpd" :key="dpd">{{ dpd }}</Option>
                 </Select>
                 <Checkbox v-if="field.type == 'boolean'" v-model="schemainstance.data[index][field.name]">{{field.name}}</Checkbox>
+                
               </Form-item>
+              <input type="file" v-if="field.type == 'file'" @change="handleFileChange($event, index, field.name)" />
             </template>
           </template>
           
@@ -76,7 +78,12 @@
 /*eslint-disable*/
 import Schema from '../api/schema'
 import SchemaForm from './SchemaForm'
-
+var AWS = require('aws-sdk')
+AWS.config.update({
+  accessKeyId: process.env.accesskey,
+  secretAccessKey: process.env.secretkey
+})
+AWS.config.region = 'us-west-2'
   export default {
     name: 'schema-form',
     props: ['schemainstance'],
@@ -92,6 +99,24 @@ import SchemaForm from './SchemaForm'
       }
     },
     methods: {
+      handleFileChange(e, index, fieldName) {
+        let self = this
+        var files = e.target.files || e.dataTransfer.files
+        if (files.length > 0) {
+          console.log('files', files[0])
+          let bucket = new AWS.S3({ params: { Bucket: 'airflowbucket1/obexpense/expenses' } })
+          var params = { Key: files[0].name, ContentType: files[0].type, Body: files[0] }
+          bucket.upload(params).on('httpUploadProgress', function (evt) {
+            console.log('Uploaded :: ' + parseInt((evt.loaded * 100) / evt.total) + '%')
+          }).send(function (err, data) {
+            if (err) {
+              alert(err)
+            } else {
+              self.schemainstance.data[index][fieldName] = data.Location
+            }
+          })
+        }
+      },
       getValidationProps (index, fieldName) {
         return 'data[' + index + '][' + fieldName + ']'
       },
