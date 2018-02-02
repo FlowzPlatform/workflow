@@ -1064,7 +1064,7 @@ export default {
         'phone': ['allowedValue', 'defaultValue', 'placeholder', 'regEx', 'optional'],
         'boolean': ['defaultValue', 'placeholder', 'optional'],
         'date': ['defaultValue', 'mindate', 'maxdate', 'placeholder', 'optional'],
-        'dropdown': ['options', 'defaultValue', 'placeholder', 'optional']
+        'dropdown': ['options', 'defaultValue', 'placeholder', 'optional'],
         'file': []
       }
       if (typePropertys[this.formSchema.entity[index].type] === undefined) {

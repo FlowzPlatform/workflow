@@ -20,9 +20,9 @@
 import flowInstance from '@/api/flowzinstance'
 import _ from 'lodash'
 import Schema from '@/api/schema'
-// import ReceiveForm from '@/api/receiveform'
+// import ReceiveForm from '@/ap'
 import Instance from '@/api/instance'
-// import $ from 'jquery'
+// import config from '@/config'process.env.accesskey import $ froprocess.env 'jquery'
 import SchemaInstance from '../../components/SchemaInstance.vue'
 
 export default {
@@ -44,6 +44,7 @@ export default {
   computed: {
     html () {
       if (this.selectedProcess.inputProperty) {
+        // console.log(this.selectedProcess.inputProperty[0].entityschema)
         let index = _.findIndex(this.selectedProcess.inputProperty[0].entityschema.createTemplate, ['filename', this.selectedProcess.inputProperty[0].createTemplate])
         // console.log('index', index)
         let url = ''
@@ -54,7 +55,7 @@ export default {
           // url = this.selectedProcess.inputProperty[0].entityschema.createTemplate[index].url
           // url = url.substr(0, 4) + url.substr(5)
           // url = 'http://172.16.230.133/websites/59a8e0dd41dc17001aeb1e67/c6f938a9-41f0-49e1-aaf1-65f8ce94b4e9/public/index.html'
-          url = 'http://localhost/person.html'
+          url = 'http://localhost/file.html'
           // url = 'http://172.16.230.133/websites/59fb06376adc6b00242a5533/f3455e59-b6b5-4b74-b02b-f39038f73bd7/public/index.html'
         }
         // console.log('url', url)
@@ -97,7 +98,7 @@ export default {
       })
       self.customSchema = customSchema
       console.log('Schema.............', self.entitySchema, self.customSchema)
-      document.getElementById('filecontainer').contentWindow.postMessage({entity: array, formData: data, schema: self.customSchema}, '*')
+      document.getElementById('filecontainer').contentWindow.postMessage({entity: array, formData: data, schema: self.customSchema, configs: { accesskey: process.env.accesskey, secretkey: process.env.secretkey }}, '*')
     },
     async getCustom (id, flag) {
       let tempSchema
