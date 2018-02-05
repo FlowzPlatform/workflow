@@ -69,6 +69,12 @@
     methods: {
       async save () {
         let xmlData
+        let svgData = ''
+        console.log('this.bpmnModeler', this.bpmnModeler)
+        this.bpmnModeler.saveSVG({ format: true },
+          function (e, svg) {
+            svgData = svg
+          })
         this.bpmnModeler.saveXML({ format: true },
           function (e, xml) {
             xmlData = xml
@@ -80,6 +86,7 @@
           flowObject.ProcessName = data.definitions.process._name
           flowObject.xml = xmlData
           flowObject.json = await this.generateJson(xmlData)
+          flowObject.svg = svgData
           // console.log('xmlData', flowObject.json)
           let result = null
           if (this.$route.params.id !== undefined) {
