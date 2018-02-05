@@ -40,6 +40,6 @@ export default {
   }
 }
 </script>
-<style lang="css">
+<!-- <style lang="css">
     @import "../../assets/styles/user.css";
-</style>
+</style> -->

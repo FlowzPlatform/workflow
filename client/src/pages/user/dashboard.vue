@@ -38,7 +38,8 @@
 <script>
 import flowz from '@/api/flowz'
 import viewSVG from './viewSVG'
-import flowzinstanceModel from '@/api/flowzinstance'
+// import flowzinstanceModel from '@/api/flowzinstance'
+import flowInstance from './flowInstance'
 export default {
   name: 'dashboard',
   components: {
@@ -49,6 +50,17 @@ export default {
       flowzList: {},
       loading: true,
       columns: [
+        {
+          type: 'expand',
+          width: 50,
+          render: (h, params) => {
+            return h(flowInstance, {
+              props: {
+                fid: params.row.id
+              }
+            })
+          }
+        },
         {
           title: '#',
           key: 'ProcessName',
@@ -104,11 +116,11 @@ export default {
       .then(response => {
         this.flowzList = response.data
         this.loading = false
-        response.data.data.forEach((item) => {
-          flowzinstanceModel.getByfid(item.id).then(res => {
-            console.log('item', res)
-          })
-        })
+        // response.data.data.forEach((item) => {
+        //   flowzinstanceModel.getByfid(item.id).then(res => {
+        //     console.log('item', res)
+        //   })
+        // })
       })
       .catch(error => {
         console.log(error)
