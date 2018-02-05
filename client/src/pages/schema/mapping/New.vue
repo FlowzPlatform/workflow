@@ -61,21 +61,23 @@
                                     </div>
                                   </td>
                                   <td class="">
-                                      <div class="ivu-table-cell" v-if="!ent.customtype">
-                                          <Cascader v-if="formMapping.consumer" :data="cascadDt" v-model="formMapping.MapData[index].consumerField"></Cascader>
-                                      </div>
-                                      <div class="ivu-table-cell" v-if="ent.customtype">
-                                      <div v-if="formMapping.consumer">
-                                        <span v-if="customDtRecord.length > 0 && customDtRecord[index].length != 0">
-                                          <Select v-if="formMapping.consumer" v-model="formMapping.MapData[index].consumerField" style="width:200px">
-                                              <Option v-for="opt in customDtRecord[index]" :value="opt.value" :key="opt.value">{{ opt.label }}</Option>
-                                          </Select>
-                                        </span>
-                                          <a v-if="formMapping.consumer" @click="saveTostore(ent.type)" style="color:#2d8cf0">
-                                              Map
-                                          </a>
+                                      <template v-if="formMapping.MapData[index]">
+                                        <div class="ivu-table-cell" v-if="!ent.customtype">
+                                            <Cascader v-if="formMapping.consumer" :data="cascadDt" v-model="formMapping.MapData[index].consumerField"></Cascader>
                                         </div>
-                                      </div>
+                                        <div class="ivu-table-cell" v-if="ent.customtype">
+                                        <div v-if="formMapping.consumer">
+                                          <span v-if="customDtRecord.length > 0 && customDtRecord[index].length != 0">
+                                            <Select v-if="formMapping.consumer" v-model="formMapping.MapData[index].consumerField" style="width:200px">
+                                                <Option v-for="opt in customDtRecord[index]" :value="opt.value" :key="opt.value">{{ opt.label }}</Option>
+                                            </Select>
+                                          </span>
+                                            <a v-if="formMapping.consumer" @click="saveTostore(ent.type)" style="color:#2d8cf0">
+                                                Map
+                                            </a>
+                                          </div>
+                                        </div>
+                                      </template>
                                   </td>
                                   
                                   <td class="">
@@ -173,7 +175,7 @@ export default {
     if (this.$route.params.mappingid) {
       let schemaMappingData = await schemamapping.get(this.$route.params.mappingid)
       this.formMapping = schemaMappingData.data
-      // this.formMapping.mappingId = this.$route.params.mappingid
+      this.formMapping.mappingId = this.$route.params.mappingid
     }
   },
   methods: {
@@ -300,6 +302,10 @@ export default {
         _.forEach(self._sourceSchema.entity, function (ent, index) {
           if (!self.$route.params.mappingid) {
             self.formMapping.MapData.push({producerField: ent.name, consumerField: [], transform: '', ctype: ent.customtype})
+          } else {
+            if (_.findIndex(self.formMapping.MapData, (f) => { return f.producerField === ent.name }) === -1) {
+              self.formMapping.MapData.push({producerField: ent.name, consumerField: [], transform: '', ctype: ent.customtype})
+            }
           }
           if (ent.customtype) {
             var data5 = []
