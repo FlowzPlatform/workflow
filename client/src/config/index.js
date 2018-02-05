@@ -18,7 +18,8 @@ var temp = {
   githubSuccessCallbackUrl: 'http://localhost:8000',
   loginWithGithubUrl: 'http://auth.' + process.env.domainkey + '/auth/github',
   grapesUrl: 'http://webbuilder.qaflowz.tk/',
-  grapesAPI: 'http://api.' + process.env.domainkey + '/serverapi'
+  grapesAPI: 'http://api.' + process.env.domainkey + '/serverapi',
+  grapesDomain: process.env.domainkey
 }
 if (process.env.NODE_ENV !== 'development') {
   temp = {
@@ -38,7 +39,8 @@ if (process.env.NODE_ENV !== 'development') {
     githubSuccessCallbackUrl: 'http://engine.' + process.env.domainkey + '/',
     loginWithGithubUrl: 'http://auth.' + process.env.domainkey + '/auth/github',
     grapesUrl: 'http://webbuilder.qaflowz.tk/',
-    grapesAPI: 'http://api.' + process.env.domainkey + '/serverapi'
+    grapesAPI: 'http://api.' + process.env.domainkey + '/serverapi',
+    grapesDomain: process.env.domainkey
   }
 }
 export default temp

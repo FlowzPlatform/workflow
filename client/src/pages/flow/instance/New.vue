@@ -200,11 +200,14 @@ export default {
     async html () {
       if (this.selectedProcess.inputProperty && this.selectedProcess.inputProperty.length > 0 && this.selectedProcess.inputProperty[0].createTemplate) {
         let index = await _.findIndex(this.selectedProcess.inputProperty[0].entityschema.createTemplate, ['filename', this.selectedProcess.inputProperty[0].createTemplate])
-        var url = this.selectedProcess.inputProperty[0].entityschema.createTemplate[index].url
-        url = url.substr(0, 4) + url.substr(5)
+        // var url = this.selectedProcess.inputProperty[0].entityschema.createTemplate[index].url
+        // url = url.substr(0, 4) + url.substr(5)
+        var temp = this.selectedProcess.inputProperty[0].entityschema.createTemplate[index]
+          // console.log('this.selectedProcess.inputProperty[0].entityschema.createTemplate[index]', this.selectedProcess.inputProperty[0].entityschema.createTemplate[index])
+        return 'http://' + this.$store.state.user._id + '.' + temp.url[0] + '.' + config.grapesDomain + '/' + temp.url[1] + '.html'
         // var promise = await axios.get(url)
         // return promise.data
-        return url
+        // return url
       }
     }
   },

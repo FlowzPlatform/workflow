@@ -37,8 +37,8 @@ export default {
     }
   },
   async created () {
-    this.fetch(this.row.inputProperty[0].entityschema._id)
-    Schema.getThis(this.row.inputProperty[0].entityschema._id).then((response) => {
+    this.fetch(this.row.inputProperty[0].entityschema.id)
+    Schema.getThis(this.row.inputProperty[0].entityschema.id).then((response) => {
       this.entitySchema = response
     })
   },
@@ -105,7 +105,7 @@ export default {
     },
     makeObj () {
       var obj = this.schema
-      obj.Schemaid = this.schema._id
+      obj.Schemaid = this.schema.id
       obj.data = this.inputs
       return obj
     },
