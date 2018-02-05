@@ -509,7 +509,7 @@
         </Form>
       </Col>
     </Row>
-    {{this.formSchema.entity}}
+    <!-- {{this.formSchema.entity}}-->
     <!-- <hr> -->
     <!-- {{etemplate}} -->
     <!-- <div class="">
