@@ -3,16 +3,25 @@
   <Card :bordered="false">
     <p slot="title">Make Request</p>
     <p slot="extra" v-show="notes">Notes : {{ notes }}</p>
-    <div v-if="isdefault">
-      <schema-instance :id="entitySchema.id" :processid="$route.params.pid" :instanceid="$route.params.fiid" :lastLog="log"></schema-instance>
+    <div v-if="status === 'inputRequired'">
+      <div v-if="isdefault">
+        <schema-instance :id="entitySchema.id" :processid="log.job" :instanceid="$route.params.fiid" :lastLog="log"></schema-instance>
+      </div>
+      <div v-else >
+        <iframe id="filecontainer" allowtransparency="true" frameborder="0" @load="iframeload()" :src="html"></iframe>
+      </div>
+      <!--  + this.$route.params.fiid + '&&pid=' + this.$route.params.pid + '' -->
+      <ul class="error">
+        <li v-for="item in err">{{item}}</li>
+      </ul>
     </div>
-    <div v-else >
-      <iframe id="filecontainer" allowtransparency="true" frameborder="0" @load="iframeload()" :src="html"></iframe>
+    <div v-else-if="status === 'completed'">
+      Process Completed
+      <Table size="small" :columns="cols" :data="showOutput"></Table>
     </div>
-    <!--  + this.$route.params.fiid + '&&pid=' + this.$route.params.pid + '' -->
-    <ul class="error">
-      <li v-for="item in err">{{item}}</li>
-    </ul>
+    <div v-else>
+      Waiting....
+    </div>
   </Card>
 </div>
 </template>
@@ -39,7 +48,10 @@ export default {
       URL: '',
       err: [],
       log: {},
-      isdefault: false
+      isdefault: false,
+      status: 'waiting',
+      showOutput: [],
+      cols: []
     }
   },
   computed: {
@@ -74,10 +86,26 @@ export default {
       await flowInstance.getThis(self.$route.params.fiid)
       .then(async function (response) {
         // console.log('self.selectedProcess.inputProperty[0].entityschema', self.selectedProcess.inputProperty[0].entityschema)
-        self.selectedProcess = await _.find(response.data.processList, ['id', self.$route.params.pid])
-        // console.log('response.data.process_log', self.selectedProcess.inputProperty[0].entityschema.id)
-        self.entitySchema = await self.getSchema(self.selectedProcess.inputProperty[0].entityschema.id)
-        self.log = await _.chain(response.data.process_log).orderBy(['lastModified'], ['asc']).findLast((f) => { return f.job === self.$route.params.pid }).value()
+        let getlastlog = _.chain(response.data.process_log).orderBy(['lastModified'], ['desc']).head().value()
+        console.log('getlastlog', getlastlog)
+        if (getlastlog !== undefined && getlastlog.status === 'inputRequired') {
+          self.status = 'inputRequired'
+          self.selectedProcess = await _.find(response.data.processList, ['id', getlastlog.job])
+          // console.log('response.data.process_log', self.selectedProcess.inputProperty[0].entityschema.id)
+          self.entitySchema = await self.getSchema(self.selectedProcess.inputProperty[0].entityschema.id)
+          self.log = getlastlog
+          // self.log = await _.chain(response.data.process_log).orderBy(['lastModified'], ['asc']).findLast((f) => { return f.job === self.$route.params.pid }).value()
+        }
+        if (getlastlog !== undefined && getlastlog.status === 'completed') {
+          self.status = 'completed'
+          self.log = getlastlog
+          self.status = 'completed'
+          self.showOutput = getlastlog.output
+          let obj = _.omit(getlastlog.output[0], ['_id', 'Schemaid'])
+          self.cols = _.map(obj, (v, k) => {
+            return { title: k, key: k }
+          })
+        }
       })
       .catch(function (error) {
         self.$Notice.error({title: 'Error..!', desc: error})
@@ -142,7 +170,7 @@ export default {
       let dataObject1 = {
         'instanceid': this.$route.params.fiid,
         'data': maindata,
-        'processid': this.$route.params.pid,
+        'processid': this.log.job,
         'jobId': this.log.jobId
       }
       // console.log(validated, maindata.length)
@@ -327,19 +355,44 @@ export default {
       .catch(function (error) {
         console.log('Error', error)
         self.$Notice.error({title: 'Error..!', desc: error})
-        return []
+        return {data: []}
       })
-      self.selectedProcess = _.find(response.data.processList, ['id', self.$route.params.pid])
-      // console.log('self.selectedProcess', self.selectedProcess)
-      // console.log('self.log', self.log)
-      self.entitySchema = await self.getSchema(self.selectedProcess.inputProperty[0].entityschema.id)
-      // console.log('Schema', self.entitySchema)
-      // console.log('createTemplate length', self.selectedProcess.inputProperty[0].entityschema.createTemplate, self.selectedProcess.inputProperty[0].entityschema.createTemplate.length)
-      let index = _.findIndex(this.selectedProcess.inputProperty[0].entityschema.createTemplate, ['filename', self.selectedProcess.inputProperty[0].createTemplate])
-      // console.log('index................', index)
-      if (index < 0) {
-        this.isdefault = true
+      let getlastlog = _.chain(response.data.process_log).orderBy(['lastModified'], ['desc']).head().value()
+      console.log('getlastlog', getlastlog)
+      if (getlastlog !== undefined && getlastlog.status === 'inputRequired') {
+        self.status = 'inputRequired'
+        self.selectedProcess = _.find(response.data.processList, ['id', getlastlog.job])
+        // console.log('self.selectedProcess', self.selectedProcess)
+        // console.log('self.log', self.log)
+        self.entitySchema = await self.getSchema(self.selectedProcess.inputProperty[0].entityschema.id)
+        self.log = getlastlog
+        // console.log('Schema', self.entitySchema)
+        // console.log('createTemplate length', self.selectedProcess.inputProperty[0].entityschema.createTemplate, self.selectedProcess.inputProperty[0].entityschema.createTemplate.length)
+        let index = _.findIndex(this.selectedProcess.inputProperty[0].entityschema.createTemplate, ['filename', self.selectedProcess.inputProperty[0].createTemplate])
+        // console.log('index................', index)
+        if (index < 0) {
+          this.isdefault = true
+        }
       }
+      if (getlastlog !== undefined && getlastlog.status === 'completed') {
+        self.status = 'completed'
+        self.showOutput = getlastlog.output
+        let obj = _.omit(getlastlog.output[0], ['_id', 'Schemaid'])
+        self.cols = _.map(obj, (v, k) => {
+          return { title: k, key: k }
+        })
+      }
+      // self.selectedProcess = _.find(response.data.processList, ['id', self.$route.params.pid])
+      // // console.log('self.selectedProcess', self.selectedProcess)
+      // // console.log('self.log', self.log)
+      // self.entitySchema = await self.getSchema(self.selectedProcess.inputProperty[0].entityschema.id)
+      // // console.log('Schema', self.entitySchema)
+      // // console.log('createTemplate length', self.selectedProcess.inputProperty[0].entityschema.createTemplate, self.selectedProcess.inputProperty[0].entityschema.createTemplate.length)
+      // let index = _.findIndex(this.selectedProcess.inputProperty[0].entityschema.createTemplate, ['filename', self.selectedProcess.inputProperty[0].createTemplate])
+      // // console.log('index................', index)
+      // if (index < 0) {
+      //   this.isdefault = true
+      // }
     }
   },
   async mounted () {
