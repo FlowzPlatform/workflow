@@ -2,7 +2,7 @@
   <div>
     <Table border :loading="loading" :columns="columns" :data="flowzList.data"></Table>
     <div style="margin: 10px;overflow: hidden">
-      <div style="float: right;">
+      <div style="float: right;"> 
         <Page :page-size="$store.state.limitPage" :total="flowzList.total" :current="current" @on-change="changePage"></Page>
       </div>
     </div>
@@ -38,8 +38,10 @@
 <script>
 import flowz from '@/api/flowz'
 import viewSVG from './viewSVG'
-// import flowzinstanceModel from '@/api/flowzinstance'
+import flowzinstanceModel from '@/api/flowzinstance'
 import flowInstance from './flowInstance'
+import _ from 'lodash'
+
 export default {
   name: 'dashboard',
   components: {
@@ -101,21 +103,34 @@ export default {
         {
           title: 'ProcessName',
           key: 'ProcessName'
+        },
+        {
+          title: 'Remaining InputRequireds',
+          key: 'inputRemain',
+          render: (h, params) => {
+            let value = params.row.inputRemain.toString()
+            return h('Badge', {
+              props: {
+                count: value
+              }
+            })
+          }
         }
       ],
       current: 1
     }
   },
   methods: {
-    init () {
+    async init () {
       this.loading = true
-      flowz.get(null, {
+      let mdata = await (flowz.get(null, {
         $limit: this.$store.state.limitPage,
         $skip: this.$store.state.limitPage * (this.current - 1)
       })
       .then(response => {
-        this.flowzList = response.data
-        this.loading = false
+        // this.flowzList = response.data
+        // this.loading = false
+        return response.data
         // response.data.data.forEach((item) => {
         //   flowzinstanceModel.getByfid(item.id).then(res => {
         //     console.log('item', res)
@@ -124,7 +139,41 @@ export default {
       })
       .catch(error => {
         console.log(error)
-      })
+        return {data: [], total: 0}
+      }))
+      for (let item of mdata.data) {
+        // console.log(i)
+        // console.log(item)
+        let count = 0
+        let stotal = await (flowzinstanceModel.getByfid(item.id, {$limit: 0}).then(resp => {
+          return resp.data.total
+        }).catch(e => {
+          console.log(e)
+          return 0
+        }))
+        // console.log('stotal', stotal)
+        if (stotal !== 0) {
+          let sdata = await (flowzinstanceModel.getByfid(item.id, {$limit: stotal}).then(res => {
+            return res.data.data
+          }).catch(errr => {
+            console.log(errr)
+            return []
+          }))
+          for (let obj of sdata) {
+            // console.log(j)
+            let lastLog = await _.find(obj.process_log, (f) => {
+              return f.status === 'inputRequired'
+            })
+            if (lastLog !== undefined) {
+              count++
+            }
+          }
+        }
+        item.inputRemain = count
+        // console.log(sdata)
+      }
+      this.flowzList = mdata
+      this.loading = false
     },
     changePage (newValue) {
       this.current = newValue

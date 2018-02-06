@@ -7,8 +7,8 @@ export default {
   getThis: (id) => {
     return api.request('get', '/' + model + '/' + id)
   },
-  getByfid: (fid) => {
-    return api.request('get', '/' + model + '?fid=' + fid)
+  getByfid: (fid, params = null) => {
+    return api.request('get', '/' + model + '?fid=' + fid, null, params)
   },
   post: (data) => {
     return api.request('post', '/' + model, data)
