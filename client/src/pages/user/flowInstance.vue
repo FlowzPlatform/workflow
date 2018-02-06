@@ -96,7 +96,10 @@ export default {
   methods: {
     init () {
       this.loading = true
-      flowzinstanceModel.getByfid(this.fid).then(res => {
+      flowzinstanceModel.getByfid(this.fid, {
+        $limit: this.$store.state.limitPage,
+        $skip: this.$store.state.limitPage * (this.current - 1)
+      }).then(res => {
         this.flowzList = res.data
         this.loading = false
       }).catch(error => {
