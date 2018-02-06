@@ -407,7 +407,7 @@ export default {
     }
 
     .running {
-      color: #d5d835b5 !important;
+      color: #d5d835 !important;
     }
 
 
