@@ -66,24 +66,37 @@ export default {
           title: 'Status',
           key: 'id',
           render: (h, params) => {
-            let lastLog = _.find(params.row.process_log, (f) => {
-              return f.status === 'inputRequired'
-            })
-            if (lastLog != null) {
-              return h('Button', {
-                props: {
-                  type: 'primary',
-                  size: 'small'
-                },
-                style: {
-                  marginRight: '5px'
-                },
-                on: {
-                  click: () => {
-                    this.$router.push('form/reply/' + lastLog.job + '/' + params.row.id)
+            // let lastLog = _.find(params.row.process_log, (f) => {
+            //   return f.status === 'inputRequired'
+            // })
+            let getlastlog = _.chain(params.row.process_log).orderBy(['lastModified'], ['desc']).head().value()
+            if (getlastlog !== undefined) {
+              if (getlastlog.status === 'inputRequired') {
+                return h('Button', {
+                  props: {
+                    type: 'primary',
+                    size: 'small'
+                  },
+                  style: {
+                    marginRight: '5px'
+                  },
+                  on: {
+                    click: () => {
+                      this.$router.push('form/reply/' + getlastlog.job + '/' + params.row.id)
+                    }
                   }
-                }
-              }, 'Input Required')
+                }, 'INPUT REQUIRED')
+              } else {
+                return h('Tag', {
+                  props: {
+                    type: 'dot',
+                    color: this.getColor(getlastlog.status)
+                  },
+                  style: {
+                    'cursor': 'initial'
+                  }
+                }, getlastlog.status.toUpperCase())
+              }
             } else {
               return h('div', '')
             }
@@ -96,7 +109,10 @@ export default {
   methods: {
     init () {
       this.loading = true
-      flowzinstanceModel.getByfid(this.fid).then(res => {
+      flowzinstanceModel.getByfid(this.fid, {
+        $limit: this.$store.state.limitPage,
+        $skip: this.$store.state.limitPage * (this.current - 1)
+      }).then(res => {
         this.flowzList = res.data
         this.loading = false
       }).catch(error => {
@@ -107,6 +123,21 @@ export default {
       this.current = newValue
       this.init()
       // console.log('newValue', newValue)
+    },
+    getColor (status) {
+      if (status === 'inputRequired') {
+        return '#E71A24'
+      } else if (status === 'created') {
+        return 'rgba(255, 251, 0, 0.56)'
+      } else if (status === 'running') {
+        return '#d5d835'
+      } else if (status === 'completed') {
+        return '#1AE75E'
+      } else if (status === 'processing') {
+        return '#1DA8D3'
+      } else {
+        return ''
+      }
     }
   },
   mounted () {
