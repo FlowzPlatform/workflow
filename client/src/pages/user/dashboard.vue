@@ -160,11 +160,8 @@ export default {
             return []
           }))
           for (let obj of sdata) {
-            // console.log(j)
-            let lastLog = await _.find(obj.process_log, (f) => {
-              return f.status === 'inputRequired'
-            })
-            if (lastLog !== undefined) {
+            let getlastlog = _.chain(obj.process_log).orderBy(['lastModified'], ['desc']).head().value()
+            if (getlastlog !== undefined && getlastlog.status === 'inputRequired') {
               count++
             }
           }
