@@ -245,7 +245,7 @@
                                               <template>
                                                 <tr class="ivu-table-row" v-for="(item, inx) in vtemplate.viewtemplate">
                                                     <td>
-                                                      <div class="ivu-table-cell">
+                                                      <div class="ivu-table-cell" >
                                                         <!-- {{item.filename}} -->
                                                         <Form-item
                                                         :key="inx"
@@ -257,7 +257,7 @@
                                                       </div>
                                                     </td>
                                                     <td>
-                                                      <div class="ivu-table-cell">
+                                                      <div class="ivu-table-cell" style="overflow: visible">
                                                         <Form-item
                                                         :key="inx"
                                                         :prop="'viewtemplate.' + inx + '.url[1]'"
@@ -734,7 +734,6 @@ export default {
   },
   methods: {
     addRowViewTemplate (name) {
-      // console.log(name)
       if (this.vtemplate.viewtemplate.length === 0) {
         this.vtemplate.viewtemplate.push({
           filename: '',
@@ -935,8 +934,12 @@ export default {
         api.request('get', '/schema/' + id)
         .then(response => {
           this.formSchema = response.data
-          this.etemplate.createtemplate = this.formSchema.createTemplate
-          this.vtemplate.viewtemplate = this.formSchema.viewTemplate
+          if (this.formSchema.createTemplate && this.formSchema.createTemplate.length > 0) {
+            this.etemplate.createtemplate = this.formSchema.createTemplate
+          }
+          if (this.formSchema.viewTemplate  && this.formSchema.viewTemplate.length > 0) {
+            this.vtemplate.viewtemplate = this.formSchema.viewTemplate
+          }
           this.mjmlUpload = this.formSchema.emailTemplate
           this.$Loading.finish()
         })
@@ -1216,5 +1219,5 @@ export default {
   .ivu-form-item-error-tip {
     position: relative;
   }
-  .dropdown-opensparts .ivu-select-dropdown {position: relative;}
+  /*.dropdown-opensparts .ivu-select-dropdown {position: relative;}*/
 </style>
