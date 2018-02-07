@@ -346,7 +346,7 @@
                                                   </div>
                                                 </td>
                                                 <td>
-                                                  <div class="ivu-table-cell">
+                                                  <div class="ivu-table-cell" style="overflow: visible">
                                                     <Form-item
                                                     :key="inx"
                                                     :prop="'createtemplate.' + inx + '.url[1]'"
@@ -999,6 +999,9 @@ export default {
               this.loading = false
             })
           } else {
+            this.formSchema['viewTemplate'] = this.vtemplate.viewtemplate
+            this.formSchema['createTemplate'] = this.etemplate.createtemplate
+            this.formSchema['emailTemplate'] = this.mjmlUpload
             // alert(this.formSchema._id)
             // this.formSchema['viewTemplate'] = this.viewtemplate
             // this.formSchema['createTemplate'] = this.createtemplate
