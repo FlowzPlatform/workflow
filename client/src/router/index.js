@@ -272,7 +272,7 @@ const routes = [{
     name: 'mail/reply',
     component: Reply
   }, {
-    path: '/form/reply/:pid/:fiid',
+    path: '/form/reply/:fiid',
     name: 'form/reply',
     component: FormReply
   }]
