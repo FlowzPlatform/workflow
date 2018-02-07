@@ -972,6 +972,7 @@ export default {
         if (valid) {
           /* Making API call to authenticate a user */
           this.loading = true
+          this.formSchema.userID = this.$store.state.user._id
           if (this.formSchema.id === undefined) {
             this.formSchema['viewTemplate'] = this.vtemplate.viewtemplate
             this.formSchema['createTemplate'] = this.etemplate.createtemplate
