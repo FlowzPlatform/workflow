@@ -3,6 +3,7 @@
   <Card :bordered="false">
     <p slot="title">Make Request</p>
     <p slot="extra" v-show="notes">Notes : {{ notes }}</p>
+    
     <div v-if="status === 'inputRequired'">
       <div v-if="isdefault">
         <schema-instance :id="entitySchema.id" :processid="log.job" :instanceid="$route.params.fiid" :lastLog="log"></schema-instance>
@@ -15,31 +16,45 @@
         <li v-for="item in err">{{item}}</li>
       </ul>
     </div>
-    <div v-else-if="status === 'completed'">
-      Process Completed
+    <!-- <div v-else-if="status === 'completed'"> -->
+      <!-- Process Completed
       <Table size="small" :columns="cols" :data="showOutput"></Table>
-    </div>
+    </div> -->
     <div v-else>
-      Waiting....
+      <!-- Waiting.... -->
+      <div id="canvas" style="height: 400px"></div>
     </div>
   </Card>
 </div>
 </template>
 <script>
-import flowInstance from '@/api/flowzinstance'
-import _ from 'lodash'
-import Schema from '@/api/schema'
-// import ReceiveForm from '@/ap'
-import Instance from '@/api/instance'
-// import config from '@/config'process.env.accesskey import $ froprocess.env 'jquery'
-import SchemaInstance from '../../components/SchemaInstance.vue'
 import config from '@/config'
 
+// Models
+import Schema from '@/api/schema'
+import flowInstance from '@/api/flowzinstance'
+import Instance from '@/api/instance'
+import modelBpmnplugin from '@/api/bpmnplugins'
+import flowz from '@/api/flowz'
+// import ReceiveForm from '@/ap'
+// import config from '@/config'process.env.accesskey import $ froprocess.env 'jquery'
+
+// Lib
+import BpmnViewer from 'bpmn-js/lib/NavigatedViewer.js'
+import _ from 'lodash'
+
+// Components
+import SchemaInstance from '../../components/SchemaInstance.vue'
+import dynamicTable from './expand-FormReply.vue'
+
+// Static - lib
+import camundaModdleDescriptor from '../../../static/bpmn/camunda-bpmn-moddle/resources/camunda'
+let viewer
 export default {
   components: {'schema-instance': SchemaInstance},
   data () {
     return {
-      Aloading: false,
+      loading: false,
       notes: '',
       input: [],
       selectedProcess: {},
@@ -51,7 +66,8 @@ export default {
       isdefault: false,
       status: 'waiting',
       showOutput: [],
-      cols: []
+      cols: [],
+      flowInstance: {}
     }
   },
   computed: {
@@ -78,38 +94,39 @@ export default {
   },
   methods: {
     async iframeload () {
+      // console.log('.......................... iframeload .................................')
       let self = this
       let array = []
       let data = []
       let custom = []
       let customSchema = []
-      await flowInstance.getThis(self.$route.params.fiid)
-      .then(async function (response) {
-        // console.log('self.selectedProcess.inputProperty[0].entityschema', self.selectedProcess.inputProperty[0].entityschema)
-        let getlastlog = _.chain(response.data.process_log).orderBy(['lastModified'], ['desc']).head().value()
-        console.log('getlastlog', getlastlog)
-        if (getlastlog !== undefined && getlastlog.status === 'inputRequired') {
-          self.status = 'inputRequired'
-          self.selectedProcess = await _.find(response.data.processList, ['id', getlastlog.job])
-          // console.log('response.data.process_log', self.selectedProcess.inputProperty[0].entityschema.id)
-          self.entitySchema = await self.getSchema(self.selectedProcess.inputProperty[0].entityschema.id)
-          self.log = getlastlog
-          // self.log = await _.chain(response.data.process_log).orderBy(['lastModified'], ['asc']).findLast((f) => { return f.job === self.$route.params.pid }).value()
-        }
-        if (getlastlog !== undefined && getlastlog.status === 'completed') {
-          self.status = 'completed'
-          self.log = getlastlog
-          self.status = 'completed'
-          self.showOutput = getlastlog.output
-          let obj = _.omit(getlastlog.output[0], ['_id', 'Schemaid'])
-          self.cols = _.map(obj, (v, k) => {
-            return { title: k, key: k }
-          })
-        }
-      })
-      .catch(function (error) {
-        self.$Notice.error({title: 'Error..!', desc: error})
-      })
+      // await flowInstance.getThis(self.$route.params.fiid)
+      // .then(async function (response) {
+      //   // console.log('self.selectedProcess.inputProperty[0].entityschema', self.selectedProcess.inputProperty[0].entityschema)
+      //   let getlastlog = _.chain(response.data.process_log).orderBy(['lastModified'], ['desc']).head().value()
+      //   console.log('getlastlog', getlastlog)
+      //   if (getlastlog !== undefined && getlastlog.status === 'inputRequired') {
+      //     self.status = 'inputRequired'
+      //     self.selectedProcess = await _.find(response.data.processList, ['id', getlastlog.job])
+      //     // console.log('response.data.process_log', self.selectedProcess.inputProperty[0].entityschema.id)
+      //     self.entitySchema = await self.getSchema(self.selectedProcess.inputProperty[0].entityschema.id)
+      //     self.log = getlastlog
+      //     // self.log = await _.chain(response.data.process_log).orderBy(['lastModified'], ['asc']).findLast((f) => { return f.job === self.$route.params.pid }).value()
+      //   }
+      //   if (getlastlog !== undefined && getlastlog.status === 'completed') {
+      //     self.status = 'completed'
+      //     self.log = getlastlog
+      //     self.status = 'completed'
+      //     self.showOutput = getlastlog.output
+      //     let obj = _.omit(getlastlog.output[0], ['_id', 'Schemaid'])
+      //     self.cols = _.map(obj, (v, k) => {
+      //       return { title: k, key: k }
+      //     })
+      //   }
+      // })
+      // .catch(function (error) {
+      //   self.$Notice.error({title: 'Error..!', desc: error})
+      // })
       // console.log('self.entitySchema.entity', self.entitySchema.entity)
       for (let i = 0; i < self.entitySchema.entity.length; i++) {
         if (self.entitySchema.entity[i].customtype === true) {
@@ -202,7 +219,8 @@ export default {
         })
         this.input = []
       }
-    }, // method for validation purpos
+    },
+    // method for validation purpos
     // async getValidate (event, schema) {
     //   let self = this
     //   let err = this.err
@@ -345,11 +363,6 @@ export default {
       let self = this
       let response = await flowInstance.getThis(fid)
       .then(function (response) {
-        // self.selectedProcess = _.find(response.data.processList, ['id', self.$route.params.pid])
-        // console.log('self.selectedProcess.inputProperty[0].entityschema', self.selectedProcess.inputProperty[0].entityschema)
-        // self.entitySchema = self.getSchema(self.selectedProcess.inputProperty[0].entityschema._id)
-        // console.log('this.selectedProcess.inputProperty[0].entityschema.createTemplate', self.selectedProcess.inputProperty[0].entityschema.createTemplate, self.selectedProcess.inputProperty[0].entityschema.createTemplate.length)
-        // self.log = await _.chain(response.data.process_log).orderBy(['lastModified'], ['asc']).findLast((f) => { return f.job === self.$route.params.pid }).value()
         return response
       })
       .catch(function (error) {
@@ -357,19 +370,22 @@ export default {
         self.$Notice.error({title: 'Error..!', desc: error})
         return {data: []}
       })
+      self.flowInstance = response.data
+      self.flowInstance.processList = _.chain(response.data.processList).map(m => {
+        m.log = _.chain(response.data.process_log).filter(f => {
+          return f.job === m.id
+        }).orderBy(['lastModified'], ['desc']).groupBy('jobId').value()
+        // this.handleMappingRequireStatus(m)
+        return m
+      }).value()
       let getlastlog = _.chain(response.data.process_log).orderBy(['lastModified'], ['desc']).head().value()
       console.log('getlastlog', getlastlog)
       if (getlastlog !== undefined && getlastlog.status === 'inputRequired') {
         self.status = 'inputRequired'
         self.selectedProcess = _.find(response.data.processList, ['id', getlastlog.job])
-        // console.log('self.selectedProcess', self.selectedProcess)
-        // console.log('self.log', self.log)
         self.entitySchema = await self.getSchema(self.selectedProcess.inputProperty[0].entityschema.id)
         self.log = getlastlog
-        // console.log('Schema', self.entitySchema)
-        // console.log('createTemplate length', self.selectedProcess.inputProperty[0].entityschema.createTemplate, self.selectedProcess.inputProperty[0].entityschema.createTemplate.length)
         let index = _.findIndex(this.selectedProcess.inputProperty[0].entityschema.createTemplate, ['filename', self.selectedProcess.inputProperty[0].createTemplate])
-        // console.log('index................', index)
         if (index < 0) {
           this.isdefault = true
         }
@@ -382,17 +398,152 @@ export default {
           return { title: k, key: k }
         })
       }
-      // self.selectedProcess = _.find(response.data.processList, ['id', self.$route.params.pid])
-      // // console.log('self.selectedProcess', self.selectedProcess)
-      // // console.log('self.log', self.log)
-      // self.entitySchema = await self.getSchema(self.selectedProcess.inputProperty[0].entityschema.id)
-      // // console.log('Schema', self.entitySchema)
-      // // console.log('createTemplate length', self.selectedProcess.inputProperty[0].entityschema.createTemplate, self.selectedProcess.inputProperty[0].entityschema.createTemplate.length)
-      // let index = _.findIndex(this.selectedProcess.inputProperty[0].entityschema.createTemplate, ['filename', self.selectedProcess.inputProperty[0].createTemplate])
-      // // console.log('index................', index)
-      // if (index < 0) {
-      //   this.isdefault = true
-      // }
+
+      // Get Flow
+      var bpmnXML = await flowz.get(response.data.fid)
+      .then(async response => {
+        return response.data
+      })
+      // console.log('bpmnXML.xml...', bpmnXML.xml)
+      // Init Bpmn
+      await this.initBPMN(bpmnXML.xml)
+    },
+    getCurrentStatus (log) {
+      return (log && log.length > 0) ? _.head(log).status : ''
+    },
+    async initBPMN (xml) {
+      let self = this
+      let plugins = await modelBpmnplugin.get()
+      let types = _.map(plugins, plug => {
+        return {
+          'name': plug.pluginType,
+          'isAbstract': true,
+          'superClass': [
+            'bpmn:FlowNode'
+          ]
+        }
+      })
+      if (types !== undefined) {
+        camundaModdleDescriptor.types = _.concat(camundaModdleDescriptor.types, types)
+        viewer = new BpmnViewer({
+          container: '#canvas',
+          additionalPlugins: plugins,
+          additionalModules: [
+            require('@/bpmn-custom-module/viewindex')
+          ],
+          moddleExtensions: {
+            camunda: camundaModdleDescriptor
+          }
+        })
+        viewer.importXML(xml, function (err) {
+          if (err) {
+            console.log('error rendering', err)
+          } else {
+            // console.log('...................................', self.flowInstance)
+            // _.forEach(self.flowInstance.processList, function (process1) {
+            for (let process1 of self.flowInstance.processList) {
+              var lastProcess = process1.log[_.findLastKey(process1.log)]
+              if (lastProcess) {
+                console.log('process1.log', process1.id, self.getCurrentStatus(lastProcess))
+                // viewer.get('canvas').addMarker(process1.id, 'red')
+                viewer.get('canvas').addMarker(process1.id, self.getCurrentStatus(lastProcess))
+              }
+            }
+            // })
+          }
+        })
+        var eventBus = viewer.get('eventBus')
+        // you may hook into any of the following events
+        var events = [
+          // 'element.hover',
+          // 'element.out',
+          'element.click'
+          // 'element.dblclick',
+          // 'element.mousedown',
+          // 'element.mouseup'
+        ]
+        events.forEach(function (event) {
+          eventBus.on(event, function (e) {
+            // e.element = the model element
+            // e.gfx = the graphical element
+            // console.log(event, 'on', e.element.id)
+            // self.showData(e.element.id)
+            let myData = _.find(self.flowInstance.processList, {id: e.element.id})
+            console.log('>>>>>>>>>>>>>>>>', self.flowInstance, myData)
+            if (myData !== undefined) {
+              let tData = []
+              for (let k in myData.log) {
+                tData.push(_.head(myData.log[k]))
+              }
+              let iCols = [{
+                type: 'expand',
+                width: 50,
+                render: (h, params) => {
+                  return h(dynamicTable, {
+                    props: {
+                      data: params.row.input
+                    }
+                  })
+                }
+              }, {
+                title: 'Jobs',
+                key: 'jobId'
+              }]
+              let oCols = [{
+                type: 'expand',
+                width: 50,
+                render: (h, params) => {
+                  return h(dynamicTable, {
+                    props: {
+                      data: params.row.output
+                    }
+                  })
+                }
+              }, {
+                title: 'Jobs',
+                key: 'jobId'
+              }]
+              self.$Modal.info({
+                title: e.element.id,
+                closable: true,
+                width: '1200px',
+                render: (h, params) => {
+                  return ('div', {}, [
+                    h('Tabs', {}, [
+                      h('TabPane', {
+                        props: {
+                          label: 'Input',
+                          icon: 'arrow-down-c'
+                        }
+                      }, [
+                        h('Table', {
+                          props: {
+                            columns: iCols,
+                            data: tData
+                          }
+                        })
+                      ]),
+                      h('TabPane', {
+                        props: {
+                          label: 'Output',
+                          icon: 'arrow-up-c'
+                        }
+                      }, [
+                        h('Table', {
+                          props: {
+                            columns: oCols,
+                            data: tData
+                          }
+                        })
+                      ])
+                    ])
+                  ])
+                }
+              })
+            }
+          })
+        })
+      }
     }
   },
   async mounted () {
@@ -403,12 +554,6 @@ export default {
       console.log('.......................... event.data :', event.data)
       self.err = []
       if (_.isArray(event.data)) {
-        // for (let j = 0; j < event.data.length; j++) {
-        //   validated = await self.getValidate(event.data[j])
-        //   self.input.push(event.data[j])
-        // }
-        console.log('......................................................................')
-        console.log('event.data............', event.data)
         self.handleSubmit(event.data)
       }
     })
@@ -422,7 +567,7 @@ export default {
   }
 }
 </script>
-<style scoped>
+<style>
 .error {
   color: red;
 }
@@ -431,5 +576,37 @@ iframe {
     width: 100%;
     background: #FFFFFF;
     padding: 0px;
+}
+/*.created {
+  color: rgba(255, 251, 0, 0.56) !important;
+}
+
+.processing {
+  color: #1DA8D3 !important;
+}
+
+.running {
+  color: #d5d835 !important;
+}
+.completed {
+  color: #1AE75E !important;
+}
+.inputRequired {
+  color: #E71A24 !important;
+}*/
+.created:not(.djs-connection) .djs-visual > :nth-child(1) {
+  fill: rgba(255, 251, 0, 0.56) !important;
+}
+.inputRequired:not(.djs-connection) .djs-visual > :nth-child(1) {
+  fill: #E71A24 !important;
+}
+.running:not(.djs-connection) .djs-visual > :nth-child(1) {
+  fill: #d5d835 !important;
+}
+.processing:not(.djs-connection) .djs-visual > :nth-child(1) {
+  fill: #1DA8D3 !important;
+}
+.completed:not(.djs-connection) .djs-visual > :nth-child(1) {
+  fill: #1AE75E !important;
 }
 </style>
