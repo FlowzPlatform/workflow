@@ -412,6 +412,13 @@ export default {
         self.handleSubmit(event.data)
       }
     })
+  },
+  feathers: {
+    'flowz-instance': {
+      updated (data) {
+        this.init(this.$route.params.fiid)
+      }
+    }
   }
 }
 </script>
