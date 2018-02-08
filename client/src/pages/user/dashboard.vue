@@ -41,6 +41,7 @@ import viewSVG from './viewSVG'
 import flowzinstanceModel from '@/api/flowzinstance'
 import flowInstance from './flowInstance'
 import _ from 'lodash'
+import moment from 'moment'
 
 export default {
   name: 'dashboard',
@@ -107,13 +108,18 @@ export default {
         {
           title: 'Remaining InputRequireds',
           key: 'inputRemain',
+          width: 200,
+          align: 'center',
           render: (h, params) => {
-            let value = params.row.inputRemain.toString()
-            return h('Badge', {
-              props: {
-                count: value
-              }
-            })
+            if (params.row.inputRemain > 0) {
+              return h('Badge', {
+                props: {
+                  count: params.row.inputRemain.toString()
+                }
+              })
+            } else {
+              return h('div', (params.row.inputRemain === 0 ? 'No Input Remaining' : 'Loading...'))
+            }
           }
         }
       ],
@@ -123,53 +129,41 @@ export default {
   methods: {
     async init () {
       this.loading = true
-      let mdata = await (flowz.get(null, {
+      this.flowzList = await (flowz.get(null, {
         $limit: this.$store.state.limitPage,
-        $skip: this.$store.state.limitPage * (this.current - 1)
+        $skip: this.$store.state.limitPage * (this.current - 1),
+        $select: ['ProcessName', 'svg', 'id']
       })
-      .then(response => {
-        // this.flowzList = response.data
-        // this.loading = false
+      .then((response) => {
+        for (let item of response.data.data) {
+          item.inputRemain = -1
+        }
         return response.data
-        // response.data.data.forEach((item) => {
-        //   flowzinstanceModel.getByfid(item.id).then(res => {
-        //     console.log('item', res)
-        //   })
-        // })
       })
       .catch(error => {
         console.log(error)
         return {data: [], total: 0}
       }))
-      for (let item of mdata.data) {
-        // console.log(i)
-        // console.log(item)
-        let count = 0
-        let stotal = await (flowzinstanceModel.getByfid(item.id, {$limit: 0}).then(resp => {
-          return resp.data.total
-        }).catch(e => {
-          console.log(e)
-          return 0
-        }))
-        // console.log('stotal', stotal)
-        if (stotal !== 0) {
-          let sdata = await (flowzinstanceModel.getByfid(item.id, {$limit: stotal}).then(res => {
-            return res.data.data
-          }).catch(errr => {
-            console.log(errr)
-            return []
-          }))
-          for (let obj of sdata) {
-            let getlastlog = _.chain(obj.process_log).orderBy(['lastModified'], ['desc']).head().value()
-            if (getlastlog !== undefined && getlastlog.status === 'inputRequired') {
-              count++
-            }
-          }
-        }
-        item.inputRemain = count
-        // console.log(sdata)
+      for (let item of this.flowzList.data) {
+        flowzinstanceModel.get({
+          fid: item.id,
+          $paginate: false,
+          $select: ['process_log']
+        }).then(response => {
+          let count = _.chain(response.data).filter(f => {
+            return f.process_log
+          }).map(m => {
+            m.process_log = _.chain(m.process_log).sortBy(s => {
+              return moment(s.lastModified)
+            }).last().value()
+            return m.process_log
+          }).countBy(f => {
+            return f.status === 'inputRequired'
+          }).result('true').value()
+          item.inputRemain = count !== undefined ? count : 0
+        })
       }
-      this.flowzList = mdata
+      // await this.getInputRequired()
       this.loading = false
     },
     changePage (newValue) {

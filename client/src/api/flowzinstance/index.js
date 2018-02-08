@@ -1,8 +1,8 @@
 import api from '../../api'
 let model = 'flowz-instance'
 export default {
-  get: () => {
-    return api.request('get', '/' + model)
+  get: (params = null) => {
+    return api.request('get', '/' + model, null, params)
   },
   getThis: (id) => {
     return api.request('get', '/' + model + '/' + id)

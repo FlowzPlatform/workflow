@@ -8,7 +8,9 @@ const axios = require('axios')
 module.exports = {
   before: {
     all: [],
-    find: [],
+    find: [
+      hook => beforeFind(hook)
+    ],
     get: [],
     create: [],
     update: [],
@@ -38,6 +40,29 @@ module.exports = {
     remove: []
   }
 };
+
+let beforeFind = function (hook) {
+  // const query = hook.params.query
+  // if (query.isdeleted != undefined) {
+  //   if (hook.params.query.isdeleted == 'true') {
+  //     hook.params.query.isdeleted = true
+  //   } else if (hook.params.query.isdeleted == 'false') {
+  //     hook.params.query.isdeleted = false
+  //   }
+  // }
+  // if (hook.params.query && hook.params.query.isdeleted) {
+  //   hook.params.query.isdeleted = !!hook.params.query.isdeleted;
+  // }
+  // hook.params.query.$sort.process_log = { lastModified: -1 };
+  if (hook.params.query && hook.params.query.$sort && hook.params.query.$sort.createdOn) {
+    hook.params.query.$sort.createdOn = parseInt(hook.params.query.$sort.createdOn);
+  }
+  if (hook.params.query && hook.params.query.$paginate) {
+    hook.params.paginate = hook.params.query.$paginate === 'false' || hook.params.query.$paginate === false;
+    delete hook.params.query.$paginate;
+  }
+}
+
 var updateProcesslogforMappingRequired = async(function (hook) {
   for (let [key, m] of hook.result.processList.entries()) {
     m['log'] = _.chain(hook.result.process_log).filter(f => {
