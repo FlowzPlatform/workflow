@@ -211,6 +211,7 @@
                   <p slot="content">
                     <Tabs @on-click="fetchname" :value="activetab">
                         <TabPane label="View" icon="eye" name="view">
+                          
                           <!-- <Button type="ghost" @click="opengrapesjs(true)">Using Grapes</Button>
                           <Button type="ghost" @click="openGridManager(true)">Using Grid Manager</Button> -->
                           <Form ref="vtemplate" :model="vtemplate" >
@@ -494,7 +495,9 @@
 
                         <Button type="info" v-if="activetab == 'email'" slot="extra" size="small" @click="openMjmlEditor">Add Template</Button>
                     </Tabs>
+                    
                   </p>
+                  
               </Panel>
           </Collapse>
           </Form-item>
@@ -685,7 +688,6 @@ export default {
     }
   },
   mounted () {
-    console.log('mounted Called')
     this.$store.state.editTemplate = undefined
     // console.log('------->>>', this.$store.state.viewTemplate)
     this.fetch(this.$route.params.id)
@@ -888,7 +890,7 @@ export default {
           for (let [i, mobj] of _res.entries()) {
             // console.log(i)
             var obj = {}
-            obj.label = mobj.configData[1].projectSettings[0].ProjectName
+            obj.label = mobj.websiteName // mobj.configData[1].projectSettings[0].ProjectName
             obj.value = mobj.configData[1].projectSettings[0].ProjectName
             obj.children = []
             for (let [inx, sObj] of mobj.configData[1].pageSettings.entries()) {
@@ -914,7 +916,7 @@ export default {
           for (let [i, mobj] of _res.entries()) {
             // console.log(i)
             var obj = {}
-            obj.label = mobj.configData[1].projectSettings[0].ProjectName
+            obj.label = mobj.websiteName // mobj.configData[1].projectSettings[0].ProjectName
             obj.value = mobj.configData[1].projectSettings[0].ProjectName
             obj.children = []
             for (let [inx, sObj] of mobj.configData[1].pageSettings.entries()) {
