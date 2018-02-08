@@ -647,4 +647,7 @@ iframe {
 .completed:not(.djs-connection) .djs-visual > :nth-child(1) {
   fill: #1AE75E !important;
 }
+.mappingRequired:not(.djs-connection) .djs-visual > :nth-child(1) {
+  fill: #d5d835 !important;
+}
 </style>
