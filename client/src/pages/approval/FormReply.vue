@@ -84,7 +84,7 @@ export default {
           // url = this.selectedProcess.inputProperty[0].entityschema.createTemplate[index].url
           // url = url.substr(0, 4) + url.substr(5)
           // url = 'http://172.16.230.133/websites/59a8e0dd41dc17001aeb1e67/c6f938a9-41f0-49e1-aaf1-65f8ce94b4e9/public/index.html'
-          // url = 'http://172.16.230.176/file.html'
+          // url = 'http://localhost/orderentry.html'
           // url = 'http://172.16.230.133/websites/59fb06376adc6b00242a5533/f3455e59-b6b5-4b74-b02b-f39038f73bd7/public/index.html'
         }
         // console.log('url', url)
@@ -560,8 +560,44 @@ export default {
   },
   feathers: {
     'flowz-instance': {
-      updated (data) {
-        this.init(this.$route.params.fiid)
+      async updated (data) {
+        // this.init(this.$route.params.fiid)
+        let self = this
+        let response = await flowInstance.getThis(this.$route.params.fiid)
+        .then(function (response) {
+          return response
+        })
+        .catch(function (error) {
+          console.log('Error', error)
+          self.$Notice.error({title: 'Error..!', desc: error})
+          return {data: []}
+        })
+        self.flowInstance = response.data
+        self.flowInstance.processList = _.chain(response.data.processList).map(m => {
+          m.log = _.chain(response.data.process_log).filter(f => {
+            return f.job === m.id
+          }).orderBy(['lastModified'], ['desc']).groupBy('jobId').value()
+          // this.handleMappingRequireStatus(m)
+          return m
+        }).value()
+        let getlastlog = _.chain(response.data.process_log).orderBy(['lastModified'], ['desc']).head().value()
+        console.log('getlastlog', getlastlog)
+        if (getlastlog !== undefined && getlastlog.status === 'inputRequired') {
+          self.status = 'inputRequired'
+          self.selectedProcess = _.find(response.data.processList, ['id', getlastlog.job])
+          self.entitySchema = await self.getSchema(self.selectedProcess.inputProperty[0].entityschema.id)
+          self.log = getlastlog
+          let index = _.findIndex(this.selectedProcess.inputProperty[0].entityschema.createTemplate, ['filename', self.selectedProcess.inputProperty[0].createTemplate])
+          if (index < 0) {
+            this.isdefault = true
+          }
+        }
+        _.forEach(self.flowInstance.processList, function (process) {
+          var lastProcess = process.log[_.findLastKey(process.log)]
+          if (lastProcess) {
+            viewer.get('canvas').addMarker(process.id, self.getCurrentStatus(lastProcess))
+          }
+        })
       }
     }
   }
