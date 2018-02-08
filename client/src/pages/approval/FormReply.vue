@@ -390,14 +390,14 @@ export default {
           this.isdefault = true
         }
       }
-      if (getlastlog !== undefined && getlastlog.status === 'completed') {
-        self.status = 'completed'
-        self.showOutput = getlastlog.output
-        let obj = _.omit(getlastlog.output[0], ['_id', 'Schemaid'])
-        self.cols = _.map(obj, (v, k) => {
-          return { title: k, key: k }
-        })
-      }
+      // if (getlastlog !== undefined && getlastlog.status === 'completed') {
+      //   self.status = 'completed'
+      //   self.showOutput = getlastlog.output
+      //   let obj = _.omit(getlastlog.output[0], ['_id', 'Schemaid'])
+      //   self.cols = _.map(obj, (v, k) => {
+      //     return { title: k, key: k }
+      //   })
+      // }
 
       // Get Flow
       var bpmnXML = await flowz.get(response.data.fid)
