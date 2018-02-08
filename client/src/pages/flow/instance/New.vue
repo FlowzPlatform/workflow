@@ -313,6 +313,7 @@ export default {
             _.forEach(self.flowInstance.processList, function (process) {
               var lastProcess = process.log[_.findLastKey(process.log)]
               if (lastProcess) {
+                console.log('>>>>>>>>>>>>>>>>>>>>......', process.id, self.getCurrentStatus(lastProcess))
                 viewer.get('canvas').addMarker(process.id, self.getCurrentStatus(lastProcess))
               }
             })
