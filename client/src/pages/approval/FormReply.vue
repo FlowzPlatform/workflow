@@ -79,8 +79,10 @@ export default {
         let url = ''
         if (index !== -1) {
           var temp = this.selectedProcess.inputProperty[0].entityschema.createTemplate[index]
+          console.log('this.selectedProcess', this.selectedProcess)
+          url = 'http://' + this.selectedProcess.inputProperty[0].entityschema.userID + '.' + temp.url[0] + '.' + config.grapesDomain + '/' + temp.url[1] + '.html'
           // console.log('this.selectedProcess.inputProperty[0].entityschema.createTemplate[index]', this.selectedProcess.inputProperty[0].entityschema.createTemplate[index])
-          url = 'http://' + this.$store.state.user._id + '.' + temp.url[0] + '.' + config.grapesDomain + '/' + temp.url[1] + '.html'
+          // url = 'http://' + this.$store.state.user._id + '.' + temp.url[0] + '.' + config.grapesDomain + '/' + temp.url[1] + '.html'
           // url = this.selectedProcess.inputProperty[0].entityschema.createTemplate[index].url
           // url = url.substr(0, 4) + url.substr(5)
           // url = 'http://172.16.230.133/websites/59a8e0dd41dc17001aeb1e67/c6f938a9-41f0-49e1-aaf1-65f8ce94b4e9/public/index.html'
@@ -572,7 +574,7 @@ export default {
   color: red;
 }
 iframe {
-    min-height: 460px;
+    min-height: 405px;
     width: 100%;
     background: #FFFFFF;
     padding: 0px;

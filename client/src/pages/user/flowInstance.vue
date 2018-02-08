@@ -11,6 +11,7 @@
 <script>
 import flowzinstanceModel from '@/api/flowzinstance'
 import _ from 'lodash'
+import moment from 'moment'
 export default {
   name: 'flowzinstance',
   props: {
@@ -82,7 +83,7 @@ export default {
                   },
                   on: {
                     click: () => {
-                      this.$router.push('form/reply/' + getlastlog.job + '/' + params.row.id)
+                      this.$router.push('form/reply/' + params.row.id)
                     }
                   }
                 }, 'INPUT REQUIRED')
@@ -100,6 +101,16 @@ export default {
             } else {
               return h('div', '')
             }
+          }
+        },
+        {
+          title: 'createdOn',
+          key: 'createdOn',
+          sortable: true,
+          width: 200,
+          sortType: 'desc',
+          render: (h, params) => {
+            return h('div', moment(this.flowzList.data[params.index].createdOn).fromNow())
           }
         }
       ],
