@@ -773,6 +773,7 @@ export default {
       }
     },
     viewAdd () {
+      console.log('config.grapesUrl', config.grapesUrl)
       window.open(config.grapesUrl, '_blank')
     },
     validateTitle: async function(title) {
