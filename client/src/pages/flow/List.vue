@@ -174,7 +174,7 @@ export default {
                 },
                 on: {
                   click: () => {
-                    this.deleteFlow(this.flowzList[params.index].id)
+                    this.deleteFlow(this.flowzList[params.index].id, params.index)
                   }
                 }
               }, '')
@@ -284,7 +284,9 @@ export default {
         onOk: () => {
           flowz.delete(id)
           .then(response => {
+            // console.log('response.data', response.data)
             this.$Notice.success({title: 'Success!!', desc: 'Flowz Deleted...'})
+            console.log('inx, ', inx)
             this.flowzList.splice(inx, 1)
           })
           .catch(error => {
@@ -293,6 +295,7 @@ export default {
           })
         },
         onCancel: () => {
+          console.log('inx, ', inx)
         }
       })
     },
