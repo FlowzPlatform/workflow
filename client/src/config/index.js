@@ -1,4 +1,4 @@
-console.log('process.env.NODE_ENV', process.env.NODE_ENV)
+// console.log('process.env.NODE_ENV', process.env.NODE_ENV)
 var temp = {
   serverURI: 'http://localhost:3030', // 'http://172.16.230.86:3030'
   socketURI: 'http://localhost:4033',
@@ -43,5 +43,4 @@ if (process.env.NODE_ENV !== 'development') {
     grapesDomain: process.env.domainkey
   }
 }
-console.log('temp', temp)
 export default temp
