@@ -72,32 +72,48 @@ export default {
             // })
             let getlastlog = _.chain(params.row.process_log).orderBy(['lastModified'], ['desc']).head().value()
             if (getlastlog !== undefined) {
-              if (getlastlog.status === 'inputRequired') {
-                return h('Button', {
-                  props: {
-                    type: 'primary',
-                    size: 'small'
-                  },
-                  style: {
-                    marginRight: '5px'
-                  },
-                  on: {
-                    click: () => {
-                      this.$router.push('form/reply/' + params.row.id)
-                    }
-                  }
-                }, 'INPUT REQUIRED')
+              let aStatus = ''
+              if (getlastlog.status !== 'inputRequired') {
+                let cStatus = _.find(params.row.processList, {id: getlastlog.job})
+                if (cStatus !== undefined && cStatus.target.length !== 0) {
+                  aStatus = 'running'
+                } else {
+                  aStatus = getlastlog.status
+                }
               } else {
-                return h('Tag', {
-                  props: {
-                    type: 'dot',
-                    color: this.getColor(getlastlog.status)
-                  },
-                  style: {
-                    'cursor': 'initial'
-                  }
-                }, getlastlog.status.toUpperCase())
+                aStatus = getlastlog.status
               }
+              // if (getlastlog.status === 'inputRequired') {
+              //   return h('Button', {
+              //     props: {
+              //       type: 'primary',
+              //       size: 'small'
+              //     },
+              //     style: {
+              //       marginRight: '5px'
+              //     },
+              //     on: {
+              //       click: () => {
+              //         this.$router.push('form/reply/' + params.row.id)
+              //       }
+              //     }
+              //   }, 'INPUT REQUIRED')
+              // } else {
+              return h('Tag', {
+                props: {
+                  type: 'dot',
+                  color: this.getColor(aStatus)
+                },
+                style: {
+                },
+                nativeOn: {
+                  'click': (value) => {
+                    this.$router.push('form/reply/' + params.row.id)
+                    // console.log('value', value)
+                  }
+                }
+              }, aStatus.toUpperCase())
+              // }
             } else {
               return h('div', '')
             }
@@ -107,7 +123,6 @@ export default {
           title: 'createdOn',
           key: 'createdOn',
           sortable: true,
-          width: 200,
           sortType: 'desc',
           render: (h, params) => {
             return h('div', moment(this.flowzList.data[params.index].createdOn).fromNow())
