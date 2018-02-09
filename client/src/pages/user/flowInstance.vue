@@ -66,6 +66,8 @@ export default {
         {
           title: 'Status',
           key: 'id',
+          width: 200,
+          align: 'center',
           render: (h, params) => {
             // let lastLog = _.find(params.row.process_log, (f) => {
             //   return f.status === 'inputRequired'
@@ -122,8 +124,10 @@ export default {
         {
           title: 'createdOn',
           key: 'createdOn',
-          sortable: true,
-          sortType: 'desc',
+          width: 200,
+          // sortable: true,
+          // sortType: 'desc',
+          align: 'center',
           render: (h, params) => {
             return h('div', moment(this.flowzList.data[params.index].createdOn).fromNow())
           }
@@ -136,6 +140,7 @@ export default {
     init () {
       this.loading = true
       flowzinstanceModel.getByfid(this.fid, {
+        '$sort[createdOn]': 1,
         $limit: this.$store.state.limitPage,
         $skip: this.$store.state.limitPage * (this.current - 1)
       }).then(res => {
