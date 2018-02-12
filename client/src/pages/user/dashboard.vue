@@ -220,7 +220,7 @@ export default {
           data.inputRemain = -1
           data._expanded = false
           let getIndex = _.findIndex(this.flowzList.data, {id: data.id})
-          console.log('getIndex  ', getIndex)
+          // console.log('getIndex  ', getIndex)
           if (getIndex !== undefined && getIndex > 0) {
             this.flowzList.data.splice(getIndex, 1)
             this.flowzList.data.splice(getIndex, 0, data)
@@ -229,11 +229,11 @@ export default {
         }
       },
       removed (data) {
-        console.log('Deleted :: ', data)
+        // console.log('Deleted :: ', data)
         if (data.id !== undefined) {
           // data.inputRemain = -1
           let getIndex = _.findIndex(this.flowzList.data, {id: data.id})
-          console.log('getIndex  ', getIndex)
+          // console.log('getIndex  ', getIndex)
           if (getIndex !== undefined && getIndex >= 0) {
             this.flowzList.data.splice(getIndex, 1)
             // this.flowzList.data.splice(getIndex, 0, data)
@@ -255,34 +255,34 @@ export default {
         console.log('flowz-instance created:: ')
       },
       updated (data) {
-        // if (!this.flowzinstanceList[data.fid]) {
-        //   return
-        // }
-        console.log('flowz-instance updated:: ', data)
-        // let _inx = _.findIndex(this.flowzinstanceList[data.fid], f => { return f.id === data.id })
-        // if (_inx >= 0) {
-        //   this.flowzinstanceList[data.fid][_inx] = data
-        // } else {
-        //   this.flowzinstanceList[data.fid].push(data)
-        // }
+        console.log('flowz-instance updated:: ')
+        if (!this.flowzinstanceList[data.fid]) {
+          return
+        }
+        let _inx = _.findIndex(this.flowzinstanceList[data.fid], f => { return f.id === data.id })
+        if (_inx >= 0) {
+          this.flowzinstanceList[data.fid][_inx] = data
+        } else {
+          this.flowzinstanceList[data.fid].push(data)
+        }
 
-        // for (let item of this.flowzList.data) {
-        //   if (item.id === data.fid) {
-        //     let temp = _.cloneDeep(this.flowzinstanceList[data.fid])
-        //     let count = _.chain(temp).filter(f => {
-        //       return f.process_log
-        //     }).map(m => {
-        //       m.process_log = _.chain(m.process_log).sortBy(s => {
-        //         return moment(s.lastModified)
-        //       }).last().value()
-        //       return m.process_log
-        //     }).countBy(f => {
-        //       return f.status === 'inputRequired'
-        //     }).result('true').value()
-        //     console.log(data.fid, count)
-        //     item.inputRemain = count !== undefined ? count : 0
-        //   }
-        // }
+        for (let item of this.flowzList.data) {
+          if (item.id === data.fid) {
+            let temp = _.cloneDeep(this.flowzinstanceList[data.fid])
+            let count = _.chain(temp).filter(f => {
+              return f.process_log
+            }).map(m => {
+              m.process_log = _.chain(m.process_log).sortBy(s => {
+                return moment(s.lastModified)
+              }).last().value()
+              return m.process_log
+            }).countBy(f => {
+              return f.status === 'inputRequired'
+            }).result('true').value()
+            // console.log(data.fid, count)
+            item.inputRemain = count !== undefined ? count : 0
+          }
+        }
         // console.log('this.flowzinstanceList', this.flowzinstanceList)
         // if (data.fid !== undefined) {
         //   let checkIndex = _.findIndex(this.flowzList.data, {id: data.fid})
@@ -302,7 +302,34 @@ export default {
         // }
       },
       removed (data) {
-        console.log('flowz-instance removed:: ')
+        console.log('flowz-instance removed:: ', data)
+        if (!this.flowzinstanceList[data.fid]) {
+          return
+        }
+        let _inx = _.findIndex(this.flowzinstanceList[data.fid], f => { return f.id === data.id })
+        if (_inx >= 0) {
+          this.flowzinstanceList[data.fid].splice(_inx, 1)
+        } else {
+          // this.flowzinstanceList[data.fid].push(data)
+        }
+
+        for (let item of this.flowzList.data) {
+          if (item.id === data.fid) {
+            let temp = _.cloneDeep(this.flowzinstanceList[data.fid])
+            let count = _.chain(temp).filter(f => {
+              return f.process_log
+            }).map(m => {
+              m.process_log = _.chain(m.process_log).sortBy(s => {
+                return moment(s.lastModified)
+              }).last().value()
+              return m.process_log
+            }).countBy(f => {
+              return f.status === 'inputRequired'
+            }).result('true').value()
+            // console.log(data.fid, count)
+            item.inputRemain = count !== undefined ? count : 0
+          }
+        }
       }
     }
   }
