@@ -1,26 +1,29 @@
 {
-  "mongo": {
-    "dbinstance": []
-  },
-  "rethink": {
-    "dbinstance": [{
-      "isenable": true,
-      "connection_name": "Rethink",
-      "host": "47.254.27.134",
-      "port": "28015",
-      "dbname": "FlowzEngine",
-      "username": "",
-      "password": "",
-      "upldIcn": "",
-      "notes": "By default",
-      "isdefault": true,
-      "id": "f613518b-200b-46ca-bebd-90db7d45c553"
-    }]
-  },
-  "elastic": {
-    "dbinstance": []
-  },
-  "nedb": {
-    "dbinstance": []
-  }
+    "mongo": {
+        "dbinstance": [
+            {
+                "isenable": true,
+                "connection_name": "FlowzTest",
+                "host": "localhost",
+                "port": "27017",
+                "dbname": "FlowzTest",
+                "username": "",
+                "password": "",
+                "upldIcn": "",
+                "rdoCrt": "",
+                "notes": "",
+                "isdefault": true,
+                "id": "90b5c275-a838-49d3-e6c0-e7bf24d6831e"
+            }
+        ]
+    },
+    "rethink": {
+        "dbinstance": []
+    },
+    "elastic": {
+        "dbinstance": []
+    },
+    "nedb": {
+        "dbinstance": []
+    }
 }

@@ -46,7 +46,7 @@
       <Col>
         <Form ref="formSchema" :model="formSchema">
           <Form-item
-            v-if="!formSchema._id"
+            v-if="!formSchema.id"
             label="Schema Title"
             prop="title"
             :label-width="100"
@@ -54,7 +54,7 @@
               <Input type="text" v-model.trim="formSchema.title"></Input>
           </Form-item>
           <Form-item
-            v-if="formSchema._id"
+            v-if="formSchema.id"
             label="Schema Title"
             :label-width="100"
             >
@@ -128,6 +128,14 @@
                                           <Form-item v-if="activatedProperty(index,'max')" label="Max" :label-width="80" class="no-margin">
                                             <Input-number size="small" v-model="item.property.max"></Input-number>
                                           </Form-item>
+                                          <Form-item v-if="activatedProperty(index,'mindate')" label="Min Date" :label-width="80" class="no-margin">
+                                            <!-- <Input-number size="small" v-model="item.property.mindate"></Input-number> -->
+                                            <DatePicker type="date" placeholder="Select date"  v-model="item.property.mindate"></DatePicker>
+                                          </Form-item>
+                                          <Form-item v-if="activatedProperty(index,'maxdate')" label="Max Date" :label-width="80" class="no-margin">
+                                            <!-- <Input-number size="small" v-model="item.property.maxdate"></Input-number> -->
+                                            <DatePicker type="date" placeholder="Select date"  v-model="item.property.maxdate"></DatePicker>
+                                          </Form-item>
                                           <Form-item v-if="activatedProperty(index,'allowedValue')" label="Allowed Value" :label-width="80" class="no-margin">
                                             <input-tag  :tags="item.property.allowedValue"></input-tag>
                                           </Form-item>
@@ -192,8 +200,8 @@
           prop="database"
           :label-width="115"
           :rules="{required: true, message: 'Please select Database'}">
-            <Cascader v-if="formSchema._id" :data="CascaderData" filterable v-model='formSchema.database' disabled></Cascader>
-            <Cascader v-if="!formSchema._id" :data="CascaderData" filterable v-model='formSchema.database'></Cascader>
+            <Cascader v-if="formSchema.id" :data="CascaderData" filterable v-model='formSchema.database' disabled></Cascader>
+            <Cascader v-if="!formSchema.id" :data="CascaderData" filterable v-model='formSchema.database'></Cascader>
 
           </Form-item>
           <Form-item>
@@ -203,6 +211,7 @@
                   <p slot="content">
                     <Tabs @on-click="fetchname" :value="activetab">
                         <TabPane label="View" icon="eye" name="view">
+                          
                           <!-- <Button type="ghost" @click="opengrapesjs(true)">Using Grapes</Button>
                           <Button type="ghost" @click="openGridManager(true)">Using Grid Manager</Button> -->
                           <Form ref="vtemplate" :model="vtemplate" >
@@ -237,7 +246,7 @@
                                               <template>
                                                 <tr class="ivu-table-row" v-for="(item, inx) in vtemplate.viewtemplate">
                                                     <td>
-                                                      <div class="ivu-table-cell">
+                                                      <div class="ivu-table-cell" >
                                                         <!-- {{item.filename}} -->
                                                         <Form-item
                                                         :key="inx"
@@ -249,7 +258,7 @@
                                                       </div>
                                                     </td>
                                                     <td>
-                                                      <div class="ivu-table-cell">
+                                                      <div class="ivu-table-cell" style="overflow: visible">
                                                         <Form-item
                                                         :key="inx"
                                                         :prop="'viewtemplate.' + inx + '.url[1]'"
@@ -338,7 +347,7 @@
                                                   </div>
                                                 </td>
                                                 <td>
-                                                  <div class="ivu-table-cell">
+                                                  <div class="ivu-table-cell" style="overflow: visible">
                                                     <Form-item
                                                     :key="inx"
                                                     :prop="'createtemplate.' + inx + '.url[1]'"
@@ -486,14 +495,16 @@
 
                         <Button type="info" v-if="activetab == 'email'" slot="extra" size="small" @click="openMjmlEditor">Add Template</Button>
                     </Tabs>
+                    
                   </p>
+                  
               </Panel>
           </Collapse>
           </Form-item>
           <Form-item>
             <Button type="primary" :loading="loading" @click="handleSubmit('formSchema')">
-                <span v-if="!loading && !formSchema._id">Save</span>
-                <span v-else-if="!loading && formSchema._id">Update</span>
+                <span v-if="!loading && !formSchema.id">Save</span>
+                <span v-else-if="!loading && formSchema.id">Update</span>
                 <span v-else>Loading...</span>
             </Button>
             <Button type="ghost" @click="handleReset('formSchema')" style="margin-left: 8px">Reset</Button>
@@ -501,7 +512,7 @@
         </Form>
       </Col>
     </Row>
-    <!-- {{GrapesListData}} -->
+    <!-- {{this.formSchema.entity}}-->
     <!-- <hr> -->
     <!-- {{etemplate}} -->
     <!-- <div class="">
@@ -521,12 +532,13 @@ import MjmlEditor from '@/components/MjmlEditor.vue'
 import Emitter from '@/mixins/emitter'
 import config from '@/config'
 import axios from 'axios'
+import vue2Dropzone from 'vue2-dropzone'
+import 'vue2-dropzone/dist/vue2Dropzone.css'
 var file = []
-
 export default {
   name: 'schema',
   mixins: [Emitter],
-  components: {'input-tag': InputTag, 'grid-manager': gridmanager, 'GrapesComponent': GrapesComponent,  'MjmlEditor': MjmlEditor},
+  components: {'input-tag': InputTag, 'grid-manager': gridmanager, 'GrapesComponent': GrapesComponent,  'MjmlEditor': MjmlEditor, vueDropzone: vue2Dropzone},
   data () {
     const validateTitle = async(rule, value, callback) => {
       var patt = new RegExp(/^_|\`|\~|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\+|\=|\[|\{|\]|\}|\||\\|\'|\<|\,|\.|\>|\?|\/|\"|\;|\:|\-|\s/)
@@ -608,6 +620,9 @@ export default {
       }, {
         value: 'dropdown',
         label: 'DropDown'
+      }, {
+        value: 'file',
+        label: 'File'
       }],
       types: [],
       CascaderData: [],
@@ -673,7 +688,6 @@ export default {
     }
   },
   mounted () {
-    console.log('mounted Called')
     this.$store.state.editTemplate = undefined
     // console.log('------->>>', this.$store.state.viewTemplate)
     this.fetch(this.$route.params.id)
@@ -722,7 +736,6 @@ export default {
   },
   methods: {
     addRowViewTemplate (name) {
-      // console.log(name)
       if (this.vtemplate.viewtemplate.length === 0) {
         this.vtemplate.viewtemplate.push({
           filename: '',
@@ -764,7 +777,7 @@ export default {
     },
     validateTitle: async function(title) {
       var res = await (api.request('get', '/schema'))
-      for (let [inx, obj] of res.data.entries()) {
+      for (let [inx, obj] of res.data.data.entries()) {
         if (obj.title === title) {
           return 'yes'
         } 
@@ -870,14 +883,14 @@ export default {
         // this.fetchSchemaType(id)
         this.$Loading.finish()
         this.GrapesListData = []
-        axios.get(config.grapesUrl + '/project-configuration?userEmail=' + this.$store.state.user.email).then(res => {
+        axios.get(config.grapesAPI + '/project-configuration?userEmail=' + this.$store.state.user.email).then(res => {
           // console.log('res', res.data.data)
           // return res.data.data
           var _res = res.data.data
           for (let [i, mobj] of _res.entries()) {
             // console.log(i)
             var obj = {}
-            obj.label = mobj.configData[1].projectSettings[0].ProjectName
+            obj.label = mobj.websiteName // mobj.configData[1].projectSettings[0].ProjectName
             obj.value = mobj.configData[1].projectSettings[0].ProjectName
             obj.children = []
             for (let [inx, sObj] of mobj.configData[1].pageSettings.entries()) {
@@ -896,11 +909,39 @@ export default {
         })
         
       } else {
+        axios.get(config.grapesAPI + '/project-configuration?userEmail=' + this.$store.state.user.email).then(res => {
+          // console.log('res', res.data.data)
+          // return res.data.data
+          var _res = res.data.data
+          for (let [i, mobj] of _res.entries()) {
+            // console.log(i)
+            var obj = {}
+            obj.label = mobj.websiteName // mobj.configData[1].projectSettings[0].ProjectName
+            obj.value = mobj.configData[1].projectSettings[0].ProjectName
+            obj.children = []
+            for (let [inx, sObj] of mobj.configData[1].pageSettings.entries()) {
+              // console.log(inx)
+              var s = {}
+              s.label = sObj.PageName
+              var a = sObj.PageName.split('.')
+              // console.log(a)
+              s.value = a[0]
+              obj.children.push(s)
+            }
+            this.GrapesListData.push(obj)
+          }
+        }).catch(err => {
+          console.log(err)
+        })
         api.request('get', '/schema/' + id)
         .then(response => {
           this.formSchema = response.data
-          this.createtemplate = this.formSchema.createTemplate
-          this.viewtemplate = this.formSchema.viewTemplate
+          if (this.formSchema.createTemplate && this.formSchema.createTemplate.length > 0) {
+            this.etemplate.createtemplate = this.formSchema.createTemplate
+          }
+          if (this.formSchema.viewTemplate  && this.formSchema.viewTemplate.length > 0) {
+            this.vtemplate.viewtemplate = this.formSchema.viewTemplate
+          }
           this.mjmlUpload = this.formSchema.emailTemplate
           this.$Loading.finish()
         })
@@ -918,9 +959,9 @@ export default {
       })
       // let checkType = '';
       this.$store.getters.allSchema.forEach((schema) => {
-        if (id !== schema._id) {
+        if (id !== schema.id) {
           type.push({
-            value: schema._id,
+            value: schema.id,
             label: schema.title
           })
         }
@@ -933,12 +974,16 @@ export default {
         if (valid) {
           /* Making API call to authenticate a user */
           this.loading = true
-          if (this.formSchema._id === undefined) {
-            this.formSchema['viewTemplate'] = this.viewtemplate
-            this.formSchema['createTemplate'] = this.createtemplate
+          this.formSchema.userID = this.$store.state.user._id
+          if (this.formSchema.id === undefined) {
+            this.formSchema['viewTemplate'] = this.vtemplate.viewtemplate
+            this.formSchema['createTemplate'] = this.etemplate.createtemplate
             this.formSchema['emailTemplate'] = this.mjmlUpload
+            this.formSchema['createdAt'] = new Date()
+            this.formSchema['isdeleted'] = false
             api.request('post', '/schema', this.formSchema)
             .then(response => {
+              // console.log('response', response)
               // this.toggleLoading()
               // this.$router.push(data.redirect)
               // console.log('Response Schema ... ', response.data)
@@ -948,7 +993,7 @@ export default {
               this.viewTemplate = []
               this.createTemplate = []
               this.mjmlUpload = []
-              this.$store.dispatch('getSchema')
+              // this.$store.dispatch('getSchema')
               this.$router.go(-1)
               // this.$router.push('/')
             })
@@ -957,12 +1002,15 @@ export default {
               this.loading = false
             })
           } else {
+            this.formSchema['viewTemplate'] = this.vtemplate.viewtemplate
+            this.formSchema['createTemplate'] = this.etemplate.createtemplate
+            this.formSchema['emailTemplate'] = this.mjmlUpload
             // alert(this.formSchema._id)
             // this.formSchema['viewTemplate'] = this.viewtemplate
             // this.formSchema['createTemplate'] = this.createtemplate
             // this.formSchema['_id'] = this.formSchema._id
             // console.log('aaa', this.formSchema)
-            api.request('put', '/schema/' + this.formSchema._id, this.formSchema).then(response => {
+            api.request('put', '/schema/' + this.formSchema.id, this.formSchema).then(response => {
               // this.toggleLoading()
               // this.$router.push(data.redirect)
               console.log(response)
@@ -1024,8 +1072,9 @@ export default {
         'number': ['min', 'max', 'allowedValue', 'defaultValue', 'placeholder', 'regEx', 'optional'],
         'phone': ['allowedValue', 'defaultValue', 'placeholder', 'regEx', 'optional'],
         'boolean': ['defaultValue', 'placeholder', 'optional'],
-        'date': ['allowedValue', 'defaultValue', 'mindate', 'maxdate', 'placeholder', 'regEx', 'optional'],
-        'dropdown': ['allowedValue', 'options', 'defaultValue', 'placeholder', 'regEx', 'optional']
+        'date': ['defaultValue', 'mindate', 'maxdate', 'placeholder', 'optional'],
+        'dropdown': ['options', 'defaultValue', 'placeholder', 'optional'],
+        'file': ['optional']
       }
       if (typePropertys[this.formSchema.entity[index].type] === undefined) {
         return ['IsArray'].indexOf(property) >= 0
@@ -1161,9 +1210,9 @@ export default {
     },
     '$store.getters.allSchema': function() {
       this.$store.getters.allSchema.forEach((schema) => {
-        if (this.$route.params.id !== schema._id) {
+        if (this.$route.params.id !== schema.id) {
           this.types.push({
-            value: schema._id,
+            value: schema.id,
             label: schema.title
           })
         }
@@ -1176,5 +1225,5 @@ export default {
   .ivu-form-item-error-tip {
     position: relative;
   }
-  .dropdown-opensparts .ivu-select-dropdown {position: relative;}
+  /*.dropdown-opensparts .ivu-select-dropdown {position: relative;}*/
 </style>
