@@ -14,7 +14,7 @@
 </template>
 <script>
 import instanceModel from '@/api/flowzinstance'
-import flowzInstanceById from '@/api/flowz'
+// import flowzInstanceById from '@/api/flowz'
 import moment from 'moment'
 // let _ = require('lodash')
 export default {
@@ -34,16 +34,16 @@ export default {
         {
           title: 'Created On',
           key: 'createdOn',
-          sortable: true,
           width: 200,
-          sortType: 'desc',
+          align: 'center',
           render: (h, params) => {
-            return h('div', moment(this.processData[params.index].createdOn).format('lll'))
+            return h('div', moment(this.processData[params.index].createdOn).fromNow())
           }
         },
         {
           title: 'Action',
           key: 'action',
+          width: 200,
           align: 'center',
           render: (h, params) => {
             return h('div', [
@@ -139,8 +139,14 @@ export default {
       this.init(this.row.id)
     },
     init (id) {
-      var string = '&$sort[createdOn]=' + this.createdOrder + '&$skip=' + this.skip + '&$limit=' + this.limit
-      instanceModel.getByfid(id + string).then(response => {
+      // var string = '&$sort[createdOn]=' + this.createdOrder + '&$skip=' + this.skip + '&$limit=' + this.limit
+      instanceModel.get({
+        fid: id,
+        '$sort[createdOn]': -1,
+        $limit: this.limit,
+        $skip: this.skip,
+        $select: ['id', 'fid', 'createdOn']
+      }).then(response => {
         this.total = response.data.total
         console.log('res >> ', response.data.data)
         this.processData = response.data.data
@@ -151,14 +157,14 @@ export default {
         this.$Notice({duration: '3', title: 'Network Error', desc: ''})
         console.log(err)
       })
-    },
-    getprocessInstance (id) {
-      console.log('get process instance call')
-      console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', id)
-      flowzInstanceById.get(id).then(res => {
-        console.log(res.data)
-      })
     }
+    // getprocessInstance (id) {
+    //   console.log('get process instance call')
+    //   console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', id)
+    //   flowzInstanceById.get(id).then(res => {
+    //     console.log(res.data)
+    //   })
+    // }
   },
   mounted () {
     // console.log('table expand', this.row.id)
