@@ -634,22 +634,23 @@ iframe {
 .inputRequired {
   color: #E71A24 !important;
 }*/
+
+.running:not(.djs-connection) .djs-visual > :nth-child(1) {
+  fill: #d5d835 !important;
+}
 .created:not(.djs-connection) .djs-visual > :nth-child(1) {
   fill: rgba(255, 251, 0, 0.56) !important;
 }
+.mappingRequired:not(.djs-connection) .djs-visual > :nth-child(1) {
+  fill: #d5d835 !important;
+}
 .inputRequired:not(.djs-connection) .djs-visual > :nth-child(1) {
   fill: #E71A24 !important;
-}
-.running:not(.djs-connection) .djs-visual > :nth-child(1) {
-  fill: #d5d835 !important;
 }
 .processing:not(.djs-connection) .djs-visual > :nth-child(1) {
   fill: #1DA8D3 !important;
 }
 .completed:not(.djs-connection) .djs-visual > :nth-child(1) {
   fill: #1AE75E !important;
-}
-.mappingRequired:not(.djs-connection) .djs-visual > :nth-child(1) {
-  fill: #d5d835 !important;
 }
 </style>
