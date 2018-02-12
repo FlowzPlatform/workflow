@@ -17,8 +17,11 @@
             </SplitArea >
             <SplitArea :size="20" :minSize="200">
               <Tooltip content="Save" placement="left" class="upload-icon">
-                <a  @click="save">
+                <a v-if="!btnLoading" @click="handleSave">
                   <i class="fa fa-floppy-o"></i>
+                </a>
+                <a v-if="btnLoading">
+                  <i class="fa fa-spinner fa-spin"></i>
                 </a>
               </Tooltip>
               <div id="js-properties-panel"></div>
@@ -61,13 +64,15 @@
     data () {
       return {
         loading: true,
+        btnLoading: false,
         processVar: null,
         bpmnModeler: null,
         bpmnXML: '<?xml version="1.0" encoding="UTF-8"?><bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn"><bpmn:process id="Process_1" isExecutable="false"><bpmn:startEvent id="StartEvent_1" /></bpmn:process><bpmndi:BPMNDiagram id="BPMNDiagram_1"><bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1"><bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1"><dc:Bounds x="173" y="102" width="36" height="36" /></bpmndi:BPMNShape></bpmndi:BPMNPlane></bpmndi:BPMNDiagram></bpmn:definitions>'
       }
     },
     methods: {
-      async save () {
+      async handleSave () {
+        this.btnLoading = true
         let xmlData
         let svgData = ''
         console.log('this.bpmnModeler', this.bpmnModeler)
@@ -98,12 +103,15 @@
             this.$Notice.success({title: 'Success..!', desc: 'Flow Saved..'})
             this.$router.push({name: 'flow/list'})
             localStorage.removeItem('BPMNXml')
+            this.btnLoading = false
           }).catch(error => {
             console.log(error)
             this.$Notice.error({title: 'Error..!', desc: 'Flow Not Saved...'})
+            this.btnLoading = false
           })
         } else {
           this.$Message.error('Please Add Process name !')
+          this.btnLoading = false
         }
       },
       async initBPMN (data) {

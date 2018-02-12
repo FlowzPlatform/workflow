@@ -140,7 +140,7 @@ export default {
     init () {
       this.loading = true
       flowzinstanceModel.getByfid(this.fid, {
-        '$sort[createdOn]': 1,
+        '$sort[createdOn]': -1,
         $limit: this.$store.state.limitPage,
         $skip: this.$store.state.limitPage * (this.current - 1)
       }).then(res => {

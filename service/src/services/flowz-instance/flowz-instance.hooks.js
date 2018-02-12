@@ -12,7 +12,9 @@ module.exports = {
       hook => beforeFind(hook)
     ],
     get: [],
-    create: [],
+    create: [
+      hook => beforeCreate(hook)
+    ],
     update: [],
     patch: [],
     remove: []
@@ -41,19 +43,11 @@ module.exports = {
   }
 };
 
+let beforeCreate = function (hook) {
+  hook.data.createdOn = new Date();
+};
+
 let beforeFind = function (hook) {
-  // const query = hook.params.query
-  // if (query.isdeleted != undefined) {
-  //   if (hook.params.query.isdeleted == 'true') {
-  //     hook.params.query.isdeleted = true
-  //   } else if (hook.params.query.isdeleted == 'false') {
-  //     hook.params.query.isdeleted = false
-  //   }
-  // }
-  // if (hook.params.query && hook.params.query.isdeleted) {
-  //   hook.params.query.isdeleted = !!hook.params.query.isdeleted;
-  // }
-  // hook.params.query.$sort.process_log = { lastModified: -1 };
   if (hook.params.query && hook.params.query.$sort && hook.params.query.$sort.createdOn) {
     hook.params.query.$sort.createdOn = parseInt(hook.params.query.$sort.createdOn);
   }
@@ -61,7 +55,7 @@ let beforeFind = function (hook) {
     hook.params.paginate = hook.params.query.$paginate === 'false' || hook.params.query.$paginate === false;
     delete hook.params.query.$paginate;
   }
-}
+};
 
 var updateProcesslogforMappingRequired = async(function (hook) {
   for (let [key, m] of hook.result.processList.entries()) {
