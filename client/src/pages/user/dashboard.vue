@@ -36,12 +36,16 @@
   </div>
 </template>
 <script>
-import flowz from '@/api/flowz'
-import viewSVG from './viewSVG'
-import flowzinstanceModel from '@/api/flowzinstance'
-import flowInstance from './flowInstance'
 import _ from 'lodash'
 import moment from 'moment'
+
+// Models
+import flowzinstanceModel from '@/api/flowzinstance'
+import flowz from '@/api/flowz'
+
+// Components
+import flowInstance from './flowInstance'
+import viewSVG from './viewSVG'
 
 export default {
   name: 'dashboard',
@@ -51,6 +55,7 @@ export default {
   data () {
     return {
       flowzList: {},
+      processLog: [],
       loading: true,
       columns: [
         {
@@ -123,7 +128,8 @@ export default {
           }
         }
       ],
-      current: 1
+      current: 1,
+      flowzinstanceList: {}
     }
   },
   methods: {
@@ -148,8 +154,9 @@ export default {
         flowzinstanceModel.get({
           fid: item.id,
           $paginate: false,
-          $select: ['process_log']
+          $select: ['process_log', 'id']
         }).then(response => {
+          this.flowzinstanceList[item.id] = _.cloneDeep(response.data)
           let count = _.chain(response.data).filter(f => {
             return f.process_log
           }).map(m => {
@@ -161,6 +168,7 @@ export default {
             return f.status === 'inputRequired'
           }).result('true').value()
           item.inputRemain = count !== undefined ? count : 0
+          console.log('this.flowzinstanceList', this.flowzinstanceList)
         })
       }
       // await this.getInputRequired()
@@ -170,10 +178,160 @@ export default {
       this.current = newValue
       this.init()
       // console.log('newValue', newValue)
+    },
+    setCount (id, index) {
+      flowzinstanceModel.get({
+        fid: id,
+        $paginate: false,
+        $select: ['process_log']
+      }).then(response => {
+        let count = _.chain(response.data).filter(f => {
+          return f.process_log
+        }).map(m => {
+          m.process_log = _.chain(m.process_log).sortBy(s => {
+            return moment(s.lastModified)
+          }).last().value()
+          return m.process_log
+        }).countBy(f => {
+          return f.status === 'inputRequired'
+        }).result('true').value()
+        this.flowzList.data[index].inputRemain = count !== undefined ? count : 0
+      })
     }
   },
   mounted () {
     this.init()
+  },
+  feathers: {
+    'flowz': {
+      created (data) {
+        // console.log('Created :: ', data)
+        if (data.id !== undefined) {
+          data.inputRemain = 0
+          if (this.flowzList.data.length < this.$store.state.limitPage) {
+            this.flowzList.data.push(data)
+          }
+          this.flowzList.total++
+        }
+      },
+      updated (data) {
+        // console.log('Updated :: ', data)
+        if (data.id !== undefined) {
+          data.inputRemain = -1
+          data._expanded = false
+          let getIndex = _.findIndex(this.flowzList.data, {id: data.id})
+          // console.log('getIndex  ', getIndex)
+          if (getIndex !== undefined && getIndex > 0) {
+            this.flowzList.data.splice(getIndex, 1)
+            this.flowzList.data.splice(getIndex, 0, data)
+            this.setCount(data.id, getIndex)
+          }
+        }
+      },
+      removed (data) {
+        // console.log('Deleted :: ', data)
+        if (data.id !== undefined) {
+          // data.inputRemain = -1
+          let getIndex = _.findIndex(this.flowzList.data, {id: data.id})
+          // console.log('getIndex  ', getIndex)
+          if (getIndex !== undefined && getIndex >= 0) {
+            this.flowzList.data.splice(getIndex, 1)
+            // this.flowzList.data.splice(getIndex, 0, data)
+            // this.setCount(data.id, getIndex)
+          }
+          this.flowzList.total--
+          if (this.flowzList.data.length === 0) {
+            if (this.current !== 1) {
+              this.current--
+            }
+            // console.log('this.current', this.current)
+            this.init()
+          }
+        }
+      }
+    },
+    'flowz-instance': {
+      created (data) {
+        console.log('flowz-instance created:: ')
+      },
+      updated (data) {
+        console.log('flowz-instance updated:: ')
+        if (!this.flowzinstanceList[data.fid]) {
+          return
+        }
+        let _inx = _.findIndex(this.flowzinstanceList[data.fid], f => { return f.id === data.id })
+        if (_inx >= 0) {
+          this.flowzinstanceList[data.fid][_inx] = data
+        } else {
+          this.flowzinstanceList[data.fid].push(data)
+        }
+
+        for (let item of this.flowzList.data) {
+          if (item.id === data.fid) {
+            let temp = _.cloneDeep(this.flowzinstanceList[data.fid])
+            let count = _.chain(temp).filter(f => {
+              return f.process_log
+            }).map(m => {
+              m.process_log = _.chain(m.process_log).sortBy(s => {
+                return moment(s.lastModified)
+              }).last().value()
+              return m.process_log
+            }).countBy(f => {
+              return f.status === 'inputRequired'
+            }).result('true').value()
+            // console.log(data.fid, count)
+            item.inputRemain = count !== undefined ? count : 0
+          }
+        }
+        // console.log('this.flowzinstanceList', this.flowzinstanceList)
+        // if (data.fid !== undefined) {
+        //   let checkIndex = _.findIndex(this.flowzList.data, {id: data.fid})
+        //   if (checkIndex !== undefined && checkIndex > -1) {
+        //     let sobj = _.chain(data.process_log).sortBy(s => {
+        //       return moment(s.lastModified)
+        //     }).last().value()
+        //     let found = false
+        //     if (sobj !== undefined && sobj.hasOwnProperty('status') && sobj.status === 'inputRequired') {
+        //       found = true
+        //     }
+        //     console.log('found:: ', found)
+        //     if (found) {
+        //       this.flowzList.data[checkIndex].inputRemain += 1
+        //     }
+        //   }
+        // }
+      },
+      removed (data) {
+        console.log('flowz-instance removed:: ', data)
+        if (!this.flowzinstanceList[data.fid]) {
+          return
+        }
+        let _inx = _.findIndex(this.flowzinstanceList[data.fid], f => { return f.id === data.id })
+        if (_inx >= 0) {
+          this.flowzinstanceList[data.fid].splice(_inx, 1)
+        } else {
+          // this.flowzinstanceList[data.fid].push(data)
+        }
+
+        for (let item of this.flowzList.data) {
+          if (item.id === data.fid) {
+            let temp = _.cloneDeep(this.flowzinstanceList[data.fid])
+            let count = _.chain(temp).filter(f => {
+              return f.process_log
+            }).map(m => {
+              m.process_log = _.chain(m.process_log).sortBy(s => {
+                return moment(s.lastModified)
+              }).last().value()
+              return m.process_log
+            }).countBy(f => {
+              return f.status === 'inputRequired'
+            }).result('true').value()
+            // console.log(data.fid, count)
+            item.inputRemain = count !== undefined ? count : 0
+          }
+        }
+      }
+    }
   }
 }
 </script>
