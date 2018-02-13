@@ -154,6 +154,9 @@
                                           <Form-item v-if="activatedProperty(index,'IsArray')" label="" class="no-margin">
                                             <Checkbox v-model="item.property.IsArray">Is Array</Checkbox>
                                           </Form-item>
+                                          <Form-item v-if="activatedProperty(index,'isMultiple')" label="" class="no-margin">
+                                            <Checkbox v-model="item.property.isMultiple">Multiple</Checkbox>
+                                          </Form-item>
                                           <Form-item v-if="activatedProperty(index,'optional')" label="" :label-width="80" class="no-margin">
                                             <Checkbox v-model="item.property.optional">Optional</Checkbox>
                                           </Form-item>
@@ -871,7 +874,8 @@ export default {
                 regEx: '',
                 optional: true,
                 options: [],
-                IsArray: false
+                IsArray: false,
+                isMultiple: true
               },
               notes: ''
             }
@@ -1049,7 +1053,8 @@ export default {
           regEx: '',
           optional: true,
           options: [],
-          IsArray: ''
+          IsArray: '',
+          isMultiple: true
         },
         notes: ''
       })
@@ -1074,7 +1079,7 @@ export default {
         'boolean': ['defaultValue', 'placeholder', 'optional'],
         'date': ['defaultValue', 'mindate', 'maxdate', 'placeholder', 'optional'],
         'dropdown': ['options', 'defaultValue', 'placeholder', 'optional'],
-        'file': ['optional']
+        'file': ['optional', 'isMultiple']
       }
       if (typePropertys[this.formSchema.entity[index].type] === undefined) {
         return ['IsArray'].indexOf(property) >= 0

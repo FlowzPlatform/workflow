@@ -234,7 +234,7 @@ var getSchemaData = async(function (id) {
   return res.data
 })
 var getallSchemaData = async(function () {
-  var res = await (axios.get('http://' + config.get('host') + ':' + config.get('port') + '/schema/'))
+  var res = await (axios.get('http://' + config.get('host') + ':' + config.get('port') + '/schema?$paginate=false'))
   return res.data.data
 })
 var giveDatabase = async(function (schemaid) {
@@ -491,6 +491,27 @@ var compareData = async(function (id, old_data, new_data, res) {
     return s
   }
 })
+
+var dataLevelCheking = async (function(data) {
+  var flag = false
+  var res = await (getSchemaData(data[0].Schemaid))
+  // console.log('res, ', res)
+  for (let ent of res.entity) {
+    if (ent.customtype) {
+      flag = true
+    }
+  }
+  if (flag) {
+    console.log('Custom Data >>>>>>>>>>>>>>>>>>>>>')
+    var response = await (setData(data))
+    return response
+  } else {
+    console.log('Single Level Data >>>>>>>>>>>>>>>>>>>>>')
+    var response = await (singleLevelsave(data))
+    return response
+  }
+})
+
 var singleLevelsave = async(function (data) {
     // console.log('singleLevelsave', data)
     var id = data[0].Schemaid
@@ -592,8 +613,13 @@ var getIdbySchemaId = async(function (id, schemaid) {
       var _res = await (db.api.getThisflowsInstance(id, res.title, res.database[1]))
         // console.log('_res', _res)
       var status = false
-      for (let k in _res) {
-        if (Array.isArray(_res[k])) {
+      // for (let k in _res) {
+      //   if (Array.isArray(_res[k])) {
+      //     status = true
+      //   }
+      // }
+      for (let ent of res.entity) {
+        if (ent.customtype) {
           status = true
         }
       }
@@ -727,56 +753,58 @@ class Service {
   }
   create(data, params) {
       console.log('.................................Create feathers...............................', data);
-      var flag = false
-        //var mainDt = data.data
-      for (let value in data.data[0]) {
-        // console.log(value)
-        if (Array.isArray(data.data[0][value])) {
-          // console.log(data[0][value])
-          flag = true
-        }
-      }
-      console.log('Flag create', flag)
-      if (!flag) {
-        // var response = saveData(data.data[0], 'single')
-        // var _data = Promise.resolve(response).then(function(d) {
-        //     console.log('response... ', d)
-        //     var arr = []
-        //     arr.push({refid: d})
-        //     return arr
-        // })
-        // .catch(function(err){
-        //     console.log('Error', err)
-        // }) 
-        // return _data
-        // return saveData(data.data[0])
-        var response = singleLevelsave(data.data)
-        return Promise.resolve(response).then(res => {
-          console.log('response..............', res)
-          return res
-        }).catch(err => {
-          console.log('Error', err)
-          return err
-        })
-      } else {
-        // var id = data.data[0].Schemaid
-        // console.log('.............id ', id)
-        // let _promise = new Promise((resolve, reject) => {
-        //     getSchemaDataEnt(id).then((data) => {
-        //         resolve(data);
-        //     })
-        // });
-        var response = setData(data.data)
-          // var response = checkDataObj(data.data)
-        return Promise.resolve(response)
-          // .then(function(d) {
-          //     console.log('response... ', d)
-          //     return d
-          // })
-          // .catch(function(err){
-          //     console.log('Error', err)
-          // }) 
-      }
+      var resp = dataLevelCheking(data.data)
+      return Promise.resolve(resp)
+      // var flag = false
+      //   //var mainDt = data.data
+      // for (let value in data.data[0]) {
+      //   // console.log(value)
+      //   if (Array.isArray(data.data[0][value])) {
+      //     // console.log(data[0][value])
+      //     flag = true
+      //   }
+      // }
+      // console.log('Flag create', flag)
+      // if (!flag) {
+      //   // var response = saveData(data.data[0], 'single')
+      //   // var _data = Promise.resolve(response).then(function(d) {
+      //   //     console.log('response... ', d)
+      //   //     var arr = []
+      //   //     arr.push({refid: d})
+      //   //     return arr
+      //   // })
+      //   // .catch(function(err){
+      //   //     console.log('Error', err)
+      //   // }) 
+      //   // return _data
+      //   // return saveData(data.data[0])
+      //   var response = singleLevelsave(data.data)
+      //   return Promise.resolve(response).then(res => {
+      //     console.log('response..............', res)
+      //     return res
+      //   }).catch(err => {
+      //     console.log('Error', err)
+      //     return err
+      //   })
+      // } else {
+      //   // var id = data.data[0].Schemaid
+      //   // console.log('.............id ', id)
+      //   // let _promise = new Promise((resolve, reject) => {
+      //   //     getSchemaDataEnt(id).then((data) => {
+      //   //         resolve(data);
+      //   //     })
+      //   // });
+      //   var response = setData(data.data)
+      //     // var response = checkDataObj(data.data)
+      //   return Promise.resolve(response)
+      //     // .then(function(d) {
+      //     //     console.log('response... ', d)
+      //     //     return d
+      //     // })
+      //     // .catch(function(err){
+      //     //     console.log('Error', err)
+      //     // }) 
+      // }
     }
     // create(data, params) {
     //   console.log('create feathers...');

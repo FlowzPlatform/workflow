@@ -88,6 +88,7 @@ export default {
           // url = 'http://172.16.230.133/websites/59a8e0dd41dc17001aeb1e67/c6f938a9-41f0-49e1-aaf1-65f8ce94b4e9/public/index.html'
           // url = 'http://localhost/orderentry.html'
           // url = 'http://172.16.230.133/websites/59fb06376adc6b00242a5533/f3455e59-b6b5-4b74-b02b-f39038f73bd7/public/index.html'
+          // url = 'http://localhost/multifile3.html'
         }
         // console.log('url', url)
         return url
@@ -137,7 +138,7 @@ export default {
           custom = await self.getCustom(self.entitySchema.entity[i].type, false)
           customSchema.push(custom)
         } else {
-          array.push({name: self.entitySchema.entity[i].name})
+          array.push({name: self.entitySchema.entity[i].name, type: self.entitySchema.entity[i].type})
           customSchema.push(self.entitySchema.entity[i])
         }
       }

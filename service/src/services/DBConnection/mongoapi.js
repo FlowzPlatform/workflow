@@ -314,7 +314,7 @@ module.exports = {
     return schema.ops[0]._id;
   }),
   postflowsInstance: async(function (data, dbid, collName) {
-    console.log('...................mongo post flowsInstance...................');
+    console.log('...................mongo post flowsInstance...................', collName);
     // data.Schemaid = data._id
     // delete data._id
     // delete data.id
