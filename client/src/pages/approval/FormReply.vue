@@ -67,7 +67,8 @@ export default {
       status: 'waiting',
       showOutput: [],
       cols: [],
-      flowInstance: {}
+      flowInstance: {},
+      move: ''
     }
   },
   computed: {
@@ -549,18 +550,33 @@ export default {
       }
     }
   },
-  async mounted () {
+  mounted () {
     let self = this
     // let validated
     this.init(self.$route.params.fiid)
-    window.addEventListener('message', async function (event) {
+    // window.addEventListener('message', function (event) {
+    //   console.log('.......................... event.data :', event.data)
+    //   self.err = []
+    //   if (_.isArray(event.data)) {
+    //     // self.handleSubmit(event.data)
+    //   }
+    // })
+  },
+  created () {
+    let self = this
+    window.addEventListener('message', function (event) {
       console.log('.......................... event.data :', event.data)
-      self.err = []
+      // self.err = []
       if (_.isArray(event.data)) {
         self.handleSubmit(event.data)
       }
     })
   },
+  // destroyed: function () {
+  //   window.removeEventListener('message', function (event) {
+  //     console.log('destroyed............')
+  //   })
+  // },
   feathers: {
     'flowz-instance': {
       async updated (data) {
@@ -595,6 +611,7 @@ export default {
             if (index < 0) {
               this.isdefault = true
             }
+            location.reload()
           }
           _.forEach(self.flowInstance.processList, function (process) {
             var lastProcess = process.log[_.findLastKey(process.log)]

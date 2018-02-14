@@ -105,7 +105,7 @@
                                         :prop="'entity.' + index + '.name'"
                                         :rules="entityrules"
                                         >
-                                          <Input type="text" v-model="item.name" placeholder="name" size="small" class="schema-form-input"></Input>
+                                          <Input type="text" v-model.trim="item.name" placeholder="name" size="small" class="schema-form-input"></Input>
                                         </Form-item>
                                     </div>
                                 </td>
@@ -256,7 +256,7 @@
                                                         :prop="'viewtemplate.' + inx + '.filename'"
                                                         :rules="viewtrule"
                                                         >
-                                                          <Input type="text" v-model="item.filename" placeholder="Project Name" class=""></Input>
+                                                          <Input type="text" v-model.trim="item.filename" placeholder="Project Name" class=""></Input>
                                                         </Form-item>
                                                       </div>
                                                     </td>
