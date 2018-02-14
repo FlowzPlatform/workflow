@@ -24,6 +24,7 @@ _.forEach(file, function (dbs, i) {
     api.choose()
   }
 })
+
 let readfile = async(function () {
   fs.readFile(path.join(__dirname, '../DBConnection/db.json'), function (err, data) {
     // console.log('reading file' + data)
@@ -51,6 +52,7 @@ let readfile = async(function () {
     })
   });
 })
+
 var getQuery = async(function (dbName, type, queryFor) {
   let result = new Promise((resolve, reject) => {
     fs.readFile(path.join(__dirname, '../DBConnection/db.json'), function (err, data) {
@@ -107,6 +109,7 @@ var checkFlag = async(function (data) {
   }))
   return flag
 })
+
 var checkFlagforGet = async(function (mObj) {
   var flag = false
     // _.forEach(data, async(function(obj, index){
@@ -126,7 +129,9 @@ var checkFlagforGet = async(function (mObj) {
     // }))  alterTableAndAddField
   return flag
 })
+
 var checkDataObj = async(function (data, id, res) {
+  // console.log('>>>>>>>>>>>>>>>>>>>>>>>> ', data, '\n..............>> ', res)
   for (let [dIndex, dObj] of data.entries()) {
     // if(dObj.hasOwnProperty('Schemaid')) {
     //   // console.log('{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{')
@@ -142,9 +147,15 @@ var checkDataObj = async(function (data, id, res) {
       // if (sKey == 'database') {
       // }
       // else {
-      if (Array.isArray(dObj[sKey])) {
+      let f = false
+      for (let ent of res.entity) {
+        if (ent.customtype) {
+          f = true
+        }
+      }
+      if (f) {
         var status = await (checkFlag(dObj[sKey]))
-          // console.log('...................................................')
+          console.log('...................................................', status)
           // console.log('dObj[sKey]', dObj[sKey], 'sKey', sKey, 'dObj', dObj, 'res', res)
           // console.log('...................................................')
           // console.log('Status of Array.............................', status)
@@ -168,11 +179,11 @@ var checkDataObj = async(function (data, id, res) {
               }
             }
             if (!s) {
-              console.log('<<<<<<<<<<<<<', _res)
+              // console.log('<<<<<<<<<<<<<', _res)
               schemaid = _res.id
               objid = await (saveData(obj, _res))
             } else {
-              console.log('@@@@.............', res)
+              // console.log('@@@@.............', res)
               schemaid = res.id
               objid = await (saveData(obj, res))
             }
@@ -216,6 +227,45 @@ var checkDataObj = async(function (data, id, res) {
   }
   return data
 })
+
+var mynewCreateFunction = async (function(data, res) {
+  // console.log('...', data)
+  let custom = false
+  for (let ent of res.entity) {
+    if (ent.customtype) {
+      custom = true
+    }
+  }
+  if (!custom) {
+    // No More Custom data
+    for (let sObj of data) {
+      let mydata = await (saveData(sObj, res))
+      for (let k in sObj) {
+        delete sObj[k]
+      }
+      sObj.refid = mydata
+    }
+  } else {
+    // schema has Custom type inside
+    for (let sObj of data) {
+      for (let ent of res.entity) {
+        if (ent.customtype) {
+          var _res = await (getSchemaData(ent.type))
+          let mydata = await (mynewCreateFunction(sObj[ent.name], _res))
+          sObj[ent.name] = mydata
+          // console.log('sObj[ent.name] >>> ', ent.name, ' >>>> ', mydata)
+        }
+      }
+      var s = await (saveData(sObj, res))
+      for (let k in sObj) {
+        delete sObj[k]
+      }
+      sObj.refid = s
+    }
+  }
+  return data
+})
+
 var FindEntitytype = async(function (fieldname, data) {
   // console.log('FindEntitytype :::::::::::', fieldname)
   for (let [inxx, object] of data.entity.entries()) {
@@ -226,6 +276,7 @@ var FindEntitytype = async(function (fieldname, data) {
     // console.log('...', object, inxx)
   }
 })
+
 var getSchemaData = async(function (id) {
   // console.log('setSchemaData calling >>>>>>>>>>>')
   var res = await (axios.get('http://' + config.get('host') + ':' + config.get('port') + '/schema/' + id))
@@ -233,18 +284,21 @@ var getSchemaData = async(function (id) {
     // postSchemaData = res.data 
   return res.data
 })
+
 var getallSchemaData = async(function () {
   var res = await (axios.get('http://' + config.get('host') + ':' + config.get('port') + '/schema?$paginate=false'))
   return res.data.data
 })
+
 var giveDatabase = async(function (schemaid) {
   var res = await (axios.get('http://' + config.get('host') + ':' + config.get('port') + '/schema/' + schemaid))
   console.log('response from giveDatabase', res.data)
     // postSchemaData = res.data 
   return res.data.data.database
 })
+
 var saveData = async(function (data, res) {
-  console.log('save calling...................', data, res)
+  // console.log('save calling...................', data, res)
     // var database;
     // if(data.Schemaid != undefined) {
     // database = await (giveDatabase(data.Schemaid))
@@ -277,6 +331,7 @@ var saveData = async(function (data, res) {
   console.log('Return Instance id .........', dbdata)
   return dbdata;
 })
+
 var setData = async(function (data) {
   // console.log('????????????????????????????????????????')
   var id = data[0].Schemaid
@@ -286,6 +341,7 @@ var setData = async(function (data) {
   var _res = await (checkDataObj(data, id, res))
   return _res
 })
+
 var getInstance = async(function (id, schemaid, columnname) {
   var instance = []
   var isMysql = false;
@@ -344,6 +400,7 @@ var getInstance = async(function (id, schemaid, columnname) {
   }))
   return _data;
 })
+
 var getallInstance = async(function (data) {
   for (let [i, obj] of data.entries()) {
     for (let k in obj) {
@@ -365,6 +422,7 @@ var getallInstance = async(function (data) {
   }
   return data
 })
+
 var getActualInstance = async(function (id, res) {
   var instance = []
   dbapi.forEach(function (db) {
@@ -383,6 +441,7 @@ var getActualInstance = async(function (id, res) {
   }))
   return _data;
 })
+
 var updateData = async(function (id, data, res) {
   console.log('update calling...................')
   var _dbindex = _.findIndex(dbapi, { 'db': res.database[0] });
@@ -390,6 +449,7 @@ var updateData = async(function (id, data, res) {
   console.log('dbdata..........')
   return dbdata;
 })
+
 var deleteData = async(function (id, res) {
   console.log('delete calling...................')
   var _dbindex = _.findIndex(dbapi, { 'db': res.database[0] });
@@ -397,6 +457,7 @@ var deleteData = async(function (id, res) {
   console.log('dbdata..........')
   return dbdata;
 })
+
 var checkUpdateData = async(function (id, data) {
   var sid = data[0].Schemaid
   var res = await (getSchemaData(sid))
@@ -626,12 +687,20 @@ var getIdbySchemaId = async(function (id, schemaid) {
       if (!status) {
         return _res
       } else {
-        for (let k in _res) {
-          if (Array.isArray(_res[k])) {
-            for (let [inx, iObj] of _res[k].entries()) {
-              var _typeid = await (FindEntitytype(k, res))
-              _res[k][inx] = await (getIdbySchemaId(iObj.refid, _typeid))
+        // for (let k in _res) {
+        //   if (Array.isArray(_res[k])) {
+        //     for (let [inx, iObj] of _res[k].entries()) {
+        //       var _typeid = await (FindEntitytype(k, res))
+        //       _res[k][inx] = await (getIdbySchemaId(iObj.refid, _typeid))
+        //     }
+        //   }
+        // }
+        for (let ent in res.entity) {
+          if (ent.customtype) {
+            for (let sObj of _res[ent.name]) {
+             sObj = await (getIdbySchemaId(sObj.refid, ent.type))  
             }
+            // _res[ent.name] = await (getIdbySchemaId())
           }
         }
         return _res
@@ -651,11 +720,13 @@ var getIdbySchemaName = async(function (id, name) {
   var _res = await (getIdbySchemaId(id, Schemaid))
   return _res;
 })
+
 var removeIdbySchemaId = async(function (id, schemaid) {
   var res = await (getSchemaData(schemaid))
   var _res = await (deleteData(id, res))
   return _res
 })
+
 var removeIdbySchemaName = async(function (id, name) {
   var Schema = await (getallSchemaData())
   var Schemaid;
@@ -667,6 +738,34 @@ var removeIdbySchemaName = async(function (id, name) {
   var _res = await (removeIdbySchemaId(id, Schemaid))
   return _res;
 })
+
+var createFunction = async (function(data) {
+  let res = await (getSchemaData(data[0].Schemaid))
+  let _data = await (mynewCreateFunction(data, res))
+  return _data
+})
+
+var getFunction = async (function(id, schemaid) {
+  let res = await (getSchemaData(schemaid))
+  let _res = await (newgetFunction(id, res))
+  return _res
+})
+
+var newgetFunction = async( function(id, res) {
+  let status = false 
+  for (let ent of res.entity) {
+    if (ent.customtype) {
+      status = true
+    }
+  }
+  if (!status) {
+    // No custom type found
+  
+  } else {
+    // Now get custom data also
+
+  }
+}) 
 
 class Service {
   constructor(options) {
@@ -726,7 +825,7 @@ class Service {
   get(id, params) {
     console.log('Get Instance feathers...');
     if (params.query.schemaid != undefined) {
-      console.log('id::: from Get Instance::: ', id)
+      // console.log('id::: from Get Instance::: ', id)
       var res = getIdbySchemaId(id, params.query.schemaid)
       return Promise.resolve(res)
     } else if (params.query.schemaname != undefined) {
@@ -752,59 +851,66 @@ class Service {
     // return Promise.resolve(dbdata)
   }
   create(data, params) {
-      console.log('.................................Create feathers...............................', data);
-      var resp = dataLevelCheking(data.data)
-      return Promise.resolve(resp)
-      // var flag = false
-      //   //var mainDt = data.data
-      // for (let value in data.data[0]) {
-      //   // console.log(value)
-      //   if (Array.isArray(data.data[0][value])) {
-      //     // console.log(data[0][value])
-      //     flag = true
-      //   }
-      // }
-      // console.log('Flag create', flag)
-      // if (!flag) {
-      //   // var response = saveData(data.data[0], 'single')
-      //   // var _data = Promise.resolve(response).then(function(d) {
-      //   //     console.log('response... ', d)
-      //   //     var arr = []
-      //   //     arr.push({refid: d})
-      //   //     return arr
-      //   // })
-      //   // .catch(function(err){
-      //   //     console.log('Error', err)
-      //   // }) 
-      //   // return _data
-      //   // return saveData(data.data[0])
-      //   var response = singleLevelsave(data.data)
-      //   return Promise.resolve(response).then(res => {
-      //     console.log('response..............', res)
-      //     return res
-      //   }).catch(err => {
-      //     console.log('Error', err)
-      //     return err
-      //   })
-      // } else {
-      //   // var id = data.data[0].Schemaid
-      //   // console.log('.............id ', id)
-      //   // let _promise = new Promise((resolve, reject) => {
-      //   //     getSchemaDataEnt(id).then((data) => {
-      //   //         resolve(data);
-      //   //     })
-      //   // });
-      //   var response = setData(data.data)
-      //     // var response = checkDataObj(data.data)
-      //   return Promise.resolve(response)
-      //     // .then(function(d) {
-      //     //     console.log('response... ', d)
-      //     //     return d
-      //     // })
-      //     // .catch(function(err){
-      //     //     console.log('Error', err)
-      //     // }) 
-      // }
+      console.log('.................................Create feathers...............................');
+      if (data.data && Array.isArray(data.data) && data.data.length > 0) {
+        let res = createFunction(data.data)
+        return res
+      } else {
+        let err = new Error('Bad Request')
+        return err
+      }
+      // var resp = dataLevelCheking(data.data)
+      // return Promise.resolve(resp)
+      // // var flag = false
+      // //   //var mainDt = data.data
+      // // for (let value in data.data[0]) {
+      // //   // console.log(value)
+      // //   if (Array.isArray(data.data[0][value])) {
+      // //     // console.log(data[0][value])
+      // //     flag = true
+      // //   }
+      // // }
+      // // console.log('Flag create', flag)
+      // // if (!flag) {
+      // //   // var response = saveData(data.data[0], 'single')
+      // //   // var _data = Promise.resolve(response).then(function(d) {
+      // //   //     console.log('response... ', d)
+      // //   //     var arr = []
+      // //   //     arr.push({refid: d})
+      // //   //     return arr
+      // //   // })
+      // //   // .catch(function(err){
+      // //   //     console.log('Error', err)
+      // //   // }) 
+      // //   // return _data
+      // //   // return saveData(data.data[0])
+      // //   var response = singleLevelsave(data.data)
+      // //   return Promise.resolve(response).then(res => {
+      // //     console.log('response..............', res)
+      // //     return res
+      // //   }).catch(err => {
+      // //     console.log('Error', err)
+      // //     return err
+      // //   })
+      // // } else {
+      // //   // var id = data.data[0].Schemaid
+      // //   // console.log('.............id ', id)
+      // //   // let _promise = new Promise((resolve, reject) => {
+      // //   //     getSchemaDataEnt(id).then((data) => {
+      // //   //         resolve(data);
+      // //   //     })
+      // //   // });
+      // //   var response = setData(data.data)
+      // //     // var response = checkDataObj(data.data)
+      // //   return Promise.resolve(response)
+      // //     // .then(function(d) {
+      // //     //     console.log('response... ', d)
+      // //     //     return d
+      // //     // })
+      // //     // .catch(function(err){
+      // //     //     console.log('Error', err)
+      // //     // }) 
+      // // }
     }
     // create(data, params) {
     //   console.log('create feathers...');
