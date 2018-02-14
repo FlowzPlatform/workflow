@@ -93,6 +93,13 @@
           flowObject.json = await this.generateJson(xmlData)
           flowObject.svg = svgData
           // console.log('xmlData', flowObject.json)
+          flowObject.allowedusers = _.union(...(_.chain(_.union(...(_.map(flowObject.json.processList, m => {
+            return _.filter(m.configurations, f => {
+              return f.key === 'allowedusers'
+            })
+          })))).map(m => {
+            return m.value.split(',')
+          }).value()))
           let result = null
           if (this.$route.params.id !== undefined) {
             result = flowz.put(this.$route.params.id, flowObject)

@@ -137,8 +137,9 @@ export default {
       this.loading = true
       this.flowzList = await (flowz.get(null, {
         $limit: this.$store.state.limitPage,
+        $useremail: this.$store.state.user.email,
         $skip: this.$store.state.limitPage * (this.current - 1),
-        $select: ['ProcessName', 'svg', 'id']
+        $select: ['ProcessName', 'svg', 'id', 'allowedusers']
       })
       .then((response) => {
         for (let item of response.data.data) {
