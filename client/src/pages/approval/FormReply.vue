@@ -28,7 +28,7 @@
 </div>
 </template>
 <script>
-// import config from '@/config'
+import config from '@/config'
 
 // Models
 import Schema from '@/api/schema'
@@ -79,15 +79,15 @@ export default {
         // console.log('index', index)
         let url = ''
         if (index !== -1) {
-          // var temp = this.selectedProcess.inputProperty[0].entityschema.createTemplate[index]
+          var temp = this.selectedProcess.inputProperty[0].entityschema.createTemplate[index]
           // console.log('this.selectedProcess', this.selectedProcess)
-          // url = 'http://' + this.selectedProcess.inputProperty[0].entityschema.userID + '.' + temp.url[0] + '.' + config.grapesDomain + '/' + temp.url[1] + '.html'
+          url = 'http://' + this.selectedProcess.inputProperty[0].entityschema.userID + '.' + temp.url[0] + '.' + config.grapesDomain + '/' + temp.url[1] + '.html'
           // console.log('this.selectedProcess.inputProperty[0].entityschema.createTemplate[index]', this.selectedProcess.inputProperty[0].entityschema.createTemplate[index])
           // url = 'http://' + this.$store.state.user._id + '.' + temp.url[0] + '.' + config.grapesDomain + '/' + temp.url[1] + '.html'
           // url = this.selectedProcess.inputProperty[0].entityschema.createTemplate[index].url
           // url = url.substr(0, 4) + url.substr(5)
           // url = 'http://172.16.230.133/websites/59a8e0dd41dc17001aeb1e67/c6f938a9-41f0-49e1-aaf1-65f8ce94b4e9/public/index.html'
-          url = 'http://localhost/person.html'
+          // url = 'http://localhost/person.html'
           // url = 'http://172.16.230.133/websites/59fb06376adc6b00242a5533/f3455e59-b6b5-4b74-b02b-f39038f73bd7/public/index.html'
           // url = 'http://localhost/multifile3.html'
         }

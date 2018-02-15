@@ -285,6 +285,19 @@ var getSchemaData = async(function (id) {
   return res.data
 })
 
+var getSchemaDataByName = async(function (title) {
+  // console.log('setSchemaData calling >>>>>>>>>>>')
+  var res = await (axios.get('http://' + config.get('host') + ':' + config.get('port') + '/schema?title=' + title))
+    // console.log('res', res.data)
+    if (res.data.data.length > 0) {
+      return res.data.data[0]
+    } else {
+      var err = new Error('Not Found')
+      return err
+    }
+    // postSchemaData = res.data 
+})
+
 var getallSchemaData = async(function () {
   var res = await (axios.get('http://' + config.get('host') + ':' + config.get('port') + '/schema?$paginate=false'))
   return res.data.data
@@ -745,8 +758,14 @@ var createFunction = async (function(data) {
   return _data
 })
 
-var getFunction = async (function(id, schemaid) {
+var getIdFunction = async (function(id, schemaid) {
   let res = await (getSchemaData(schemaid))
+  let _res = await (newgetFunction(id, res))
+  return _res
+})
+
+var getNameFunction = async (function(id, title) {
+  let res = await (getSchemaDataByName(title))
   let _res = await (newgetFunction(id, res))
   return _res
 })
@@ -760,10 +779,28 @@ var newgetFunction = async( function(id, res) {
   }
   if (!status) {
     // No custom type found
-  
+    for (let [i, db] of dbapi.entries()) {
+      if (db.db == res.database[0]) {
+        var _res = await (db.api.getThisflowsInstance(id, res.title, res.database[1]))
+        return _res  
+      }
+    }
   } else {
     // Now get custom data also
-
+    for (let [i, db] of dbapi.entries()) {
+      if (db.db == res.database[0]) {
+        var _res = await (db.api.getThisflowsInstance(id, res.title, res.database[1]))
+        for (let e of res.entity) {
+          if (e.customtype) {
+            let mschema = await (getSchemaData(e.type))
+            for (let [i, mObj] of _res[e.name].entries()) {
+              _res[e.name][i] = await (newgetFunction(mObj.refid, mschema))
+            }
+          }
+        }
+        return _res
+      }
+    }  
   }
 }) 
 
@@ -826,10 +863,12 @@ class Service {
     console.log('Get Instance feathers...');
     if (params.query.schemaid != undefined) {
       // console.log('id::: from Get Instance::: ', id)
-      var res = getIdbySchemaId(id, params.query.schemaid)
+      // var res = getIdbySchemaId(id, params.query.schemaid)
+      var res = getIdFunction(id, params.query.schemaid)
       return Promise.resolve(res)
     } else if (params.query.schemaname != undefined) {
-      var res = getIdbySchemaName(id, params.query.schemaname)
+      // var res = getIdbySchemaName(id, params.query.schemaname)
+      var res = getNameFunction(id, params.query.schemaname)
       return Promise.resolve(res)
     } else {
       return Promise.resolve('You Must Enter schemaid Or schemaname as parameter for result..')
