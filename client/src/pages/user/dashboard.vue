@@ -137,7 +137,6 @@ export default {
       this.loading = true
       this.flowzList = await (flowz.get(null, {
         $limit: this.$store.state.limitPage,
-        $useremail: this.$store.state.user.email,
         $skip: this.$store.state.limitPage * (this.current - 1),
         $select: ['ProcessName', 'svg', 'id', 'allowedusers']
       })
@@ -155,7 +154,8 @@ export default {
         flowzinstanceModel.get({
           fid: item.id,
           $paginate: false,
-          $select: ['process_log', 'id']
+          $useremail: this.$store.state.user.email,
+          $select: ['process_log', 'id', 'allowedusers']
         }).then(response => {
           this.flowzinstanceList[item.id] = _.cloneDeep(response.data)
           let count = _.chain(response.data).filter(f => {
@@ -169,7 +169,7 @@ export default {
             return f.status === 'inputRequired'
           }).result('true').value()
           item.inputRemain = count !== undefined ? count : 0
-          console.log('this.flowzinstanceList', this.flowzinstanceList)
+          // console.log('this.flowzinstanceList', this.flowzinstanceList)
         })
       }
       // await this.getInputRequired()
@@ -184,7 +184,8 @@ export default {
       flowzinstanceModel.get({
         fid: id,
         $paginate: false,
-        $select: ['process_log']
+        $useremail: this.$store.state.user.email,
+        $select: ['process_log', 'allowedusers']
       }).then(response => {
         let count = _.chain(response.data).filter(f => {
           return f.process_log
@@ -219,7 +220,7 @@ export default {
         // console.log('Updated :: ', data)
         if (data.id !== undefined) {
           data.inputRemain = -1
-          data._expanded = false
+          // data._expanded = true
           let getIndex = _.findIndex(this.flowzList.data, {id: data.id})
           // console.log('getIndex  ', getIndex)
           if (getIndex !== undefined && getIndex > 0) {
@@ -253,11 +254,10 @@ export default {
     },
     'flowz-instance': {
       created (data) {
-        console.log('flowz-instance created:: ')
+        // console.log('flowz-instance created:: ')
       },
       updated (data) {
-        console.log('flowz-instance updated:: ')
-        if (!this.flowzinstanceList[data.fid]) {
+        if (!this.flowzinstanceList[data.fid] || _.indexOf(data.allowedusers, this.$store.state.user.email) === -1) {
           return
         }
         let _inx = _.findIndex(this.flowzinstanceList[data.fid], f => { return f.id === data.id })
@@ -281,6 +281,7 @@ export default {
               return f.status === 'inputRequired'
             }).result('true').value()
             // console.log(data.fid, count)
+            item._expanded = true
             item.inputRemain = count !== undefined ? count : 0
           }
         }
@@ -303,7 +304,7 @@ export default {
         // }
       },
       removed (data) {
-        console.log('flowz-instance removed:: ', data)
+        // console.log('flowz-instance removed:: ', data)
         if (!this.flowzinstanceList[data.fid]) {
           return
         }

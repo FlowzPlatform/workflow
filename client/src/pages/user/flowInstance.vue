@@ -72,9 +72,16 @@ export default {
             // let lastLog = _.find(params.row.process_log, (f) => {
             //   return f.status === 'inputRequired'
             // })
+            // console.log('params', params.row)
             let getlastlog = _.chain(params.row.process_log).orderBy(['lastModified'], ['desc']).head().value()
+            // console.log('getlastlog', getlastlog)
             if (getlastlog !== undefined) {
               let aStatus = ''
+              let _configuration = _.chain(params.row.processList).find(f => {
+                return f.id === getlastlog.job
+              }).result('configurations').find(f => {
+                return f.key === 'allowedusers'
+              }).value()
               if (getlastlog.status !== 'inputRequired') {
                 let cStatus = _.find(params.row.processList, {id: getlastlog.job})
                 if (cStatus !== undefined && cStatus.target.length !== 0) {
@@ -82,25 +89,11 @@ export default {
                 } else {
                   aStatus = getlastlog.status
                 }
-              } else {
+              } else if (_configuration && _.indexOf(_configuration, this.$store.state.user.email)) {
                 aStatus = getlastlog.status
+              } else {
+                aStatus = 'running'
               }
-              // if (getlastlog.status === 'inputRequired') {
-              //   return h('Button', {
-              //     props: {
-              //       type: 'primary',
-              //       size: 'small'
-              //     },
-              //     style: {
-              //       marginRight: '5px'
-              //     },
-              //     on: {
-              //       click: () => {
-              //         this.$router.push('form/reply/' + params.row.id)
-              //       }
-              //     }
-              //   }, 'INPUT REQUIRED')
-              // } else {
               return h('Tag', {
                 props: {
                   type: 'dot',
@@ -115,9 +108,8 @@ export default {
                   }
                 }
               }, aStatus.toUpperCase())
-              // }
             } else {
-              return h('div', '')
+              return h('div', 'Not started yet.')
             }
           }
         },
@@ -141,6 +133,7 @@ export default {
       this.loading = true
       flowzinstanceModel.getByfid(this.fid, {
         '$sort[createdOn]': -1,
+        $useremail: this.$store.state.user.email,
         $limit: this.$store.state.limitPage,
         $skip: this.$store.state.limitPage * (this.current - 1)
       }).then(res => {
@@ -168,6 +161,25 @@ export default {
         return '#1DA8D3'
       } else {
         return ''
+      }
+    }
+  },
+  feathers: {
+    'flowz-instance': {
+      created (data) {
+        if (_.indexOf(data.allowedusers, this.$store.state.user.email) !== -1) {
+          this.flowzList.data.splice(0, 0, data)
+          this.flowzList.data.splice(this.flowzList.data.length - 1, 1)
+          this.flowzList.total = this.flowzList.total + 1
+        }
+        // this.init()
+      },
+      updated (data) {
+        if (_.indexOf(data.allowedusers, this.$store.state.user.email) !== -1) {
+          let index = _.findIndex(this.flowzList.data, i => { return i.id === data.id })
+          this.flowzList.data.splice(index, 1)
+          this.flowzList.data.splice(index, 0, data)
+        }
       }
     }
   },
