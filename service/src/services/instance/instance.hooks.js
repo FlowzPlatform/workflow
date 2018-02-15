@@ -37,6 +37,7 @@ module.exports = {
   }
 };
 var aftercreateInstance = async(function(hook) {
+  console.log('hook....', hook.result)
   let outputObject = [];
   // console.log('hook.result', hook.result)
   // console.log('hook.data', hook.data)
