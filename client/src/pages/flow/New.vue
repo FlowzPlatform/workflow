@@ -75,7 +75,7 @@
         this.btnLoading = true
         let xmlData
         let svgData = ''
-        console.log('this.bpmnModeler', this.bpmnModeler)
+        // console.log('this.bpmnModeler', this.bpmnModeler)
         this.bpmnModeler.saveSVG({ format: true },
           function (e, svg) {
             svgData = svg
@@ -306,7 +306,7 @@
         })
       },
       getConfigurationsProperties (proccess) {
-        if (proccess.extensionElements && proccess.extensionElements.myConfigurations) {
+        if (proccess.extensionElements && proccess.extensionElements.myConfigurations && proccess.extensionElements.myConfigurations.configuration) {
           if (!_.isArray(proccess.extensionElements.myConfigurations.configuration)) {
             proccess.extensionElements.myConfigurations.configuration = [proccess.extensionElements.myConfigurations.configuration]
           }
