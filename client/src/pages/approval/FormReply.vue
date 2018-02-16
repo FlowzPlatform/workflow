@@ -70,7 +70,7 @@ export default {
               // console.log('this.selectedProcess.inputProperty[0].entityschema.createTemplate[index]', this.selectedProcess.inputProperty[0].entityschema.createTemplate[index])
           url = 'http://' + this.$store.state.user._id + '.' + temp.url[0] + '.' + config.grapesDomain + '/Preview/' + temp.url[1] + '.html'
               // url = 'http://localhost/person.html'
-          url = 'http://localhost/multifile2.html'
+          // url = 'http://localhost/multifile2.html'
         }
         return url
       }
