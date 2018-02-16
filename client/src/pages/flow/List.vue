@@ -218,7 +218,6 @@ export default {
   feathers: {
     'flowz-instance': {
       created (data) { // update status using socket
-        console.log('New Data', data)
         flowz.get()
         .then(response => {
           this.flowzList = response.data.data
@@ -259,6 +258,8 @@ export default {
     async createNewInstance (index, id) {
       // let generatedJson = await this.generateJson(this.flowzList[index].xml)
       let generatedJson = this.flowzList[index].json
+      console.log('this.flowzList[index]', this.flowzList[index])
+      generatedJson.allowedusers = this.flowzList[index].allowedusers ? this.flowzList[index].allowedusers : []
       // console.log('generatedJson', JSON.stringify(generatedJson))
       // console.log('generatedJson', generatedJson)
       generatedJson.fid = id
