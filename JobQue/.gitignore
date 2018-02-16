@@ -10,7 +10,7 @@ selenium-debug.log
 package-lock.json
 worker/
 example/worker/
-seneca-job-queue/log
+seneca-job-queue/logs
 
 # Editor directories and files
 .idea
