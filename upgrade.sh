@@ -41,7 +41,7 @@ curl -u ""$RANCHER_USER":"$RANCHER_PASS"" \
 -H 'Content-Type: application/json' \
 -d '{
      "inServiceStrategy":{"launchConfig": {"imageUuid":"docker:'$USERNAME'/seneca_jobqueue_flowz:'$TAG'","kind": "container","labels":{"io.rancher.container.pull_image": "always","io.rancher.scheduler.affinity:host_label": "machine=cluster-flowz"},"ports": ["4001:4001/tcp","4002:4002/tcp","4003:4003/tcp"],"environment": {"host": "'"$RDB_HOST"'","port": "'"$RDB_PORT"'","authDB":"'"$RAUTH"'","cert":"'"$CERT_SENECA_JOBQUEUE_FLOWZ"'"},"healthCheck": {"type": "instanceHealthCheck","healthyThreshold": 2,"initializingTimeout": 60000,"interval": 2000,"name": null,"port": 4001,"recreateOnQuorumStrategyConfig": {"type": "recreateOnQuorumStrategyConfig","quorum": 1},"reinitializingTimeout": 60000,"responseTimeout": 60000,"strategy": "recreateOnQuorum","unhealthyThreshold": 3},"networkMode": "managed"}},"toServiceStrategy":null}' \
-http://rancher.flowz.com:8080/v2-beta/projects/$ENV_ID/services/SERVICE_ID_JOBQUEUE?action=upgrade
+http://rancher.flowz.com:8080/v2-beta/projects/$ENV_ID/services/$SERVICE_ID_JOBQUEUE?action=upgrade
 
 curl -u ""$RANCHER_USER":"$RANCHER_PASS"" \
 -X POST \
@@ -49,7 +49,7 @@ curl -u ""$RANCHER_USER":"$RANCHER_PASS"" \
 -H 'Content-Type: application/json' \
 -d '{
      "inServiceStrategy":{"launchConfig": {"imageUuid":"docker:'$USERNAME'/flowz_frontend_flowz:'$TAG'","kind": "container","labels":{"io.rancher.container.pull_image": "always","io.rancher.scheduler.affinity:host_label": "machine=engine-front","io.rancher.scheduler.affinity:container_label_soft_ne": "io.rancher.stack_service.name=front-flowz/	engine-fronted-flowz"},"ports": ["80:80/tcp","443:443/tcp"],"healthCheck": {"type": "instanceHealthCheck","healthyThreshold": 2,"initializingTimeout": 60000,"interval": 2000,"name": null,"port": 80,"recreateOnQuorumStrategyConfig": {"type": "recreateOnQuorumStrategyConfig","quorum": 1},"reinitializingTimeout": 60000,"requestLine": "GET \"http://localhost\" \"HTTP/1.0\"","responseTimeout": 60000,"strategy": "recreateOnQuorum","unhealthyThreshold": 3},"networkMode": "managed"}},"toServiceStrategy":null}' \
-http://rancher.flowz.com:8080/v2-beta/projects/$ENV_ID/services/SERVICE_ID_FRONTEND?action=upgrade
+http://rancher.flowz.com:8080/v2-beta/projects/$ENV_ID/services/$SERVICE_ID_FRONTEND?action=upgrade
 
 curl -u ""$RANCHER_USER":"$RANCHER_PASS"" \
 -X POST \
@@ -57,4 +57,4 @@ curl -u ""$RANCHER_USER":"$RANCHER_PASS"" \
 -H 'Content-Type: application/json' \
 -d '{
      "inServiceStrategy":{"launchConfig": {"imageUuid":"docker:'$USERNAME'/flowz_backend_flowz:'$TAG'","kind": "container","labels":{"io.rancher.container.pull_image": "always","io.rancher.scheduler.affinity:host_label": "machine=cluster-flowz"},"ports": ["3033:3033/tcp","4033:4033/tcp"],"environment": {"rauth":"'"$RAUTH"'","cert":"'"$CERT_FLOWZ_BACKEND_FLOWZ"'","RDB_HOST":"'"$RDB_HOST"'","RDB_PORT":"'"$RDB_PORT"'"},"healthCheck": {"type": "instanceHealthCheck","healthyThreshold": 2,"initializingTimeout": 60000,"interval": 2000,"name": null,"port": 3033,"recreateOnQuorumStrategyConfig": {"type": "recreateOnQuorumStrategyConfig","quorum": 1},"reinitializingTimeout": 60000,"responseTimeout": 60000,"strategy": "recreateOnQuorum","unhealthyThreshold": 3},"networkMode": "managed"}},"toServiceStrategy":null}' \
-http://rancher.flowz.com:8080/v2-beta/projects/$ENV_ID/services/SERVICE_ID_BACKEND?action=upgrade
+http://rancher.flowz.com:8080/v2-beta/projects/$ENV_ID/services/$SERVICE_ID_BACKEND?action=upgrade
