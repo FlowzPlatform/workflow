@@ -169,8 +169,10 @@ export default {
       created (data) {
         if (_.indexOf(data.allowedusers, this.$store.state.user.email) !== -1) {
           this.flowzList.data.splice(0, 0, data)
-          this.flowzList.data.splice(this.flowzList.data.length - 1, 1)
           this.flowzList.total = this.flowzList.total + 1
+          if (this.flowzList.total > this.$store.state.limitPage) {
+            this.flowzList.data.splice(this.flowzList.data.length - 1, 1)
+          }
         }
         // this.init()
       },
