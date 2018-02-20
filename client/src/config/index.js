@@ -24,23 +24,23 @@ var temp = {
 }
 if (process.env.NODE_ENV !== 'development') {
   temp = {
-    serverURI: 'http://api.' + process.env.domainkey + '/eng',
-    socketURI: 'ws://ws.' + process.env.domainkey + ':4033',
-    workerRegisterURL: 'http://api.' + process.env.domainkey + '/jobqueue1',
-    approvalRoleURI: 'http://api.' + process.env.domainkey + '/authldap/',
-    loginURL: 'http://auth.' + process.env.domainkey + '/api',
+    serverURI: 'https://api.' + process.env.domainkey + '/eng',
+    socketURI: 'wss://ws.' + process.env.domainkey + ':4033',
+    workerRegisterURL: 'https://api.' + process.env.domainkey + '/jobqueue1',
+    approvalRoleURI: 'https://api.' + process.env.domainkey + '/authldap/',
+    loginURL: 'https://auth.' + process.env.domainkey + '/api',
     fixedLayout: false,
     hideLogoOnMobile: false,
-    facebookSuccessCallbackUrl: 'http://engine.' + process.env.domainkey + '/',
-    loginWithFacebookUrl: 'http://auth.' + process.env.domainkey + '/auth/facebook',
-    googleSuccessCallbackUrl: 'http://engine.' + process.env.domainkey + '/',
-    loginWithGoogleUrl: 'http://auth.' + process.env.domainkey + '/auth/Gplus',
-    linkedinSuccessCallbackUrl: 'http://engine.' + process.env.domainkey + '/',
-    loginWithLinkedinUrl: 'http://auth.' + process.env.domainkey + '/auth/linkedin',
-    githubSuccessCallbackUrl: 'http://engine.' + process.env.domainkey + '/',
-    loginWithGithubUrl: 'http://auth.' + process.env.domainkey + '/auth/github',
-    grapesUrl: 'http://webbuilder.qaflowz.tk/',
-    grapesAPI: 'http://api.' + process.env.domainkey + '/serverapi',
+    facebookSuccessCallbackUrl: 'https://engine.' + process.env.domainkey + '/',
+    loginWithFacebookUrl: 'https://auth.' + process.env.domainkey + '/auth/facebook',
+    googleSuccessCallbackUrl: 'https://engine.' + process.env.domainkey + '/',
+    loginWithGoogleUrl: 'https://auth.' + process.env.domainkey + '/auth/Gplus',
+    linkedinSuccessCallbackUrl: 'https://engine.' + process.env.domainkey + '/',
+    loginWithLinkedinUrl: 'https://auth.' + process.env.domainkey + '/auth/linkedin',
+    githubSuccessCallbackUrl: 'https://engine.' + process.env.domainkey + '/',
+    loginWithGithubUrl: 'https://auth.' + process.env.domainkey + '/auth/github',
+    grapesUrl: 'https://webbuilder.qaflowz.tk/',
+    grapesAPI: 'https://api.' + process.env.domainkey + '/serverapi',
     grapesDomain: process.env.domainkey
   }
 }
