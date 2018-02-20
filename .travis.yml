@@ -38,22 +38,22 @@ jobs:
       script:
       - 'if [ ${TRAVIS_BRANCH} = "master" ]; then
             docker login -u="$DOCKER_USERNAME_FLOWZ" -p="$DOCKER_PASSWORD_FLOWZ";
-            docker build -t mom_frontend_flowz:latest --build-arg accesskey="$AWS_ACCESSKEY" --build-arg secretkey="$AWS_SECRETKEY" ./client/;
+            docker build -t flowz_frontend_flowz:latest --build-arg accesskey="$AWS_ACCESSKEY" --build-arg secretkey="$AWS_SECRETKEY" ./client/;
             docker images;
-            docker tag mom_frontend_flowz:latest $DOCKER_USERNAME_FLOWZ/mom_frontend_flowz:latest;
-            docker push $DOCKER_USERNAME_FLOWZ/mom_frontend_flowz:latest;
+            docker tag flowz_frontend_flowz:latest $DOCKER_USERNAME_FLOWZ/flowz_frontend_flowz:latest;
+            docker push $DOCKER_USERNAME_FLOWZ/flowz_frontend_flowz:latest;
         elif [ ${TRAVIS_BRANCH} = "develop" ]; then
             docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-            docker build -t mom_frontend_flowz:dev --build-arg accesskey="$AWS_ACCESSKEY" --build-arg secretkey="$AWS_SECRETKEY" ./client/;
+            docker build -t flowz_frontend_flowz:dev --build-arg accesskey="$AWS_ACCESSKEY" --build-arg secretkey="$AWS_SECRETKEY" ./client/;
             docker images;
-            docker tag mom_frontend_flowz:dev $DOCKER_USERNAME/mom_frontend_flowz:dev;
-            docker push $DOCKER_USERNAME/mom_frontend_flowz:dev;
+            docker tag flowz_frontend_flowz:dev $DOCKER_USERNAME/flowz_frontend_flowz:dev;
+            docker push $DOCKER_USERNAME/flowz_frontend_flowz:dev;
         else
             docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-            docker build -t mom_frontend_flowz:qa --build-arg accesskey="$AWS_ACCESSKEY" --build-arg secretkey="$AWS_SECRETKEY" ./client/;
+            docker build -t flowz_frontend_flowz:qa --build-arg accesskey="$AWS_ACCESSKEY" --build-arg secretkey="$AWS_SECRETKEY" ./client/;
             docker images;
-            docker tag mom_frontend_flowz:qa $DOCKER_USERNAME/mom_frontend_flowz:qa;
-            docker push $DOCKER_USERNAME/mom_frontend_flowz:qa;
+            docker tag flowz_frontend_flowz:qa $DOCKER_USERNAME/flowz_frontend_flowz:qa;
+            docker push $DOCKER_USERNAME/flowz_frontend_flowz:qa;
         fi'
     - stage: Flowz-Backend-Flowz
       script:
