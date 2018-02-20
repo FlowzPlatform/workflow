@@ -33,7 +33,7 @@
 </div>
 </template>
 <script>
-import config from '@/config'
+// import config from '@/config'
 
 // Models
 import Schema from '@/api/schema'
@@ -81,7 +81,8 @@ export default {
         return f.filename === this.isTemplate
       }).reduce((result, value, key) => {
         if (key === 'url') {
-          result = 'http://' + this.currentEntitySchema.userID + '.' + value[0] + '.' + config.grapesDomain + '/' + value[1] + '.html'
+          // result = 'http://' + this.currentEntitySchema.userID + '.' + value[0] + '.' + config.grapesDomain + '/' + value[1] + '.html'
+          result = 'http://172.16.230.87/' + value[1] + '.html'
         }
         return result
       }, '').value()
@@ -103,7 +104,7 @@ export default {
       return _.chain(this.flowInstance.processList).find(f => {
         return f.id === this.lastLog.job
       }).result('configurations').findIndex(f => {
-        return f.key === 'allowedusers' && f.value === this.$store.state.user.email
+        return f.key === 'allowedusers' && (_.indexOf(f.value.split(',').map(item => item.trim()), this.$store.state.user.email) >= 0)
       }).value() >= 0
     }
   },
