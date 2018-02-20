@@ -1,24 +1,35 @@
 <template>
-<div style="background:#eee;padding: 20px">
-  <Card :bordered="false">
-    <p slot="title">Make Request</p>
-    <p slot="extra" v-show="notes">Notes : {{ notes }}</p>
-      <div v-if="isAccess && isallow && isInputStatus && istemplate" >
-        Found Template 
-        <iframe id="filecontainer" allowtransparency="true" frameborder="0" @load="iframeload()" :src="html"></iframe>
-      </div>
-      <div v-else-if="isAccess && isallow && isInputStatus && !istemplate">
-        Component render
-        <schema-instance :id="entitySchema.id" :processid="lastLog.job" :instanceid="$route.params.fiid" :lastLog="lastLog"></schema-instance>
-      </div>
-      <div v-else-if="isAccess">
-        Canvas Here
-        <div id="canvas" style="height: 400px"></div>
+<div>
+  <Row>
+    <Col v-show="loading" class="demo-spin-col" span="24" style="margin-top:35px;">
+        <Spin fix>
+            <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
+            <div>Loading..</div>
+        </Spin>
+    </Col>
+  </Row>
+  <Row>
+    <Col v-show="!loading" span="24">
+      <div v-if="isallow">
+        <div v-if="lastLog.status === 'inputRequired' && isTemplate !== undefined && isAccess">
+          <iframe id="filecontainer" allowtransparency="true" frameborder="0" @load="iframeload()" :src="html"></iframe>
+        </div>
+        <div v-else-if="lastLog.status === 'inputRequired' && isAccess">
+          <schema-instance :id="currentEntitySchema.id" :processid="lastLog.job" :instanceid="$route.params.fiid" :lastLog="lastLog"></schema-instance>
+        </div>
+        <div v-show="lastLog.status !== 'inputRequired'">
+          <div id="canvas" style="height: calc(100vh - 130px); min-height: 400px;"></div>
+        </div>
+        <Spin size="large" fix v-if="submitLoading">
+          <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
+          <div>Submiting..</div>
+        </Spin>
       </div>
       <div v-else>
         Unuthorized User
       </div>
-  </Card>
+    </Col>
+  </Row>
 </div>
 </template>
 <script>
@@ -44,66 +55,89 @@ import dynamicTable from './expand-FormReply.vue'
 import camundaModdleDescriptor from '../../../static/bpmn/camunda-bpmn-moddle/resources/camunda'
 
 let viewer
+let messageEvent
 
 export default {
   components: {'schema-instance': SchemaInstance},
   data () {
     return {
       notes: '',
+      submitLoading: false,
+      loading: true,
       flowInstance: {},
-      isAccess: false,
+      // isAccess: false,
       isallow: false,
-      istemplate: false,
-      lastLog: {},
+      // istemplate: false,
+      // lastLog: {},
       entitySchema: {},
       isInputStatus: false
     }
   },
   computed: {
     html () {
-      if (this.selectedProcess.inputProperty) {
-        // console.log(this.selectedProcess.inputProperty[0].entityschema)
-        let index = _.findIndex(this.selectedProcess.inputProperty[0].entityschema.createTemplate, ['filename', this.selectedProcess.inputProperty[0].createTemplate])
-          // // console.log('index', index)
-        let url = ''
-        if (index !== -1) {
-          var temp = this.selectedProcess.inputProperty[0].entityschema.createTemplate[index]
-              // console.log('this.selectedProcess', this.selectedProcess)
-          url = 'http://' + this.selectedProcess.inputProperty[0].entityschema.userID + '.' + temp.url[0] + '.' + config.grapesDomain + '/Preview/' + temp.url[1] + '.html'
-              // console.log('this.selectedProcess.inputProperty[0].entityschema.createTemplate[index]', this.selectedProcess.inputProperty[0].entityschema.createTemplate[index])
-          // url = 'http://' + this.$store.state.user._id + '.' + temp.url[0] + '.' + config.grapesDomain + '/Preview/' + temp.url[1] + '.html'
-              // url = 'http://localhost/person.html'
-          // url = 'http://localhost/multifile2.html'
+      return _.chain(this.flowInstance.processList).find(f => {
+        return f.id === this.lastLog.job
+      }).result('inputProperty[0].entityschema.createTemplate').find(f => {
+        return f.filename === this.isTemplate
+      }).reduce((result, value, key) => {
+        if (key === 'url') {
+          result = 'http://' + this.currentEntitySchema.userID + '.' + value[0] + '.' + config.grapesDomain + '/' + value[1] + '.html'
         }
-        return url
-      }
+        return result
+      }, '').value()
+    },
+    currentEntitySchema () {
+      return _.chain(this.flowInstance.processList).find(f => {
+        return f.id === this.lastLog.job
+      }).result('inputProperty[0].entityschema').value()
+    },
+    lastLog () {
+      return _.chain(this.flowInstance.process_log).orderBy(['lastModified'], ['desc']).head().value()
+    },
+    isTemplate () {
+      return _.chain(this.flowInstance.processList).find(f => {
+        return f.id === this.lastLog.job
+      }).result('inputProperty[0].createTemplate').value()
+    },
+    isAccess () {
+      return _.chain(this.flowInstance.processList).find(f => {
+        return f.id === this.lastLog.job
+      }).result('configurations').findIndex(f => {
+        return f.key === 'allowedusers' && f.value === this.$store.state.user.email
+      }).value() >= 0
     }
   },
   methods: {
     async iframeload () {
-      // console.log('.......................... iframeload .................................')
       let self = this
       let array = []
-      let data = []
       let custom = []
       let customSchema = []
-      for (let i = 0; i < self.entitySchema.entity.length; i++) {
-        if (self.entitySchema.entity[i].customtype === true) {
-          custom = await self.getCustom(self.entitySchema.entity[i].type, true)
-          array.push({customtype: true, name: self.entitySchema.entity[i].name, entity: custom})
-          custom = await self.getCustom(self.entitySchema.entity[i].type, false)
+      for (let i = 0; i < self.currentEntitySchema.entity.length; i++) {
+        if (self.currentEntitySchema.entity[i].customtype === true) {
+          custom = await self.getCustom(self.currentEntitySchema.entity[i].type, true)
+          array.push({customtype: true, name: self.currentEntitySchema.entity[i].name, entity: custom})
+          custom = await self.getCustom(self.currentEntitySchema.entity[i].type, false)
           customSchema.push(custom)
         } else {
-          array.push({name: self.entitySchema.entity[i].name, type: self.entitySchema.entity[i].type})
-          customSchema.push(self.entitySchema.entity[i])
+          array.push({name: self.currentEntitySchema.entity[i].name, type: self.currentEntitySchema.entity[i].type})
+          customSchema.push(self.currentEntitySchema.entity[i])
         }
       }
-      for (let item of self.lastLog.input) {
-        data.push(item)
+      document.getElementById('filecontainer').contentWindow.postMessage({
+        entity: array,
+        formData: self.lastLog.input,
+        schema: customSchema,
+        configs: { accesskey: process.env.accesskey, secretkey: process.env.secretkey }
+      }, '*')
+      // handle Listener Event
+      messageEvent = function (event) {
+        if (_.isArray(event.data)) {
+          self.handleSubmit(event.data)
+        }
+        window.removeEventListener('message', messageEvent)
       }
-      self.customSchema = customSchema
-      // console.log('Schema.............', self.entitySchema)
-      document.getElementById('filecontainer').contentWindow.postMessage({entity: array, formData: data, schema: self.customSchema, configs: { accesskey: process.env.accesskey, secretkey: process.env.secretkey }}, '*')
+      window.addEventListener('message', messageEvent)
     },
     async getCustom (id, flag) {
       let tempSchema
@@ -126,7 +160,6 @@ export default {
       return flag ? data : customData
     },
     async getSchema (id) {
-      // console.log('>>>>>>>>>>>>..', id)
       var resp = await Schema.getThis(id).then((res) => {
         return res.data
       }).catch(err => {
@@ -136,14 +169,10 @@ export default {
       return resp
     },
     async handleSubmit (maindata) {
-      // let dataObject = {
-      //   'fId': this.$route.params.fiid,
-      //   'inputs': this.input,
-      //   'job': this.$route.params.pid
-      // }
+      this.submitLoading = true
       for (let [inx, mObj] of maindata.entries()) {
         console.log('inx', inx)
-        mObj.Schemaid = this.entitySchema.id
+        mObj.Schemaid = this.currentEntitySchema.id
       }
       let dataObject1 = {
         'instanceid': this.$route.params.fiid,
@@ -151,137 +180,48 @@ export default {
         'processid': this.lastLog.job,
         'jobId': this.lastLog.jobId
       }
-      // console.log(validated, maindata.length)
       if (maindata.length > 0) {
-        // console.log('dataObject1', dataObject1)
         Instance.post(dataObject1)
         .then(response => {
-          // console.log('response', response.data)
-          this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
-          this.isInputStatus = false
-          // this.$Loading.finish()
+          // this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
         })
         .catch(error => {
           console.log('Error', error)
+          this.submitLoading = false
           this.$Notice.error({title: 'Error!', desc: 'Instance not saved...'})
-          // this.$Loading.error()
         })
-        // ReceiveForm.post(dataObject)
-        // .then(response => {
-        //   this.$Notice.success({title: 'Success..!', desc: 'Form request sent.'})
-        //   this.$router.push('/')
-        // })
-        // .catch(err => {
-        //   this.$Notice.success({title: 'Error..!', desc: err})
-        // })
       } else {
         this.$Notice.error({
           title: 'Error..!',
           desc: 'Details are in bottom of page.'
         })
-        // this.input = []
-      }
-    },
-    async init (response, abc) {
-      if (abc !== undefined) {
-        console.log('................................................... >> socket >>> ', abc)
-        this.isAccess = false
-        this.isallow = false
-        this.istemplate = false
-        this.isInputStatus = false
-      }
-      let self = this
-      // let response = await flowInstance.getThis(fid).then(function (response) {
-      //   return response.data
-      // }).catch(function (error) {
-      //   console.log('Error', error)
-      //   self.$Notice.error({title: 'Error..!', desc: error})
-      //   return {}
-      // })
-      // console.log('response', response)
-      self.flowInstance = response
-      if (response.hasOwnProperty('allowedusers')) {
-        if (response.allowedusers.length > 0) {
-          if (this.$store.state.user !== null && this.$store.state.user !== undefined && this.$store.state.user.hasOwnProperty('email')) {
-            let checkAccess = _.indexOf(response.allowedusers, this.$store.state.user.email)
-            if (checkAccess !== undefined && checkAccess !== -1) {
-              this.isAccess = true
-            }
-          }
-        }
-      }
-      // console.log('self.flowInstance', self.flowInstance)
-      if (this.isAccess) {
-        if (abc === undefined) {
-          self.flowInstance.processList = _.chain(response.processList).map(m => {
-            m.log = _.chain(response.process_log).filter(f => {
-              return f.job === m.id
-            }).orderBy(['lastModified'], ['desc']).groupBy('jobId').value()
-            // this.handleMappingRequireStatus(m)
-            return m
-          }).value()
-        }
-
-        this.lastLog = _.chain(response.process_log).orderBy(['lastModified'], ['desc']).head().value()
-        // console.log('self.selectedProcess', self.selectedProcess, this.lastLog)
-        if (this.lastLog !== undefined && this.lastLog !== '') {
-          self.selectedProcess = _.find(response.processList, ['id', this.lastLog.job])
-          console.log('getlastlog', this.lastLog, this.lastLog.status, self.selectedProcess.name)
-          // self.status = 'inputRequired'
-          if (this.lastLog.status === 'inputRequired') {
-            this.isInputStatus = true
-            console.log('self.selectedProcess.inputProperty[0].entityschema.id', self.selectedProcess.inputProperty[0].entityschema.id)
-            self.entitySchema = await self.getSchema(self.selectedProcess.inputProperty[0].entityschema.id)
-            if (self.entitySchema !== undefined && self.entitySchema !== null) {
-              let index = _.findIndex(this.selectedProcess.inputProperty[0].entityschema.createTemplate, ['filename', self.selectedProcess.inputProperty[0].createTemplate])
-              if (index >= 0) {
-                this.istemplate = true
-              }
-            }
-            let configUser = self.selectedProcess.configurations
-            if (configUser.length !== 0) {
-              let getUsers = _.find(configUser, {key: 'allowedusers'})
-              if (getUsers !== undefined) {
-                let users = getUsers.value.split(',')
-                if (this.$store.state.user !== null) {
-                  let checkuser = _.indexOf(users, this.$store.state.user.email)
-                  if (checkuser !== undefined && checkuser >= 0) {
-                    this.isallow = true
-                  }
-                }
-              }
-            }
-          }
-        }
-        if (abc !== undefined) {
-          for (let process1 of self.flowInstance.processList) {
-            var lastProcess = process1.log[_.findLastKey(process1.log)]
-            if (lastProcess && process1 !== undefined && process1.id !== undefined && self.getCurrentStatus(lastProcess) !== undefined && self.getCurrentStatus(lastProcess) !== '') {
-              console.log('Here,..... also.........................', process1.id, self.getCurrentStatus(lastProcess))
-              viewer.get('canvas').addMarker(process1.id, self.getCurrentStatus(lastProcess))
-            }
-          }
-        } else {
-          // Get Flow
-          var bpmnXML = await flowz.get(response.fid)
-          .then(async response => {
-            return response.data
-          })
-          // console.log('bpmnXML.xml...', bpmnXML.xml)
-          // Init Bpmn
-          await this.initBPMN(bpmnXML.xml)
-        }
       }
     },
     async beforeinit (fid) {
-      let response = await flowInstance.getThis(fid).then(function (response) {
+      this.flowInstance = await flowInstance.getThis(fid).then(response => {
         return response.data
-      }).catch(function (error) {
-        console.log('Error', error)
-        self.$Notice.error({title: 'Error..!', desc: error})
+      }).catch(error => {
+        if (error.response) {
+          this.$Message.error(error.response.data)
+        } else {
+          this.$Message.error('Server not connected.')
+        }
         return {}
       })
-      await this.init(response)
+      // check authentication
+      if (_.indexOf(this.flowInstance.allowedusers, this.$store.state.user.email) >= 0) {
+        // allowed
+        this.isallow = true
+        var bpmnXML = await flowz.get(this.flowInstance.fid)
+          .then(async response => {
+            return response.data
+          })
+        await this.initBPMN(bpmnXML.xml)
+        this.loading = false
+      } else {
+        // not allowed
+        this.isallow = false
+      }
     },
     getCurrentStatus (log) {
       return (log && log.length > 0) ? _.head(log).status : ''
@@ -311,22 +251,15 @@ export default {
           }
         })
         viewer.importXML(xml, function (err) {
-          if (err) {
-            console.log('error rendering', err)
-          } else {
-            // console.log('...................................', self.flowInstance)
-            // _.forEach(self.flowInstance.processList, function (process1) {
-            for (let process1 of self.flowInstance.processList) {
-              var lastProcess = process1.log[_.findLastKey(process1.log)]
-              if (lastProcess) {
-                console.log('process1.log', process1.id, self.getCurrentStatus(lastProcess))
-                // viewer.get('canvas').addMarker(process1.id, 'red')
-                if (self.getCurrentStatus(process1 && process1.id !== undefined && process1.id !== '' && lastProcess) !== '' && self.getCurrentStatus(lastProcess) !== undefined) {
-                  viewer.get('canvas').addMarker(process1.id, self.getCurrentStatus(lastProcess))
-                }
+          if (!err) {
+            _.forEach(self.flowInstance.processList, function (process) {
+              var lastProcess = _.chain(self.flowInstance.process_log).filter(f => {
+                return f.job === process.id
+              }).orderBy(['lastModified'], ['desc']).value()
+              if (lastProcess.length > 0) {
+                viewer.get('canvas').addMarker(process.id, self.getCurrentStatus(lastProcess))
               }
-            }
-            // })
+            })
           }
         })
         var eventBus = viewer.get('eventBus')
@@ -345,7 +278,6 @@ export default {
             // e.gfx = the graphical element
             // console.log(event, 'on', e.element)
             let myData = _.find(self.flowInstance.processList, {id: e.element.id})
-            // console.log('>>>>>>>>>>>>>>>>', self.flowInstance, myData)
             if (myData !== undefined) {
               let checkallow = false
               if (e.element.type === 'bpmn:EndEvent') {
@@ -447,58 +379,21 @@ export default {
   mounted () {
     this.beforeinit(this.$route.params.fiid)
   },
-  created () {
-    let self = this
-    window.addEventListener('message', function (event) {
-      console.log('.......................... event.data :', event.data)
-      if (_.isArray(event.data)) {
-        self.handleSubmit(event.data)
-      }
-    })
-  },
   feathers: {
     'flowz-instance': {
       async updated (data) {
-        // this.init(this.$route.params.fiid)
-        // let self = this
-        if (this.$route.params.fiid !== undefined) {
-          await this.init(data, 'update')
-          // let response = await flowInstance.getThis(this.$route.params.fiid)
-          // .then(function (response) {
-          //   return response
-          // })
-          // .catch(function (error) {
-          //   console.log('Error', error)
-          //   self.$Notice.error({title: 'Error..!', desc: error})
-          //   return {data: []}
-          // })
-          // self.flowInstance = response.data
-          // self.flowInstance.processList = _.chain(response.data.processList).map(m => {
-          //   m.log = _.chain(response.data.process_log).filter(f => {
-          //     return f.job === m.id
-          //   }).orderBy(['lastModified'], ['desc']).groupBy('jobId').value()
-          //   // this.handleMappingRequireStatus(m)
-          //   return m
-          // }).value()
-          // let getlastlog = _.chain(response.data.process_log).orderBy(['lastModified'], ['desc']).head().value()
-          // console.log('getlastlog', getlastlog)
-          // if (getlastlog !== undefined && getlastlog.status === 'inputRequired') {
-          //   self.status = 'inputRequired'
-          //   self.selectedProcess = _.find(response.data.processList, ['id', getlastlog.job])
-          //   self.entitySchema = await self.getSchema(self.selectedProcess.inputProperty[0].entityschema.id)
-          //   self.log = getlastlog
-          //   let index = _.findIndex(this.selectedProcess.inputProperty[0].entityschema.createTemplate, ['filename', self.selectedProcess.inputProperty[0].createTemplate])
-          //   if (index < 0) {
-          //     this.isdefault = true
-          //   }
-          //   location.reload()
-          // }
-          // _.forEach(self.flowInstance.processList, function (process) {
-          //   var lastProcess = process.log[_.findLastKey(process.log)]
-          //   if (lastProcess && process !== undefined && process.id !== undefined && self.getCurrentStatus(lastProcess) !== undefined && self.getCurrentStatus(lastProcess) !== '') {
-          //     viewer.get('canvas').addMarker(process.id, self.getCurrentStatus(lastProcess))
-          //   }
-          // })
+        let self = this
+        if (this.$route.params.fiid !== undefined && this.$route.params.fiid === data.id) {
+          this.flowInstance = data
+          _.forEach(self.flowInstance.processList, function (process) {
+            var lastProcess = _.chain(self.flowInstance.process_log).filter(f => {
+              return f.job === process.id
+            }).orderBy(['lastModified'], ['desc']).value()
+            if (lastProcess.length > 0) {
+              viewer.get('canvas').addMarker(process.id, self.getCurrentStatus(lastProcess))
+            }
+          })
+          this.submitLoading = false
         }
       }
     }
@@ -514,6 +409,7 @@ iframe {
     width: 100%;
     background: #FFFFFF;
     padding: 0px;
+    height: calc(100vh - 135px);
 }
 .running:not(.djs-connection) .djs-visual > :nth-child(1) {
   fill: #d5d835 !important;
