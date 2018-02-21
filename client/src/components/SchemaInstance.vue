@@ -1,6 +1,6 @@
 <template>
   <div class="schema-instance">
-    <Form ref="formSchemaInstance" :model="formSchemaInstance">
+    <!-- <Form ref="formSchemaInstance" :model="formSchemaInstance"> -->
       <!-- <Form-item 
         label="Title" 
         prop="name"
@@ -25,11 +25,13 @@
             <!-- </Col>
           </Row>
         </Form-item> -->
-      <Form-item>
+      <!-- <Form-item> -->
+      <div style="padding: 5px 0 5px 0">
         <Button type="primary" v-model="savebutton" @click="handleSubmit('formSchemaInstance')">{{ savebutton }}</Button>
-        <Button type="ghost" @click="handleReset('formSchemaInstance')" style="margin-left: 8px">Reset</Button>
-      </Form-item>
-    </Form>
+        <Button type="ghost" @click="handleReset('formSchemaInstance')" style="margin-left: 10px">Reset</Button>
+      </div>
+      <!-- </Form-item> -->
+    <!-- </Form> -->
     <!-- {{formSchemaInstance.data}} -->
     <!-- <hr><hr><hr><hr><hr><hr> -->
     <!-- {{formSchemaInstance.entity}} -->
@@ -181,7 +183,43 @@ export default {
       }
       // console.log('self.formSchemaInstance.data[0]', self.formSchemaInstance.data[0])
       // if (self.formSchemaInstance.data[0].length === 0) {
-      this.handleAdd()
+      if (this.lastLog !== undefined && this.lastLog.input.length !== 0) {
+        for (let mdata of self.lastLog.input) {
+          for (let ent of self.schema.entity) {
+            if (ent.type === 'file') {
+              mdata[ent.name + 'List'] = mdata[ent.name]
+              mdata[ent.name] = []
+              // console.log(mdata, ent.name)
+            } else if (ent.customtype) {
+              mdata[ent.name] = self.setFileList(mdata[ent.name], ent.entity[0])
+            }
+          }
+          // console.log(mdata)
+        }
+        // console.log('self.lastLog.input', self.lastLog.input)
+        self.formSchemaInstance.data = _.map(self.lastLog.input, (entry) => {
+          entry.Schemaid = self.schema.id
+          return _.chain(entry).omit(['id', '_id']).reduce((result, value, key) => {
+            // if (_.isArray(value)) {
+            //   result[key] = self.deleteId(value)
+            // } else {
+            result[key] = value
+            // }
+            return result
+          }, {}).value()
+        })
+        // console.log('self.formSchemaInstance.data', self.formSchemaInstance.data)
+        // _.forEach(self.lastLog.input, (obj) => {
+        //   // obj = this.lastLog.input[0]
+        //   // obj.database = this.schema.database
+        //   obj.Schemaid = self.schema.id
+        //   delete obj.id
+        //   delete obj._id
+        //   self.formSchemaInstance.data.push(obj)
+        // })
+      } else {
+        this.handleAdd()
+      }
       // }
     },
     deleteId (obj) {
@@ -198,66 +236,95 @@ export default {
         }, {}).value()
       })
     },
+    setFileList (mdata, entity) {
+      // console.log('mdata', mdata, entity)
+      for (let sdata of mdata) {
+        for (let ent of entity.entity) {
+          if (ent.type === 'file') {
+            sdata[ent.name + 'List'] = sdata[ent.name]
+            sdata[ent.name] = []
+            // console.log(mdata, ent.name)
+          } else if (ent.customtype) {
+            sdata[ent.name] = this.setFileList(sdata[ent.name], ent.entity[0])
+          }
+        }
+      }
+      return mdata
+    },
     handleAdd () {
       var self = this
       var obj = {}
-      if (this.lastLog !== undefined && this.lastLog.input.length !== 0) {
-        self.formSchemaInstance.data = _.map(self.lastLog.input, (entry) => {
-          entry.Schemaid = self.schema.id
-          return _.chain(entry).omit(['id', '_id']).reduce((result, value, key) => {
-            if (_.isArray(value)) {
-              result[key] = self.deleteId(value)
-            } else {
-              result[key] = value
-            }
-            return result
-          }, {}).value()
-        })
-        // _.forEach(self.lastLog.input, (obj) => {
-        //   // obj = this.lastLog.input[0]
-        //   // obj.database = this.schema.database
-        //   obj.Schemaid = self.schema.id
-        //   delete obj.id
-        //   delete obj._id
-        //   self.formSchemaInstance.data.push(obj)
-        // })
-      } else {
+      // if (this.lastLog !== undefined && this.lastLog.input.length !== 0) {
+      //   for (let mdata of self.lastLog.input) {
+      //     for (let ent of self.schema.entity) {
+      //       if (ent.type === 'file') {
+      //         mdata[ent.name + 'List'] = mdata[ent.name]
+      //         mdata[ent.name] = []
+      //         // console.log(mdata, ent.name)
+      //       } else if (ent.customtype) {
+      //         mdata[ent.name] = self.setFileList(mdata[ent.name], ent.entity[0])
+      //       }
+      //     }
+      //     // console.log(mdata)
+      //   }
+      //   // console.log('self.lastLog.input', self.lastLog.input)
+      //   self.formSchemaInstance.data = _.map(self.lastLog.input, (entry) => {
+      //     entry.Schemaid = self.schema.id
+      //     return _.chain(entry).omit(['id', '_id']).reduce((result, value, key) => {
+      //       // if (_.isArray(value)) {
+      //       //   result[key] = self.deleteId(value)
+      //       // } else {
+      //       result[key] = value
+      //       // }
+      //       return result
+      //     }, {}).value()
+      //   })
+      //   // console.log('self.formSchemaInstance.data', self.formSchemaInstance.data)
+      //   // _.forEach(self.lastLog.input, (obj) => {
+      //   //   // obj = this.lastLog.input[0]
+      //   //   // obj.database = this.schema.database
+      //   //   obj.Schemaid = self.schema.id
+      //   //   delete obj.id
+      //   //   delete obj._id
+      //   //   self.formSchemaInstance.data.push(obj)
+      //   // })
+      // } else {
         // obj.database = this.schema.database
-        obj.Schemaid = this.schema.id
-        // console.log('this.entity', this.entity)
-        _.forEach(this.entity, function (v) {
-          if (v.customtype) {
-            obj[v.name] = self.getChildData(v.type)
-          } else {
-            if (v.type === 'number') {
-              if (v.property.defaultValue !== '') {
-                obj[v.name] = v.property.defaultValue
-              } else {
-                if (v.property.min !== 0 && v.property.min !== '') {
-                  obj[v.name] = v.property.min
-                } else {
-                  obj[v.name] = 1
-                }
-              }
-            } else if (v.type === 'boolean') {
-              if (v.property.defaultValue !== '' || v.property.defaultValue === 'true') {
-                obj[v.name] = true
-              } else {
-                obj[v.name] = false
-              }
-            } else if (v.type === 'file') {
-              obj[v.name] = []
+      obj.Schemaid = this.schema.id
+      // console.log('this.entity', this.entity)
+      _.forEach(this.entity, function (v) {
+        if (v.customtype) {
+          obj[v.name] = self.getChildData(v.type)
+        } else {
+          if (v.type === 'number') {
+            if (v.property.defaultValue !== '') {
+              obj[v.name] = v.property.defaultValue
             } else {
-              if (v.property.defaultValue !== '') {
-                obj[v.name] = v.property.defaultValue
+              if (v.property.min !== 0 && v.property.min !== '') {
+                obj[v.name] = v.property.min
               } else {
-                obj[v.name] = ''
+                obj[v.name] = 1
               }
+            }
+          } else if (v.type === 'boolean') {
+            if (v.property.defaultValue !== '' || v.property.defaultValue === 'true') {
+              obj[v.name] = true
+            } else {
+              obj[v.name] = false
+            }
+          } else if (v.type === 'file') {
+            obj[v.name] = []
+          } else {
+            if (v.property.defaultValue !== '') {
+              obj[v.name] = v.property.defaultValue
+            } else {
+              obj[v.name] = ''
             }
           }
-        })
-        this.formSchemaInstance.data.push(obj)
-      }
+        }
+      })
+      this.formSchemaInstance.data.push(obj)
+      // }
       // console.log('obj', obj)
     },
     makeObj () {
@@ -266,6 +333,23 @@ export default {
       obj.Schemaid = this.schema.id
       obj.data = this.formSchemaInstance.data
       return obj
+    },
+    mergeFileList (mdata, schema) {
+      for (let sdata of mdata) {
+        for (let ent of schema.entity) {
+          if (ent.type === 'file') {
+            if (sdata.hasOwnProperty(ent.name + 'List')) {
+              for (let f of sdata[ent.name + 'List']) {
+                sdata[ent.name].push(f)
+              }
+              delete sdata[ent.name + 'List']
+            }
+          } else if (ent.customtype) {
+            sdata[ent.name] = this.mergeFileList(sdata[ent.name], ent.entity[0])
+          }
+        }
+      }
+      return mdata
     },
     handleSubmit (name) {
       var obj = this.makeObj()
@@ -278,10 +362,13 @@ export default {
         allcheck.push(flag)
       }
       let check = _.indexOf(allcheck, false)
+      // console.log('mergeData', mergeData, obj.data)
       // var check = this.checkValidation(obj.data[0], this.entity)
       // console.log('checkkkkkkkkkkkk', check, obj.data[0], this.entity)
       this.$Loading.start()
       if (check === -1) {
+        let mergeData = this.mergeFileList(obj.data, obj)
+        obj.data = mergeData
         Instance.post({ instanceid: this.instanceid, processid: this.processid, jobId: this.lastLog.jobId, data: obj.data })
         .then(response => {
           // console.log('response', response.data)
