@@ -47,17 +47,17 @@
                 :key="inx"
                 :rules="createRules(field)">
                 <!-- <div style="border: 1px solid red"> -->
-                <Input :disabled="field.isDisabled" v-if="field.type == 'text' || field.type == 'email' || field.type == 'phone'" v-model="schemainstance.data[index][field.name]" type="text" :placeholder="field.name"></Input>
+                <Input v-if="field.type == 'text' || field.type == 'email' || field.type == 'phone'" v-model="schemainstance.data[index][field.name]" type="text" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name" :min="(field.property.min > 0)?field.property.min : -Infinity"></Input>
                 <!-- </div> -->
                 <Input-number v-if="field.type == 'number'" :min="(field.property.min > 0)?field.property.min : -Infinity" :max="(field.property.max > 0)?field.property.max : Infinity" v-model="schemainstance.data[index][field.name]" :type="field.type" :placeholder="field.name"></Input-number>
-                <Date-picker v-if="field.type == 'date'" type="date" v-model="schemainstance.data[index][field.name]" format="MM-dd-yyyy" :placeholder="field.name"></Date-picker>
-                <Select v-if="field.type == 'dropdown'" v-model="schemainstance.data[index][field.name]">
+                <DatePicker v-if="field.type == 'date'" type="date" v-model="schemainstance.data[index][field.name]" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name"></DatePicker>
+                <Select v-if="field.type == 'dropdown'" v-model="schemainstance.data[index][field.name]" style="width:200px" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name">
                   <Option v-for="dpd in field.property.options" :value="dpd" :key="dpd">{{ dpd }}</Option>
                 </Select>
                 <Checkbox v-if="field.type == 'boolean'" v-model="schemainstance.data[index][field.name]">{{field.name}}</Checkbox>
                 
               </Form-item>
-              <input type="file" v-if="field.type == 'file'" @change="handleFileChange($event, index, field.name)" />
+              <input type="file" v-if="field.type == 'file'" @change="handleFileChange($event, index, field.name)" :multiple="(field.property.isMultiple)? field.property.isMultiple: false"/>
             </template>
           </template>
           
@@ -76,6 +76,7 @@
 
 <script>
 /*eslint-disable*/
+import moment from 'moment'
 import Schema from '../api/schema'
 import SchemaForm from './SchemaForm'
 var AWS = require('aws-sdk')
@@ -102,20 +103,28 @@ AWS.config.region = 'us-west-2'
       handleFileChange(e, index, fieldName) {
         let self = this
         var files = e.target.files || e.dataTransfer.files
+        let allFiles = []
         if (files.length > 0) {
-          console.log('files', files[0])
-          let bucket = new AWS.S3({ params: { Bucket: 'airflowbucket1/obexpense/expenses' } })
-          var params = { Key: files[0].name, ContentType: files[0].type, Body: files[0] }
-          bucket.upload(params).on('httpUploadProgress', function (evt) {
-            console.log('Uploaded :: ' + parseInt((evt.loaded * 100) / evt.total) + '%')
-          }).send(function (err, data) {
-            if (err) {
-              alert(err)
-            } else {
-              self.schemainstance.data[index][fieldName] = data.Location
+          // console.log('files', files[0])
+          for(let i = 0; i < files.length; i++) {
+            let bucket = new AWS.S3({ params: { Bucket: 'airflowbucket1/obexpense/expenses' } })
+            var params = { 
+             Key: moment().valueOf().toString() + i + files[i].name,
+             ContentType: files[i].type, 
+             Body: files[i]
             }
-          })
+            bucket.upload(params).on('httpUploadProgress', function (evt) {
+              console.log('Uploaded :: ' + parseInt((evt.loaded * 100) / evt.total) + '%')
+            }).send(function (err, data) {
+              if (err) {
+                alert(err)
+              } else {
+                allFiles.push(data.Location)
+              }
+            })
+          }
         }
+        self.schemainstance.data[index][fieldName] = allFiles
       },
       getValidationProps (index, fieldName) {
         return 'data[' + index + '][' + fieldName + ']'
@@ -135,13 +144,32 @@ AWS.config.region = 'us-west-2'
               if (v.customtype) {
                 console.log('child', self.getChildData(v.type))
                 obj[v.name] = self.getChildData(v.type)
-              } else {
-                  if (v.type === 'number') {
-                    obj[v.name] = 1
+              }  else {
+                if (v.type === 'number') {
+                  if (v.property.defaultValue !== '') {
+                    obj[v.name] = v.property.defaultValue
+                  } else {
+                    if (v.property.min !== 0 && v.property.min !== '') {
+                      obj[v.name] = v.property.min
+                    } else {
+                      obj[v.name] = 1
+                    }
                   }
-                  else {
+                } else if (v.type === 'boolean') {
+                  if (v.property.defaultValue !== '' || v.property.defaultValue === 'true') {
+                    obj[v.name] = true
+                  } else {
+                    obj[v.name] = false
+                  }
+                } else if (v.type === 'file') {
+                  obj[v.name] = []
+                } else {
+                  if (v.property.defaultValue !== '') {
+                    obj[v.name] = v.property.defaultValue
+                  } else {
                     obj[v.name] = ''
                   }
+                }
               }
             })
             arrObj.push(obj)
@@ -183,10 +211,29 @@ AWS.config.region = 'us-west-2'
             obj[v.name] = self.getChildData(v.type)
           } else {
             if (v.type === 'number') {
-              obj[v.name] = 1
-            }
-            else {
-              obj[v.name] = ''
+              if (v.property.defaultValue !== '') {
+                obj[v.name] = v.property.defaultValue
+              } else {
+                if (v.property.min !== 0 && v.property.min !== '') {
+                  obj[v.name] = v.property.min
+                } else {
+                  obj[v.name] = 1
+                }
+              }
+            } else if (v.type === 'boolean') {
+              if (v.property.defaultValue !== '' || v.property.defaultValue === 'true') {
+                obj[v.name] = true
+              } else {
+                obj[v.name] = false
+              }
+            } else if (v.type === 'file') {
+              obj[v.name] = []
+            } else {
+              if (v.property.defaultValue !== '') {
+                obj[v.name] = v.property.defaultValue
+              } else {
+                obj[v.name] = ''
+              }
             }
           }
         })
@@ -199,7 +246,7 @@ AWS.config.region = 'us-west-2'
       //     return (((1+Math.random())*0x10000)|0).toString(16).substring(1); 
       // },
       getObjectType (type) {
-        return ['text', 'email', 'number', 'phone', 'boolean', 'date', 'dropdown'].indexOf(type) === -1
+        return ['text', 'email', 'number', 'phone', 'boolean', 'date', 'dropdown', 'file'].indexOf(type) === -1
       },
       createRules (row) {
         let rules = []

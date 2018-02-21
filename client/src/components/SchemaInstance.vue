@@ -30,9 +30,9 @@
         <Button type="ghost" @click="handleReset('formSchemaInstance')" style="margin-left: 8px">Reset</Button>
       </Form-item>
     </Form>
-    <!-- {{formSchemaInstance.data}}
-    <hr><hr><hr><hr><hr><hr>
-    {{formSchemaInstance.entity}} -->
+    <!-- {{formSchemaInstance.data}} -->
+    <!-- <hr><hr><hr><hr><hr><hr> -->
+    <!-- {{formSchemaInstance.entity}} -->
     <div v-if="validErr.length != 0" style="color: #a94442;background-color: #f2dede;border:1px solid #ebccd1;padding: 5px">
       <div v-for="item in validErr">
         <Icon type="record" style="font-size:10px"></Icon>
@@ -98,11 +98,29 @@ export default {
               obj[v.name] = self.getChildData(v.type)
             } else {
               if (v.type === 'number') {
-                obj[v.name] = 1
+                if (v.property.defaultValue !== '') {
+                  obj[v.name] = v.property.defaultValue
+                } else {
+                  if (v.property.min !== 0 && v.property.min !== '') {
+                    obj[v.name] = v.property.min
+                  } else {
+                    obj[v.name] = 1
+                  }
+                }
               } else if (v.type === 'boolean') {
-                obj[v.name] = false
+                if (v.property.defaultValue !== '' || v.property.defaultValue === 'true') {
+                  obj[v.name] = true
+                } else {
+                  obj[v.name] = false
+                }
+              } else if (v.type === 'file') {
+                obj[v.name] = []
               } else {
-                obj[v.name] = ''
+                if (v.property.defaultValue !== '') {
+                  obj[v.name] = v.property.defaultValue
+                } else {
+                  obj[v.name] = ''
+                }
               }
             }
           })
@@ -212,11 +230,29 @@ export default {
             obj[v.name] = self.getChildData(v.type)
           } else {
             if (v.type === 'number') {
-              obj[v.name] = 1
+              if (v.property.defaultValue !== '') {
+                obj[v.name] = v.property.defaultValue
+              } else {
+                if (v.property.min !== 0 && v.property.min !== '') {
+                  obj[v.name] = v.property.min
+                } else {
+                  obj[v.name] = 1
+                }
+              }
             } else if (v.type === 'boolean') {
-              obj[v.name] = false
+              if (v.property.defaultValue !== '' || v.property.defaultValue === 'true') {
+                obj[v.name] = true
+              } else {
+                obj[v.name] = false
+              }
+            } else if (v.type === 'file') {
+              obj[v.name] = []
             } else {
-              obj[v.name] = ''
+              if (v.property.defaultValue !== '') {
+                obj[v.name] = v.property.defaultValue
+              } else {
+                obj[v.name] = ''
+              }
             }
           }
         })
@@ -235,10 +271,17 @@ export default {
       var obj = this.makeObj()
       this.validFlag = true
       this.validErr = []
-      var check = this.checkValidation(obj.data[0], this.entity)
+      // var check = this.checkValidation(obj.data[0], this.entity)
+      let allcheck = []
+      for (let dobj of obj.data) {
+        let flag = this.checkValidation(dobj, this.entity)
+        allcheck.push(flag)
+      }
+      let check = _.indexOf(allcheck, false)
+      // var check = this.checkValidation(obj.data[0], this.entity)
       // console.log('checkkkkkkkkkkkk', check, obj.data[0], this.entity)
       this.$Loading.start()
-      if (check) {
+      if (check === -1) {
         Instance.post({ instanceid: this.instanceid, processid: this.processid, jobId: this.lastLog.jobId, data: obj.data })
         .then(response => {
           // console.log('response', response.data)
@@ -251,6 +294,7 @@ export default {
           this.$Loading.error()
         })
       } else {
+        this.validErr = _.uniqBy(this.validErr, 'name')
         this.$Notice.error({title: 'Validation Error!'})
       }
     },
@@ -265,34 +309,83 @@ export default {
             self.validFlag = self.checkValidation(d, v.entity[0].entity)
           })
         } else {
-          if (v.property.optional !== true) {
+          if (!v.property.optional) {
             if (data[v.name] === '') {
               self.validErr.push({name: v.name, errmsg: 'Field is required.'})
               self.validFlag = false
-            }
-            if (v.type === 'email' && data[v.name] !== '') {
-              var patt = (v.property.regEx === '') ? new RegExp('[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}$') : new RegExp(v.property.regEx)
-              var res = patt.test(data[v.name])
-              if (!res) {
+            } else if (Array.isArray(data[v.name]) && data[v.name].length === 0) {
+              self.validErr.push({name: v.name, errmsg: 'File is required.'})
+              self.validFlag = false
+            } else if (v.type === 'text') {
+              if (v.property.regEx !== '') {
+                var patt0 = v.property.regEx
+                var res0 = patt0.test(data[v.name])
+                if (!res0) {
+                  self.validErr.push({name: v.name, errmsg: 'Invalid Email.'})
+                  self.validFlag = false
+                }
+              } else if (v.property.max !== 0) {
+                if (data[v.name].length > v.property.max) {
+                  self.validErr.push({name: v.name, errmsg: 'max ' + v.property.max + ' characters allowed.'})
+                  self.validFlag = false
+                }
+              } else if (v.property.allowedValue.length > 0) {
+                let exist = _.indexOf(v.property.allowedValue, data[v.name])
+                if (exist === -1) {
+                  self.validErr.push({name: v.name, errmsg: 'Not Allowed Email, Please select allow one.'})
+                  self.validFlag = false
+                }
+              }
+            } else if (v.type === 'email' && data[v.name] !== '') {
+              var patt1 = (v.property.regEx === '') ? new RegExp('[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}$') : new RegExp(v.property.regEx)
+              var res1 = patt1.test(data[v.name])
+              if (!res1) {
                 self.validErr.push({name: v.name, errmsg: 'Invalid Email.'})
                 self.validFlag = false
+              } else if (v.property.allowedValue.length > 0) {
+                let exist = _.indexOf(v.property.allowedValue, data[v.name])
+                if (exist === -1) {
+                  self.validErr.push({name: v.name, errmsg: 'Not Allowed Email, Please select allow one.'})
+                  self.validFlag = false
+                }
               }
-            }
-            if (v.type === 'phone' && data[v.name] !== '') {
-              patt = new RegExp('^\\(?([0-9]{3})\\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$')
-              res = patt.test(data[v.name])
-              if (!res) {
+            } else if (v.type === 'phone') {
+              var patt2 = (v.property.regEx === '') ? new RegExp('^\\(?([0-9]{3})\\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$') : new RegExp(v.property.regEx)
+              var res2 = patt2.test(data[v.name])
+              if (!res2) {
                 self.validErr.push({name: v.name, errmsg: 'Invalid Phone.'})
                 self.validFlag = false
+              } else if (v.property.allowedValue.length > 0) {
+                let exist = _.indexOf(v.property.allowedValue, data[v.name])
+                if (exist === -1) {
+                  self.validErr.push({name: v.name, errmsg: 'Not Allowed Phone, Please select allow one.'})
+                  self.validFlag = false
+                }
               }
-            }
-            if (v.type === 'number') {
-              patt = new RegExp('^[0-9]+$')
-              res = patt.test(data[v.name])
-              // alert(data[v.name])
-              if (!res) {
-                self.validErr.push({name: v.name, errmsg: 'Invalid Number.'})
-                self.validFlag = false
+            } else if (v.type === 'number') {
+              if (v.property.allowedValue.length > 0) {
+                let exist = _.indexOf(v.property.allowedValue, data[v.name])
+                if (exist === -1) {
+                  self.validErr.push({name: v.name, errmsg: 'Not Allowed Number, Please select allow one.'})
+                  self.validFlag = false
+                }
+              }
+            } else if (v.type === 'date') {
+              if (v.property.mindate !== '' && v.property.maxdate !== '') {
+                if (data[v.name] < v.property.mindate && data[v.name] > v.property.maxdate) {
+                  self.validErr.push({name: v.name, errmsg: 'Date must in between ' + v.property.mindate + ' and ' + v.property.maxdate})
+                  self.validFlag = false
+                }
+              } else if (v.property.mindate !== '') {
+                if (data[v.name] < v.property.mindate) {
+                  self.validErr.push({name: v.name, errmsg: 'Date must be greater than or equal ' + v.property.mindate + '.'})
+                  self.validFlag = false
+                }
+              } else if (v.property.maxdate !== '') {
+                if (data[v.name] > v.property.maxdate) {
+                  self.validErr.push({name: v.name, errmsg: 'Date must be less than or equal ' + v.property.mindate + '.'})
+                  self.validFlag = false
+                }
               }
             }
           }
