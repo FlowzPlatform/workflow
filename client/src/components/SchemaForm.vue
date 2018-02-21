@@ -1,14 +1,15 @@
 <template>
-  <div class="schema-form"   style="border-left:3px solid rgb(147, 180, 216);">
+  <div class="schema-form"   style="">
     <!-- {{schemainstance.data}} -->
-    <Form-item v-for="(item, index) in schemainstance.data" :key="index" style="padding-left:2px">
+    <div v-for="(item, index) in schemainstance.data" :key="index" style="">
       <!-- {{schemainstance.data}} -->
-      <Form ref="formSchema" :model="schemainstance" inline>
+      <Form ref="formSchema" :model="schemainstance" style="border:2px solid rgb(147, 180, 216);padding: 5px">
+        <Row>
         <!-- :model="item"  -->
-        <Form-item :model="item" style="cursor:-webkit-grabbing;">
+        <!-- <div style="cursor:-webkit-grabbing;">
             <Icon type="android-more-vertical" size="18"></Icon>
             <Icon type="android-more-vertical" size="18"></Icon>
-        </Form-item>
+        </div> -->
 
         <!-- <span v-if="item.data != undefined">
           <Form-item v-for="(field,inx) in item.entity" :key="inx" :prop="'entity.'+inx+'.value'" :show-message="true">  -->
@@ -22,54 +23,94 @@
             <!-- <schema-form v-if="getObjectType(field.type)" :schema="schema.schema"></schema-form> -->
         <!-- </Form-item> -->
       <!--   </span> -->
-        <span>
+        <!-- <span> -->
         <!-- v-else -->
         <!-- 'data.' + inx + '.' + field.name -->  <!-- schemainstance.data[index][field.name] -->
-          <template v-for="(field,inx) in schemainstance.entity">
+          <div v-for="(field,inx) in schemainstance.entity">
             <template v-if="field.customtype">
-              <Form-item 
-                :key="inx">
-                <div style="">{{field.name}}
-                  <div v-if="field.property.IsArray">
+            <Col :span="24">
+              <FormItem 
+                :key="inx"
+                style="margin-bottom:10px;"
+                >
+                <Row style="font-size:16px">
+                  <b><u>{{field.name}}</u></b>
+                </Row>
+                <!-- <div style=""> -->
+                  <Row v-if="field.property.IsArray">
                     <schema-form  :schemainstance="getObject(inx, index, field.name, field.type)"></schema-form>
-                    <Button type="dashed" long @click="handleAdd(inx, index, schemainstance.entity[inx].entity[0], schemainstance.data[index][field.name], field.name)" icon="plus-round">Add ({{field.name}})</Button>
-                  </div>
-                  <div v-else>
-                    <schema-form  :schemainstance="getObject(inx, index, field.name, field.type)"></schema-form>
-                  </div>
-                </div>
-              </Form-item>
+                    <Button type="dashed" long @click="handleAdd(inx, index, schemainstance.entity[inx].entity[0], schemainstance.data[index][field.name], field.name)" icon="plus-round" style="float:right">Add ({{field.name}})</Button>
+                  </Row>
+                  <Row v-else>
+                      <schema-form  :schemainstance="getObject(inx, index, field.name, field.type)"></schema-form>
+                  </Row>
+                <!-- </div> -->
+              </FormItem>
+            </Col>
             </template>
             <!-- :prop="'data[' + index + '][' + field.name + ']'" -->
                 <!-- :show-message="true" -->
             <template v-else>
-              <Form-item 
+              <Col :span="12" style="padding:0px 2px 0px 2px" v-if="field.type !== 'file'">
+                <FormItem 
+                  :key="inx"
+                  :rules="createRules(field)"
+                  style="margin-bottom:10px;"
+                  >
+                  <Row>
+                    <Col :span="4">
+                      <b>{{field.name}}</b>
+                    </Col>
+                    <Col :span="20" >
+                      <Input v-if="field.type == 'text' || field.type == 'email' || field.type == 'phone'" v-model="schemainstance.data[index][field.name]" type="text" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name" :min="(field.property.min > 0)?field.property.min : -Infinity"></Input>
+                      <!-- </div> -->
+                      <Input-number v-if="field.type == 'number'" :min="(field.property.min > 0)?field.property.min : -Infinity" :max="(field.property.max > 0)?field.property.max : Infinity" v-model="schemainstance.data[index][field.name]" :type="field.type" :placeholder="field.name"></Input-number>
+                      <DatePicker v-if="field.type == 'date'" type="date" v-model="schemainstance.data[index][field.name]" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name"></DatePicker>
+                      <Select v-if="field.type == 'dropdown'" v-model="schemainstance.data[index][field.name]" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name">
+                        <Option v-for="dpd in field.property.options" :value="dpd" :key="dpd">{{ dpd }}</Option>
+                      </Select>
+                      <Checkbox v-if="field.type == 'boolean'" v-model="schemainstance.data[index][field.name]">{{field.name}}</Checkbox>
+                      <!-- <input type="file" v-if="field.type == 'file'" @change="handleFileChange($event, index, field.name)" :multiple="(field.property.isMultiple)? field.property.isMultiple: false"/> -->
+                    </Col>
+                  </Row>
+                  <!-- <div style="border: 1px solid red"> -->
+                </FormItem>
+              </Col>
+              <Col :span="24" style="padding:0px 2px 0px 2px" v-else>
+                <FormItem
                 :key="inx"
-                :rules="createRules(field)">
-                <!-- <div style="border: 1px solid red"> -->
-                <Input v-if="field.type == 'text' || field.type == 'email' || field.type == 'phone'" v-model="schemainstance.data[index][field.name]" type="text" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name" :min="(field.property.min > 0)?field.property.min : -Infinity"></Input>
-                <!-- </div> -->
-                <Input-number v-if="field.type == 'number'" :min="(field.property.min > 0)?field.property.min : -Infinity" :max="(field.property.max > 0)?field.property.max : Infinity" v-model="schemainstance.data[index][field.name]" :type="field.type" :placeholder="field.name"></Input-number>
-                <DatePicker v-if="field.type == 'date'" type="date" v-model="schemainstance.data[index][field.name]" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name"></DatePicker>
-                <Select v-if="field.type == 'dropdown'" v-model="schemainstance.data[index][field.name]" style="width:200px" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name">
-                  <Option v-for="dpd in field.property.options" :value="dpd" :key="dpd">{{ dpd }}</Option>
-                </Select>
-                <Checkbox v-if="field.type == 'boolean'" v-model="schemainstance.data[index][field.name]">{{field.name}}</Checkbox>
-                
-              </Form-item>
-              <input type="file" v-if="field.type == 'file'" @change="handleFileChange($event, index, field.name)" :multiple="(field.property.isMultiple)? field.property.isMultiple: false"/>
+                :rules="createRules(field)"
+                style="margin-bottom:10px;"
+                >
+                  <Row>
+                    <Col :span="2">
+                      <b>{{field.name}}</b>
+                    </Col>
+                    <Col :span="22">
+                      <input type="file" v-if="field.type == 'file'" @change="handleFileChange($event, index, field.name)" :multiple="(field.property.isMultiple)? field.property.isMultiple: false"/>
+                      <div v-if="schemainstance.data[index][field.name + 'List']">
+                        <div class="list-group" v-for="val in schemainstance.data[index][field.name + 'List']" style="margin-bottom:0px;">
+                            <a :href="val" class="list-group-item" target="_blank" style="color:blue;padding:2px 15px;">{{val}}</a>
+                        </div>
+                      </div>
+                      <!-- <div>{{schemainstance.data[index][field.name + 'List']}}</div> -->
+                    </Col>
+                  </Row>
+                </FormItem>
+              </Col>
             </template>
-          </template>
+          </div>
           
-        </span>
-        <Form-item>
+        <!-- </span> -->
+        <!-- <Form-item> -->
             <!-- <a @click="handleEdit(item)"><Icon type="edit" size="20"></Icon></Icon></a> -->
-        </Form-item>
-        <Form-item v-if="index != 0">
+        <!-- </Form-item> -->
+        <div v-if="index != 0" style="float:right">
             <a @click="handleRemove(index)"><Icon type="trash-a" style="color:#e74c3c" size="20"></Icon></a>
-        </Form-item>
+        </div>
+      </Row>
       </Form>
-    </Form-item>
+    </div>
   <!-- {{schemainstance}} -->
   </div>
 </template>
@@ -300,3 +341,8 @@ AWS.config.region = 'us-west-2'
     }
   }
 </script>
+<style>
+  /*.ivu-form-item .ivu-form-item {
+    margin-bottom: 10px !important;
+  }*/
+</style>
