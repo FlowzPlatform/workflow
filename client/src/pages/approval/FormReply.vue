@@ -81,8 +81,8 @@ export default {
         return f.filename === this.isTemplate
       }).reduce((result, value, key) => {
         if (key === 'url') {
-          result = 'https://' + this.currentEntitySchema.userID + '.' + value[0] + '.' + config.grapesDomain + '/' + value[1] + '.html'
-          // result = 'http://172.16.230.87/' + value[1] + '.html'
+          // result = 'https://' + this.currentEntitySchema.userID + '.' + value[0] + '.' + config.grapesDomain + '/' + value[1] + '.html'
+          result = 'https://work247.flowzcluster.tk/' + value[1] + '.html'
         }
         return result
       }, '').value()
