@@ -468,16 +468,3 @@ export default {
   }
 }
 </script>
-<style>
-.expand-row{
-        margin-bottom: 16px;
-    }
-.ivu-table-small th {
-      height: 32px;
-      background-color: #394263;
-      color: #fff;
-    }
-.btn {
-    margin-top: 20px;
-}
-</style>
