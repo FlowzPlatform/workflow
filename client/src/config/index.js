@@ -18,7 +18,7 @@ var temp = {
   loginWithLinkedinUrl: 'http://auth.' + process.env.domainkey + '/auth/linkedin',
   githubSuccessCallbackUrl: 'http://localhost:8000',
   loginWithGithubUrl: 'http://auth.' + process.env.domainkey + '/auth/github',
-  grapesUrl: 'http://webbuilder.qaflowz.tk/',
+  grapesUrl: 'https://webbuilder.' + process.env.domainkey + '/',
   grapesAPI: 'http://api.' + process.env.domainkey + '/serverapi',
   grapesDomain: process.env.domainkey
 }
@@ -39,7 +39,7 @@ if (process.env.NODE_ENV !== 'development') {
     loginWithLinkedinUrl: 'https://auth.' + process.env.domainkey + '/auth/linkedin',
     githubSuccessCallbackUrl: 'https://engine.' + process.env.domainkey + '/',
     loginWithGithubUrl: 'https://auth.' + process.env.domainkey + '/auth/github',
-    grapesUrl: 'https://webbuilder.qaflowz.tk/',
+    grapesUrl: 'https://webbuilder.' + process.env.domainkey + '/',
     grapesAPI: 'https://api.' + process.env.domainkey + '/serverapi',
     grapesDomain: process.env.domainkey
   }
