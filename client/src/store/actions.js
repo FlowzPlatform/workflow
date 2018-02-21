@@ -6,10 +6,10 @@ import modelUser from '@/api/user'
 export default {
   getSchema ({ commit }) {
     commit('SET_SCHEMA', [])
-    api.request('get', '/schema')
+    api.request('get', '/schema?$paginate=false')
       .then(response => {
         // console.log('hdhd::', _.reject(response.data, { 'isdeleted': true }))
-        commit('SET_SCHEMA', response.data.data)
+        commit('SET_SCHEMA', response.data)
       })
       .catch(error => {
         console.log(error)
