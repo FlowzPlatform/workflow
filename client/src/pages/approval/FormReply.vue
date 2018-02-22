@@ -33,7 +33,7 @@
 </div>
 </template>
 <script>
-// import config from '@/config'
+import config from '@/config'
 
 // Models
 import Schema from '@/api/schema'
@@ -81,8 +81,10 @@ export default {
         return f.filename === this.isTemplate
       }).reduce((result, value, key) => {
         if (key === 'url') {
-          // result = 'https://' + this.currentEntitySchema.userID + '.' + value[0] + '.' + config.grapesDomain + '/' + value[1] + '.html'
-          result = 'https://work247.flowzcluster.tk/' + value[1] + '.html'
+          result = 'http://' + this.currentEntitySchema.userID + '.' + value[0] + '.' + config.grapesDomain + '/' + value[1] + '.html'
+          // result = 'http://localhost/person.html'
+          // result = 'https://work247.flowzcluster.tk/' + value[1] + '.html'
+          // result = 'http://592fd3b09df25d00f7a11393.67671226-1635-43e0-a1b8-30e6524805e2.flowzcluster.tk/'+ value[1]+ '.html'
         }
         return result
       }, '').value()
@@ -116,15 +118,17 @@ export default {
       let customSchema = []
       for (let i = 0; i < self.currentEntitySchema.entity.length; i++) {
         if (self.currentEntitySchema.entity[i].customtype === true) {
-          custom = await self.getCustom(self.currentEntitySchema.entity[i].type, true)
+          console.log('self.currentEntitySchema.entity[i]', self.currentEntitySchema.entity[i])
+          custom = await self.getCustom(self.currentEntitySchema.entity[i].id, true)
           array.push({customtype: true, name: self.currentEntitySchema.entity[i].name, entity: custom})
-          custom = await self.getCustom(self.currentEntitySchema.entity[i].type, false)
+          custom = await self.getCustom(self.currentEntitySchema.entity[i].id, false)
           customSchema.push(custom)
         } else {
           array.push({name: self.currentEntitySchema.entity[i].name, type: self.currentEntitySchema.entity[i].type})
           customSchema.push(self.currentEntitySchema.entity[i])
         }
       }
+      // console.log('entity:: ', array, ' formData :: ', self.lastLog.input, ' schema :: ', customSchema)
       document.getElementById('filecontainer').contentWindow.postMessage({
         entity: array,
         formData: self.lastLog.input,
@@ -154,7 +158,7 @@ export default {
           tempData = await self.getCustom(tempSchema.entity[i].type, false)
           customData.push(tempData)
         } else {
-          data.push({name: tempSchema.entity[i].name})
+          data.push({name: tempSchema.entity[i].name, type: tempSchema.entity[i].type})
           customData.push(tempSchema.entity[i])
         }
       }
