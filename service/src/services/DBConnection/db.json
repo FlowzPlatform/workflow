@@ -1,29 +1,27 @@
 {
-    "mongo": {
-        "dbinstance": [
-            {
-                "isenable": true,
-                "connection_name": "FlowzTest",
-                "host": "localhost",
-                "port": "27017",
-                "dbname": "FlowzTest",
-                "username": "",
-                "password": "",
-                "upldIcn": "",
-                "rdoCrt": "",
-                "notes": "",
-                "isdefault": true,
-                "id": "90b5c275-a838-49d3-e6c0-e7bf24d6831e"
-            }
-        ]
-    },
-    "rethink": {
-        "dbinstance": []
-    },
-    "elastic": {
-        "dbinstance": []
-    },
-    "nedb": {
-        "dbinstance": []
-    }
+  "mongo": {
+    "dbinstance": [{
+      "isenable": true,
+      "connection_name": "FlowzEngineTest",
+      "host": "ds245218.mlab.com",
+      "port": "45218",
+      "dbname": "flowztest",
+      "username": "nik",
+      "password": "123456",
+      "upldIcn": "",
+      "rdoCrt": "",
+      "notes": "",
+      "isdefault": true,
+      "id": "9750939e-3698-43da-8163-cb41bd65c478"
+    }]
+  },
+  "rethink": {
+    "dbinstance": []
+  },
+  "elastic": {
+    "dbinstance": []
+  },
+  "nedb": {
+    "dbinstance": []
+  }
 }
