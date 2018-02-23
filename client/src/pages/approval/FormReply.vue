@@ -33,7 +33,7 @@
 </div>
 </template>
 <script>
-import config from '@/config'
+// import config from '@/config'
 
 // Models
 import Schema from '@/api/schema'
