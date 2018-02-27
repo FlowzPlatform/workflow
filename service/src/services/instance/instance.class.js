@@ -10,48 +10,50 @@ var chokidar = require('chokidar');
 var db = '../DBConnection/db.json';
 var file = require(db);
 var dbapi = [];
+let databasesUrl = 'http://' + config.get('host') + ':' + config.get('port') + '/databases'
+let allapi = '../DBConnection/'
 
-_.forEach(file, function (dbs, i) {
-  var flag = false
-  _.forEach(dbs.dbinstance, function (instance) {
-    if (instance.isenable) {
-      flag = true
-    }
-  })
-  if (flag) {
-    var api = require('../DBConnection/' + i + 'api')
-    dbapi.push({ db: i, api: api });
-    api.choose()
-  }
-})
+// _.forEach(file, function (dbs, i) {
+//   var flag = false
+//   _.forEach(dbs.dbinstance, function (instance) {
+//     if (instance.isenable) {
+//       flag = true
+//     }
+//   })
+//   if (flag) {
+//     var api = require('../DBConnection/' + i + 'api')
+//     dbapi.push({ db: i, api: api });
+//     api.choose()
+//   }
+// })
 
-let readfile = async(function () {
-  fs.readFile(path.join(__dirname, '../DBConnection/db.json'), function (err, data) {
-    // console.log('reading file' + data)
-    // console.log('reading file form instance' + data)
-    if (err) return console.log(err);
-    if (data == '') {
-      console.log('BLANCK DATA');
-      return 'nodata';
-    }
-    file = JSON.parse(data);
-    dbapi = [];
-    _.forEach(file, function (dbs, i) {
-      var flag = false
-      _.forEach(dbs.dbinstance, function (instance) {
-        if (instance.isenable) {
-          flag = true
-        }
-      })
-      if (flag) {
-        var api = require('../DBConnection/' + i + 'api')
-        dbapi.push({ db: i, api: api });
-        // console.log('From..........................................instance')
-        api.choose()
-      }
-    })
-  });
-})
+// let readfile = async(function () {
+//   fs.readFile(path.join(__dirname, '../DBConnection/db.json'), function (err, data) {
+//     // console.log('reading file' + data)
+//     // console.log('reading file form instance' + data)
+//     if (err) return console.log(err);
+//     if (data == '') {
+//       console.log('BLANCK DATA');
+//       return 'nodata';
+//     }
+//     file = JSON.parse(data);
+//     dbapi = [];
+//     _.forEach(file, function (dbs, i) {
+//       var flag = false
+//       _.forEach(dbs.dbinstance, function (instance) {
+//         if (instance.isenable) {
+//           flag = true
+//         }
+//       })
+//       if (flag) {
+//         var api = require('../DBConnection/' + i + 'api')
+//         dbapi.push({ db: i, api: api });
+//         // console.log('From..........................................instance')
+//         api.choose()
+//       }
+//     })
+//   });
+// })
 
 var getQuery = async(function (dbName, type, queryFor) {
   let result = new Promise((resolve, reject) => {
@@ -76,39 +78,39 @@ var getQuery = async(function (dbName, type, queryFor) {
 });
 
 // One-liner for current directory, ignores .dotfiles 
-chokidar.watch(path.join(__dirname, '../DBConnection/db.json'), { ignored: /(^|[\/\\])\../ }).on('change', async(function (path) {
-  // console.log('From..........................................instance111')
-  // console.log('File', path, 'has been changed');
-  delete require.cache[require.resolve('../DBConnection/db')];
-  delete require.cache[require.resolve('../DBConnection/mongoapi')];
-  delete require.cache[require.resolve('../DBConnection/rethinkapi')];
-  delete require.cache[require.resolve('../DBConnection/elasticapi')];
-  //  delete require.cache[require.resolve('../DBConnection/mysqlapi')];
-  var checking = await (readfile());
-  if (checking == 'nodata') {
-    await (readfile);
-  }
-}))
+// chokidar.watch(path.join(__dirname, '../DBConnection/db.json'), { ignored: /(^|[\/\\])\../ }).on('change', async(function (path) {
+//   // console.log('From..........................................instance111')
+//   // console.log('File', path, 'has been changed');
+//   delete require.cache[require.resolve('../DBConnection/db')];
+//   delete require.cache[require.resolve('../DBConnection/mongoapi')];
+//   delete require.cache[require.resolve('../DBConnection/rethinkapi')];
+//   delete require.cache[require.resolve('../DBConnection/elasticapi')];
+//   //  delete require.cache[require.resolve('../DBConnection/mysqlapi')];
+//   var checking = await (readfile());
+//   if (checking == 'nodata') {
+//     await (readfile);
+//   }
+// }))
 
-var checkFlag = async(function (data) {
-  var flag = false
-  _.forEach(data, async(function (obj, index) {
-    // console.log('Obj', obj, '..k..', k)la
-    _.forEach(obj, async(function (val, key) {
-      // console.log(key, val)
-      if (key == 'database') {} else {
-        if (Array.isArray(val)) {
-          _.forEach(val, async(function (obj) {
-            if (!obj.hasOwnProperty('refid')) {
-              flag = true
-            }
-          }))
-        }
-      }
-    }))
-  }))
-  return flag
-})
+// var checkFlag = async(function (data) {
+//   var flag = false
+//   _.forEach(data, async(function (obj, index) {
+//     // console.log('Obj', obj, '..k..', k)la
+//     _.forEach(obj, async(function (val, key) {
+//       // console.log(key, val)
+//       if (key == 'database') {} else {
+//         if (Array.isArray(val)) {
+//           _.forEach(val, async(function (obj) {
+//             if (!obj.hasOwnProperty('refid')) {
+//               flag = true
+//             }
+//           }))
+//         }
+//       }
+//     }))
+//   }))
+//   return flag
+// })
 
 var checkFlagforGet = async(function (mObj) {
   var flag = false
@@ -310,6 +312,11 @@ var giveDatabase = async(function (schemaid) {
   return res.data.data.database
 })
 
+var getConnectionData = async( function(id) {
+  let res = await(axios.get(databasesUrl + '/' + id))
+  return res.data
+})
+
 var saveData = async(function (data, res) {
   // console.log('save calling...................', data, res)
     // var database;
@@ -329,17 +336,18 @@ var saveData = async(function (data, res) {
     //   database = res.database
     // }
 
-  var _dbindex = _.findIndex(dbapi, { 'db': res.database[0] });
+  // var _dbindex = _.findIndex(dbapi, { 'db': res.database[0] });
   // for(let [i, obj] of dbapi.entries()) {
   //   if(obj.db == database[0]) {
   //     _dbindex = i
   //   }
   // }
-
+  let selectapi = require(allapi + res.database[0] + 'api')
+  let conn = await (getConnectionData(res.database[1]))
   if (typeof res.id !== 'undefined') {
-    var dbdata = await (dbapi[_dbindex].api.postflowsInstance(data, res.database[1], res.title));
+    var dbdata = await (selectapi.postflowsInstance(data, conn, res.title));
   } else {
-    var dbdata = await (dbapi[_dbindex].api.postflowsInstance(data, res.database[1]));
+    var dbdata = await (selectapi.postflowsInstance(data, conn));
   }
   console.log('Return Instance id .........', dbdata)
   return dbdata;
@@ -779,28 +787,44 @@ var newgetFunction = async( function(id, res) {
   }
   if (!status) {
     // No custom type found
-    for (let [i, db] of dbapi.entries()) {
-      if (db.db == res.database[0]) {
-        var _res = await (db.api.getThisflowsInstance(id, res.title, res.database[1]))
-        return _res  
-      }
-    }
+    // for (let [i, db] of dbapi.entries()) {
+    //   if (db.db == res.database[0]) {
+    //     var _res = await (db.api.getThisflowsInstance(id, res.title, res.database[1]))
+    //     return _res  
+    //   }
+    // }
+    let selectapi = require(allapi + res.database[0] + 'api')
+    let conndata = await (getConnectionData(res.database[1]))
+    let _res = await (selectapi.getThisflowsInstance(id, res.title, conndata))
+    return _res
   } else {
     // Now get custom data also
-    for (let [i, db] of dbapi.entries()) {
-      if (db.db == res.database[0]) {
-        var _res = await (db.api.getThisflowsInstance(id, res.title, res.database[1]))
-        for (let e of res.entity) {
-          if (e.customtype) {
-            let mschema = await (getSchemaData(e.type))
-            for (let [i, mObj] of _res[e.name].entries()) {
-              _res[e.name][i] = await (newgetFunction(mObj.refid, mschema))
-            }
-          }
+    // for (let [i, db] of dbapi.entries()) {
+    //   if (db.db == res.database[0]) {
+    //     var _res = await (db.api.getThisflowsInstance(id, res.title, res.database[1]))
+    //     for (let e of res.entity) {
+    //       if (e.customtype) {
+    //         let mschema = await (getSchemaData(e.type))
+    //         for (let [i, mObj] of _res[e.name].entries()) {
+    //           _res[e.name][i] = await (newgetFunction(mObj.refid, mschema))
+    //         }
+    //       }
+    //     }
+    //     return _res
+    //   }
+    // }  
+    let selectapi = require(allapi + res.database[0] + 'api')
+    let conndata = await (getConnectionData(res.database[1]))
+    let _res = await (selectapi.getThisflowsInstance(id, res.title, conndata))
+    for (let e of res.entity) {
+      if (e.customtype) {
+        let mschema = await (getSchemaData(e.type))
+        for (let [i, mObj] of _res[e.name].entries()) {
+          _res[e.name][i] = await (newgetFunction(mObj.refid, mschema))
         }
-        return _res
       }
-    }  
+    }
+    return _res
   }
 }) 
 
