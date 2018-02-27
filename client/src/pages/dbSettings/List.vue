@@ -21,7 +21,8 @@
     </div>
 </template>
 <script>
-import api from '@/api'
+// import api from '@/api'
+import databasesModel from '@/api/databases'
 import _ from 'lodash'
 export default {
   data () {
@@ -30,17 +31,37 @@ export default {
       tabPane: 'mongo',
       row: '',
       mongoCol: [{
-        title: 'Select',
+        title: 'Status',
         width: 80,
         align: 'center',
         render: (h, params) => {
-          return h('Checkbox', {
+          return h('i-switch', {
             props: {
-              value: this.mongoDt[params.index].isenable
+              value: this.mongoDt[params.index].isenable,
+              size: 'small'
             },
             on: {
               'on-change': (value) => {
-                this.enableDbInstance(this.tabPane, params.index, value)
+                this.mongoDt[params.index].isenable = value
+                this.$Modal.confirm({
+                  title: 'Confirm',
+                  loading: true,
+                  content: '<p>Are you sure you want to ' + (value ? 'enable' : 'disable') + ' this database?</p>',
+                  onOk: async () => {
+                    let returnStatus = await this.handleEnableDisable(this.mongoDt[params.index])
+                    if (returnStatus.status === 'error') {
+                      this.$Notice.error({
+                        title: returnStatus.message,
+                        desc: this.mongoDt[params.index].connection_name + ' is not ' + (value ? 'enable' : 'disable')
+                      })
+                    }
+                    this.$Modal.remove()
+                  },
+                  onCancel: () => {
+                    this.mongoDt[params.index].isenable = !value
+                  }
+                })
+                // this.enableDbInstance(this.tabPane, params.index, value)
               }
             }
           })
@@ -57,7 +78,27 @@ export default {
             },
             on: {
               'on-change': (value) => {
-                this.defaultDBInstance(this.tabPane, params.index, value)
+                // this.defaultDBInstance(this.tabPane, params.index, value)
+                this.mongoDt[params.index].isdefault = value
+                this.$Modal.confirm({
+                  title: 'Confirm',
+                  loading: true,
+                  content: '<p>Are you sure you want to ' + (value ? 'set' : 'unset') + ' default database?</p>',
+                  onOk: async () => {
+                    let returnStatus = await this.defaultDBInstance(this.mongoDt[params.index])
+                    if (returnStatus.status === 'error') {
+                      this.$Notice.error({
+                        title: returnStatus.message,
+                        desc: this.mongoDt[params.index].connection_name + ' is not ' + (value ? 'enable' : 'disable')
+                      })
+                      this.mongoDt[params.index].isdefault = !value
+                    }
+                    this.$Modal.remove()
+                  },
+                  onCancel: () => {
+                    this.mongoDt[params.index].isdefault = !value
+                  }
+                })
               }
             }
           })
@@ -113,39 +154,59 @@ export default {
       }],
       mongoDt: [],
       rethinkCol: [{
-        title: 'Select',
+        title: 'Status',
         width: 80,
         align: 'center',
         render: (h, params) => {
-          return h('Checkbox', {
+          return h('i-switch', {
             props: {
-              value: this.rethinkDt[params.index].isenable
+              value: this.rethinkDt[params.index].isenable,
+              size: 'small'
             },
             on: {
               'on-change': (value) => {
-                this.enableDbInstance(this.tabPane, params.index, value)
+                this.rethinkDt[params.index].isenable = value
+                this.$Modal.confirm({
+                  title: 'Confirm',
+                  loading: true,
+                  content: '<p>Are you sure you want to ' + (value ? 'enable' : 'disable') + ' this database?</p>',
+                  onOk: async () => {
+                    let returnStatus = await this.handleEnableDisable(this.rethinkDt[params.index])
+                    if (returnStatus.status === 'error') {
+                      this.$Notice.error({
+                        title: returnStatus.message,
+                        desc: this.rethinkDt[params.index].connection_name + ' is not ' + (value ? 'enable' : 'disable')
+                      })
+                    }
+                    this.$Modal.remove()
+                  },
+                  onCancel: () => {
+                    this.rethinkDt[params.index].isenable = !value
+                  }
+                })
+                // this.enableDbInstance(this.tabPane, params.index, value)
               }
             }
           })
         }
       },
-      {
-        title: 'Default',
-        width: 80,
-        align: 'center',
-        render: (h, params) => {
-          return h('Radio', {
-            props: {
-              value: this.rethinkDt[params.index].isdefault
-            },
-            on: {
-              'on-change': (value) => {
-                this.defaultDBInstance(this.tabPane, params.index, value)
-              }
-            }
-          })
-        }
-      },
+      // {
+      //   title: 'Default',
+      //   width: 80,
+      //   align: 'center',
+      //   render: (h, params) => {
+      //     return h('Radio', {
+      //       props: {
+      //         value: this.rethinkDt[params.index].isdefault
+      //       },
+      //       on: {
+      //         'on-change': (value) => {
+      //           this.defaultDBInstance(this.tabPane, params.index, value)
+      //         }
+      //       }
+      //     })
+      //   }
+      // },
       {
         title: 'Connection Name',
         key: 'connection_name'
@@ -196,40 +257,60 @@ export default {
       }],
       rethinkDt: [],
       esCol: [{
-        title: 'Select',
+        title: 'Status',
         width: 80,
         align: 'center',
         render: (h, params) => {
-          return h('Checkbox', {
+          return h('i-switch', {
             props: {
-              value: this.elasticDt[params.index].isenable
+              value: this.elasticDt[params.index].isenable,
+              size: 'small'
             },
             on: {
               'on-change': (value) => {
-                this.enableDbInstance(this.tabPane, params.index, value)
+                this.elasticDt[params.index].isenable = value
+                this.$Modal.confirm({
+                  title: 'Confirm',
+                  loading: true,
+                  content: '<p>Are you sure you want to ' + (value ? 'enable' : 'disable') + ' this database?</p>',
+                  onOk: async () => {
+                    let returnStatus = await this.handleEnableDisable(this.elasticDt[params.index])
+                    if (returnStatus.status === 'error') {
+                      this.$Notice.error({
+                        title: returnStatus.message,
+                        desc: this.elasticDt[params.index].connection_name + ' is not ' + (value ? 'enable' : 'disable')
+                      })
+                    }
+                    this.$Modal.remove()
+                  },
+                  onCancel: () => {
+                    this.elasticDt[params.index].isenable = !value
+                  }
+                })
+                // this.enableDbInstance(this.tabPane, params.index, value)
               }
             }
           })
         }
       },
-      {
-        title: 'Default',
-        width: 80,
-        align: 'center',
-        render: (h, params) => {
-          return h('Radio', {
-            props: {
-              value: this.elasticDt[params.index].isdefault
-            },
-            on: {
-              'on-change': (value) => {
-                this.defaultDBInstance(this.tabPane, params.index, value)
-                // console.log(this.mongoDt[params.index].isenable);
-              }
-            }
-          })
-        }
-      },
+      // {
+      //   title: 'Default',
+      //   width: 80,
+      //   align: 'center',
+      //   render: (h, params) => {
+      //     return h('Radio', {
+      //       props: {
+      //         value: this.elasticDt[params.index].isdefault
+      //       },
+      //       on: {
+      //         'on-change': (value) => {
+      //           this.defaultDBInstance(this.tabPane, params.index, value)
+      //           // console.log(this.mongoDt[params.index].isenable);
+      //         }
+      //       }
+      //     })
+      //   }
+      // },
       {
         title: 'Connection Name',
         key: 'connection_name'
@@ -281,40 +362,60 @@ export default {
       }],
       elasticDt: [],
       neCol: [{
-        title: 'Select',
+        title: 'Status',
         width: 80,
         align: 'center',
         render: (h, params) => {
-          return h('Checkbox', {
+          return h('i-switch', {
             props: {
-              value: this.nedbDt[params.index].isenable
+              value: this.nedbDt[params.index].isenable,
+              size: 'small'
             },
             on: {
               'on-change': (value) => {
-                this.enableDbInstance(this.tabPane, params.index, value)
+                this.nedbDt[params.index].isenable = value
+                this.$Modal.confirm({
+                  title: 'Confirm',
+                  loading: true,
+                  content: '<p>Are you sure you want to ' + (value ? 'enable' : 'disable') + ' this database?</p>',
+                  onOk: async () => {
+                    let returnStatus = await this.handleEnableDisable(this.nedbDt[params.index])
+                    if (returnStatus.status === 'error') {
+                      this.$Notice.error({
+                        title: returnStatus.message,
+                        desc: this.nedbDt[params.index].connection_name + ' is not ' + (value ? 'enable' : 'disable')
+                      })
+                    }
+                    this.$Modal.remove()
+                  },
+                  onCancel: () => {
+                    this.nedbDt[params.index].isenable = !value
+                  }
+                })
+                // this.enableDbInstance(this.tabPane, params.index, value)
               }
             }
           })
         }
       },
-      {
-        title: 'Default',
-        width: 80,
-        align: 'center',
-        render: (h, params) => {
-          return h('Radio', {
-            props: {
-              value: this.nedbDt[params.index].isdefault
-            },
-            on: {
-              'on-change': (value) => {
-                this.defaultDBInstance(this.tabPane, params.index, value)
-                // console.log(this.mongoDt[params.index].isenable);
-              }
-            }
-          })
-        }
-      },
+      // {
+      //   title: 'Default',
+      //   width: 80,
+      //   align: 'center',
+      //   render: (h, params) => {
+      //     return h('Radio', {
+      //       props: {
+      //         value: this.nedbDt[params.index].isdefault
+      //       },
+      //       on: {
+      //         'on-change': (value) => {
+      //           this.defaultDBInstance(this.tabPane, params.index, value)
+      //           // console.log(this.mongoDt[params.index].isenable);
+      //         }
+      //       }
+      //     })
+      //   }
+      // },
       {
         title: 'Connection Name',
         key: 'connection_name'
@@ -368,6 +469,34 @@ export default {
     }
   },
   methods: {
+    getSettings () {
+      databasesModel.get(null, {
+        $paginate: false
+      })
+      .then(response => {
+        this.mongoDt = _.filter(response.data, {selectedDb: 'mongo'})
+        this.rethinkDt = _.filter(response.data, {selectedDb: 'rethink'})
+        this.elasticDt = _.filter(response.data, {selectedDb: 'elastic'})
+        this.nedbDt = _.filter(response.data, {selectedDb: 'nedb'})
+        this.loading = false
+      })
+      .catch(error => {
+        this.$Notice.error({
+          duration: 3,
+          title: 'Error!!',
+          desc: error.message
+        })
+        this.loading = false
+      })
+    },
+    async handleEnableDisable (data) {
+      // console.log(data)
+      return await databasesModel.patch(data.id, {isenable: data.isenable}).then(response => {
+        return {status: 'success'}
+      }).catch(error => {
+        return {status: 'error', message: error.message}
+      })
+    },
     addSettings () {
       this.$router.push({name: 'DbSettings/new', params: { db: this.tabPane }})
     },
@@ -377,94 +506,74 @@ export default {
         content: '<p>Are you sure you want to delete Connection?</p>',
         onOk: () => {
           var id = this[db + 'Dt'][index].id
-          api.request('delete', '/settings/' + id + '?db=' + db)
+          databasesModel.delete(id)
           .then(response => {
             this[db + 'Dt'].splice(index, 1)
             this.$Notice.success({title: 'Success', desc: 'Connection Deleted.....'})
           })
           .catch(error => {
-            console.log(error)
-            this.$Notice.error({title: 'Error', desc: 'Connection Not Deleted.....'})
+            this.$Notice.error({title: 'Error', desc: error.message})
           })
         },
         onCancel: () => {
         }
       })
     },
-    enableDbInstance (db, index, value) {
-      this.$Modal.confirm({
-        title: 'Confirm',
-        content: '<p>Are you sure you want to enable Connection?</p>',
-        onOk: () => {
-          var id = this[db + 'Dt'][index].id
-          api.request('put', '/settings/' + id + '?db=' + db, {isenable: value})
-              .then(response => {
-                this[db + 'Dt'][index].isenable = value
-                this.$Notice.success({duration: 3, title: 'Success!!', desc: 'Connection Enable Successfully..'})
-                this.$store.dispatch('getSchema')
-                this.getSettings()
-              })
-              .catch(error => {
-                console.log(error)
-                this.$Notice.error({duration: 3, title: 'Error!!', desc: 'Connection not Enable...'})
-              })
-        },
-        onCancel: () => {
-          this.getSettings()
-        }
+    // enableDbInstance (db, index, value) {
+    //   this.$Modal.confirm({
+    //     title: 'Confirm',
+    //     content: '<p>Are you sure you want to enable Connection?</p>',
+    //     onOk: () => {
+    //       var id = this[db + 'Dt'][index].id
+    //       api.request('put', '/settings/' + id + '?db=' + db, {isenable: value})
+    //           .then(response => {
+    //             this[db + 'Dt'][index].isenable = value
+    //             this.$Notice.success({duration: 3, title: 'Success!!', desc: 'Connection Enable Successfully..'})
+    //             this.$store.dispatch('getSchema')
+    //             this.getSettings()
+    //           })
+    //           .catch(error => {
+    //             console.log(error)
+    //             this.$Notice.error({duration: 3, title: 'Error!!', desc: 'Connection not Enable...'})
+    //           })
+    //     },
+    //     onCancel: () => {
+    //       this.getSettings()
+    //     }
+    //   })
+    // },
+    async defaultDBInstance (data) {
+      return await databasesModel.patch(data.id, {isdefault: data.isdefault}).then(response => {
+        return {status: 'success'}
+      }).catch(error => {
+        return {status: 'error', message: error.message}
       })
-    },
-    defaultDBInstance (db, index, value) {
-      this.$Modal.confirm({
-        title: 'Confirm',
-        content: '<p>Are you sure you want to change default Connection?</p>',
-        onOk: () => {
-          var id = this[db + 'Dt'][index].id
-          api.request('patch', '/settings/' + id + '?db=' + db, {isdefault: value})
-          .then(response => {
-            this[db + 'Dt'][index].isdefault = value
-            this.$Notice.success({duration: 3, title: 'Success!!', desc: 'Connection set Default Successfully..'})
-            this.$store.dispatch('getSchema')
-            this.getSettings()
-          })
-          .catch(error => {
-            console.log(error)
-            this.$Notice.error({duration: 3, title: 'Error!!', desc: 'Connection not set Default...'})
-          })
-        },
-        onCancel: () => {
-          this.getSettings()
-          // this[db+'Dt'][index].isenable = !value
-        }
-      })
-    },
-    getSettings () {
-      let self = this
-      api.request('get', '/settings')
-      .then(response => {
-        _.forEach(response.data, (instances, db) => {
-          self[db + 'Dt'] = response.data[db].dbinstance
-        })
-      })
-      .catch(error => {
-        this.$Notice.error({title: 'Network Error!!'})
-        console.log(error)
-      })
+      // this.$Modal.confirm({
+      //   title: 'Confirm',
+      //   content: '<p>Are you sure you want to change default Connection?</p>',
+      //   onOk: () => {
+      //     var id = this[db + 'Dt'][index].id
+      //     api.request('patch', '/settings/' + id + '?db=' + db, {isdefault: value})
+      //     .then(response => {
+      //       this[db + 'Dt'][index].isdefault = value
+      //       this.$Notice.success({duration: 3, title: 'Success!!', desc: 'Connection set Default Successfully..'})
+      //       // this.$store.dispatch('getSchema')
+      //       // this.getSettings()
+      //     })
+      //     .catch(error => {
+      //       console.log(error)
+      //       this.$Notice.error({duration: 3, title: 'Error!!', desc: 'Connection not set Default...'})
+      //     })
+      //   },
+      //   onCancel: () => {
+      //     this.getSettings()
+      //     // this[db+'Dt'][index].isenable = !value
+      //   }
+      // })
     }
   },
   mounted () {
-    let self = this
-    api.request('get', '/settings')
-    .then(response => {
-      _.forEach(response.data, (instances, db) => {
-        self[db + 'Dt'] = response.data[db].dbinstance
-        self.loading = false
-      })
-    })
-    .catch(error => {
-      this.$Notice.error({title: 'Network Error!!'})
-      console.log(error)
-    })
+    this.getSettings()
   }
 }
 </script>
