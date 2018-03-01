@@ -177,6 +177,7 @@ export default{
                     // let obj = this.frmSettings;
                     // obj.id = guid;
                     // api.request('post', '/settings', this.frmSettings)
+                    // this.frmSettings.id = '1aad0216-67f5-4803-3864-22dd01fa2ad7'
                     databasesModel.post(this.frmSettings)
                         .then(response => {
                             // this.$Message.success('Success');

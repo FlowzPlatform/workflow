@@ -4,7 +4,7 @@
       <Button type="primary" size="small" style="margin-bottom: 2px;" @click="addNewFlow" icon="plus"> Add</Button>
     </Row>
     <Row>
-      <Table size="small" :loading="loading" :columns="columns10" :data="flowzList"></Table>
+      <Table size="small" :loading="loading" :columns="columns10" :data="flowzList" stripe></Table>
     </Row>
     <Row style="margin-top: 4px; float: right">
       <Page :total="total" :current="cpage" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
