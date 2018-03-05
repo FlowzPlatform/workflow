@@ -17,12 +17,18 @@
             <Row type="flex" justify="end">
                 <div class="layout-nav">
                     <Menu-item name="1">
-                      <Submenu name="1">
+                    <router-link to="/">
+                            Home
+                      </router-link>
+                      </Menu-item>
+
+                    <Menu-item name="2">
+                      <Submenu name="2">
                         <template slot="title">
                           <Icon type="person" :size="16"></Icon>
                           {{$store.state.user.fullname}}
                         </template>
-                        <Menu-item name="1-1">
+                        <Menu-item name="2-1">
                             <a @click="handleRemove">
                                 <Icon type="ios-locked-outline" :size="16"></Icon>
                                 Logout

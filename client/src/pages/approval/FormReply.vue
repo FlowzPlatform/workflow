@@ -393,6 +393,8 @@ export default {
                   onOk () {
                   }
                 })
+              } else {
+                self.$Message.error('You have no rights.')
               }
             }
           })
