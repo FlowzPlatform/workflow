@@ -2,6 +2,7 @@ import api from '../api'
 import axios from 'axios'
 import config from '@/config'
 import modelUser from '@/api/user'
+import flowz from '@/api/flowz'
 // import _ from 'lodash'
 export default {
   getSchema ({ commit }) {
@@ -33,9 +34,13 @@ export default {
   },
   getFlowzdata ({ commit }) {
     // commit('SET_FLOWZDATA', [])
-    api.request('get', '/flowz')
+    // api.request('get', '/flowz')
+    flowz.get(null, {
+      $paginate: false,
+      $select: ['id', 'ProcessName', 'json', 'allowedusers']
+    })
       .then(response => {
-        commit('SET_FLOWZDATA', response.data.data)
+        commit('SET_FLOWZDATA', response.data)
       })
       .catch(error => {
         console.log(error)

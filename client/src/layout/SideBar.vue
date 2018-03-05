@@ -169,7 +169,8 @@
         if(_flowz.length > 0) {
           console.log('flowz data', _flowz)
           this.loading = false
-          return _.orderBy(_flowz, [checkcase => checkcase.ProcessName.toLowerCase()], [this.orderby])
+          this.flowzList = _.orderBy(this.flowzList, [checkcase => checkcase.ProcessName.toLowerCase()], [this.orderby])
+          return _.orderBy(this.flowzList, [checkcase => checkcase.ProcessName.toLowerCase()], [this.orderby])
         } else {
           this.loading = false
           return []
@@ -296,8 +297,24 @@
         this.orderby = name
       },
       async createNewInstance (index, id) {
-        let generatedJson = await this.generateJson(this.flowzList[index].xml)
+        // let generatedJson = await this.generateJson(this.flowzList[index].xml)
+        // generatedJson.fid = id
+        // instanceModel.post(generatedJson)
+        // .then(response => {
+        //   // console.log('response.data', response.data)
+        //   this.$router.push('/admin/flow/instance/' + response.data.id)
+        // })
+        // .catch(error => {
+        //   console.log(error)
+        // })
+        let generatedJson = this.flowzList[index].json
+        // console.log('this.flowzList[index]', this.flowzList[index])
+        generatedJson.allowedusers = this.flowzList[index].allowedusers ? this.flowzList[index].allowedusers : []
+        // console.log('generatedJson', JSON.stringify(generatedJson))
+        // console.log('generatedJson', generatedJson)
         generatedJson.fid = id
+        generatedJson.createdOn = Date()
+        // console.log('instanceModel', instanceModel)
         instanceModel.post(generatedJson)
         .then(response => {
           // console.log('response.data', response.data)
@@ -379,185 +396,185 @@
           processRef.push(result)
           await self.getAllProcess(jsonXML, result, processRef)
         }
-    },
-    async getStartProcess (process) {
-      let self = this
-      return await Promise.all(_.chain(process.startEvent)
-      .map(async (m) => {
-        return {
-          id: m._id,
-          capacity: 1,
-          name: m._name,
-          type: 'start',
-          target: self.getTargetId(m, process),
-          mapping: [],
-          inputProperty: await self.getProperties(m),
-          outputProperty: await self.getOutputProperties(m)
-        }
-      }).value())
-    },
-    getTargetId (event, process) {
-      if (!_.isArray(event.outgoing)) {
-        event.outgoing = [event.outgoing]
-      }
-      return _.map(event.outgoing, (targetMap) => {
-        return _.chain(process.sequenceFlow).filter((ftr) => {
-          return ftr._id === targetMap.__text
-        }).map((m) => {
-          return {
-            id: m._targetRef
-          }
-        }).value()[0]
-        // return { id: targetMap.__text }
-      })
-    },
-    async getProperties (proccess) {
-      if (proccess.extensionElements && proccess.extensionElements.myProperty) {
-        if (!_.isArray(proccess.extensionElements.myProperty.property)) {
-          proccess.extensionElements.myProperty.property = [proccess.extensionElements.myProperty.property]
-        }
-        return await Promise.all(_.map(proccess.extensionElements.myProperty.property, async (m) => {
+      },
+      async getStartProcess (process) {
+        let self = this
+        return await Promise.all(_.chain(process.startEvent)
+        .map(async (m) => {
           return {
             id: m._id,
-            entityschema: await schemaModel.getAll(m._entityschema),
-            approvalClass: m._approvalClass !== undefined && m._approvalClass !== '0' ? await approvalModel.get(m._approvalClass).then(content => {
-              return content.data
-            }) : undefined,
-            cancelLabel: m._cancelLabel,
-            choice: m._choice,
-            createTemplate: m._createTemplate,
-            emailTemplate: m._emailTemplate,
-            notes: m._notes,
-            submitLabel: m._submitLabel,
-            viewTemplate: m._viewTemplate
-          }
-        }))
-      } else {
-        return []
-      }
-    },
-    async getOutputProperties (proccess) {
-      if (proccess.extensionElements && proccess.extensionElements.myOutputs) {
-        if (!_.isArray(proccess.extensionElements.myOutputs.output)) {
-          proccess.extensionElements.myOutputs.output = [proccess.extensionElements.myOutputs.output]
-        }
-        return await Promise.all(_.map(proccess.extensionElements.myOutputs.output, async (m) => {
-          return {
-            id: m._id,
-            entityschema: await schemaModel.getAll(m._entityschema),
-            approvalClass: m._approvalClass !== undefined && m._approvalClass !== '0' ? await approvalModel.get(m._approvalClass).then(content => {
-              return content.data
-            }) : undefined,
-            cancelLabel: m._cancelLabel,
-            choice: m._choice,
-            createTemplate: m._createTemplate,
-            emailTemplate: m._emailTemplate,
-            notes: m._notes,
-            submitLabel: m._submitLabel,
-            viewTemplate: m._viewTemplate
-          }
-        }))
-      } else {
-        return []
-      }
-    },
-    async getMapping (event, mergeModules) {
-      var self = this
-      if (!_.isArray(event.incoming)) {
-        event.incoming = [event.incoming]
-      }
-      return await Promise.all(_.chain(_.union(...mergeModules))
-        .filter((f) => {
-          return _.filter(event.incoming, (i) => { return i.__text === f._id }).length > 0
-        }).map(async (m) => {
-          let sourceRef = m._sourceRef
-          if (m.extensionElements && m.extensionElements.myIOMapping) {
-            if (!_.isArray(m.extensionElements.myIOMapping.mapping)) {
-              m.extensionElements.myIOMapping.mapping = [m.extensionElements.myIOMapping.mapping]
-            }
-            return await Promise.all(_.map(m.extensionElements.myIOMapping.mapping, async (m) => {
-              var content = await schemamappingModel.get(m._schemamapping)
-              content.data['sourceid'] = sourceRef // _.chain(_.union(...mergeModules)).find((fnd) => { return fnd._id === event.incoming.__text }).value()._sourceRef
-              content.data.MapData = await Promise.all(_.map(content.data.MapData, async (schema) => {
-                return {
-                  producerField: schema.producerField,
-                  transform: schema.transform,
-                  consumerField: schema.ctype ? (await self.getMapData(schema.consumerField)) : _.first(schema.consumerField)
-                }
-              }))
-              content.data.MapData = self.mapDataConvertToSquenceFlow(content.data.MapData)
-              return content.data
-            }))
-          } else {
-            return []
+            capacity: 1,
+            name: m._name,
+            type: 'start',
+            target: self.getTargetId(m, process),
+            mapping: [],
+            inputProperty: await self.getProperties(m),
+            outputProperty: await self.getOutputProperties(m)
           }
         }).value())
-      // temp = await Promise.all(temp)
-      // return temp
-    },
-    mapDataConvertToSquenceFlow (MapData) {
-      let newMapData = []
-      _.map(MapData, (m) => {
-        if (_.isArray(m.consumerField)) {
-          _.forEach(m.consumerField, (fe) => {
-            if (!_.isArray(fe.consumerField)) {
-              newMapData.push({
-                consumerField: _.reduceRight([fe.consumerTitle], function (memo, arrayValue) {
-                  var obj = {}
-                  obj[arrayValue] = memo
-                  return obj
-                }, fe.consumerField),
-                transform: fe.transform,
-                producerField: _.reduceRight([fe.producerTitle], function (memo, arrayValue) {
-                  var obj = {}
-                  obj[arrayValue] = memo
-                  return obj
-                }, fe.producerField)
-              })
+      },
+      getTargetId (event, process) {
+        if (!_.isArray(event.outgoing)) {
+          event.outgoing = [event.outgoing]
+        }
+        return _.map(event.outgoing, (targetMap) => {
+          return _.chain(process.sequenceFlow).filter((ftr) => {
+            return ftr._id === targetMap.__text
+          }).map((m) => {
+            return {
+              id: m._targetRef
             }
-          })
+          }).value()[0]
+          // return { id: targetMap.__text }
+        })
+      },
+      async getProperties (proccess) {
+        if (proccess.extensionElements && proccess.extensionElements.myProperty) {
+          if (!_.isArray(proccess.extensionElements.myProperty.property)) {
+            proccess.extensionElements.myProperty.property = [proccess.extensionElements.myProperty.property]
+          }
+          return await Promise.all(_.map(proccess.extensionElements.myProperty.property, async (m) => {
+            return {
+              id: m._id,
+              entityschema: await schemaModel.getAll(m._entityschema),
+              approvalClass: m._approvalClass !== undefined && m._approvalClass !== '0' ? await approvalModel.get(m._approvalClass).then(content => {
+                return content.data
+              }) : undefined,
+              cancelLabel: m._cancelLabel,
+              choice: m._choice,
+              createTemplate: m._createTemplate,
+              emailTemplate: m._emailTemplate,
+              notes: m._notes,
+              submitLabel: m._submitLabel,
+              viewTemplate: m._viewTemplate
+            }
+          }))
         } else {
-          newMapData.push(m)
+          return []
         }
-      })
-      return newMapData
-    },
-    async getMapData (mapId) {
-      var content = await schemamappingModel.get(mapId)
-      let producer = await schemaModel.get(content.data.producer)
-      let consumer = await schemaModel.get(content.data.consumer)
-      return await Promise.all(_.map(content.data.MapData, async (schema) => {
-        var obj = {
-          consumerTitle: consumer.data.title,
-          producerTitle: producer.data.title,
-          transform: schema.transform,
-          producerField: schema.producerField,
-          consumerField: schema.ctype ? (await self.getMapData(schema.consumerField)) : _.first(schema.consumerField)
+      },
+      async getOutputProperties (proccess) {
+        if (proccess.extensionElements && proccess.extensionElements.myOutputs) {
+          if (!_.isArray(proccess.extensionElements.myOutputs.output)) {
+            proccess.extensionElements.myOutputs.output = [proccess.extensionElements.myOutputs.output]
+          }
+          return await Promise.all(_.map(proccess.extensionElements.myOutputs.output, async (m) => {
+            return {
+              id: m._id,
+              entityschema: await schemaModel.getAll(m._entityschema),
+              approvalClass: m._approvalClass !== undefined && m._approvalClass !== '0' ? await approvalModel.get(m._approvalClass).then(content => {
+                return content.data
+              }) : undefined,
+              cancelLabel: m._cancelLabel,
+              choice: m._choice,
+              createTemplate: m._createTemplate,
+              emailTemplate: m._emailTemplate,
+              notes: m._notes,
+              submitLabel: m._submitLabel,
+              viewTemplate: m._viewTemplate
+            }
+          }))
+        } else {
+          return []
         }
-        // obj[producer.data.title] = schema.producerField
-        // obj[consumer.data.title] = schema.ctype ? (await self.getMapData(schema.consumerField)) : _.first(schema.consumerField)
-        return obj
-      }))
-    },
-    deleteFlow (id, inx) {
-      this.$Modal.confirm({
-        title: 'Confirm',
-        content: '<p>Are you sure you want to delete?</p>',
-        onOk: () => {
-          flowz.delete(id)
-          .then(response => {
-            this.$Notice.success({title: 'Success!!', desc: 'Flowz Deleted...'})
-            this.flowzList.splice(inx, 1)
-          })
-          .catch(error => {
-            this.$Notice.error({title: 'Error!!', desc: 'Flowz Not Deleted...'})
-            console.log(error)
-          })
-        },
-        onCancel: () => {
+      },
+      async getMapping (event, mergeModules) {
+        var self = this
+        if (!_.isArray(event.incoming)) {
+          event.incoming = [event.incoming]
         }
-      })
-    },
+        return await Promise.all(_.chain(_.union(...mergeModules))
+          .filter((f) => {
+            return _.filter(event.incoming, (i) => { return i.__text === f._id }).length > 0
+          }).map(async (m) => {
+            let sourceRef = m._sourceRef
+            if (m.extensionElements && m.extensionElements.myIOMapping) {
+              if (!_.isArray(m.extensionElements.myIOMapping.mapping)) {
+                m.extensionElements.myIOMapping.mapping = [m.extensionElements.myIOMapping.mapping]
+              }
+              return await Promise.all(_.map(m.extensionElements.myIOMapping.mapping, async (m) => {
+                var content = await schemamappingModel.get(m._schemamapping)
+                content.data['sourceid'] = sourceRef // _.chain(_.union(...mergeModules)).find((fnd) => { return fnd._id === event.incoming.__text }).value()._sourceRef
+                content.data.MapData = await Promise.all(_.map(content.data.MapData, async (schema) => {
+                  return {
+                    producerField: schema.producerField,
+                    transform: schema.transform,
+                    consumerField: schema.ctype ? (await self.getMapData(schema.consumerField)) : _.first(schema.consumerField)
+                  }
+                }))
+                content.data.MapData = self.mapDataConvertToSquenceFlow(content.data.MapData)
+                return content.data
+              }))
+            } else {
+              return []
+            }
+          }).value())
+        // temp = await Promise.all(temp)
+        // return temp
+      },
+      mapDataConvertToSquenceFlow (MapData) {
+        let newMapData = []
+        _.map(MapData, (m) => {
+          if (_.isArray(m.consumerField)) {
+            _.forEach(m.consumerField, (fe) => {
+              if (!_.isArray(fe.consumerField)) {
+                newMapData.push({
+                  consumerField: _.reduceRight([fe.consumerTitle], function (memo, arrayValue) {
+                    var obj = {}
+                    obj[arrayValue] = memo
+                    return obj
+                  }, fe.consumerField),
+                  transform: fe.transform,
+                  producerField: _.reduceRight([fe.producerTitle], function (memo, arrayValue) {
+                    var obj = {}
+                    obj[arrayValue] = memo
+                    return obj
+                  }, fe.producerField)
+                })
+              }
+            })
+          } else {
+            newMapData.push(m)
+          }
+        })
+        return newMapData
+      },
+      async getMapData (mapId) {
+        var content = await schemamappingModel.get(mapId)
+        let producer = await schemaModel.get(content.data.producer)
+        let consumer = await schemaModel.get(content.data.consumer)
+        return await Promise.all(_.map(content.data.MapData, async (schema) => {
+          var obj = {
+            consumerTitle: consumer.data.title,
+            producerTitle: producer.data.title,
+            transform: schema.transform,
+            producerField: schema.producerField,
+            consumerField: schema.ctype ? (await self.getMapData(schema.consumerField)) : _.first(schema.consumerField)
+          }
+          // obj[producer.data.title] = schema.producerField
+          // obj[consumer.data.title] = schema.ctype ? (await self.getMapData(schema.consumerField)) : _.first(schema.consumerField)
+          return obj
+        }))
+      },
+      deleteFlow (id, inx) {
+        this.$Modal.confirm({
+          title: 'Confirm',
+          content: '<p>Are you sure you want to delete?</p>',
+          onOk: () => {
+            flowz.delete(id)
+            .then(response => {
+              this.$Notice.success({title: 'Success!!', desc: 'Flowz Deleted...'})
+              this.flowzList.splice(inx, 1)
+            })
+            .catch(error => {
+              this.$Notice.error({title: 'Error!!', desc: 'Flowz Not Deleted...'})
+              console.log(error)
+            })
+          },
+          onCancel: () => {
+          }
+        })
+      },
     }
   }
 </script>
