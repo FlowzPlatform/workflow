@@ -3,17 +3,31 @@
         "dbinstance": [
             {
                 "isenable": true,
-                "connection_name": "FlowzTest",
-                "host": "localhost",
-                "port": "27017",
-                "dbname": "FlowzTest",
-                "username": "",
-                "password": "",
+                "connection_name": "FlowzEngineTest",
+                "host": "ds245218.mlab.com",
+                "port": "45218",
+                "dbname": "flowztest",
+                "username": "nik",
+                "password": "01d8c5c9ecb5",
                 "upldIcn": "",
                 "rdoCrt": "",
                 "notes": "",
                 "isdefault": true,
-                "id": "90b5c275-a838-49d3-e6c0-e7bf24d6831e"
+                "id": "9750939e-3698-43da-8163-cb41bd65c478"
+            },
+            {
+                "isenable": true,
+                "connection_name": "Flowenginwork247",
+                "host": "ds247178.mlab.com",
+                "port": "47178",
+                "dbname": "work247",
+                "username": "officebrain5510",
+                "password": "01d8c5c9ecb5",
+                "upldIcn": "",
+                "rdoCrt": "",
+                "notes": "",
+                "isdefault": false,
+                "id": "1aad0216-67f5-4803-3864-22dd01fa2ad7"
             }
         ]
     },

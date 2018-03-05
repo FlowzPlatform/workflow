@@ -1,6 +1,7 @@
 <template>
 <div>
   <Row>
+  <!-- {{loading}} {{isallow}} {{lastLog.status}} -->
     <Col v-show="loading" class="demo-spin-col" span="24" style="margin-top:35px;">
         <Spin fix>
             <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
@@ -17,7 +18,8 @@
         <div v-else-if="lastLog.status === 'inputRequired' && isAccess">
           <schema-instance :id="currentEntitySchema.id" :processid="lastLog.job" :instanceid="$route.params.fiid" :lastLog="lastLog"></schema-instance>
         </div>
-        <div v-show="lastLog.status !== 'inputRequired'">
+        <div v-show="lastLog.status !== 'inputRequired' || (lastLog.status === 'inputRequired' && !isAccess)">
+        <!-- <div v-else> -->
           <div id="canvas" style="height: calc(100vh - 130px); min-height: 400px;"></div>
         </div>
         <Spin size="large" fix v-if="submitLoading">
@@ -81,8 +83,12 @@ export default {
         return f.filename === this.isTemplate
       }).reduce((result, value, key) => {
         if (key === 'url') {
-          result = 'https://' + this.currentEntitySchema.userID + '.' + value[0] + '.' + config.grapesDomain + '/' + value[1] + '.html'
-          // result = 'http://172.16.230.87/' + value[1] + '.html'
+          // result = 'https://' + this.currentEntitySchema.userID + '.' + value[0] + '.' + config.grapesDomain + '/' + value[1] + '.html'
+          // result = 'http://localhost/person.html'
+          // console.log('Active File ::: ', value[1])
+          result = 'https://work247.flowzcluster.tk/' + value[1] + '.html'
+          // result = 'http://localhost/' + value[1] + '.html'
+          // result = 'http://592fd3b09df25d00f7a11393.67671226-1635-43e0-a1b8-30e6524805e2.flowzcluster.tk/'+ value[1]+ '.html'
         }
         return result
       }, '').value()
@@ -112,19 +118,33 @@ export default {
     async iframeload () {
       let self = this
       let array = []
-      let custom = []
+      // let custom = []
       let customSchema = []
-      for (let i = 0; i < self.currentEntitySchema.entity.length; i++) {
-        if (self.currentEntitySchema.entity[i].customtype === true) {
-          custom = await self.getCustom(self.currentEntitySchema.entity[i].type, true)
-          array.push({customtype: true, name: self.currentEntitySchema.entity[i].name, entity: custom})
-          custom = await self.getCustom(self.currentEntitySchema.entity[i].type, false)
-          customSchema.push(custom)
+      // for (let i = 0; i < self.currentEntitySchema.entity.length; i++) {
+      //   // if (self.currentEntitySchema.entity[i].customtype === true) {
+      //   if (self.currentEntitySchema.entity[i].type === 'object' || self.currentEntitySchema.entity[i].type === 'array') {
+      //     // console.log('self.currentEntitySchema.entity[i]', self.currentEntitySchema.entity[i])
+      //     custom = await self.getCustom(self.currentEntitySchema.entity[i].id, true)
+      //     array.push({customtype: true, name: self.currentEntitySchema.entity[i].name, entity: custom})
+      //     custom = await self.getCustom(self.currentEntitySchema.entity[i].id, false)
+      //     customSchema.push(custom)
+      //   } else {
+      //     array.push({name: self.currentEntitySchema.entity[i].name})
+      //     customSchema.push(self.currentEntitySchema.entity[i])
+      //   }
+      // }
+      // console.log('entity:: ', array, ' formData :: ', self.lastLog.input, ' schema :: ', customSchema)
+      for (let ent of self.currentEntitySchema.entity) {
+        if (ent.type === 'object' || ent.type === 'array') {
+          let mdata = await self.getCustomData(ent.entity)
+          array.push({customtype: true, name: ent.name, entity: mdata.arr})
+          customSchema.push(mdata.custom)
         } else {
-          array.push({name: self.currentEntitySchema.entity[i].name, type: self.currentEntitySchema.entity[i].type})
-          customSchema.push(self.currentEntitySchema.entity[i])
+          array.push({name: ent.name, type: ent.type})
+          customSchema.push(ent)
         }
       }
+      console.log('entity:: ', array, ' formData :: ', self.lastLog.input, ' schema :: ', customSchema)
       document.getElementById('filecontainer').contentWindow.postMessage({
         entity: array,
         formData: self.lastLog.input,
@@ -140,25 +160,20 @@ export default {
       }
       window.addEventListener('message', messageEvent)
     },
-    async getCustom (id, flag) {
-      let tempSchema
-      let tempData = []
+    async getCustomData (entity) {
+      let array = []
       let customData = []
-      let data = []
-      let self = this
-      tempSchema = await self.getSchema(id)
-      for (let i = 0; i < tempSchema.entity.length; i++) {
-        if (tempSchema.entity[i].customtype === true) {
-          tempData = await self.getCustom(tempSchema.entity[i].type, true)
-          data.push({customtype: true, name: tempSchema.entity[i].name, entity: tempData})
-          tempData = await self.getCustom(tempSchema.entity[i].type, false)
-          customData.push(tempData)
+      for (let ent of entity) {
+        if (ent.type === 'object' || ent.type === 'array') {
+          let mdata = await this.getCustomData(ent.entity)
+          array.push({customtype: true, name: ent.name, entity: mdata.arr})
+          customData.push(mdata.custom)
         } else {
-          data.push({name: tempSchema.entity[i].name})
-          customData.push(tempSchema.entity[i])
+          array.push({name: ent.name, type: ent.type})
+          customData.push(ent)
         }
       }
-      return flag ? data : customData
+      return {arr: array, custom: customData}
     },
     async getSchema (id) {
       var resp = await Schema.getThis(id).then((res) => {
@@ -209,6 +224,13 @@ export default {
         }
         return {}
       })
+      this.flowInstance.processList = _.chain(this.flowInstance.processList).map(m => {
+        m.log = _.chain(this.flowInstance.process_log).filter(f => {
+          return f.job === m.id
+        }).orderBy(['lastModified'], ['desc']).groupBy('jobId').value()
+        return m
+      }).value()
+      // console.log('this.flowInstance', this.flowInstance)
       // check authentication
       if (_.indexOf(this.flowInstance.allowedusers, this.$store.state.user.email) >= 0) {
         // allowed
@@ -277,8 +299,8 @@ export default {
           eventBus.on(event, function (e) {
             // e.element = the model element
             // e.gfx = the graphical element
-            // console.log(event, 'on', e.element)
             let myData = _.find(self.flowInstance.processList, {id: e.element.id})
+            // console.log('on :: ', e.element.id)
             if (myData !== undefined) {
               let checkallow = false
               if (e.element.type === 'bpmn:EndEvent') {
@@ -298,7 +320,6 @@ export default {
                   }
                 }
               }
-
               // data only shown if user is allowed by flow
               if (checkallow) {
                 let tData = []
@@ -333,9 +354,9 @@ export default {
                   title: 'Jobs',
                   key: 'jobId'
                 }]
+                // console.log('tData...', tData)
                 self.$Modal.info({
                   title: e.element.id,
-                  closable: true,
                   width: '1200px',
                   render: (h, params) => {
                     return ('div', {}, [
@@ -368,6 +389,8 @@ export default {
                         ])
                       ])
                     ])
+                  },
+                  onOk () {
                   }
                 })
               }

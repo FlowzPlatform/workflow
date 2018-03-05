@@ -7,6 +7,7 @@ let getAllEntity = async(id) => {
     if (item.customtype) {
       response.data.entity[index] = await getAllEntity(item.type)
       response.data.entity[index]['name'] = item.name
+      response.data.entity[index]['customtype'] = true
       response.data.entity[index]['type'] = item.property.IsArray ? 'array' : 'object'
       if (response.data.entity[index]['type'] === 'array') {
         response.data.entity[index]['items'] = {}
