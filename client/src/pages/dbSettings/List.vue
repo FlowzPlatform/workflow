@@ -92,6 +92,8 @@ export default {
                         desc: this.mongoDt[params.index].connection_name + ' is not ' + (value ? 'enable' : 'disable')
                       })
                       this.mongoDt[params.index].isdefault = !value
+                    } else {
+                      this.getSettings()
                     }
                     this.$Modal.remove()
                   },
@@ -190,23 +192,45 @@ export default {
           })
         }
       },
-      // {
-      //   title: 'Default',
-      //   width: 80,
-      //   align: 'center',
-      //   render: (h, params) => {
-      //     return h('Radio', {
-      //       props: {
-      //         value: this.rethinkDt[params.index].isdefault
-      //       },
-      //       on: {
-      //         'on-change': (value) => {
-      //           this.defaultDBInstance(this.tabPane, params.index, value)
-      //         }
-      //       }
-      //     })
-      //   }
-      // },
+      {
+        title: 'Default',
+        width: 80,
+        align: 'center',
+        render: (h, params) => {
+          return h('Radio', {
+            props: {
+              value: this.rethinkDt[params.index].isdefault
+            },
+            on: {
+              'on-change': (value) => {
+                // this.defaultDBInstance(this.tabPane, params.index, value)
+                this.rethinkDt[params.index].isdefault = value
+                this.$Modal.confirm({
+                  title: 'Confirm',
+                  loading: true,
+                  content: '<p>Are you sure you want to ' + (value ? 'set' : 'unset') + ' default database?</p>',
+                  onOk: async () => {
+                    let returnStatus = await this.defaultDBInstance(this.rethinkDt[params.index])
+                    if (returnStatus.status === 'error') {
+                      this.$Notice.error({
+                        title: returnStatus.message,
+                        desc: this.rethinkDt[params.index].connection_name + ' is not ' + (value ? 'enable' : 'disable')
+                      })
+                      this.rethinkDt[params.index].isdefault = !value
+                    } else {
+                      this.getSettings()
+                    }
+                    this.$Modal.remove()
+                  },
+                  onCancel: () => {
+                    this.rethinkDt[params.index].isdefault = !value
+                  }
+                })
+              }
+            }
+          })
+        }
+      },
       {
         title: 'Connection Name',
         key: 'connection_name'
@@ -293,24 +317,45 @@ export default {
           })
         }
       },
-      // {
-      //   title: 'Default',
-      //   width: 80,
-      //   align: 'center',
-      //   render: (h, params) => {
-      //     return h('Radio', {
-      //       props: {
-      //         value: this.elasticDt[params.index].isdefault
-      //       },
-      //       on: {
-      //         'on-change': (value) => {
-      //           this.defaultDBInstance(this.tabPane, params.index, value)
-      //           // console.log(this.mongoDt[params.index].isenable);
-      //         }
-      //       }
-      //     })
-      //   }
-      // },
+      {
+        title: 'Default',
+        width: 80,
+        align: 'center',
+        render: (h, params) => {
+          return h('Radio', {
+            props: {
+              value: this.elasticDt[params.index].isdefault
+            },
+            on: {
+              'on-change': (value) => {
+                // this.defaultDBInstance(this.tabPane, params.index, value)
+                this.elasticDt[params.index].isdefault = value
+                this.$Modal.confirm({
+                  title: 'Confirm',
+                  loading: true,
+                  content: '<p>Are you sure you want to ' + (value ? 'set' : 'unset') + ' default database?</p>',
+                  onOk: async () => {
+                    let returnStatus = await this.defaultDBInstance(this.elasticDt[params.index])
+                    if (returnStatus.status === 'error') {
+                      this.$Notice.error({
+                        title: returnStatus.message,
+                        desc: this.elasticDt[params.index].connection_name + ' is not ' + (value ? 'enable' : 'disable')
+                      })
+                      this.elasticDt[params.index].isdefault = !value
+                    } else {
+                      this.getSettings()
+                    }
+                    this.$Modal.remove()
+                  },
+                  onCancel: () => {
+                    this.elasticDt[params.index].isdefault = !value
+                  }
+                })
+              }
+            }
+          })
+        }
+      },
       {
         title: 'Connection Name',
         key: 'connection_name'
@@ -398,24 +443,45 @@ export default {
           })
         }
       },
-      // {
-      //   title: 'Default',
-      //   width: 80,
-      //   align: 'center',
-      //   render: (h, params) => {
-      //     return h('Radio', {
-      //       props: {
-      //         value: this.nedbDt[params.index].isdefault
-      //       },
-      //       on: {
-      //         'on-change': (value) => {
-      //           this.defaultDBInstance(this.tabPane, params.index, value)
-      //           // console.log(this.mongoDt[params.index].isenable);
-      //         }
-      //       }
-      //     })
-      //   }
-      // },
+      {
+        title: 'Default',
+        width: 80,
+        align: 'center',
+        render: (h, params) => {
+          return h('Radio', {
+            props: {
+              value: this.nedbDt[params.index].isdefault
+            },
+            on: {
+              'on-change': (value) => {
+                // this.defaultDBInstance(this.tabPane, params.index, value)
+                this.nedbDt[params.index].isdefault = value
+                this.$Modal.confirm({
+                  title: 'Confirm',
+                  loading: true,
+                  content: '<p>Are you sure you want to ' + (value ? 'set' : 'unset') + ' default database?</p>',
+                  onOk: async () => {
+                    let returnStatus = await this.defaultDBInstance(this.nedbDt[params.index])
+                    if (returnStatus.status === 'error') {
+                      this.$Notice.error({
+                        title: returnStatus.message,
+                        desc: this.nedbDt[params.index].connection_name + ' is not ' + (value ? 'enable' : 'disable')
+                      })
+                      this.nedbDt[params.index].isdefault = !value
+                    } else {
+                      this.getSettings()
+                    }
+                    this.$Modal.remove()
+                  },
+                  onCancel: () => {
+                    this.nedbDt[params.index].isdefault = !value
+                  }
+                })
+              }
+            }
+          })
+        }
+      },
       {
         title: 'Connection Name',
         key: 'connection_name'
@@ -508,7 +574,10 @@ export default {
           var id = this[db + 'Dt'][index].id
           databasesModel.delete(id)
           .then(response => {
-            this[db + 'Dt'].splice(index, 1)
+            let checkInx = _.findIndex(this[db + 'Dt'], {id: id})
+            if (checkInx !== undefined && checkInx >= 0) {
+              this[db + 'Dt'].splice(checkInx, 1)
+            }
             this.$Notice.success({title: 'Success', desc: 'Connection Deleted.....'})
           })
           .catch(error => {
@@ -574,6 +643,30 @@ export default {
   },
   mounted () {
     this.getSettings()
+  },
+  feathers: {
+    'databases': {
+      created (data) {
+        // console.log('created', data)
+        this[data.selectedDb + 'Dt'].push(data)
+      },
+      updated (data) {
+        // console.log('updated', data)
+        let findInx = _.findIndex(this[data.selectedDb + 'Dt'], {id: data.id})
+        if (findInx !== undefined && findInx >= 0) {
+          _.forEach(data, (v, k) => {
+            this[data.selectedDb + 'Dt'][findInx][k] = v
+          })
+        }
+      },
+      removed (data) {
+        // console.log('removed', data)
+        let findInx = _.findIndex(this[data.selectedDb + 'Dt'], {id: data.id})
+        if (findInx !== undefined && findInx >= 0) {
+          this[data.selectedDb + 'Dt'].splice(findInx, 1)
+        }
+      }
+    }
   }
 }
 </script>
