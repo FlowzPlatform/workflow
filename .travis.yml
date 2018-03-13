@@ -9,6 +9,7 @@ branches:
   only:
   - master
   - develop
+  - staging
   - QA
 
 jobs:
@@ -27,6 +28,14 @@ jobs:
             docker images;
             docker tag seneca_jobqueue_flowz:dev $DOCKER_USERNAME/seneca_jobqueue_flowz:dev;
             docker push $DOCKER_USERNAME/seneca_jobqueue_flowz:dev;
+        elif [ ${TRAVIS_BRANCH} = "staging" ]; then
+            docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+            docker build -t seneca_jobqueue_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER ./JobQue/;
+            docker tag seneca_jobqueue_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER $DOCKER_USERNAME/seneca_jobqueue_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER;
+            docker tag seneca_jobqueue_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER $DOCKER_USERNAME/seneca_jobqueue_flowz:staging;
+            docker images;
+            docker push $DOCKER_USERNAME/seneca_jobqueue_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER;
+            docker push $DOCKER_USERNAME/seneca_jobqueue_flowz:staging;
         else
             docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
             docker build -t seneca_jobqueue_flowz:qa ./JobQue/;
@@ -48,6 +57,14 @@ jobs:
             docker images;
             docker tag flowz_frontend_flowz:dev $DOCKER_USERNAME/flowz_frontend_flowz:dev;
             docker push $DOCKER_USERNAME/flowz_frontend_flowz:dev;
+        elif [ ${TRAVIS_BRANCH} = "staging" ]; then
+            docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+            docker build -t flowz_frontend_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER --build-arg accesskey="$AWS_ACCESSKEY" --build-arg secretkey="$AWS_SECRETKEY" --build-arg domainkey="$DOMAINKEY_STAGING" ./client/;
+            docker tag flowz_frontend_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER $DOCKER_USERNAME/flowz_frontend_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER;
+            docker tag flowz_frontend_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER $DOCKER_USERNAME/flowz_frontend_flowz:staging;
+            docker images;
+            docker push $DOCKER_USERNAME/flowz_frontend_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER;
+            docker push $DOCKER_USERNAME/flowz_frontend_flowz:staging;
         else
             docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
             docker build -t flowz_frontend_flowz:qa --build-arg accesskey="$AWS_ACCESSKEY" --build-arg secretkey="$AWS_SECRETKEY" --build-arg domainkey="$DOMAINKEY_QA" ./client/;
@@ -69,6 +86,14 @@ jobs:
             docker images;
             docker tag flowz_backend_flowz:dev $DOCKER_USERNAME/flowz_backend_flowz:dev;
             docker push $DOCKER_USERNAME/flowz_backend_flowz:dev;
+        elif [ ${TRAVIS_BRANCH} = "staging" ]; then
+            docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+            docker build -t flowz_backend_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER ./service/;
+            docker tag flowz_backend_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER $DOCKER_USERNAME/flowz_backend_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER;
+            docker tag flowz_backend_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER $DOCKER_USERNAME/flowz_backend_flowz:staging;
+            docker images;
+            docker push $DOCKER_USERNAME/flowz_backend_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER;
+            docker push $DOCKER_USERNAME/flowz_backend_flowz:staging;
         else
             docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
             docker build -t flowz_backend_flowz:qa ./service/;
@@ -93,6 +118,3 @@ notifications:
       - rbajaniya@officebrain.com
     on_success: always
     on_failure: always
- 
- 
- 
