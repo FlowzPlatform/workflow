@@ -117,4 +117,4 @@ notifications:
       - naveeng@officebrain.com
       - rbajaniya@officebrain.com
     on_success: always
-on_failure: always
+    on_failure: always
