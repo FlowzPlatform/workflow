@@ -8,7 +8,7 @@
   },
   "scheduler_table": "scheduler",
   "qJobTimeout": 3600000,
-  "qJobRetryMax": 0,
+  "qJobRetryMax": 5,
   "instance_table": "flowzinstance",
   "approvar_table": "approvalClass",
   "system_logs_table": "system_logs",
