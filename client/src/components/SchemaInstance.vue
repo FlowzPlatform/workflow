@@ -1,6 +1,6 @@
 <template>
   <div class="schema-instance">
-    <Form ref="formSchemaInstance" :model="formSchemaInstance">
+    <!-- <Form ref="formSchemaInstance" :model="formSchemaInstance"> -->
       <!-- <Form-item 
         label="Title" 
         prop="name"
@@ -25,14 +25,16 @@
             <!-- </Col>
           </Row>
         </Form-item> -->
-      <Form-item>
+      <!-- <Form-item> -->
+      <div style="padding: 5px 0 5px 0">
         <Button type="primary" v-model="savebutton" @click="handleSubmit('formSchemaInstance')">{{ savebutton }}</Button>
-        <Button type="ghost" @click="handleReset('formSchemaInstance')" style="margin-left: 8px">Reset</Button>
-      </Form-item>
-    </Form>
-    <!-- {{formSchemaInstance.data}}
-    <hr><hr><hr><hr><hr><hr>
-    {{formSchemaInstance.entity}} -->
+        <Button type="ghost" @click="handleReset('formSchemaInstance')" style="margin-left: 10px">Reset</Button>
+      </div>
+      <!-- </Form-item> -->
+    <!-- </Form> -->
+    <!-- {{formSchemaInstance.data}} -->
+    <!-- <hr><hr><hr><hr><hr><hr> -->
+    <!-- {{formSchemaInstance.entity}} -->
     <div v-if="validErr.length != 0" style="color: #a94442;background-color: #f2dede;border:1px solid #ebccd1;padding: 5px">
       <div v-for="item in validErr">
         <Icon type="record" style="font-size:10px"></Icon>
@@ -98,11 +100,29 @@ export default {
               obj[v.name] = self.getChildData(v.type)
             } else {
               if (v.type === 'number') {
-                obj[v.name] = 1
+                if (v.property.defaultValue !== '') {
+                  obj[v.name] = v.property.defaultValue
+                } else {
+                  if (v.property.min !== 0 && v.property.min !== '') {
+                    obj[v.name] = v.property.min
+                  } else {
+                    obj[v.name] = 1
+                  }
+                }
               } else if (v.type === 'boolean') {
-                obj[v.name] = false
+                if (v.property.defaultValue !== '' || v.property.defaultValue === 'true') {
+                  obj[v.name] = true
+                } else {
+                  obj[v.name] = false
+                }
+              } else if (v.type === 'file') {
+                obj[v.name] = []
               } else {
-                obj[v.name] = ''
+                if (v.property.defaultValue !== '') {
+                  obj[v.name] = v.property.defaultValue
+                } else {
+                  obj[v.name] = ''
+                }
               }
             }
           })
@@ -142,6 +162,7 @@ export default {
       //     this.formSchemaInstance.data = this.lastLog.input
       //   }
       // }
+      // console.log('response.data', response.data)
       this.schema = response.data
       this.entity = this.schema.entity
       this.formSchemaInstance.entity = this.schema.entity
@@ -162,57 +183,192 @@ export default {
       }
       // console.log('self.formSchemaInstance.data[0]', self.formSchemaInstance.data[0])
       // if (self.formSchemaInstance.data[0].length === 0) {
-      this.handleAdd()
+      if (this.lastLog !== undefined && this.lastLog.input.length !== 0) {
+        for (let mdata of self.lastLog.input) {
+          for (let ent of self.schema.entity) {
+            if (ent.type === 'file') {
+              mdata[ent.name + 'List'] = mdata[ent.name]
+              mdata[ent.name] = []
+              // console.log(mdata, ent.name)
+            } else if (ent.customtype) {
+              mdata[ent.name] = self.setFileList(mdata[ent.name], ent.entity[0])
+            }
+          }
+          // console.log(mdata)
+        }
+        // console.log('self.lastLog.input', self.lastLog.input)
+        self.formSchemaInstance.data = _.map(self.lastLog.input, (entry) => {
+          entry.Schemaid = self.schema.id
+          return _.chain(entry).omit(['id', '_id']).reduce((result, value, key) => {
+            // if (_.isArray(value)) {
+            //   result[key] = self.deleteId(value)
+            // } else {
+            result[key] = value
+            // }
+            return result
+          }, {}).value()
+        })
+        // console.log('self.formSchemaInstance.data', self.formSchemaInstance.data)
+        // _.forEach(self.lastLog.input, (obj) => {
+        //   // obj = this.lastLog.input[0]
+        //   // obj.database = this.schema.database
+        //   obj.Schemaid = self.schema.id
+        //   delete obj.id
+        //   delete obj._id
+        //   self.formSchemaInstance.data.push(obj)
+        // })
+      } else {
+        this.handleAdd()
+      }
       // }
+    },
+    deleteId (obj) {
+      let self = this
+      return _.map(obj, (entry) => {
+        entry.Schemaid = self.schema.id
+        return _.chain(entry).omit(['id', '_id']).reduce((result, value, key) => {
+          if (_.isArray(value)) {
+            result[key] = self.deleteId(value)
+          } else {
+            result[key] = value
+          }
+          return result
+        }, {}).value()
+      })
+    },
+    setFileList (mdata, entity) {
+      // console.log('mdata', mdata, entity)
+      for (let sdata of mdata) {
+        for (let ent of entity.entity) {
+          if (ent.type === 'file') {
+            sdata[ent.name + 'List'] = sdata[ent.name]
+            sdata[ent.name] = []
+            // console.log(mdata, ent.name)
+          } else if (ent.customtype) {
+            sdata[ent.name] = this.setFileList(sdata[ent.name], ent.entity[0])
+          }
+        }
+      }
+      return mdata
     },
     handleAdd () {
       var self = this
       var obj = {}
-      if (this.lastLog !== undefined && this.lastLog.input.length !== 0) {
-        _.forEach(self.lastLog.input, (obj) => {
-          // obj = this.lastLog.input[0]
-          // obj.database = this.schema.database
-          obj.Schemaid = self.schema._id
-          delete obj.id
-          delete obj._id
-          self.formSchemaInstance.data.push(obj)
-        })
-      } else {
+      // if (this.lastLog !== undefined && this.lastLog.input.length !== 0) {
+      //   for (let mdata of self.lastLog.input) {
+      //     for (let ent of self.schema.entity) {
+      //       if (ent.type === 'file') {
+      //         mdata[ent.name + 'List'] = mdata[ent.name]
+      //         mdata[ent.name] = []
+      //         // console.log(mdata, ent.name)
+      //       } else if (ent.customtype) {
+      //         mdata[ent.name] = self.setFileList(mdata[ent.name], ent.entity[0])
+      //       }
+      //     }
+      //     // console.log(mdata)
+      //   }
+      //   // console.log('self.lastLog.input', self.lastLog.input)
+      //   self.formSchemaInstance.data = _.map(self.lastLog.input, (entry) => {
+      //     entry.Schemaid = self.schema.id
+      //     return _.chain(entry).omit(['id', '_id']).reduce((result, value, key) => {
+      //       // if (_.isArray(value)) {
+      //       //   result[key] = self.deleteId(value)
+      //       // } else {
+      //       result[key] = value
+      //       // }
+      //       return result
+      //     }, {}).value()
+      //   })
+      //   // console.log('self.formSchemaInstance.data', self.formSchemaInstance.data)
+      //   // _.forEach(self.lastLog.input, (obj) => {
+      //   //   // obj = this.lastLog.input[0]
+      //   //   // obj.database = this.schema.database
+      //   //   obj.Schemaid = self.schema.id
+      //   //   delete obj.id
+      //   //   delete obj._id
+      //   //   self.formSchemaInstance.data.push(obj)
+      //   // })
+      // } else {
         // obj.database = this.schema.database
-        obj.Schemaid = this.schema._id
-        // console.log('this.entity', this.entity)
-        _.forEach(this.entity, function (v) {
-          if (v.customtype) {
-            obj[v.name] = self.getChildData(v.type)
-          } else {
-            if (v.type === 'number') {
-              obj[v.name] = 1
-            } else if (v.type === 'boolean') {
+      obj.Schemaid = this.schema.id
+      // console.log('this.entity', this.entity)
+      _.forEach(this.entity, function (v) {
+        if (v.customtype) {
+          obj[v.name] = self.getChildData(v.type)
+        } else {
+          if (v.type === 'number') {
+            if (v.property.defaultValue !== '') {
+              obj[v.name] = v.property.defaultValue
+            } else {
+              if (v.property.min !== 0 && v.property.min !== '') {
+                obj[v.name] = v.property.min
+              } else {
+                obj[v.name] = 1
+              }
+            }
+          } else if (v.type === 'boolean') {
+            if (v.property.defaultValue !== '' || v.property.defaultValue === 'true') {
+              obj[v.name] = true
+            } else {
               obj[v.name] = false
+            }
+          } else if (v.type === 'file') {
+            obj[v.name] = []
+          } else {
+            if (v.property.defaultValue !== '') {
+              obj[v.name] = v.property.defaultValue
             } else {
               obj[v.name] = ''
             }
           }
-        })
-        this.formSchemaInstance.data.push(obj)
-      }
+        }
+      })
+      this.formSchemaInstance.data.push(obj)
+      // }
       // console.log('obj', obj)
     },
     makeObj () {
+      // console.log('this.schema', this.schema)
       var obj = this.schema
-      obj.Schemaid = this.schema._id
+      obj.Schemaid = this.schema.id
       obj.data = this.formSchemaInstance.data
       return obj
     },
+    mergeFileList (mdata, schema) {
+      for (let sdata of mdata) {
+        for (let ent of schema.entity) {
+          if (ent.type === 'file') {
+            if (sdata.hasOwnProperty(ent.name + 'List')) {
+              for (let f of sdata[ent.name + 'List']) {
+                sdata[ent.name].push(f)
+              }
+              delete sdata[ent.name + 'List']
+            }
+          } else if (ent.customtype) {
+            sdata[ent.name] = this.mergeFileList(sdata[ent.name], ent.entity[0])
+          }
+        }
+      }
+      return mdata
+    },
     handleSubmit (name) {
       var obj = this.makeObj()
-      // console.log('QQQQQQQQQQQQ', obj.data[0])
       this.validFlag = true
       this.validErr = []
-      var check = this.checkValidation(obj.data[0], this.entity)
+      // var check = this.checkValidation(obj.data[0], this.entity)
+      let allcheck = []
+      for (let dobj of obj.data) {
+        let flag = this.checkValidation(dobj, this.entity)
+        allcheck.push(flag)
+      }
+      let check = _.indexOf(allcheck, false)
+      // console.log('mergeData', mergeData, obj.data)
+      // var check = this.checkValidation(obj.data[0], this.entity)
       // console.log('checkkkkkkkkkkkk', check, obj.data[0], this.entity)
       this.$Loading.start()
-      if (check) {
+      if (check === -1) {
+        let mergeData = this.mergeFileList(obj.data, obj)
+        obj.data = mergeData
         Instance.post({ instanceid: this.instanceid, processid: this.processid, jobId: this.lastLog.jobId, data: obj.data })
         .then(response => {
           // console.log('response', response.data)
@@ -225,49 +381,98 @@ export default {
           this.$Loading.error()
         })
       } else {
+        this.validErr = _.uniqBy(this.validErr, 'name')
         this.$Notice.error({title: 'Validation Error!'})
       }
     },
     checkValidation (data, ent) {
-      console.log('Validation....', data, ent)
+      // console.log('Validation....', data, ent)
       var self = this
       // var flag = true
       _.forEach(ent, function (v) {
-        console.log(JSON.stringify(v))
         if (v.customtype) {
           // console.log('data[v.name]', data[v.name])
           _.forEach(data[v.name], (d) => {
             self.validFlag = self.checkValidation(d, v.entity[0].entity)
           })
         } else {
-          if (v.property.optional !== true) {
+          if (!v.property.optional) {
             if (data[v.name] === '') {
               self.validErr.push({name: v.name, errmsg: 'Field is required.'})
               self.validFlag = false
-            }
-            if (v.type === 'email' && data[v.name] !== '') {
-              var patt = (v.property.regEx === '') ? new RegExp('[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}$') : new RegExp(v.property.regEx)
-              var res = patt.test(data[v.name])
-              if (!res) {
+            } else if (Array.isArray(data[v.name]) && data[v.name].length === 0) {
+              self.validErr.push({name: v.name, errmsg: 'File is required.'})
+              self.validFlag = false
+            } else if (v.type === 'text') {
+              if (v.property.regEx !== '') {
+                var patt0 = v.property.regEx
+                var res0 = patt0.test(data[v.name])
+                if (!res0) {
+                  self.validErr.push({name: v.name, errmsg: 'Invalid Email.'})
+                  self.validFlag = false
+                }
+              } else if (v.property.max !== 0) {
+                if (data[v.name].length > v.property.max) {
+                  self.validErr.push({name: v.name, errmsg: 'max ' + v.property.max + ' characters allowed.'})
+                  self.validFlag = false
+                }
+              } else if (v.property.allowedValue.length > 0) {
+                let exist = _.indexOf(v.property.allowedValue, data[v.name])
+                if (exist === -1) {
+                  self.validErr.push({name: v.name, errmsg: 'Not Allowed Email, Please select allow one.'})
+                  self.validFlag = false
+                }
+              }
+            } else if (v.type === 'email' && data[v.name] !== '') {
+              var patt1 = (v.property.regEx === '') ? new RegExp('[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}$') : new RegExp(v.property.regEx)
+              var res1 = patt1.test(data[v.name])
+              if (!res1) {
                 self.validErr.push({name: v.name, errmsg: 'Invalid Email.'})
                 self.validFlag = false
+              } else if (v.property.allowedValue.length > 0) {
+                let exist = _.indexOf(v.property.allowedValue, data[v.name])
+                if (exist === -1) {
+                  self.validErr.push({name: v.name, errmsg: 'Not Allowed Email, Please select allow one.'})
+                  self.validFlag = false
+                }
               }
-            }
-            if (v.type === 'phone' && data[v.name] !== '') {
-              patt = new RegExp('^\\(?([0-9]{3})\\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$')
-              res = patt.test(data[v.name])
-              if (!res) {
+            } else if (v.type === 'phone') {
+              var patt2 = (v.property.regEx === '') ? new RegExp('^\\(?([0-9]{3})\\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$') : new RegExp(v.property.regEx)
+              var res2 = patt2.test(data[v.name])
+              if (!res2) {
                 self.validErr.push({name: v.name, errmsg: 'Invalid Phone.'})
                 self.validFlag = false
+              } else if (v.property.allowedValue.length > 0) {
+                let exist = _.indexOf(v.property.allowedValue, data[v.name])
+                if (exist === -1) {
+                  self.validErr.push({name: v.name, errmsg: 'Not Allowed Phone, Please select allow one.'})
+                  self.validFlag = false
+                }
               }
-            }
-            if (v.type === 'number') {
-              patt = new RegExp('^[0-9]+$')
-              res = patt.test(data[v.name])
-              // alert(data[v.name])
-              if (!res) {
-                self.validErr.push({name: v.name, errmsg: 'Invalid Number.'})
-                self.validFlag = false
+            } else if (v.type === 'number') {
+              if (v.property.allowedValue.length > 0) {
+                let exist = _.indexOf(v.property.allowedValue, data[v.name])
+                if (exist === -1) {
+                  self.validErr.push({name: v.name, errmsg: 'Not Allowed Number, Please select allow one.'})
+                  self.validFlag = false
+                }
+              }
+            } else if (v.type === 'date') {
+              if (v.property.mindate !== '' && v.property.maxdate !== '') {
+                if (data[v.name] < v.property.mindate && data[v.name] > v.property.maxdate) {
+                  self.validErr.push({name: v.name, errmsg: 'Date must in between ' + v.property.mindate + ' and ' + v.property.maxdate})
+                  self.validFlag = false
+                }
+              } else if (v.property.mindate !== '') {
+                if (data[v.name] < v.property.mindate) {
+                  self.validErr.push({name: v.name, errmsg: 'Date must be greater than or equal ' + v.property.mindate + '.'})
+                  self.validFlag = false
+                }
+              } else if (v.property.maxdate !== '') {
+                if (data[v.name] > v.property.maxdate) {
+                  self.validErr.push({name: v.name, errmsg: 'Date must be less than or equal ' + v.property.mindate + '.'})
+                  self.validFlag = false
+                }
               }
             }
           }

@@ -551,13 +551,6 @@ export default {
         top: 0;
         left: 0;
     }
-    .ivu-table th {
-      height: 44px;
-      white-space: nowrap;
-      overflow: hidden;
-      background-color: #394263;
-      color: #fff;
-    }
     /*.ivu-table td:hover {
       background-color: #eee;
     }*/

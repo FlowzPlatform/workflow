@@ -1,26 +1,43 @@
 {
-  "mongo": {
-    "dbinstance": []
-  },
-  "rethink": {
-    "dbinstance": [{
-      "isenable": true,
-      "connection_name": "Rethink",
-      "host": "47.254.27.134",
-      "port": "28015",
-      "dbname": "FlowzEngine",
-      "username": "",
-      "password": "",
-      "upldIcn": "",
-      "notes": "By default",
-      "isdefault": true,
-      "id": "f613518b-200b-46ca-bebd-90db7d45c553"
-    }]
-  },
-  "elastic": {
-    "dbinstance": []
-  },
-  "nedb": {
-    "dbinstance": []
-  }
+    "mongo": {
+        "dbinstance": [
+            {
+                "isenable": true,
+                "connection_name": "FlowzEngineTest",
+                "host": "ds245218.mlab.com",
+                "port": "45218",
+                "dbname": "flowztest",
+                "username": "nik",
+                "password": "01d8c5c9ecb5",
+                "upldIcn": "",
+                "rdoCrt": "",
+                "notes": "",
+                "isdefault": true,
+                "id": "9750939e-3698-43da-8163-cb41bd65c478"
+            },
+            {
+                "isenable": true,
+                "connection_name": "Flowenginwork247",
+                "host": "ds247178.mlab.com",
+                "port": "47178",
+                "dbname": "work247",
+                "username": "officebrain5510",
+                "password": "01d8c5c9ecb5",
+                "upldIcn": "",
+                "rdoCrt": "",
+                "notes": "",
+                "isdefault": false,
+                "id": "1aad0216-67f5-4803-3864-22dd01fa2ad7"
+            }
+        ]
+    },
+    "rethink": {
+        "dbinstance": []
+    },
+    "elastic": {
+        "dbinstance": []
+    },
+    "nedb": {
+        "dbinstance": []
+    }
 }
