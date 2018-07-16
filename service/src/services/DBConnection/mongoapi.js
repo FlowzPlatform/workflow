@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var MongoClient = require('mongodb').MongoClient;
 let _ = require('lodash');
 var db1 = require('./db');
 let async = require('asyncawait/async');
@@ -7,32 +8,32 @@ var endecrypt = require('../encryption/security')
 var db = [];
 var defaultDb = []
 
-db1.mongo.dbinstance.forEach(function (instance, inx) {
-  if (instance.isenable) {
-    // console.log('instance', instance)
-    var pass = endecrypt.decrypt(instance.password)
-      // console.log(pass)
-    var mongoDB = 'mongodb://' + instance.username + ':' + pass + '@' + instance.host + ':' + instance.port + '/' + instance.dbname;
-    // var mongoDB = 'mongodb://'+instance.host+':'+instance.port+'/'+((instance.dbname == '') ? databasename : instance.dbname);
-    console.log('database::::', mongoDB);
-    var connection = mongoose.createConnection(mongoDB);
-    connection.on('error', console.error.bind(console, 'MongoDB connection error:'));
+// db1.mongo.dbinstance.forEach(function (instance, inx) {
+//   if (instance.isenable) {
+//     // console.log('instance', instance)
+//     var pass = endecrypt.decrypt(instance.password)
+//       // console.log(pass)
+//     var mongoDB = 'mongodb://' + instance.username + ':' + pass + '@' + instance.host + ':' + instance.port + '/' + instance.dbname;
+//     // var mongoDB = 'mongodb://'+instance.host+':'+instance.port+'/'+((instance.dbname == '') ? databasename : instance.dbname);
+//     console.log('database::::', mongoDB);
+//     var connection = mongoose.createConnection(mongoDB);
+//     connection.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
-    db.push({ id: instance.id, conn: connection })
-  }
-  if (instance.isdefault) {
-    // console.log('instance', instance)
-    var pass = endecrypt.decrypt(instance.password)
-      // console.log(pass)
-    var mongoDB = 'mongodb://' + instance.username + ':' + pass + '@' + instance.host + ':' + instance.port + '/' + instance.dbname;
-    // var mongoDB = 'mongodb://'+instance.host+':'+instance.port+'/'+((instance.dbname == '') ? databasename : instance.dbname);
-    console.log('database::::', mongoDB);
-    var connection = mongoose.createConnection(mongoDB);
-    connection.on('error', console.error.bind(console, 'MongoDB connection error:'));
+//     db.push({ id: instance.id, conn: connection })
+//   }
+//   if (instance.isdefault) {
+//     // console.log('instance', instance)
+//     var pass = endecrypt.decrypt(instance.password)
+//       // console.log(pass)
+//     var mongoDB = 'mongodb://' + instance.username + ':' + pass + '@' + instance.host + ':' + instance.port + '/' + instance.dbname;
+//     // var mongoDB = 'mongodb://'+instance.host+':'+instance.port+'/'+((instance.dbname == '') ? databasename : instance.dbname);
+//     console.log('database::::', mongoDB);
+//     var connection = mongoose.createConnection(mongoDB);
+//     connection.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
-    defaultDb.push({ id: instance.id, conn: connection })
-  }
-})
+//     defaultDb.push({ id: instance.id, conn: connection })
+//   }
+// })
 
 // db1.mongo.username+':'+db1.mongo.password+'@'+
 // var mongoDB = 'mongodb://'+db1.mongo.host+':'+db1.mongo.port+'/'+((db1.mongo.dbname == '') ? databasename : db1.mongo.dbname);
@@ -54,6 +55,19 @@ db1.mongo.dbinstance.forEach(function (instance, inx) {
 // db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 // console.log('Success!!!!!!!!!!!!! Mongo');
 
+let getConnection = async (function(data) {
+  // console.log(data)
+  let uri = 'mongodb://' + ((data.username != '' ? data.username + ':' + data.password + '@' : '')) + data.host + ':' + data.port + '/' + data.dbname; 
+  // console.log(uri)
+  let _data = await (MongoClient.connect(uri).then(res=> {
+    return res
+  }).catch(err=> {
+    let obj = {iserror: true, msg: err} 
+    return obj
+  }))
+  return _data
+})
+
 module.exports = {
   generateInstanceTable: async(function (ins_id, title){
     console.log('Mongo generate instance collection..........', ins_id, title);
@@ -69,9 +83,166 @@ module.exports = {
   }),
 
   choose: async(function () {
-    console.log('===================MONGODB=================');
+    console.log('=================== MONGODB =================');
   }),
+
   //get methods
+  
+
+  getflowsInstance: async(function (collName, inst_id) {
+    console.log('mongo get flowsInstance');
+    // var flowsInstance = async(function (collName, inst_id) {
+      for (let [i, inst] of db.entries()) {
+        if ( inst.id == inst_id ) {
+          var r = await (inst.conn.collection(collName).find().toArray())
+          // console.log('mongo r', r)
+          return r
+        }
+      }
+      // var result = []
+      // _.forEach(db, function (dbinstance) {
+      //   var r = await (dbinstance.conn.collection('flows-instance').find().toArray())
+      //   _.forEach(r, function (instance) {
+      //     result.push(instance)
+      //   })
+      // })
+      // return result;
+    // });
+    // var res = await (flowsInstance(collName, inst_id))
+    // return res;
+    // var flowsInstance = await (db.collection('flows-instance').find().toArray());
+    // // console.log('flowsInstance',flowsInstance);
+    // return flowsInstance;
+  }),
+
+  getThisflowsInstance: async(function (id, collName, conndata) {
+    console.log('mongo get flowsInstanceCurrent');
+    var id = new mongoose.Types.ObjectId(id);
+    // for (let [i, inst] of db.entries()) {
+    //     if ( inst.id == inst_id ) {
+    //       var r = await (inst.conn.collection(collName).find({_id: id}).toArray())
+    //       // console.log('mongo r', r)
+    //       return r[0]
+    //       // for(let [inx, obj] of r.entries()) {
+    //       //   if (obj._id == id) {
+    //       //     return obj
+    //       //   }
+    //       // }
+    //     }
+    // }
+    var conn = await( getConnection(conndata).then(res => {
+      return res
+    }).catch(err => {
+      return {iserror: true, msg: err}
+    }))
+    if (conn.hasOwnProperty('iserror') && conn.iserror) {
+      return conn
+    } else {
+      var schema = await (conn.collection(collName).find({_id: id}).toArray());
+      // console.log('Generated Id:', schema.ops[0]._id)
+      conn.close()
+      return schema[0];
+    }
+    // if (id.length != 24) {
+    //   return [];
+    // } else {
+    //   var id = new mongoose.Types.ObjectId(id);
+    //   var flowsInstance = async(function () {
+    //     var result = []
+    //     _.forEach(db, function (dbinstance) {
+    //       var r = await (dbinstance.conn.collection('flows-instance').find({ _id: id }).toArray())
+    //       _.forEach(r, function (instance) {
+    //         result.push(instance)
+    //       })
+    //     })
+    //     return result;
+    //   });
+    //   var res = await (flowsInstance())
+    //   return res;
+    // }
+    // var id = new mongoose.Types.ObjectId(id);
+    // var flowsInstance = await (db.collection('flows-instance').find({ _id: id }).toArray());
+    // // console.log('flowsInstance',flowsInstance);
+    // return flowsInstance[0];
+  }),
+
+  //post methods
+  
+  postflowsInstance: async(function (data, conndata, collName) {
+    console.log('...................mongo post flowsInstance...................');
+    // data.Schemaid = data._id
+    // delete data._id
+    // delete data.id
+    // console.log('guid', data.database[1])
+    // console.log('dbid', dbid)
+    // var selectedDB = _.find(db, async(function(d){
+    //     return d.id == dbid
+    //   }))
+    // var selectedDB;
+    // for(let i = 0; i < db.length; i++ ){
+    //   // console.log('connid', db[i].id)
+    //   if(db[i].id == dbid) {
+    //     selectedDB = db[i]
+    //   } 
+    // }
+    // console.log('selectedDB', selectedDB)
+    var conn = await( getConnection(conndata).then(res => {
+      // console.log('conndata', conndata)
+      return res
+    }).catch(err => {
+      return {iserror: true, msg: err}
+    }))
+    if (conn.hasOwnProperty('iserror') && conn.iserror) {
+      return conn
+    } else {
+      var schema = await (conn.collection(collName).insert(data));
+      // console.log('Generated Id:', schema.ops[0]._id)
+      conn.close()
+      return schema.ops[0]._id;
+    }
+    // var flowsInstance = await (db.collection('flows-instance').insert(data));
+    // // var flowsInstance = await (db.collection('flows-instance').insert(data, function(err, result) {
+    // //     if (err) {
+    // //         console.log('Error!! from mongo post flowsInstance');
+    // //         return {success: false}
+    // //     } else {
+    // //         console.log('Success!! from mongo post flowsInstance');
+    // //         return {success: true}
+    // //     }
+    // // }));
+    // return flowsInstance.ops;
+  }),
+
+  //put methods
+  
+  putflowsInstance: async(function (id, data, tableName, inst_id) {
+    console.log('mongo put flowsInstance');
+    delete data._id
+    delete data.id
+    var id = new mongoose.Types.ObjectId(id);
+    // console.log('id from putflowsInstance:',id);
+    var selectedDB = _.find(db, (d) => {
+      return d.id == inst_id
+    })
+    var flowsInstance = await (selectedDB.conn.collection(tableName).updateOne({ _id: id }, { $set: data }));
+    return flowsInstance.result;
+  }),
+
+  //delete methods
+
+  deleteThisflowsInstance: async(function (id, tableName, inst_id) {
+    console.log('mongo delete this flowsInstance');
+    var id = new mongoose.Types.ObjectId(id);
+    var selectedDB = _.find(db, (d) => {
+      return d.id == inst_id
+    })
+    var flowsInstance = await (selectedDB.conn.collection(tableName).deleteOne({ _id: id }));
+    return flowsInstance;
+  }),
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
   getSchemaName: async(function (name) {
     console.log('mongo get SchemaName.............................');
     var schemadata = async(function () {
@@ -213,6 +384,7 @@ module.exports = {
       // console.log('schemadata getSchema',res);
     return res;
   }),
+
   getThisSchema: async(function (id) {
     console.log('mongo get SchemaCurrent');
     if (id.length != 24) {
@@ -238,70 +410,6 @@ module.exports = {
       return res;
     }
   }),
-  getflowsInstance: async(function (collName, inst_id) {
-    console.log('mongo get flowsInstance');
-    // var flowsInstance = async(function (collName, inst_id) {
-      for (let [i, inst] of db.entries()) {
-        if ( inst.id == inst_id ) {
-          var r = await (inst.conn.collection(collName).find().toArray())
-          // console.log('mongo r', r)
-          return r
-        }
-      }
-      // var result = []
-      // _.forEach(db, function (dbinstance) {
-      //   var r = await (dbinstance.conn.collection('flows-instance').find().toArray())
-      //   _.forEach(r, function (instance) {
-      //     result.push(instance)
-      //   })
-      // })
-      // return result;
-    // });
-    // var res = await (flowsInstance(collName, inst_id))
-    // return res;
-    // var flowsInstance = await (db.collection('flows-instance').find().toArray());
-    // // console.log('flowsInstance',flowsInstance);
-    // return flowsInstance;
-  }),
-  getThisflowsInstance: async(function (id, collName, inst_id) {
-    console.log('mongo get flowsInstanceCurrent');
-    var id = new mongoose.Types.ObjectId(id);
-    for (let [i, inst] of db.entries()) {
-        if ( inst.id == inst_id ) {
-          var r = await (inst.conn.collection(collName).find({_id: id}).toArray())
-          // console.log('mongo r', r)
-          return r[0]
-          // for(let [inx, obj] of r.entries()) {
-          //   if (obj._id == id) {
-          //     return obj
-          //   }
-          // }
-        }
-      }
-    // if (id.length != 24) {
-    //   return [];
-    // } else {
-    //   var id = new mongoose.Types.ObjectId(id);
-    //   var flowsInstance = async(function () {
-    //     var result = []
-    //     _.forEach(db, function (dbinstance) {
-    //       var r = await (dbinstance.conn.collection('flows-instance').find({ _id: id }).toArray())
-    //       _.forEach(r, function (instance) {
-    //         result.push(instance)
-    //       })
-    //     })
-    //     return result;
-    //   });
-    //   var res = await (flowsInstance())
-    //   return res;
-    // }
-    // var id = new mongoose.Types.ObjectId(id);
-    // var flowsInstance = await (db.collection('flows-instance').find({ _id: id }).toArray());
-    // // console.log('flowsInstance',flowsInstance);
-    // return flowsInstance[0];
-  }),
-
-  //post methods
   postSchema: async(function (data) {
     console.log('mongo post Schemax');
     // console.log('guid', data.database[1])
@@ -313,41 +421,6 @@ module.exports = {
     // console.log(schema)
     return schema.ops[0]._id;
   }),
-  postflowsInstance: async(function (data, dbid, collName) {
-    console.log('...................mongo post flowsInstance...................');
-    // data.Schemaid = data._id
-    // delete data._id
-    // delete data.id
-    // console.log('guid', data.database[1])
-    console.log('dbid', dbid)
-    // var selectedDB = _.find(db, async(function(d){
-    //     return d.id == dbid
-    //   }))
-    var selectedDB;
-    for(let i = 0; i < db.length; i++ ){
-      // console.log('connid', db[i].id)
-      if(db[i].id == dbid) {
-        selectedDB = db[i]
-      } 
-    }
-    // console.log('selectedDB', selectedDB)
-    var schema = await (selectedDB.conn.collection(collName).insert(data));
-    console.log('Generated Id:', schema.ops[0]._id)
-    return schema.ops[0]._id;
-    // var flowsInstance = await (db.collection('flows-instance').insert(data));
-    // // var flowsInstance = await (db.collection('flows-instance').insert(data, function(err, result) {
-    // //     if (err) {
-    // //         console.log('Error!! from mongo post flowsInstance');
-    // //         return {success: false}
-    // //     } else {
-    // //         console.log('Success!! from mongo post flowsInstance');
-    // //         return {success: true}
-    // //     }
-    // // }));
-    // return flowsInstance.ops;
-  }),
-
-  //put methods
   putSchema: async(function (data, id) {
     console.log('mongo put Schema');
     // delete data._id
@@ -359,40 +432,6 @@ module.exports = {
     var schema = await (defaultDb[0].conn.collection('schema').updateOne({ _id: id }, { $set: data }));
     return schema;
   }),
-  putflowsInstance: async(function (id, data, tableName, inst_id) {
-    console.log('mongo put flowsInstance');
-    delete data._id
-    delete data.id
-    var id = new mongoose.Types.ObjectId(id);
-    // console.log('id from putflowsInstance:',id);
-    var selectedDB = _.find(db, (d) => {
-      return d.id == inst_id
-    })
-    var flowsInstance = await (selectedDB.conn.collection(tableName).updateOne({ _id: id }, { $set: data }));
-    return flowsInstance.result;
-  }),
-
-  //delete methods
-  // deleteSchema: async(function() {
-  //     // var _data = JSON.parse(data);
-  //     // console.log('mongo delete Schema');
-  //  // var id = new mongoose.Types.ObjectId(id);
-  //  // console.log('id from putSchema:',id);
-  //  // db.collection('schema').updateOne({ _id: id }, { $set: _data }, function(err, result) {
-  //  //     if (err) {
-  //  //         return {success: false}
-  //  //     } else {
-  //  //         return {success: true}
-  //  //     }
-  //  // });
-  //  db.collection('schema').drop(function(err, result) {
-  //   if (err) {
-  //          return {success: false}
-  //      } else {
-  //          return {success: true}
-  //      }
-  //  });
-  // })
   deleteThisSchema: async(function (id, type) {
     console.log('mongo delete schema');
     if (id.length != 24) {
@@ -422,15 +461,5 @@ module.exports = {
         }
     }
     // // var schema = await (db.collection('schema').deleteOne({ _id: id }));
-  }),
-  deleteThisflowsInstance: async(function (id, tableName, inst_id) {
-    console.log('mongo delete this flowsInstance');
-    var id = new mongoose.Types.ObjectId(id);
-    var selectedDB = _.find(db, (d) => {
-      return d.id == inst_id
-    })
-    var flowsInstance = await (selectedDB.conn.collection(tableName).deleteOne({ _id: id }));
-    return flowsInstance;
   })
-
 }

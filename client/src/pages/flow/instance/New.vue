@@ -109,7 +109,7 @@
                     <div style="padding:10px;">
                       <Tabs>
                         <TabPane label="Form Data" name="formtab">
-                          <template v-if="selectedProcess.inputProperty[0].createTemplate && getCurrentStatus(selectedLogs) === 'inputRequired'">
+                          <template v-if="selectedProcess.inputProperty && selectedProcess.inputProperty.length > 0 && selectedProcess.inputProperty[0].createTemplate && getCurrentStatus(selectedLogs) === 'inputRequired'">
                             <schemaTemplate :row="selectedProcess" :html="html" :log="lastLog"></schemaTemplate>
                           <!-- {{selectedProcess.inputProperty[0].createTemplate}} -->
                           </template>
@@ -117,7 +117,7 @@
                             <expandRow :row="selectedProcess" :lastLog="getLastLog(selectedLogs)"></expandRow>
                           </template>
                           <template v-else>
-                            <Table stripe :columns="getInputColumns(selectedProcess.inputProperty[0].entityschema.entity)" :data="getLastLog(selectedLogs).input" size="small"></Table>
+                            <Table stripe :columns="getInputColumns()" :data="getLastLog(selectedLogs).input" size="small"></Table>
                           </template>
                         </TabPane>
                         <TabPane label="Logs"  name="logtab">
@@ -198,13 +198,16 @@ export default {
   },
   asyncComputed: {
     async html () {
-      if (this.selectedProcess.inputProperty && this.selectedProcess.inputProperty[0].createTemplate) {
+      if (this.selectedProcess.inputProperty && this.selectedProcess.inputProperty.length > 0 && this.selectedProcess.inputProperty[0].createTemplate) {
         let index = await _.findIndex(this.selectedProcess.inputProperty[0].entityschema.createTemplate, ['filename', this.selectedProcess.inputProperty[0].createTemplate])
-        var url = this.selectedProcess.inputProperty[0].entityschema.createTemplate[index].url
-        url = url.substr(0, 4) + url.substr(5)
+        // var url = this.selectedProcess.inputProperty[0].entityschema.createTemplate[index].url
+        // url = url.substr(0, 4) + url.substr(5)
+        var temp = this.selectedProcess.inputProperty[0].entityschema.createTemplate[index]
+          // console.log('this.selectedProcess.inputProperty[0].entityschema.createTemplate[index]', this.selectedProcess.inputProperty[0].entityschema.createTemplate[index])
+        return 'http://' + this.$store.state.user._id + '.' + temp.url[0] + '.' + config.grapesDomain + '/' + temp.url[1] + '.html'
         // var promise = await axios.get(url)
         // return promise.data
-        return url
+        // return url
       }
     }
   },
@@ -310,6 +313,7 @@ export default {
             _.forEach(self.flowInstance.processList, function (process) {
               var lastProcess = process.log[_.findLastKey(process.log)]
               if (lastProcess) {
+                console.log('>>>>>>>>>>>>>>>>>>>>......', process.id, self.getCurrentStatus(lastProcess))
                 viewer.get('canvas').addMarker(process.id, self.getCurrentStatus(lastProcess))
               }
             })
@@ -345,13 +349,19 @@ export default {
       return _.size(log)
     },
     getInputColumns (entity) {
-      return _.map(entity, m => {
-        return {title: m.name, key: m.name}
-      })
+      let self = this
+      if (this.selectedProcess.inputProperty && this.selectedProcess.inputProperty.length > 0 && this.selectedProcess.inputProperty[0].entityschema.entity) {
+        return _.map(self.selectedProcess.inputProperty[0].entityschema.entity, m => {
+          return {title: m.name, key: m.name}
+        })
+      } else {
+        return _.map(this.getLastLog(this.selectedLogs).input[0], (m, k) => {
+          return {title: k, key: k}
+        })
+      }
     },
     async handleProcessClick (item, log) {
       this.showProp = true
-      console.log('item ', item)
       this.selectedProcess = item
       this.selectedLogs = log
       this.lastLog = this.getLastLog(this.selectedLogs)
@@ -398,7 +408,7 @@ export default {
     }
 
     .running {
-      color: #d5d835b5 !important;
+      color: #d5d835 !important;
     }
 
 

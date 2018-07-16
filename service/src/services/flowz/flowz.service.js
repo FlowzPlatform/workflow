@@ -2,7 +2,7 @@
 const createService = require('feathers-rethinkdb');
 const hooks = require('./flowz.hooks');
 const filters = require('./flowz.filters');
-module.exports = function() {
+module.exports = function () {
   const app = this;
   const Model = app.get('rethinkdbClient');
   const paginate = app.get('paginate');
@@ -19,4 +19,20 @@ module.exports = function() {
   if (service.filter) {
     service.filter(filters);
   }
+  service.hooks({
+    before: {
+      find(context) {
+        if (context.params.query.$useremail) {
+          let useremail = context.params.query.$useremail;
+          delete context.params.query.$useremail;
+          const query = this.createQuery(context.params.query);
+          context.params.rethinkdb = query.filter((row) => {
+            return row('allowedusers').setIntersection(
+              [useremail]
+            ).count().ge(1);
+          });
+        }
+      }
+    }
+  });
 };
