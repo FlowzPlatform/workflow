@@ -37,7 +37,7 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
         if (numberOfExternalSchema != 0 && !externalCheck) {
 
           let sourceCounts = targetJob.data.sourceCount ? Object.values(targetJob.data.sourceCount) : []
-          
+
           if (sourceCounts.length < numberOfExternalSchema || (capacity && Math.min(...sourceCounts) != capacity)) {
             await this.updateProcess(targetJob, 'created')
             await this.updateLog(targetJob, 'created', false)
@@ -568,6 +568,7 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
   this.constructor.prototype.newInstance = async function (flowInstance, fId, next) {
     return new Promise (async (resolve, reject) => {
       try{
+        
         for (let i=0; i<flowInstance.start_states.length; i++) {
 
           let startStateId = flowInstance.start_states[i]
