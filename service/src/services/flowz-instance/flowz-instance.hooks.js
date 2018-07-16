@@ -96,6 +96,7 @@ var handleMappingRequireStatus = async(function (data, fid) {
 })
 
 function aftercreateInstance(hook) {
+  console.log("=============111111=========");
   let id = hook.data.id;
   if (hook.data.id != undefined) {
     const Queue = require('rethinkdb-job-queue')
