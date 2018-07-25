@@ -3,7 +3,7 @@ let model = 'schemamapping'
 export default {
   get: (id) => {
     if (id === undefined) {
-      return api.request('get', '/' + model)
+      return api.request('get', '/' + model + '/?$paginate=false')
     } else {
       return api.request('get', '/' + model + '/' + id)
     }
