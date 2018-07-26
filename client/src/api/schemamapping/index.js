@@ -8,6 +8,9 @@ export default {
       return api.request('get', '/' + model + '/' + id)
     }
   },
+  getAll: () => {
+    return api.request('get', '/' + model + '?$paginate=false')
+  },
   post: (data) => {
     return api.request('post', '/' + model, data)
     .then(response => {

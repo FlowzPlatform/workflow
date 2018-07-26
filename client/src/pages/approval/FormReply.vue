@@ -157,6 +157,7 @@ export default {
       // handle Listener Event
       messageEvent = function (event) {
         if (_.isArray(event.data)) {
+          console.log('Received...', event.data)
           self.handleSubmit(event.data)
         }
         window.removeEventListener('message', messageEvent)
@@ -202,7 +203,7 @@ export default {
       if (maindata.length > 0) {
         Instance.post(dataObject1)
         .then(response => {
-          // this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
+          this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
         })
         .catch(error => {
           console.log('Error', error)

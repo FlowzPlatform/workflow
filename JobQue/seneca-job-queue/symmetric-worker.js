@@ -194,7 +194,7 @@ async function getSummary() {
   } catch (e) {
     pino(PINO).error(e)
   }
-  setTimeout(() => { getSummary() }, 2000)
+  setTimeout(() => { getSummary() }, 5000)
 }
 
 async function saveToRethinkDB(table, data) {
