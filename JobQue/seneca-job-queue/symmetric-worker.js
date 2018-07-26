@@ -169,7 +169,11 @@ async function getSummary() {
         let summary = await objQ.summary()
         pino(PINO).info('\n' + 'job-type : ' + jobType + ' | host : ' + cOptions.host + ' | port : ' + cOptions.port + ' | db : ' + cOptions.db + '\n\x1b[33m' + JSON.stringify(summary) + '\x1b[0m' + '\n')
 
-        let sWaiting = await getCount(cOptions, jobType)
+        let sWaiting = 0
+        if(summary.waiting > 0) {
+          console.log("=================dsdssd=========");
+          sWaiting = await getCount(cOptions, jobType)
+        }
           // let sCreated = summary.created ? summary.created : 0
           // let sIR = summary.inputRequired ? summary.inputRequired : 0
           // let sMR = summary.mappingRequired ? summary.mappingRequired : 0
@@ -190,7 +194,7 @@ async function getSummary() {
   } catch (e) {
     pino(PINO).error(e)
   }
-  setTimeout(() => { getSummary() }, 10000)
+  setTimeout(() => { getSummary() }, 2000)
 }
 
 async function saveToRethinkDB(table, data) {
