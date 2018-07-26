@@ -302,7 +302,7 @@ var getSchemaDataByName = async(function (title) {
 
 var getallSchemaData = async(function () {
   var res = await (axios.get('http://' + config.get('host') + ':' + config.get('port') + '/schema?$paginate=false'))
-  return res.data.data
+  return res.data
 })
 
 var giveDatabase = async(function (schemaid) {
