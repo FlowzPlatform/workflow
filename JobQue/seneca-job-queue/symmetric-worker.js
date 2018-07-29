@@ -8,12 +8,11 @@ const cxnOptions = config.cxnOptions
 const symmetricWorker = config.symmetricWorker
 const rethinkdbdash = require('rethinkdbdash')
 const rdash = rethinkdbdash(cxnOptions)
-const pino = require('pino')
+const pino = require('pino')(config.pino)
 const cors = require('cors')
 const waitingThreshold = config.waitingThreshold
 const increaseWorker = config.increaseWorker
 const maxWorker = config.maxWorker
-const PINO = config.pino
 const r = require('rethinkdb')
 let wCount = 1
 let registeredJobTypeQueueObj = {} // register job type queue object
@@ -22,7 +21,7 @@ var connected = false
 
 checkTableExistsOrNot(symmetricWorker.table)
   .then(res => {
-    pino(PINO).info(res)
+    pino.info(res)
     connected = true
   })
 
@@ -30,7 +29,7 @@ app.use(cors())
 process.setMaxListeners(0)
 let socketObj = io.of('/execute-worker')
 socketObj.on('connection', function (socket) {
-  pino(PINO).info('socket connected')
+  pino.info('socket connected')
 })
 
 server.listen(symmetricWorker.port)
@@ -155,6 +154,8 @@ function getDataJobType(table, jobType) {
   })
 }
 
+let wokerFlag = {}
+
 async function getSummary() {
   try {
     for (let jKey in registeredJobTypeQueueObj) {
@@ -167,11 +168,10 @@ async function getSummary() {
 
         let concurrency = objQ.concurrency
         let summary = await objQ.summary()
-        pino(PINO).info('\n' + 'job-type : ' + jobType + ' | host : ' + cOptions.host + ' | port : ' + cOptions.port + ' | db : ' + cOptions.db + '\n\x1b[33m' + JSON.stringify(summary) + '\x1b[0m' + '\n')
+        // pino.info('\n' + 'job-type : ' + jobType + ' | host : ' + cOptions.host + ' | port : ' + cOptions.port + ' | db : ' + cOptions.db + '\n\x1b[33m' + JSON.stringify(summary) + '\x1b[0m' + '\n')
 
         let sWaiting = 0
         if(summary.waiting > 0) {
-          console.log("=================dsdssd=========");
           sWaiting = await getCount(cOptions, jobType)
         }
           // let sCreated = summary.created ? summary.created : 0
@@ -179,22 +179,22 @@ async function getSummary() {
           // let sMR = summary.mappingRequired ? summary.mappingRequired : 0
           // let denominator = (summary.total - (summary.active + summary.completed + summary.cancelled + summary.failed + summary.terminated + sCreated + sIR + sMR))
           // let waitingRatio = denominator != 0 ? (summary.waiting - sWaiting) / denominator : 0
-          // pino(PINO).warn('waiting-ratio : '+waitingRatio)
+          // pino.warn('waiting-ratio : '+waitingRatio)
         let waitingJobs = summary.waiting - sWaiting
         if (waitingJobs >= 1) {
-          pino(PINO).info(jobType + " worker required")
+          pino.info(jobType + " worker required")
           socketObj.emit('worker', { 'jobType': jobType, 'options': registeredJobTypeQueueObj[jKey].options })
         }
       } catch (err) {
         deadQueueObj[jKey] = registeredJobTypeQueueObj[jKey]
         delete registeredJobTypeQueueObj[jKey]
-        pino(PINO).error('key : ' + jKey + ' connection error')
+        pino.error('key : ' + jKey + ' connection error')
       }
     }
   } catch (e) {
-    pino(PINO).error(e)
+    pino.error(e)
   }
-  setTimeout(() => { getSummary() }, 5000)
+  setTimeout(() => { getSummary() }, 2000)
 }
 
 async function saveToRethinkDB(table, data) {
@@ -209,7 +209,7 @@ async function saveToRethinkDB(table, data) {
     }
     saveData.run()
       .then(function (result) {
-        pino(PINO).info('data inserted')
+        pino.info('data inserted')
         resolve(result)
       })
       .error(function (err) {
@@ -260,7 +260,7 @@ app.delete('/register-jobtype/:jobtype', async function (req, res) {
       res.send('JobType not found')
     }
   } catch (e) {
-    pino(PINO).error(e)
+    pino.error(e)
     return res.status(400).send('JobType not found')
   }
 })
@@ -274,7 +274,7 @@ app.post('/register-jobtype/:jobtype', async function (req, res) {
       .then(result => { res.send(result) })
       .catch(err => { res.send(err) })
   } catch (e) {
-    pino(PINO).error(e)
+    pino.error(e)
     return res.status(400).send('JobType not registered')
   }
 })

@@ -18,6 +18,7 @@
     "child_process": "^1.0.2",
     "chokidar": "^1.7.0",
     "cors": "^2.8.4",
+    "emailjs": "^2.2.0",
     "express": "^4.16.2",
     "express-fileupload": "^0.3.0",
     "fs": "0.0.1-security",
