@@ -66,7 +66,7 @@
     "rethinkdb-job-queue": "^3.1.6",
     "rethinkdbdash": "^2.3.31",
     "serve-favicon": "^2.4.4",
-    "uws": "^10.148.1",
+    "uws": "10.148.1",
     "winston": "^2.3.1"
   },
   "devDependencies": {
