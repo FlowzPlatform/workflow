@@ -52,29 +52,30 @@ module.exports = function (options) {
   const func = new scheduler_functions(options, PINO_DB_OPTION, PINO_C_OPTION)
 
   q.process(async(job, next) => {
+
     try {
 
       const fId = job.data.fId
-      const flowInstance = await func.getFlowInstance(fId) //get flow instance from db
+      const flowInstance = await func.getFlowInstance(fId).catch(err => {throw err}); //get flow instance from db
         // pino(PINO_C_OPTION).info(job.data)
       if (job.data.processNotification) {
         //the condition will be satisfied if the job is created by some process worker as a part
         //of notifying schcduler that the process completed succesfully a that particular worker
 
-        func.notificationACK(flowInstance, fId, job.data, next, cxnOptions, qOptions)
+        func.notificationACK(flowInstance, fId, job.data, next, cxnOptions, qOptions).catch(err => {throw err});
       } else if (job.data.isExternalInput) {
         //the condition will be satisfied if the job is created in
         //order to provide external input to certain process
 
-        await func.performExternalOperation(flowInstance, job.data, fId, next)
+        await func.performExternalOperation(flowInstance, job.data, fId, next).catch(err => {throw err});
       } else {
         //i.e. the job in scheduler was created as a result of a new flowz instance
-        await func.newInstance(flowInstance, fId, next)
+        await func.newInstance(flowInstance, fId, next).catch(err => {throw err});
       }
     } catch (err) {
       pino(PINO_DB_OPTION, fs.createWriteStream('./logs')).error({}, '... error in process\n' + err)
       pino(PINO_C_OPTION).error({}, '... error in process ' + err)
-      return next(err)
+      return next(new Error(err.message),null)
     }
   })
 }
