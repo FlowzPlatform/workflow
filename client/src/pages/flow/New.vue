@@ -473,8 +473,8 @@
             })
           }),
           new Promise((resolve, reject) => {
-            schemamappingModel.get().then((response) => {
-              resolve(response.data.data)
+            schemamappingModel.get(null, {$paginate: false}).then((response) => {
+              resolve(response.data)
             }).catch(error => {
               reject(error)
             })

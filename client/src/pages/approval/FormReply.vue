@@ -12,6 +12,7 @@
   <Row>
     <Col v-show="!loading" span="24">
       <div v-if="isallow">
+        {{isTemplate}}
         <div v-if="lastLog.status === 'inputRequired' && isTemplate !== undefined && isAccess">
           <iframe id="filecontainer" allowtransparency="true" frameborder="0" @load="iframeload()" :src="html"></iframe>
         </div>
@@ -156,6 +157,7 @@ export default {
       }, '*')
       // handle Listener Event
       messageEvent = function (event) {
+        console.log('event', event.data)
         if (_.isArray(event.data)) {
           self.handleSubmit(event.data)
         }

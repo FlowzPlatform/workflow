@@ -265,9 +265,9 @@ export default {
         _.forEach(self._sourceSchema.entity, function (ent) {
           if (ent.customtype) {
             var data5 = []
-            schemamapping.get()
+            schemamapping.get(null, {$paginate: false})
             .then(response => {
-              response.data.data.forEach(function (result, i) {
+              response.data.forEach(function (result, i) {
                 if (result.producer === ent.type) {
                   data5.push({value: result.id, label: result.title})
                 }
@@ -309,9 +309,9 @@ export default {
           }
           if (ent.customtype) {
             var data5 = []
-            schemamapping.get()
+            schemamapping.get(null, {$paginate: false})
             .then(response => {
-              response.data.data.forEach(function (result, i) {
+              response.data.forEach(function (result, i) {
                 if (result.producer === ent.type) {
                   data5.push({value: result.id, label: result.title})
                 }
