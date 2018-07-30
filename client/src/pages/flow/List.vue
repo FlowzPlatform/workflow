@@ -1,13 +1,18 @@
 <template>
   <div class="flow">
-    <row type="flex" justify="end">
+    <Row type="flex" justify="end">
       <Button type="primary" size="small" style="margin-bottom: 2px;" @click="addNewFlow" icon="plus"> Add</Button>
-    </row>
+    </Row>
+    <Row>
+      <Table size="small" :loading="loading" :columns="columns10" :data="flowzList" stripe></Table>
+    </Row>
+    <Row style="margin-top: 4px; float: right">
+      <Page :total="total" :current="cpage" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+    </Row>
     <!-- <div slot="content">
         <div class="schema-form ivu-table-wrapper">
             <div class="ivu-table ivu-table-border">
                 <div class="ivu-table-body"> -->
-                    <Table size="small" :loading="loading" :columns="columns10" :data="flowzList"></Table>
                     <!-- <table cellspacing="0" cellpadding="0" border="0" style="width: 100%;">
                         <thead>
                             <tr>
@@ -87,6 +92,10 @@ export default {
   data () {
     return {
       loading: true,
+      limit: 10,
+      cpage: 1,
+      skip: 0,
+      total: 0,
       flowzList: [],
       columns10: [
         {
@@ -165,7 +174,7 @@ export default {
                 },
                 on: {
                   click: () => {
-                    this.deleteFlow(this.flowzList[params.index].id)
+                    this.deleteFlow(this.flowzList[params.index].id, params.index)
                   }
                 }
               }, '')
@@ -194,20 +203,21 @@ export default {
     }
   },
   mounted () {
-    flowz.get()
-    .then(response => {
-      this.flowzList = response.data.data
-      this.loading = false
-      // console.log('this.flowzList', this.flowzList)
-    })
-    .catch(error => {
-      console.log(error)
-    })
+    // flowz.get()
+    // .then(response => {
+    //   // console.log('response', response)
+    //   this.flowzList = response.data.data
+    //   this.loading = false
+    //   // console.log('this.flowzList', this.flowzList)
+    // })
+    // .catch(error => {
+    //   console.log(error)
+    // })
+    this.init()
   },
   feathers: {
     'flowz-instance': {
       created (data) { // update status using socket
-        console.log('New Data', data)
         flowz.get()
         .then(response => {
           this.flowzList = response.data.data
@@ -219,9 +229,37 @@ export default {
     }
   },
   methods: {
+    handlePage (page) {
+      this.cpage = page
+      this.skip = (page * this.limit) - this.limit
+      this.init()
+    },
+    handlePagesize (size) {
+      this.limit = size
+      this.skip = 0
+      this.init()
+    },
+    init () {
+      var string = '?$skip=' + this.skip + '&$limit=' + this.limit
+      flowz.getCustom(string)
+      .then(response => {
+        // console.log('response', response)
+        this.total = response.data.total
+        this.flowzList = response.data.data
+        this.loading = false
+        // console.log('this.flowzList', this.flowzList)
+      })
+      .catch(error => {
+        this.loading = false
+        this.$Notice({duration: '3', title: 'Network Error', desc: ''})
+        console.log(error)
+      })
+    },
     async createNewInstance (index, id) {
       // let generatedJson = await this.generateJson(this.flowzList[index].xml)
       let generatedJson = this.flowzList[index].json
+      console.log('this.flowzList[index]', this.flowzList[index])
+      generatedJson.allowedusers = this.flowzList[index].allowedusers ? this.flowzList[index].allowedusers : []
       // console.log('generatedJson', JSON.stringify(generatedJson))
       // console.log('generatedJson', generatedJson)
       generatedJson.fid = id
@@ -247,7 +285,9 @@ export default {
         onOk: () => {
           flowz.delete(id)
           .then(response => {
+            // console.log('response.data', response.data)
             this.$Notice.success({title: 'Success!!', desc: 'Flowz Deleted...'})
+            console.log('inx, ', inx)
             this.flowzList.splice(inx, 1)
           })
           .catch(error => {
@@ -256,6 +296,7 @@ export default {
           })
         },
         onCancel: () => {
+          console.log('inx, ', inx)
         }
       })
     },

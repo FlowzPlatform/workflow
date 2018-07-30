@@ -4,7 +4,7 @@ import VueRouter from 'vue-router'
 import Layout from '@/layout/Master'
 import userLayout from '@/layout/user/Master'
 
-import commonLayout from '@/layout/user/Common.vue'
+// import commonLayout from '@/layout/user/Common.vue'
 // userLayout
 // import userLayout from '@/userLayout/Master'
 import UserDashboard from '@/pages/user/dashboard'
@@ -266,13 +266,13 @@ const routes = [{
 }, {
   path: '/',
   name: 'Reply',
-  component: commonLayout,
+  component: userLayout,
   children: [{
     path: '/mail/reply/:mailid/:pid/:jobid/:fiid',
     name: 'mail/reply',
     component: Reply
   }, {
-    path: '/form/reply/:pid/:fiid',
+    path: '/form/reply/:fiid',
     name: 'form/reply',
     component: FormReply
   }]

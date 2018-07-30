@@ -36,7 +36,7 @@
     data () {
     },
     created () {
-      this.$store.dispatch('getFlowzdata')
+      // this.$store.dispatch('getFlowzdata')
     },
     computed: {
       stylesPin () {

@@ -8,9 +8,13 @@ const axios = require('axios')
 module.exports = {
   before: {
     all: [],
-    find: [],
+    find: [
+      hook => beforeFind(hook)
+    ],
     get: [],
-    create: [],
+    create: [
+      hook => beforeCreate(hook)
+    ],
     update: [],
     patch: [],
     remove: []
@@ -38,6 +42,21 @@ module.exports = {
     remove: []
   }
 };
+
+let beforeCreate = function (hook) {
+  hook.data.createdOn = new Date();
+};
+
+let beforeFind = function (hook) {
+  if (hook.params.query && hook.params.query.$sort && hook.params.query.$sort.createdOn) {
+    hook.params.query.$sort.createdOn = parseInt(hook.params.query.$sort.createdOn);
+  }
+  if (hook.params.query && hook.params.query.$paginate) {
+    hook.params.paginate = hook.params.query.$paginate === 'false' || hook.params.query.$paginate === false;
+    delete hook.params.query.$paginate;
+  }
+};
+
 var updateProcesslogforMappingRequired = async(function (hook) {
   for (let [key, m] of hook.result.processList.entries()) {
     m['log'] = _.chain(hook.result.process_log).filter(f => {
@@ -77,6 +96,7 @@ var handleMappingRequireStatus = async(function (data, fid) {
 })
 
 function aftercreateInstance(hook) {
+  console.log("=============111111=========");
   let id = hook.data.id;
   if (hook.data.id != undefined) {
     const Queue = require('rethinkdb-job-queue')

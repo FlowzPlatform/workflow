@@ -37,8 +37,8 @@ export default {
     }
   },
   async created () {
-    this.fetch(this.row.inputProperty[0].entityschema._id)
-    Schema.getThis(this.row.inputProperty[0].entityschema._id).then((response) => {
+    this.fetch(this.row.inputProperty[0].entityschema.id)
+    Schema.getThis(this.row.inputProperty[0].entityschema.id).then((response) => {
       this.entitySchema = response
     })
   },
@@ -68,7 +68,7 @@ export default {
       _.forEach(log.input, function (item) {
         data.push(item)
       })
-      document.getElementById('filecontainer').contentWindow.postMessage({entity: array, formData: data}, '*')
+      document.getElementById('filecontainer').contentWindow.postMessage({entity: array, formData: data, schema: self.customSchema, configs: { accesskey: process.env.accesskey, secretkey: process.env.secretkey }}, '*')
     },
     async getCustom (id, flag) {
       let tempSchema
@@ -105,7 +105,7 @@ export default {
     },
     makeObj () {
       var obj = this.schema
-      obj.Schemaid = this.schema._id
+      obj.Schemaid = this.schema.id
       obj.data = this.inputs
       return obj
     },
@@ -383,12 +383,12 @@ export default {
     //     return true
     //   }
     // },
-    async handleSubmit (validated) {
-      let obj = await this.makeObj()
-      console.log('Submitted Data', obj.data)
-      console.log()
-      if (validated && this.inputs.length > 0) {
-        Instance.post({ instanceid: this.$route.params.id, processid: this.log.job, jobId: this.log.jobId, data: obj.data })
+    async handleSubmit (data) {
+      // let obj = await this.makeObj()
+      // console.log('Submitted Data', obj.data)
+      // console.log()
+      if (data.length > 0) {
+        Instance.post({ instanceid: this.$route.params.id, processid: this.log.job, jobId: this.log.jobId, data: data })
         .then(response => {
           this.$Notice.success({title: 'success!', desc: 'Instance Saved...'})
         })
@@ -545,17 +545,17 @@ export default {
   },
   async mounted () {
     let self = this
-    let validated
+    // let validated
 
     window.addEventListener('message', async function (event) {
       self.err = []
       if (_.isArray(event.data)) {
-        for (let j = 0; j < event.data.length; j++) {
-          validated = await self.getValidate(event.data[j])
-          event.data[j].Schemaid = self.entitySchema.data.id
-          self.inputs.push(event.data[j])
-        }
-        self.handleSubmit(validated)
+        // for (let j = 0; j < event.data.length; j++) {
+        //   validated = await self.getValidate(event.data[j])
+        //   event.data[j].Schemaid = self.entitySchema.data.id
+        //   self.inputs.push(event.data[j])
+        // }
+        self.handleSubmit(event.data)
       }
     })
   }
