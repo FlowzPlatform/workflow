@@ -265,7 +265,7 @@ export default {
         _.forEach(self._sourceSchema.entity, function (ent) {
           if (ent.customtype) {
             var data5 = []
-            schemamapping.getAll()
+            schemamapping.get(null, {$paginate: false})
             .then(response => {
               response.data.forEach(function (result, i) {
                 if (result.producer === ent.type) {
@@ -309,7 +309,7 @@ export default {
           }
           if (ent.customtype) {
             var data5 = []
-            schemamapping.getAll()
+            schemamapping.get(null, {$paginate: false})
             .then(response => {
               response.data.forEach(function (result, i) {
                 if (result.producer === ent.type) {
