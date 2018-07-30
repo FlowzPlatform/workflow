@@ -159,6 +159,7 @@ export default {
       messageEvent = function (event) {
         console.log('event', event.data)
         if (_.isArray(event.data)) {
+          console.log('Received...', event.data)
           self.handleSubmit(event.data)
         }
         window.removeEventListener('message', messageEvent)

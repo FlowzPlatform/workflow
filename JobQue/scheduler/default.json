@@ -15,7 +15,7 @@
   "scheduler_table": "scheduler",
   "system_logs_table": "system_logs",
   "qJobTimeout": 3600000,
-  "qJobRetryMax": 0,
+  "qJobRetryMax": 5,
   "chokidar": {
     "persistent": true,
     "ignoreInitial": false,
