@@ -148,7 +148,7 @@ export default {
           customSchema.push(ent)
         }
       }
-      console.log('entity:: ', array, ' formData :: ', self.lastLog.input, ' schema :: ', customSchema)
+      console.log('entity:: ', JSON.stringify(array), ' formData :: ', self.lastLog.input, ' schema :: ', JSON.stringify(customSchema), 'configs', { accesskey: process.env.accesskey, secretkey: process.env.secretkey })
       document.getElementById('filecontainer').contentWindow.postMessage({
         entity: array,
         formData: self.lastLog.input,
