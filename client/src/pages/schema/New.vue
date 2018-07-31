@@ -220,7 +220,7 @@
                           <Form ref="vtemplate" :model="vtemplate" >
                               <div class="schema-form ivu-table-wrapper" style="margin-top:10px">
                                 <div class="ivu-table ivu-table-border">
-                                    <div class="ivu-table-body">
+                                    <div class="ivu-table-body" style="min-height:300px">
                                         <table cellspacing="0" class="dropdown-opensparts" cellpadding="0" border="0" style="width: 100%;">
                                             <thead>
                                                 <tr>
@@ -310,7 +310,7 @@
                           <Form ref="etemplate" :model="etemplate" >
                             <div class="schema-form ivu-table-wrapper" style="margin-top:10px">
                               <div class="ivu-table ivu-table-border">
-                                  <div class="ivu-table-body">
+                                  <div class="ivu-table-body"  style="min-height:300px">
                                       <table cellspacing="0" class="dropdown-opensparts" cellpadding="0" border="0" style="width: 100%;">
                                           <thead>
                                               <tr>
@@ -429,7 +429,7 @@
                           <!-- <Button type="ghost" @click="openMjmlEditor">Add Template</Button> -->
                           <div class="schema-form ivu-table-wrapper" style="margin-top:10px">
                             <div class="ivu-table ivu-table-border">
-                                <div class="ivu-table-body">
+                                <div class="ivu-table-body"  style="min-height:300px">
                                     <table cellspacing="0" cellpadding="0" border="0" style="width: 100%;">
                                         <thead>
                                             <tr>
@@ -687,41 +687,68 @@ export default {
       }, {
         validator: validateEditTemplateTitle,
         trigger: 'blur'
-      }]
+      }],
+      databases: {
+        'mongo': [],
+        'rethink': [],
+        'elastic': [],
+        'nebb': []
+      }
     }
   },
-  mounted () {
+  async mounted () {
     this.$store.state.editTemplate = undefined
     // console.log('------->>>', this.$store.state.viewTemplate)
     this.fetch(this.$route.params.id)
     // this.mjmlUpload = this.$store.state.emailTemplate
     // console.log(this.mjmlUpload)
-    api.request('get', '/settings')
+    await api.request('get', '/databases', null, {$paginate: false})
       .then(response => {
-        var result = response.data
+        // var result = response.data
         // console.log('settings',result)
+        let result = _.filter(response.data, {isenable: true})
 
-        for(var db in result){
-          var obj = {}
-          // if(result[db].dbdefault == 'true'){
-            // console.log('aaaaaaa',db)
-            obj.value = db,
-            obj.label = db,
-            obj.children = []
-            // console.log(result[db].dbinstance)
-            result[db].dbinstance.forEach(function(instance, i){
-              if(instance.isenable){
-                // console.log(instance.cname)
-                obj.children.push({label: instance.connection_name, value:instance.id})
-              }
-            })
-            if(obj.children.length == 0 && obj.label != 'nedb'){
-              obj.disabled = true
-            }
-          // }
-          // console.log(obj)
-          this.CascaderData.push(obj)
+        for (let db in this.databases) {
+          this.databases[db] = _.filter(result, {selectedDb: db}) 
         }
+
+        for (let db in this.databases) {
+          if (this.databases[db].length > 0) {
+            let childrens = []
+            for (let item of this.databases[db]) {
+              childrens.push({
+                label: item.connection_name,
+                value: item.id
+              })
+            }
+            this.CascaderData.push({
+              label: db,
+              value: db,
+              children: childrens
+            })
+          }
+        }
+        // for(var db in result){
+        //   var obj = {}
+        //   // if(result[db].dbdefault == 'true'){
+        //     // console.log('aaaaaaa',db)
+        //     obj.value = db,
+        //     obj.label = db,
+        //     obj.children = []
+        //     // console.log(result[db].dbinstance)
+        //     result[db].dbinstance.forEach(function(instance, i){
+        //       if(instance.isenable){
+        //         // console.log(instance.cname)
+        //         obj.children.push({label: instance.connection_name, value:instance.id})
+        //       }
+        //     })
+        //     if(obj.children.length == 0 && obj.label != 'nedb'){
+        //       obj.disabled = true
+        //     }
+        //   // }
+        //   // console.log(obj)
+        //   this.CascaderData.push(obj)
+        // }
         // this.$Loading.finish()
       })
       .catch(error => {
