@@ -84,4 +84,17 @@ export default {
       }
     })
   }
+  // getActiveFlow ({commit}, id) {
+  //   console.log(id)
+  //   // return flowz.get(id, {
+  //   //   $select: ['json']
+  //   // }).then(res => {
+  //   commit('SET_ACTIVE_FLOW', id)
+  //   //   // return res.data
+  //   // }).catch(err => {
+  //   //   console.log('Error state getActiveFlow', err)
+  //   //   commit('SET_ACTIVE_FLOW', '')
+  //   //   // return []
+  //   // })
+  // }
 }

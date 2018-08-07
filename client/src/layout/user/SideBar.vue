@@ -24,7 +24,25 @@
         </Col>
       </Row>
       <Row style="padding: 10px;">
-        
+        <Menu theme="dark" width="auto" style="overflow: auto;height: calc(100% - 104px);">
+          <template v-if="loading" align="center">
+            <div class="demo-spin-col">
+              <Spin size="large">
+                <div class="loader">
+                  <icon type="load-c" :size="18" class="demo-spin-icon-load"></icon>
+                </div>
+              </Spin>
+            </div>
+          </template>
+          <template v-else>
+            <div style="color:yellow;padding:10px" v-if="list.length > 0">{{name}}</div>
+            <Menu-item :name="index" v-for="(item, index) in list" :key="index">
+                  <div>
+                    {{item.name}}
+                  </div>
+            </Menu-item>
+          </template>
+        </Menu>
       </Row>
     </div>
   </div>    
@@ -32,11 +50,48 @@
 
 <script>
 /*eslint-disable*/
+import flowzModal from '@/api/flowz'
+import _ from 'lodash'
   export default {
     data () {
+      return {
+        loading: false,
+        name: '',
+        list: []
+      }
     },
     created () {
-      // this.$store.dispatch('getFlowzdata')
+      console.log('this.$store.state.activeFlow', this.$store.state.activeFlow)
+    },
+    methods: {
+      activeFlow(id) {
+        // console.log('activeFlow', this.$store.state.activeFlow)
+        this.loading = true
+        if (id !== '' && id !== null) {
+          flowzModal.get(id, {$select: ['json']}).then(res => {
+            // console.log('res.data', res.data)
+            let processList = _.cloneDeep(res.data.json.processList)
+            this.loading = false
+            this.name = res.data.json.name
+            this.list =_.remove(processList, (m)=> {
+              if (m.type !== 'start' && m.type !== 'endevent' && m.type !== 'intermediatethrowevent') {
+                return m
+              }
+            })
+            console.log(this.list)
+          }).catch(err => {
+            console.log('err=>', err)
+            // return []
+            this.name = ''
+            this.list = []
+            this.loading = false
+          })
+        } else {
+          this.name = ''
+          this.list = []
+          this.loading = false
+        }
+      }
     },
     computed: {
       stylesPin () {
@@ -49,6 +104,15 @@
       pinNvaigationContent () {
         return !this.$store.state.sidenavpin ? 'Pin nvaigation' : 'Unpin nvaigation'
       }
+    },
+    watch: {
+      '$store.state.activeFlow': function(newValue, oldValue) {
+        // console.log(oldValue, newValue)
+        this.activeFlow(newValue)
+      }
+    },
+    mounted () {
+      this.activeFlow(this.$store.state.activeFlow)
     }
 }
 </script>

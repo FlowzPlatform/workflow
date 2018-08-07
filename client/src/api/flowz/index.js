@@ -5,7 +5,7 @@ export default {
     if (id === null) {
       return api.request('get', '/' + model, null, params)
     } else {
-      return api.request('get', '/' + model + '/' + id)
+      return api.request('get', '/' + model + '/' + id, null, params)
     }
   },
   getCustom: (string) => {
