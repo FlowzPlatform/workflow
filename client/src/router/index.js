@@ -8,6 +8,7 @@ import userLayout from '@/layout/user/Master'
 // userLayout
 // import userLayout from '@/userLayout/Master'
 import UserDashboard from '@/pages/user/dashboard'
+import list from '@/pages/user/List'
 
 import Userconfig from '@/pages/user/UserConfig.vue'
 // userLayout
@@ -241,7 +242,7 @@ const routes = [{
   component: Register
 }, {
   path: '/',
-  name: 'User',
+  name: 'Userapproval',
   component: userLayout,
   meta: { requiresAuth: true, role: [2, 3] },
   children: [{
@@ -275,6 +276,14 @@ const routes = [{
     path: '/form/reply/:fiid',
     name: 'form/reply',
     component: FormReply
+  }, {
+    path: '/list/:id',
+    name: 'listview',
+    component: list,
+    props: {
+      id: String,
+      required: true
+    }
   }]
 }]
 export default routes

@@ -65,7 +65,7 @@
     "vue-router": "^2.7.0",
     "vue-split-panel": "^1.0.4",
     "vue2-codemirror-lite-js": "^3.5.2",
-    "vue2-dropzone": "^3.0.3",
+    "vue2-dropzone": "^3.2.2",
     "vuedraggable": "^2.16.0",
     "vuex": "^2.4.0",
     "vuex-persistedstate": "^2.4.2",

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Table border :loading="loading" :columns="columns" :data="flowzList.data"></Table>
+    <Table border :loading="loading" :columns="columns" :data="flowzList.data" @on-row-click="handleRowClick"></Table>
     <div style="margin: 10px;overflow: hidden">
       <div style="float: right;"> 
         <Page :page-size="$store.state.limitPage" :total="flowzList.total" :current="current" @on-change="changePage"></Page>
@@ -199,6 +199,13 @@ export default {
         }).result('true').value()
         this.flowzList.data[index].inputRemain = count !== undefined ? count : 0
       })
+    },
+    handleRowClick (data) {
+      // console.log('row', data.id)
+      this.$store.state.activeFlow = null
+      this.$store.state.activeFlow = data.id
+      this.$store.state.sidenavtoggle = true
+      this.$store.state.sidenavpin = true
     }
   },
   mounted () {

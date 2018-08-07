@@ -20,5 +20,6 @@ export default {
   mappingTemp: [],
   BPMNxml: '',
   isLoggedIn: false,
-  limitPage: 5
+  limitPage: 5,
+  activeFlow: null
 }

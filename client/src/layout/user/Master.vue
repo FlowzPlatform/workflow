@@ -1,10 +1,10 @@
 <template>
   <div class="layout">
     <Row type="flex">
-      <!-- <i-col v-if="$store.state.sidenavtoggle" :span="5" :style="styles"> -->
-        <!-- <f-sidebar></f-sidebar> -->
-      <!-- </i-col> -->
-      <i-col :span="24" style="z-index:1">
+      <i-col v-if="$store.state.sidenavtoggle" :span="5" :style="styles">
+        <f-sidebar></f-sidebar>
+      </i-col>
+      <i-col :span="contentSpan" style="z-index:1">
          <f-header></f-header>
          <div class="f-layout-content">
           <div class="f-layout-content-main">
@@ -31,9 +31,9 @@ export default {
   data () {
   },
   computed: {
-    // iconSize () {
-      // return this.spanLeft === 5 ? 14 : 24
-    // },
+    iconSize () {
+      return this.spanLeft === 5 ? 14 : 24
+    },
     tabdata () {
       console.log('this.$store.getters.TabData', this.$store.getters.TabData)
       return this.$store.getters.TabData
@@ -53,6 +53,11 @@ export default {
     }
   },
   methods: {
+  },
+  mounted () {
+    // console.log(this.$store.state.sidenavtoggle, this.$store.state.sidenavpin)
+    this.$store.state.sidenavtoggle = false
+    this.$store.state.sidenavpin = false
   }
 }
 </script>
