@@ -277,13 +277,9 @@ const routes = [{
     name: 'form/reply',
     component: FormReply
   }, {
-    path: '/list/:id',
+    path: '/list',
     name: 'listview',
-    component: list,
-    props: {
-      id: String,
-      required: true
-    }
+    component: list
   }]
 }]
 export default routes
