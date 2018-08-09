@@ -56,8 +56,8 @@ export default {
   },
   mounted () {
     // console.log(this.$store.state.sidenavtoggle, this.$store.state.sidenavpin)
-    this.$store.state.sidenavtoggle = false
-    this.$store.state.sidenavpin = false
+    // this.$store.state.sidenavtoggle = false
+    // this.$store.state.sidenavpin = false
   }
 }
 </script>
