@@ -115,10 +115,14 @@
         this.dataConfig = []
         if (this.schema.hasOwnProperty('entity')) {
           for (let item of this.schema.entity) {
+            let isshow = true
+            if (item.customtype) {
+              isshow = false
+            }
             this.dataConfig.push({
               title: item.name,
               key: item.name,
-              show: true,
+              show: isshow,
               sortable: false,
               width: 150
             })

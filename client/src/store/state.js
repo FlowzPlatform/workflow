@@ -21,5 +21,6 @@ export default {
   BPMNxml: '',
   isLoggedIn: false,
   limitPage: 5,
-  activeFlow: null
+  activeFlow: null,
+  activeList: null
 }
