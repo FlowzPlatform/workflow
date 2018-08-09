@@ -14,7 +14,7 @@
             <Row type="flex" justify="end" align="middle">
               <Tooltip :content="pinNvaigationContent" placement="left">
                 <div :style="stylesPin">
-                  <a @click="$store.state.sidenavpin = !$store.state.sidenavpin">
+                  <a  @click="$store.state.sidenavpin = !$store.state.sidenavpin">
                     <Icon type="pin" :size="24" ></Icon>
                   </a>
                 </div>
@@ -37,9 +37,9 @@
           <template v-else>
             <div style="color:yellow;padding:10px" v-if="list.length > 0">{{name}}</div>
             <Menu-item :name="index" v-for="(item, index) in list" :key="index">
-                  <div>
-                    {{item.name}}
-                  </div>
+              <div :title="item.id">
+                <a href="javascript:void(0)" @click="handleActiveStage(item)" class="menuitem">{{item.name}}</a>
+              </div>
             </Menu-item>
           </template>
         </Menu>
@@ -61,9 +61,18 @@ import _ from 'lodash'
       }
     },
     created () {
-      console.log('this.$store.state.activeFlow', this.$store.state.activeFlow)
+      // console.log('this.$store.state.activeFlow', this.$store.state.activeFlow)
     },
     methods: {
+      handleActiveStage (item) {
+        console.log('handleActiveStage', item)
+        if (item.inputProperty[0].entityschema.id) {
+          this.$store.state.activeList = item.id + '/' + item.inputProperty[0].entityschema.id
+          this.$router.push('/list')
+        } else {
+          console.log('inputProperty not found!!')
+        }
+      },
       activeFlow(id) {
         // console.log('activeFlow', this.$store.state.activeFlow)
         this.loading = true
@@ -116,3 +125,8 @@ import _ from 'lodash'
     }
 }
 </script>
+<style scoped>
+  .menuitem {
+    color: #fff !important;
+  }
+</style>
