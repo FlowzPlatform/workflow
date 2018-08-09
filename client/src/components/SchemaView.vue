@@ -81,7 +81,7 @@ const deepstream = require('deepstream.io-client-js')
 
 const DeepRecord = require('@/assets/js/deepstream/deepRecord')
 
-const client = deepstream('ws://167.99.233.211:6020').login()
+const client = deepstream('ws://204.48.26.167:6020').login()
 let instanceId = '39c53741_ec14_4ceb_a9db_97d7066cd424'
 let instanceListName = instanceId + 'List'
 let instanceName = 'NewWork247'
