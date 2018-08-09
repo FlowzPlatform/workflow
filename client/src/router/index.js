@@ -50,6 +50,9 @@ import FormReply from '@/pages/approval/FormReply'
 // import UserDashboard from '@/pages/user/dashboard'
 // import UserProcesslist from '@/pages/user/processlist'
 import ManageBPMNPlugin from '@/pages/BPMNPlugins/Manage'
+
+import SchemaView from '@/components/SchemaView'
+
 Vue.use(VueRouter)
 const routes = [{
   path: '/admin',
@@ -284,6 +287,10 @@ const routes = [{
       id: String,
       required: true
     }
+  }, {
+    path: '/schemaview',
+    name: 'schemaview',
+    component: SchemaView
   }]
 }]
 export default routes
