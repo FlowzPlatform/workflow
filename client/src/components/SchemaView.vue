@@ -12,7 +12,7 @@
 						<div class="row" style="margin-top: 15px;">
 		    			<div class="col-md-12">
 		    				<div class="ui-card">
-		    					<h3 class="formTitle">{{formTitle}}</h3>
+		    					<h3 class="formTitle">{{formTitle}}<span style="font-size:12px">&nbsp;&nbsp;({{item.id}})</span></h3>
 		    				</div>
 		    			</div>
 		    		</div>
@@ -21,10 +21,28 @@
 		    			<div class="col-md-12">
 		    				<schemasubform :schemainstance="formSchemaInstance"></schemasubform>
 						    <!-- <i-button type="dashed" class="btnAdd" long @click="handleAdd" icon="plus-round">Add</i-button> -->
-
+                <div v-if="isMultiple">
+                <div class="row" style="margin-top: 15px;">
+                  <div class="col-md-12">
+                    <div class="ui-card">
+                      <!-- <h3 class="formTitle">{{formTitle}}<span style="font-size:12px">&nbsp;&nbsp;({{item.id}})</span></h3> -->
+                      <Row>
+                        <Col :span="4">
+                          <b class="field-label">Target</b>
+                        </Col>
+                        <Col :span="20">
+                          <Select v-model="nextTarget.value" placeholder="Choose Target">
+                            <Option v-for="dpd in nextTarget.options" :value="dpd.value" :key="dpd.value">{{ dpd.label }}</Option>
+                          </Select>
+                        </Col>
+                      </Row>
+                    </div>
+                  </div>
+                </div>
+                </div>
 						    <div style="padding: 5px 0 5px 0">
-						        <Button type="primary" @click="handleSubmit('formSchemaInstance')">{{ savebutton }}</Button>
-						        <Button @click="handleReset('formSchemaInstance')" style="margin-left: 10px">Reset</Button>
+						        <Button type="primary" @click="handleSubmit('formSchemaInstance')" :loading="bLoading">{{ savebutton }}</Button>
+						        <!-- <Button @click="handleReset('formSchemaInstance')" style="margin-left: 10px">Reset</Button> -->
 						    </div>
 
 						    <div v-if="validErr.length != 0" style="color: #a94442;background-color: #f2dede;border:1px solid #ebccd1;padding: 5px">
@@ -37,7 +55,7 @@
 		    			</div>
 		    		</div>
 					</div>
-					<div class="col-md-2 fixed-div">
+					<div class="col-md-1 fixed-div">
 						<strong>Jump To:</strong>
 						<ul class="jumper-links">
 							<a href="#top" class="btn btn-info btn-block btnJumperLink"><li>Top</li></a>
@@ -70,24 +88,26 @@
 </template>
 
 <script>
-
+/* eslint-disable */
 import _ from 'lodash'
 import axios from 'axios'
 
 import ListInstances from './ListInstances'
 import SchemaSubForm from './SchemaSubForm'
 
-const deepstream = require('deepstream.io-client-js')
+import flowzdataModal from '@/api/flowzdata'
 
-const DeepRecord = require('@/assets/js/deepstream/deepRecord')
+// const deepstream = require('deepstream.io-client-js')
 
-const client = deepstream('ws://204.48.26.167:6020').login()
-let instanceId = '39c53741_ec14_4ceb_a9db_97d7066cd424'
-let instanceListName = instanceId + 'List'
-let instanceName = 'NewWork247'
-let instanceList = client.record.getList(instanceListName)
+// const DeepRecord = require('@/assets/js/deepstream/deepRecord')
 
-console.log('Data: ', instanceName, instanceList)
+// const client = deepstream('ws://204.48.26.167:6020').login()
+// let instanceId = '39c53741_ec14_4ceb_a9db_97d7066cd424'
+// let instanceListName = instanceId + 'List'
+// let instanceName = 'NewWork247'
+// let instanceList = client.record.getList(instanceListName)
+
+// console.log('Data: ', instanceName, instanceList)
 
 export default {
   name: 'SchemaView',
@@ -118,7 +138,14 @@ export default {
       processid: null,
       lastLog: null,
       formTitle: null,
-      jumperLinks: SchemaSubForm.jumperLinks
+      jumperLinks: SchemaSubForm.jumperLinks,
+      flowData: null,
+      bLoading: false,
+      isMultiple: false,
+      nextTarget: {
+        value: '',
+        options: []
+      }
     }
   },
   components: {
@@ -234,7 +261,11 @@ export default {
       //   }
       }
       if (arr) {
-        this.formSchemaInstance.data = arr
+        // console.log('_________________arr ', arr)
+        let m = [arr]
+        this.formSchemaInstance.data = m
+      } else {
+        await this.handleAdd()
       }
       // console.log('self.formSchemaInstance.data[0]', self.formSchemaInstance.data[0])
       // if (self.formSchemaInstance.data[0].length === 0) {
@@ -274,7 +305,7 @@ export default {
       //   // })
       // } else {
       // setTimeout(async ()=>{
-      await this.handleAdd()
+      // await this.handleAdd()
       this.$Loading.finish()
       // },4000)
       // }
@@ -420,6 +451,7 @@ export default {
     },
 
     async handleSubmit (name) {
+      // this.bLoading = true
       var obj = this.makeObj()
       this.validFlag = true
       this.validErr = []
@@ -441,15 +473,33 @@ export default {
 
         console.log('Data: ', obj.data[0])
 
-        let returnObj = await DeepRecord.deepRecord.instanceStageSubmit(client, this.item, obj.data[0])
-        console.log('Data: ', returnObj)
+        // let returnObj = await DeepRecord.deepRecord.instanceStageSubmit(client, this.item, obj.data[0])
+        // console.log('Data: ', returnObj)
+        let saveObj = {
+          fid: this.item.fid,
+          iid: this.item.id,
+          state: this.item.currentStatus,
+          data: obj.data[0]
+        }
+        if (this.isMultiple) {
+          saveObj.nextTarget = this.nextTarget.value
+        }
+        this.bLoading = true
+        await flowzdataModal.post(saveObj).then(res => {
+          // console.log('--------------Saved-------------', res.data)
+          this.id = null
+          this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
+          this.$Loading.finish()
+          this.bLoading = false
+        }).catch(err => {
+          console.log('Error', err)
+          this.$Loading.finish()
+          this.bLoading = false
+          this.$Notice.error({title: 'Not Saved!'})
+        })
         // let instanceObj = await DeepRecord.deepRecord.getRecordObject(client, this.item)
         // instanceObj.set('currentStatus', this.nextState)
-
-        this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
-        this.$Loading.finish()
-
-        this.id = null
+        
 
         // axios.post('http://192.81.213.41:3033/eng/instance/', { data: obj.data })
         // .then(response => {
@@ -571,16 +621,44 @@ export default {
     },
 
     setValues (values) {
-      console.log('Values: ', values)
+      // console.log('Values: ', values.currentState)
+      this.nextTarget.value = ''
+      this.nextTarget.options = []
+      this.isMultiple = false
       this.id = values.id
-      this.item = values.item
-      this.formTitle = values.formName
-      let arr = [values.formData]
+      if (values.id !== null) {
+        this.item = values.item
+        this.formTitle = values.formName
+        this.flowData = values.flowzData
+        // console.log('values.flowData', this.flowData)
+        let targetObj = _.find(values.flowzData.json.processList, {id: values.currentState})
+        if (Object.keys(targetObj).length > 0) {
+          if (targetObj.target.length > 1) {
+            let opts = []
+            for (let m of targetObj.target) {
+              // console.log('------', m)
+              let label = _.find(values.flowzData.json.processList, {id: m.id}).name
+              opts.push({
+                label: label,
+                value: m.id
+              })
+            }
+            this.nextTarget.value = ''
+            this.nextTarget.options = opts
+            this.isMultiple = true
+          }
+        }
+        if (values.formData !== null, Object.keys(values.formData).length > 0) {
+          this.fetch(this.id, values.formData)
+        } else {
+          this.fetch(this.id)
+        }
+      }
+      // let arr = [values.formData]
       // this.formSchemaInstance.data = arr[0]
       // console.log('form instance data: ', this.formSchemaInstance.data)
       // this.nextState = values.nextState
       // this.currentState = values.currentState
-      this.fetch(this.id, arr)
     }
   },
   mounted () {

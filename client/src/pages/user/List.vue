@@ -9,8 +9,8 @@
 <script>
   import schemalist from './SchemaList'
   import schemaModel from '@/api/schema'
-  const deepstream = require('deepstream.io-client-js')
-  const client = deepstream('ws://204.48.26.167:6020').login()
+  // const deepstream = require('deepstream.io-client-js')
+  // const client = deepstream('ws://204.48.26.167:6020').login()
 
   export default {
     name: 'listview',
@@ -26,10 +26,10 @@
     },
     mounted () {
       if (this.$store.state.activeList !== null) {
-        console.log('this.$store.state.activeList', this.$store.state.activeList)
-        let ids = this.$store.state.activeList.split('/')
-        this.setSchema(ids[1])
-        this.setList(ids[0])
+        // console.log('this.$store.state.activeList', this.$store.state.activeList)
+        // let ids = this.$store.state.activeList.split('/')
+        // this.setSchema(ids[1])
+        // this.setList(ids[0])
       }
     },
     methods: {
@@ -37,13 +37,13 @@
         console.log('callback-------')
         console.log('entries', entries)
         this.mdata = []
-        for (let i of entries) {
-          let recordObj = client.record.getRecord(i)
-          recordObj.whenReady((record) => {
-            console.log('recordObj', record.get())
-            this.mdata.push(record.get())
-          })
-        }
+        // for (let i of entries) {
+        //   let recordObj = client.record.getRecord(i)
+        //   recordObj.whenReady((record) => {
+        //     console.log('recordObj', record.get())
+        //     this.mdata.push(record.get())
+        //   })
+        // }
       },
       setSchema (id) {
         if (id !== null && id !== undefined) {
@@ -57,9 +57,9 @@
       },
       setList (StageId) {
         console.log(StageId + 'List')
-        let orderEntryList = client.record.getList(StageId + 'List')
+        // let orderEntryList = client.record.getList(StageId + 'List')
         // console.log('orderEntryList', orderEntryList)
-        orderEntryList.subscribe(this.listChanged, false)
+        // orderEntryList.subscribe(this.listChanged, false)
       }
     },
     watch: {
