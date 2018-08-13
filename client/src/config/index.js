@@ -26,10 +26,10 @@ var temp = {
 }
 if (process.env.NODE_ENV === 'development') {
   temp = {
-    serverURI: 'http://localhost:3030', // 'http://172.16.230.86:3030'
-    socketURI: 'http://localhost:4033',
-    // serverURI: 'https://api.' + process.env.domainkey + '/eng',
-    // socketURI: 'wss://ws.' + process.env.domainkey + ':4033',
+    // serverURI: 'http://localhost:3030', // 'http://172.16.230.86:3030'
+    // socketURI: 'http://localhost:4033',
+    serverURI: 'https://api.' + process.env.domainkey + '/eng',
+    socketURI: 'wss://ws.' + process.env.domainkey + ':4033',
     workerRegisterURL: 'https://api.' + process.env.domainkey + '/jobqueue1',
     approvalRoleURI: 'https://api.' + process.env.domainkey + '/authldap/',
     loginURL: 'https://api.' + process.env.domainkey + '/auth/api',

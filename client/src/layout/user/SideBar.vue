@@ -24,7 +24,7 @@
         </Col>
       </Row>
       <Row>
-        <Menu theme="dark" width="auto" style="overflow: auto;height: calc(100% - 104px);" accordion   @on-select="handleopenChange">
+        <Menu theme="dark" width="auto" style="overflow: auto;height: calc(100% - 104px);" accordion @on-select="handleopenChange">
           <template v-if="loading" align="center">
             <div class="demo-spin-col">
               <Spin size="large">
