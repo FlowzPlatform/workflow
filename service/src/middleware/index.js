@@ -13,12 +13,13 @@ module.exports = function () {
     'flowz': ['create','update', 'patch', 'find', 'get', 'remove'],
     'finstance': ['create','update', 'patch', 'find', 'get', 'remove'],
     'flowzdata': ['create','update', 'patch', 'find', 'get', 'remove'],
+    'schema': ['create','update', 'patch', 'find', 'get', 'remove']
   };
 
   subscription.moduleResource.registerAppModule = registerAppModule;
   subscription.moduleResource.appRoles = ['Superadmin', 'Admin', 'Manager', 'Team-Lead','Client', 'CSR'];
   subscription.registeredAppModulesRole();
-  // subscription.registerDynamicHooks(app, registerAppModule);
+  subscription.registerDynamicHooks(app, registerAppModule);
 
   app.use(flowzError());
   app.use(notFound());
