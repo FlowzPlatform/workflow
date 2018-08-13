@@ -12,6 +12,8 @@ const dbConfig = config.cxnOptions
 const qConfig = config.defaultQueue
 const subsConfig = config.defaultSubscription
 
+const connectionObj = []
+
 const qCreateOption = config.defaultCreateJob
 
 const defaultOption = {
@@ -89,7 +91,7 @@ module.exports = function job (options) {
 
       // Merge Options
       newoptions = mergeOptions(options, newoption)
-      let queueObj = await createJobQueue(newoptions.connection, newoptions.queue)
+      let queueObj = await createJobQueue(newoptions.connection, newoptions.queue,true)
       queueObj.on('error', (err) => {
         // err object is system error
         response(customError(err))
@@ -225,10 +227,19 @@ module.exports = function job (options) {
     }
   }
 
-  function createJobQueue (dbDriver, queueOption) {
+  function createJobQueue (dbDriver, queueOption, isNew = false) {
     try {
       rethinkDBInfo = {'jobHost': dbDriver.host, 'port': dbDriver.port, 'jobDB': dbDriver.db, 'jobType': queueOption.name}
-      return new Queue(dbDriver, queueOption)
+      if(isNew) {
+        return new Queue(dbDriver, queueOption)
+      } else {
+        let connKey = dbDriver.host + '_' + dbDriver.port + '_' + dbDriver.db + queueOption.name;
+        if (connectionObj[connKey] !== undefined) {
+          return connectionObj[connKey]
+        }
+        connectionObj[connKey] = new Queue(dbDriver, queueOption)
+        return connectionObj[connKey]
+      }
     } catch (err) {
       return (err)
     }
