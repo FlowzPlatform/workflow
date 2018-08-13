@@ -42,7 +42,7 @@
               </template>
               <Menu-item :name="subItem" v-for="(subItem, inx) in item" :key="inx">
                 <div>
-                  {{subItem}}
+                  {{subItem.name}}
                 </div>
               </Menu-item>  
             </Submenu>
@@ -98,7 +98,11 @@ import _ from 'lodash'
               // console.log('response.data[i].json.processList[j].name: ', response.data[i].json.processList[j].name)
               // if(response.data[i].json.processList[j].name){
                 if(response.data[i].json.processList[j].type !== 'start' && response.data[i].json.processList[j].type !== 'endevent' && response.data[i].json.processList[j].type !== 'intermediatethrowevent'){
-                  menuItems[response.data[i].json.name].push(response.data[i].json.processList[j].name)
+                  let value = {
+                    id: response.data[i].json.processList[j].id,
+                    name: response.data[i].json.processList[j].name
+                  }
+                  menuItems[response.data[i].json.name].push(value)
                 }
               // }
             }
