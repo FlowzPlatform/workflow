@@ -1,11 +1,12 @@
 <template>
   <div>
-    <Table border :loading="loading" :columns="columns" :data="flowzList.data" @on-row-click="handleRowClick"></Table>
+    Dashboard
+    <!-- <Table border :loading="loading" :columns="columns" :data="flowzList.data" @on-row-click="handleRowClick"></Table>
     <div style="margin: 10px;overflow: hidden">
       <div style="float: right;"> 
         <Page :page-size="$store.state.limitPage" :total="flowzList.total" :current="current" @on-change="changePage"></Page>
       </div>
-    </div>
+    </div> -->
     <!-- <div>
       <template v-for="item in flowzList.data">
         <div class="flow-menu">

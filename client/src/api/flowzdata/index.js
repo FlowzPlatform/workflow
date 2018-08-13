@@ -1,9 +1,11 @@
 import api from '../../api'
-let model = 'finstance'
+let model = 'flowzdata'
 export default {
   get: (id = null, params = null) => {
     if (id === null) {
-      return api.request('get', '/' + model, null, params)
+      return api.request('get', '/' + model, null, params).then(response => {
+        return response.data
+      })
     } else {
       return api.request('get', '/' + model + '/' + id, params)
     }

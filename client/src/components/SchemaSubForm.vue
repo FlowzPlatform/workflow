@@ -194,11 +194,11 @@ export default {
       if (indexx === -1) {
         this.jumperLinks.push(fname)
       }
-      console.log('recursive obj', obj)
+      // console.log('recursive obj', obj)
       return obj
     },
     async handleAdd (eIndex, dataIndex, ent, data, fname) {
-      console.log('Called')
+      // console.log('Called')
       // console.log('Data', data, ent)
       var self = this
       // console.log('self.$refs', self.$refs['formSchema'])
@@ -249,7 +249,7 @@ export default {
         }
       }
       this.schemainstance.data[dataIndex][fname].push(obj)
-      console.log('schemainstance: ', this.schemainstance.data)
+      // console.log('schemainstance: ', this.schemainstance.data)
     },
     // getGuid () {
     //   return (this.S4() + this.S4() + "-" + this.S4() + "-4" + this.S4().substr(0,3) + "-" + this.S4() + "-" + this.S4() + this.S4() + this.S4()).toLowerCase()
@@ -311,10 +311,10 @@ export default {
     }
   },
   mounted () {
-    console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+    // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
   },
   created () {
-    console.log('created >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+    // console.log('created >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
   }
 }
 

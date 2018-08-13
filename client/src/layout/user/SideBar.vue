@@ -23,8 +23,8 @@
           </Col>
         </Col>
       </Row>
-      <Row style="padding: 10px;">
-        <Menu theme="dark" width="auto" style="overflow: auto;height: calc(100% - 104px);" accordion>
+      <Row>
+        <Menu theme="dark" width="auto" style="overflow: auto;height: calc(100% - 104px);" accordion @on-select="handleopenChange">
           <template v-if="loading" align="center">
             <div class="demo-spin-col">
               <Spin size="large">
@@ -35,16 +35,32 @@
             </div>
           </template>
           <template v-else>
-            <Submenu :name="key" v-for="(item, key, index) in flowzList" :key="index">
+            <Submenu :name="index" v-for="(item, index) in flowzList" :key="index">
               <template slot="title">
                   <Icon type="ios-people" />
-                  {{key}}
+                  {{item.json.name}}
+                  <span style="float:right;">
+                    <Badge :count="item.count"  class-name="demo-badge-alone"></Badge>
+                  </span>
               </template>
-              <Menu-item :name="subItem" v-for="(subItem, inx) in item" :key="inx">
-                <div>
-                  {{subItem}}
-                </div>
-              </Menu-item>  
+              <template
+                v-for="(subItem, inx) in item.json.processList" 
+                v-if="subItem.type !== 'start' && subItem.type !== 'endevent' && subItem.type !== 'intermediatethrowevent'"
+              >
+                <Menu-item 
+                  :name="item.id + '/' + subItem.id" 
+                  :key="inx" 
+                >
+                  <div :title="subItem.id" class="submentItem">
+                    <a @click="handleSubmenu(item, subItem)">
+                      {{subItem.name}}
+                      <span style="float:right;">
+                        <Badge :count="subItem.count"  class-name="demo-badge-alone"></Badge>
+                      </span>
+                    </a>
+                  </div>
+                </Menu-item>
+              </template>
             </Submenu>
             <!-- <Submenu name="1">
               <template slot="title">
@@ -58,7 +74,6 @@
               </Menu-item>  
             </Submenu> -->
             <!-- <div style="color:yellow;padding:10px" v-if="list.length > 0">{{name}}</div> -->
-            
           </template>
         </Menu>
       </Row>
@@ -67,103 +82,177 @@
 </template>
 
 <script>
-/*eslint-disable*/
 import flowzModal from '@/api/flowz'
+import finstanceModal from '@/api/finstance'
 import _ from 'lodash'
-  export default {
-    data () {
-      return {
-        loading: false,
-        name: '',
-        list: [],
-        flowzList: null
-      }
+export default {
+  data () {
+    return {
+      loading: false,
+      name: '',
+      list: [],
+      flowzList: null
+    }
+  },
+  created () {
+    // console.log('this.$store.state.activeFlow', this.$store.state.activeFlow)
+  },
+  methods: {
+    handleopenChange (node) {
+      node = node.split('/')
+      this.$router.push('/schemaview/' + node[0] + '/' + node[1])
     },
-    created () {
-      console.log('this.$store.state.activeFlow', this.$store.state.activeFlow)
+    handleSubmenu (item, subitem) {
+      // console.log(item, subitem)
+      this.$router.push('/schemaview/' + item.id + '/' + subitem.id)
     },
-    methods: {
-      async init() {
-        flowzModal.get(null, {
-          $select: ['allowedusers', 'json'],
-          $paginate: false
-        })
-        .then((response) => {
-          console.log('response: ', response)
-          let menuItems = {}
-          for(let i = 0; i < response.data.length; i++){
-            // menuItems.push(response.data[i].json.name)
-            menuItems[response.data[i].json.name] = []
-            for(let j = 0; j < response.data[i].json.processList.length; j++){
-              // console.log('response.data[i].json.processList[j].name: ', response.data[i].json.processList[j].name)
-              // if(response.data[i].json.processList[j].name){
-                if(response.data[i].json.processList[j].type !== 'start' && response.data[i].json.processList[j].type !== 'endevent' && response.data[i].json.processList[j].type !== 'intermediatethrowevent'){
-                  menuItems[response.data[i].json.name].push(response.data[i].json.processList[j].name)
-                }
-              // }
-            }
-          }
-
-          this.flowzList = menuItems;
-          console.log('flowzlist: ', JSON.stringify(this.flowzList))
-        })
-        .catch(error => {
-          console.log(error)
-          return {data: [], total: 0}
-        })
-      },
-      activeFlow(id) {
-        // console.log('activeFlow', this.$store.state.activeFlow)
-        this.loading = true
-        if (id !== '' && id !== null) {
-          flowzModal.get(id, {$select: ['json']}).then(res => {
-            // console.log('res.data', res.data)
-            let processList = _.cloneDeep(res.data.json.processList)
-            this.loading = false
-            this.name = res.data.json.name
-            this.list =_.remove(processList, (m)=> {
-              if (m.type !== 'start' && m.type !== 'endevent' && m.type !== 'intermediatethrowevent') {
-                return m
-              }
-            })
-            console.log('ListListListListListListListListListList: ', this.list)
-            console.log(this.list)
-          }).catch(err => {
-            console.log('err=>', err)
-            // return []
-            this.name = ''
-            this.list = []
-            this.loading = false
+    // calculateProcessList (list) {
+    //   return _.remove(list, (m) => {
+    //     if (m.type !== 'start' && m.type !== 'endevent' && m.type !== 'intermediatethrowevent') {
+    //       return m
+    //     }
+    //   })
+    // },
+    async init () {
+      this.loading = true
+      flowzModal.get(null, {
+        $select: ['allowedusers', 'json', 'id'],
+        $paginate: false
+      })
+      .then((response) => {
+        this.loading = false
+        this.flowzList = _.map(response.data, (m) => {
+          m.count = 0
+          _.map(m.json.processList, (p) => {
+            p.count = 0
+            return p
           })
-        } else {
+          return m
+        })
+        this.setCounters()
+        // console.log('flowzlist: ', this.flowzList)
+      })
+      .catch(error => {
+        console.log(error)
+        this.loading = false
+      })
+    },
+    activeFlow (id) {
+      // console.log('activeFlow', this.$store.state.activeFlow)
+      this.loading = true
+      if (id !== '' && id !== null) {
+        flowzModal.get(id, {$select: ['json']}).then(res => {
+          // console.log('res.data', res.data)
+          let processList = _.cloneDeep(res.data.json.processList)
+          this.loading = false
+          this.name = res.data.json.name
+          this.list = _.remove(processList, (m) => {
+            if (m.type !== 'start' && m.type !== 'endevent' && m.type !== 'intermediatethrowevent') {
+              return m
+            }
+          })
+          // console.log('ListListListListListListListListListList: ', this.list)
+          // console.log(this.list)
+        }).catch(err => {
+          console.log('err=>', err)
+          // return []
           this.name = ''
           this.list = []
           this.loading = false
+        })
+      } else {
+        this.name = ''
+        this.list = []
+        this.loading = false
+      }
+    },
+    setCounters (sitem) {
+      if (sitem) {
+        finstanceModal.get(null, {
+          $paginate: false,
+          $select: ['currentStatus'],
+          mainStatus: 'inprocess',
+          fid: sitem.id
+        }).then(res => {
+          // console.log('res count', res.data)
+          sitem.count = res.data.length
+          for (let pitem of sitem.json.processList) {
+            pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
+          }
+        }).catch(err => {
+          console.log('error', err)
+        })
+      } else {
+        for (let item of this.flowzList) {
+          // console.log('------------------', item)
+          finstanceModal.get(null, {
+            $paginate: false,
+            $select: ['currentStatus'],
+            mainStatus: 'inprocess',
+            fid: item.id
+          }).then(res => {
+            // console.log('res count', res.data)
+            item.count = res.data.length
+            for (let pitem of item.json.processList) {
+              pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
+            }
+          }).catch(err => {
+            console.log('error', err)
+          })
         }
       }
-    },
-    computed: {
-      stylesPin () {
-        let style = {}
-        if (this.$store.state.sidenavpin) {
-          style.transform = 'rotate(90deg)'
-        }
-        return style
-      },
-      pinNvaigationContent () {
-        return !this.$store.state.sidenavpin ? 'Pin nvaigation' : 'Unpin nvaigation'
-      }
-    },
-    watch: {
-      '$store.state.activeFlow': function(newValue, oldValue) {
-        console.log(oldValue, newValue)
-        this.activeFlow(newValue)
-      }
-    },
-    mounted () {
-      this.activeFlow(this.$store.state.activeFlow)
-      this.init()
     }
+  },
+  computed: {
+    stylesPin () {
+      let style = {}
+      if (this.$store.state.sidenavpin) {
+        style.transform = 'rotate(90deg)'
+      }
+      return style
+    },
+    pinNvaigationContent () {
+      return !this.$store.state.sidenavpin ? 'Pin nvaigation' : 'Unpin nvaigation'
+    }
+  },
+  watch: {
+    '$store.state.activeFlow': function (newValue, oldValue) {
+      // console.log(oldValue, newValue)
+      // this.activeFlow(newValue)
+    }
+  },
+  mounted () {
+    // this.activeFlow(this.$store.state.activeFlow)
+    this.init()
+  },
+  feathers: {
+    'finstance': {
+      created (data) {
+        // console.log('created', data)
+        let finx = _.findIndex(this.flowzList, {id: data.fid})
+        if (finx !== -1) {
+          // this.flowzList[finx].count += 1
+          this.setCounters(this.flowzList[finx])
+        }
+      },
+      updated (data) {
+        // console.log('updated', data)
+        let finx = _.findIndex(this.flowzList, {id: data.fid})
+        if (finx !== -1) {
+          // this.flowzList[finx].count += 1
+          this.setCounters(this.flowzList[finx])
+        }
+      },
+      removed (data) {
+        // console.log('removed', data)
+        let finx = _.findIndex(this.flowzList, {id: data.fid})
+        if (finx !== -1) {
+          // this.flowzList[finx].count += 1
+          this.setCounters(this.flowzList[finx])
+        }
+      }
+    }
+  }
 }
 </script>
 <style scoped>
@@ -186,5 +275,13 @@ import _ from 'lodash'
     /*background-image: -webkit-gradient(linear, 0 0, 0 100%,
                        color-stop(.5, rgba(255, 255, 255, .2)),
                color-stop(.5, transparent), to(transparent));*/
+  }
+  .submentItem > a{
+    color: #fff
+  }
+</style>
+<style>
+  .demo-badge-alone {
+    background-color: #5cb85c !important;
   }
 </style>
