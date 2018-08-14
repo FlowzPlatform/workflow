@@ -288,8 +288,8 @@ const routes = [{
     name: 'schemaview',
     component: SchemaView,
     props: {
-      id: String,
-      required: true
+      stateid: String,
+      required: false
     }
   }]
 }]

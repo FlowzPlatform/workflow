@@ -40,6 +40,12 @@
                             Db-settings
                         </router-link>
                     </Menu-item>
+                    <Menu-item name="4.1">
+                        <!-- <router-link to="/admin/DbSettings"> -->
+                            <!-- <Icon type="gear-b" :size="14"></Icon> -->
+                            <subscription :value="$store.state.subscription" :token="$store.state.token" @on-change="handleChange"></subscription>
+                        <!-- </router-link> -->
+                    </Menu-item>
                     <Menu-item name="5">
                       <Submenu name="1">
                         <template slot="title">
@@ -74,12 +80,16 @@
 </template>
 <script>
   import psl from 'psl'
+  import subscription from '@/components/subscription'
 /*eslint-disable*/
   export default {
     computed: {
       toggeleEnable () {
         return !this.$store.state.sidenavpin || (!this.$store.state.sidenavtoggle)
       }
+    },
+    components: {
+      subscription
     },
     methods:{
       handleRemove () {
@@ -90,6 +100,10 @@
         this.$store.commit('SET_USER', null)
         this.$store.commit('SET_ROLE', null)
         this.$router.push('/login')
+      },
+      handleChange (value) {
+        console.log('value parent', value)
+        this.$store.state.subscription = value
       }
     }
   }
