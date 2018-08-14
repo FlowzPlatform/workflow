@@ -25,9 +25,11 @@ var serviceTaskDelegateProps = require('./parts/ServiceTaskDelegateProps'),
   myPropertiesIOProps = require('./parts/myPropertiesIOProps'),
   myOutputProps = require('./parts/myOutputProps'),
   myConfigProps = require('./parts/MyConfigProps'),
+  // myRoles = require('./parts/MyRoles'),
   capacityProps = require('./parts/CapacityProps'),
   startEventInitiator = require('./parts/StartEventInitiator'),
   variableMapping = require('./parts/VariableMappingProps'),
+  AddRoles = require('./parts/AddRoles'),
   versionTag = require('./parts/VersionTagProps');
 var listenerProps = require('./parts/ListenerProps'),
   listenerDetails = require('./parts/ListenerDetailProps'),
@@ -242,15 +244,37 @@ function createIOMappingGroups(element, bpmnFactory, elementRegistry, translate,
 function createOutputGroups(element, bpmnFactory, elementRegistry, translate, data) {
   if (data != undefined) {
     options = data
+    console.log("hello")
   }
   var propertiesGroup = {
     id: 'outputs',
     label: translate('Output'),
     entries: []
   };
+  console.log("options from createOutputGroups", options)
   myOutputProps(propertiesGroup, element, bpmnFactory, translate, options);
   return [
     propertiesGroup
+  ];
+}
+
+function createAddRolesTabGroups(element, bpmnFactory, elementRegistry, translate) {
+  var generalGroup = {
+    id: 'addroles',
+    label: translate('add Roles'),
+    entries: []
+  };
+  console.log("options from createAddRolesTabGroups", options)
+  AddRoles(generalGroup, element, translate, options);
+  // var configGroup = {
+  //   id: 'configs',
+  //   label: translate('Config'),
+  //   entries: []
+  // }
+  // myConfigProps(configGroup, element, bpmnFactory, translate)
+  return [
+    // configGroup,
+    generalGroup
   ];
 }
 
@@ -265,6 +289,18 @@ function createConfigGroups(element, bpmnFactory, elementRegistry, translate, da
     configGroup
   ]
 }
+
+// function createRoles(element, bpmnFactory, elementRegistry, translate, data) {
+//   var rolesGroup = {
+//     id: 'roles',
+//     label: translate('Roles'),
+//     entries: []
+//   }
+//   myRoles(rolesGroup, element, bpmnFactory, translate)
+//   return [
+//     rolesGroup
+//   ]
+// }
 
 function createListenersTabGroups(element, bpmnFactory, elementRegistry, translate) {
   var listenersGroup = {
@@ -402,6 +438,11 @@ function CamundaPropertiesProvider(eventBus, bpmnFactory, elementRegistry, eleme
         element, bpmnFactory,
         elementRegistry, elementTemplates, translate)
     };
+    // var roles = {
+    //   id: 'Roles',
+    //   label: translate('Roles'),
+    //   groups: createRoles(element, bpmnFactory, elementRegistry, translate)
+    // };
     var ioMapping = {
       id: 'IOMapping',
       label: translate('I/O Mapping'),
@@ -461,6 +502,11 @@ function CamundaPropertiesProvider(eventBus, bpmnFactory, elementRegistry, eleme
       label: translate('Output'),
       groups: createOutputGroups(element, bpmnFactory, elementRegistry, translate)
     };
+    var addRoles = {
+      id: 'addRoles',
+      label: translate('Add Roles'),
+      groups: createAddRolesTabGroups(element, bpmnFactory,elementRegistry, translate)
+    };
     var configTab = {
       id: 'Configuration',
       label: translate('Config'),
@@ -469,6 +515,8 @@ function CamundaPropertiesProvider(eventBus, bpmnFactory, elementRegistry, eleme
     return [
       generalTab,
       ioMapping,
+      // roles,
+      addRoles,
       // variablesTab,
       // connectorTab,
       propertiesTab,

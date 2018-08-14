@@ -236,6 +236,11 @@
           "type": "String"
         },
         {
+          "name": "addedRoles",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
           "name": "historyTimeToLive",
           "isAttr": true,
           "type": "String"
