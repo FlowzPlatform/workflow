@@ -91,6 +91,7 @@ var router = new VueRouter({
   }
 })
 
+import axios from 'axios'
 import psl from 'psl'
 // Some middleware to help us ensure the user is authenticated.
 router.beforeEach((to, from, next) => {
@@ -110,6 +111,12 @@ router.beforeEach((to, from, next) => {
     router.app.$cookie.set('auth_token', to.query.token, { expires: 1, domain: location })
   }
   const token = router.app.$cookie.get('auth_token')
+  // set token in axios
+  if (token) {
+    axios.defaults.headers.common['authorization'] = token
+  } else {
+    delete axios.defaults.headers.common['authorization']
+  }
   if (to.matched.some(record => record.meta.requiresAuth) && obId) {
     window.console.log('ob_id obtained')
     next({

@@ -17,11 +17,13 @@
             <Row type="flex" justify="end">
                 <div class="layout-nav">
                     <Menu-item name="1">
-                    <router-link to="/">
-                            Home
+                      <router-link to="/">
+                              Home
                       </router-link>
-                      </Menu-item>
-
+                    </Menu-item>
+                    <Menu-item name="1.1">
+                      <subscription :value="$store.state.subscription" :token="$store.state.token" @on-change="handleChange"></subscription>
+                    </Menu-item>
                     <Menu-item name="2">
                       <Submenu name="2">
                         <template slot="title">
@@ -44,7 +46,12 @@
 </template>
 <script>
   import psl from 'psl'
+  // import axios from 'axios'
+  import subscription from '@/components/subscription'
   export default {
+    components: {
+      subscription
+    },
     computed: {
       toggeleEnable () {
         return !this.$store.state.sidenavpin || (!this.$store.state.sidenavtoggle)
@@ -59,6 +66,12 @@
         this.$store.commit('SET_USER', null)
         this.$store.commit('SET_ROLE', null)
         this.$router.push('/login')
+      },
+      handleChange (value) {
+        console.log('value parent', value)
+        // console.log('', value)
+        this.$store.state.subscription = value
+        // axios.defaults.headers.common['subscriptionid'] = value
       }
     }
   }

@@ -284,9 +284,13 @@ const routes = [{
     name: 'listview',
     component: list
   }, {
-    path: '/schemaview',
+    path: '/schemaview/:id/:stateid',
     name: 'schemaview',
-    component: SchemaView
+    component: SchemaView,
+    props: {
+      stateid: String,
+      required: false
+    }
   }]
 }]
 export default routes
