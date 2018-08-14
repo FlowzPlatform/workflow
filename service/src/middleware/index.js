@@ -8,20 +8,22 @@ module.exports = function () {
   // in Express the order matters
   const app = this; // eslint-disable-line no-unused-vars
 
-  subscription.moduleResource.moduleName = 'workflow';
-  let registerAppModule = {
-    'flowz': ['create','update', 'patch', 'find', 'get', 'remove'],
-    'finstance': ['create','update', 'patch', 'find', 'get', 'remove'],
-    'flowzdata': ['create','update', 'patch', 'find', 'get', 'remove'],
-    'schema': ['create','update', 'patch', 'find', 'get', 'remove']
-  };
+  app.use(function(req, res, next) { req.feathers.headers= req.headers; next(); })
 
-  subscription.moduleResource.registerAppModule = registerAppModule;
-  subscription.moduleResource.appRoles = ['Superadmin', 'Admin', 'Manager', 'Team-Lead','Client', 'CSR'];
-  subscription.registeredAppModulesRole();
-  subscription.registerDynamicHooks(app, registerAppModule);
+  // subscription.moduleResource.moduleName = 'workflow';
+  // let registerAppModule = {
+  //   'flowz': ['create','update', 'patch', 'find', 'get', 'remove'],
+  //   'finstance': ['create','update', 'patch', 'find', 'get', 'remove'],
+  //   'flowzdata': ['create','update', 'patch', 'find', 'get', 'remove'],
+  //   'schema': ['create','update', 'patch', 'find', 'get', 'remove']
+  // };
 
-  app.use(flowzError());
-  app.use(notFound());
-  app.use(handler());
+  // subscription.moduleResource.registerAppModule = registerAppModule;
+  // subscription.moduleResource.appRoles = ['Superadmin', 'Admin', 'Manager', 'Team-Lead','Client', 'CSR'];
+  // subscription.registeredAppModulesRole();
+  // subscription.registerDynamicHooks(app, registerAppModule);
+
+  // app.use(flowzError());
+  // app.use(notFound());
+  // app.use(handler());
 };

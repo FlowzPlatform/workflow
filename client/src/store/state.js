@@ -22,5 +22,6 @@ export default {
   isLoggedIn: false,
   limitPage: 5,
   activeFlow: null,
-  activeList: null
+  activeList: null,
+  subscription: ''
 }
