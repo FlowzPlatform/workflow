@@ -31,6 +31,7 @@ var webpackConfig = merge(baseWebpackConfig, {
     new webpack.DefinePlugin({
       'process.env': env
     }),
+    new webpack.EnvironmentPlugin(['domainKey']),
     new webpack.optimize.UglifyJsPlugin({
       compress: {
         warnings: false

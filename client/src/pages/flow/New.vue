@@ -14,7 +14,7 @@
           <Split style="height: calc(100vh - 97.51px);">
             <SplitArea :size="80" :minSize="800">
               <div id="js-canvas" style="width: 100%;height: calc(100vh - 110px);position: relative;"></div>
-            </SplitArea >
+            </SplitArea>
             <SplitArea :size="20" :minSize="200">
               <Tooltip content="Save" placement="left" class="upload-icon">
                 <a v-if="!btnLoading" @click="handleSave">
@@ -34,6 +34,7 @@
 </template>
 
 <script>
+  const subscriptionNew = require('flowz-subscription')
   import _ from 'lodash'
   import schemaModel from '@/api/schema'
   import approvalModel from '@/api/approval'
@@ -63,6 +64,7 @@
     },
     data () {
       return {
+        permissions: ['read', 'write'],
         loading: true,
         btnLoading: false,
         processVar: null,
@@ -86,11 +88,60 @@
           })
         let x2js = new X2JS()
         let data = x2js.xml2js(xmlData)
+
+        // console.log('Final Data: Final Data:Final Data:Final Data: ', data.definitions.process['_camunda:addedRoles'])
+        let userRoles = null
+        if (data.definitions.process['_camunda:addedRoles']) {
+          userRoles = data.definitions.process['_camunda:addedRoles']
+        }
+        let userRolesArr = []
+        if (userRoles !== null) {
+          userRolesArr = userRoles.split(',')
+        } else {
+          userRolesArr = []
+        }
+        console.log('userRolesArr: ', userRolesArr)
+
         if (data.definitions.process._name !== undefined) {
           let flowObject = {}
           flowObject.ProcessName = data.definitions.process._name
           flowObject.xml = xmlData
+          flowObject.roles = userRoles
           flowObject.json = await this.generateJson(xmlData)
+
+          let actions = []
+          console.log('actions: ', flowObject.json.processList)
+          let filteredProcesses = await _.filter(flowObject.json.processList, (o) => {
+            console.log('type: ', o.type)
+            if (o.type !== 'start' && o.type !== 'endevent' && o.type !== 'intermediatethrowevent') {
+              return o
+            }
+            // return (o.type !== 'start' || o.type !== 'endevent' || o.type !== 'intermediatethrowevent')
+          })
+
+          for (var i = 0; i < filteredProcesses.length; i++) {
+            console.log('id: ', filteredProcesses[i].id)
+            actions.push(filteredProcesses[i].id)
+          }
+          console.log('actions: ', actions)
+
+          let actionsObj = {}
+          for (let i = 0; i < actions.length; i++) {
+            // let str = '\'' + actions[i] + '\':' + this.permissions
+            actionsObj[actions[i]] = this.permissions
+          }
+
+          console.log('actions obj: ', actionsObj)
+          subscriptionNew.moduleResource.moduleName = 'workflow_' + this.$route.params.id
+  
+          let registerAppModuleNew = actionsObj
+
+          console.log('registerAppModuleNew: ', registerAppModuleNew)
+  
+          subscriptionNew.moduleResource.registerAppModule = registerAppModuleNew
+          subscriptionNew.moduleResource.appRoles = userRolesArr
+          subscriptionNew.registeredAppModulesRole()
+
           flowObject.svg = svgData
           // console.log('xmlData', flowObject.json)
           flowObject.allowedusers = _.union(...(_.chain(_.union(...(_.map(flowObject.json.processList, m => {
@@ -161,6 +212,7 @@
               camunda: camundaModdleDescriptor
             }
           })
+          // console.log('this.bpmnXML', this.bpmnXML)
           this.bpmnModeler.importXML(this.bpmnXML, function (err) {
             if (err) {
               console.error(err)
@@ -487,8 +539,11 @@
           response[2].splice(0, 0, { name: '---select---', value: 0 })
           if (this.$route.params.id !== undefined) {
             this.bpmnXML = flowz.get(this.$route.params.id).then(async (result) => {
+              console.log('result Data: ', result.data)
               this.bpmnXML = result.data.xml
               await this.initBPMN({
+                cdata: result.data,
+                id: this.$route.params.id,
                 schema: response[0],
                 approval: response[1],
                 emailtemplate: response[2],
@@ -565,7 +620,7 @@
   .palette-img > img {
     padding: 10px;
   }
-  // #js-properties-panel {
+  // #js-properties-panel {init
   //   position: absolute;
   //   top: -15px;
   //   bottom: 0;

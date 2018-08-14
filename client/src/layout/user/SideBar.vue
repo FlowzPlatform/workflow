@@ -37,7 +37,7 @@
           <template v-else>
             <Submenu :name="key" v-for="(item, key, index) in flowzList" :key="index">
               <template slot="title">
-                  <Icon type="ios-people" />
+                  <Icon type="ios-shuffle" />
                   {{key}}
               </template>
               <Menu-item :name="subItem" v-for="(subItem, inx) in item" :key="inx">

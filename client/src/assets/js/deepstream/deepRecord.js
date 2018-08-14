@@ -1,7 +1,7 @@
  // <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
  // <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.10/lodash.min.js"></script>
-const axios = require('axios')
-const _ = require('lodash')
+import axios from 'axios'
+import _ from 'lodash'
 
 let options = {
   flowzApiURL: 'https://api.flowzcluster.tk/eng/flowz/',
