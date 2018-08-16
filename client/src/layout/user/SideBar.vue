@@ -106,13 +106,6 @@ export default {
       // console.log(item, subitem)
       this.$router.push('/schemaview/' + item.id + '/' + subitem.id)
     },
-    // calculateProcessList (list) {
-    //   return _.remove(list, (m) => {
-    //     if (m.type !== 'start' && m.type !== 'endevent' && m.type !== 'intermediatethrowevent') {
-    //       return m
-    //     }
-    //   })
-    // },
     async init () {
       this.loading = true
       flowzModal.get(null, {

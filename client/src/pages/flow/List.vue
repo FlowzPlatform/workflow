@@ -13,7 +13,8 @@
         <div class="table-wrapper">
           <!-- {{tableData}} -->
             <h4 align="center" style="margin-bottom: 10px">{{titleCase(module)}}</h4>
-            <table class="table-bordered" style="font-size: 115%; width: 100%">
+            <div v-if="tableData != undefined || tableData != null">
+              <table align="center" class="table-bordered" style="font-size: 115%;">
                 <thead class="header">
 
                 </thead>
@@ -96,7 +97,12 @@
                         </template>
                     </template>
                 </tbody>
-            </table>
+              </table>
+            </div>
+            <div v-else>
+              <p align="center"><small>No Data</small></p>
+            </div>
+
         </div>
 
       </div>
@@ -390,6 +396,9 @@ export default {
                   size: 'large',
                   icon: 'arrow-right-b'
                 },
+                domProps: {
+                  title: 'Start Instance'
+                },
                 style: {
                   marginRight: '3px',
                   padding: '0px',
@@ -408,6 +417,9 @@ export default {
                   size: 'large',
                   icon: 'settings'
                 },
+                domProps: {
+                  title: 'Set Permission'
+                },
                 style: {
                   color: '#008080',
                   marginRight: '3px',
@@ -425,6 +437,9 @@ export default {
                   type: 'text',
                   size: 'large',
                   icon: 'edit'
+                },
+                domProps: {
+                  title: 'Edit Flow'
                 },
                 style: {
                   color: '#7DE144',
@@ -461,6 +476,9 @@ export default {
                   type: 'text',
                   size: 'large',
                   icon: 'android-delete'
+                },
+                domProps: {
+                  title: 'Delete Flow'
                 },
                 style: {
                   marginRight: '3px',
