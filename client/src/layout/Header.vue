@@ -16,12 +16,12 @@
         <i-col :span="18">
             <Row type="flex" justify="end">
                 <div class="layout-nav">
-                    <Menu-item name="1">
+                    <!-- <Menu-item name="1">
                         <router-link to="/admin/approval">
                             <Icon type="filing" :size="14"></Icon>
                             Approval
                         </router-link>
-                    </Menu-item>
+                    </Menu-item> -->
                     <Menu-item name="2">
                         <router-link to="/admin/schema">
                             <Icon type="filing" :size="14"></Icon>
