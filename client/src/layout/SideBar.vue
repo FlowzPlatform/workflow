@@ -1,6 +1,6 @@
 <template>
   <div style="width: inherit;">
-    <div  style="background: rgb(54, 62, 79); height: 100%; position: fixed;width: inherit;">
+    <div id="style-5" style="background: rgb(54, 62, 79); height: 100%; overflow-y: auto; position: fixed;width: inherit;">
       <Row style="padding: 16.3px 10px;border-bottom: 1px solid #15171b;">
         <Col :span="20" :offset="2">
           <Col :span="3">
@@ -103,10 +103,16 @@
           <template v-else>
             <Submenu :name="index" v-for="(item, index) in flowzList" :key="index">
               <template slot="title">
-                  <Icon type="ios-people" />
+                  <!-- <Icon type="ios-people" /> -->
                   {{item.json.name}}
-                  <span style="float:right;">
+                  
+                  <span style="margin-left: 10px;">
                     <Badge :count="item.count"  class-name="demo-badge-alone"></Badge>
+                  </span>
+                  <span style="float:right;" title="Preview Progress" @click.prevent="viewProgress(item)">
+                    <!-- <Icon type="android-analytics" /> -->
+                    <!-- <Icon type="ios-pie" size="24"/> -->
+                    <i class="fa fa-line-chart"></i>
                   </span>
               </template>
               <template
@@ -118,6 +124,7 @@
                   :key="inx"
                   class="submentItem"
                 >
+                
                   <div :title="subItem.id">
                     <a @click="handleSubmenu(item, subItem)">
                       {{subItem.name}}
@@ -216,6 +223,10 @@
       }
     },
     methods: {
+      viewProgress (item) {
+        console.log('item: ', item)
+        this.$router.push('/admin/flow/analytics/' + item.id)
+      },
       addNewFlow () {
         this.$store.dispatch('removeXMLtoLocalStorage')
         this.$router.push('/admin/flow/new')
@@ -707,6 +718,13 @@
   }
 </script>
 <style scoped>
+  .submentItem a {
+    color: #c0c0c0;
+  }
+  .submentItem a:hover{
+    color: #fff;
+  }
+
   #style-5::-webkit-scrollbar-track
   {
     -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
@@ -715,7 +733,7 @@
 
   #style-5::-webkit-scrollbar
   {
-    width: 10px;
+    width: 7px;
     background-color: #666;
   }
 
@@ -726,12 +744,6 @@
     /*background-image: -webkit-gradient(linear, 0 0, 0 100%,
                        color-stop(.5, rgba(255, 255, 255, .2)),
                color-stop(.5, transparent), to(transparent));*/
-  }
-  .submentItem a {
-    color: #c0c0c0;
-  }
-  .submentItem a:hover{
-    color: #fff;
   }
 </style>
 <style>
@@ -796,4 +808,8 @@
   .demo-badge-alone {
     background-color: #5cb85c !important;
   }
+  .ivu-menu-vertical .ivu-menu-submenu-title-icon{
+    float: left;
+  }
+  
 </style>
