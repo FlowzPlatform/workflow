@@ -43,6 +43,7 @@ import ApprovalList from '@/pages/approval/List'
 import ApprovalNew from '@/pages/approval/New'
 import Reply from '@/pages/approval/MailReply'
 import FormReply from '@/pages/approval/FormReply'
+import Analytics from '@/pages/flow/analytics'
 // User area
 // import UserDashboard from '@/pages/user/dashboard'
 // import ManageBPMNPlugin from '@/pages/BPMNPlugins/Manage'
@@ -161,6 +162,15 @@ const routes = [
             name: 'flow/list',
             component: FlowzList,
             meta: { description: 'Flow' }
+          },
+          {
+            path: 'analytics/:id',
+            alias: '',
+            component: Analytics,
+            name: 'Analytics',
+            props: {
+              id: String
+            }
           },
           {
             path: 'new',

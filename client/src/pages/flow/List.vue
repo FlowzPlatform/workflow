@@ -12,8 +12,8 @@
           
         <div class="table-wrapper">
           <!-- {{tableData}} -->
-            <h4 align="center" style="margin-bottom: 10px">{{titleCase(module)}}</h4>
-            <div v-if="tableData != undefined || tableData != null">
+            <h4 align="center" style="margin-bottom: 10px">{{titleCase(selectedFlowName)}}</h4>
+            <div v-if="showTable == true">
               <table align="center" class="table-bordered" style="font-size: 115%;">
                 <thead class="header">
 
@@ -35,7 +35,7 @@
                                 <tr class="row">
                                     <template v-for="(field,fieldNumber) in fields[moduleName]">
                                         <td v-if="fieldNumber ==0" style="padding:10px;font-weight:bold;border-right: 3px solid #cdd0d4;">
-                                            {{ titleCase(item.service) }}
+                                            {{ item.serviceName }}
                                         </td>
                                         <td v-else>
                                             <table class="table-bordered" style="width:100%">
@@ -280,6 +280,7 @@ export default {
   },
   data () {
     return {
+      showTable: false,
       isDone: 'abc',
       loadingPermisions: true,
       tableData: null,
@@ -290,6 +291,7 @@ export default {
       currentMsgInst: this.$store.state.currentMsgInst,
       instanceId: null,
       module: null,
+      selectedFlowName: null,
       selectedFlowObject: null,
       permissionsModal: false,
       loading: true,
@@ -479,8 +481,10 @@ export default {
       .catch(function (error) {
         console.log(error)
       })
+      this.showTable = false
       this.tableData = null
       this.instanceId = this.selectedFlowObject.id
+      this.selectedFlowName = this.selectedFlowObject.ProcessName
       this.module = 'workflow_' + this.selectedFlowObject.id
       this.getRoles('workflow_' + this.selectedFlowObject.id)
       // Permissions.methods.getRoles('workflow_' + this.selectedFlowObject.id)
@@ -805,8 +809,8 @@ export default {
         return obj
       }))
     },
-    getName: function (taskId) {
-      return new Promise(async resolve => {
+    getName: async function (taskId) {
+      let respond = await Promise(async resolve => {
         taskId = this.titleCase(taskId)
         deepRecord.deepRecord.getCurrentTraget(this.instanceId, taskId).then(res => {
           console.log('res: ', res)
@@ -818,7 +822,7 @@ export default {
           resolve('ERROR')
         })
       })
-      // console.log('Name: ', JSON.stringify(name))
+      console.log('Name: ', respond)
       // return name
     },
     getAllPermissions: async function (appName, totalApps) {
@@ -919,7 +923,11 @@ export default {
         console.log('arrResources: ', arrResources)
         // self.tableData = arrResources
         // self.tableData = ['hi']
-        self.tableData = _.extend(self.tableData, arrResources)
+        self.tableData = await _.extend(self.tableData, arrResources)
+        console.log('self.tableData.length: ', self.tableData)
+        // for (let k = 0; k < self.tableData.length; k++) {
+        //   console.log('task id: ', self.tableData[k])
+        // }
         console.log('table data: ', JSON.stringify(self.tableData))
         self.loadingPermisions = false
       }).catch(function (error) {
@@ -927,10 +935,23 @@ export default {
         console.log(error)
       })
       self.loadingPermisions = false
+
       for (var tblData in self.tableData) {
-        console.log('table data for loop: ', self.tableData)
+        console.log('table data for loop: ', self.tableData[tblData][0].service)
+        // get task name from task id
+        for (let i = 0; i < self.tableData[tblData].length; i++) {
+          let taskId = self.titleCase(self.tableData[tblData][i].service)
+          await deepRecord.deepRecord.getCurrentTraget(self.instanceId, taskId).then(res => {
+            console.log('res: ', res)
+            let name = res.name
+            self.tableData[tblData][i]['serviceName'] = name
+          }).catch(err => {
+            console.log('err: ', err)
+          })
+        }
         await self.getAllPermissions(tblData, Object.keys(self.tableData).length)
       }
+      this.showTable = true
       // axios.get(config.subscriptionUrl+'register-resource', {
       // headers: {
       // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
@@ -1196,7 +1217,7 @@ export default {
 
   @media (min-width: 600px) {
     .modal-content {
-      max-width: 600px;
+      max-width: 800px;
       top: 10%;
       right: 0;
       margin: 0 auto;
