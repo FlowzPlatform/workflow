@@ -394,8 +394,6 @@
         }
       },
       getSMTPProperties (proccess) {
-        console.log('process..entry', proccess)
-        console.log('......', proccess['workerType'])
         if (proccess.workerType === 'sendproofmail') {
           console.log('here', proccess._host)
           return {
