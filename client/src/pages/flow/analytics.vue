@@ -1,6 +1,24 @@
 <template>
   <div class="Analytics">
-  	<h3 class="card">Analytics: {{ flowName }}</h3>
+    <div class="row">
+      <div class="col-md-6">
+        <h3 class="card">Analytics: {{ flowName }}</h3>
+      </div>
+      <div class="col-md-6">
+        <div class="legend card">
+          <!-- <strong>Legend</strong> -->
+          <ul>
+              <li><strong>Legend:</strong></li>
+              <li><span style="background-color:#00FF00"></span>Completed</li>
+              <li><span style="background-color:#FF0000"></span>Current</li>
+              <li><span style="background-color:#EEEEEE"></span>Pending</li>
+              <!-- <li><span style="background-color:#1F6980"></span>Zone 4 - Thursday</li> -->
+              <!-- <li><span style="background-color:#AB156A"></span>Zone 5 - Friday</li> -->
+              </ul>
+       </div>
+      </div>
+    </div>
+
     <div>
       <table class="table table-bordered table-hover">
         <thead>
@@ -213,6 +231,39 @@ export default {
     background-color: #fff;
     margin: 10px 0;
     padding: 20px;
+  }
+
+  .legend {
+    /*background: #fff;*/
+    /*background: rgba(255, 255, 255, 0.8);*/
+    left: 80px;
+    top: 20px;
+    padding: 22px;
+    /*border: 1px solid;*/
+  }
+  .legend h4 {
+    margin: 0 0 10px;
+    text-transform: uppercase;
+    font-family: sans-serif;
+    text-align: center;
+  }
+  .legend ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+  }
+  .legend li { 
+    padding-bottom: 5px; 
+    display: inline-block;
+    margin-left: 10px;
+  }
+  .legend span {
+    display: inline-block;
+    width: 30px;
+    /*height: 3px;*/
+    margin-right: 6px;
+    /*margin-top: -3px;*/
+    padding-top: 10px; 
   }
 </style>
 <style>
