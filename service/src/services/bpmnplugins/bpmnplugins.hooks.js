@@ -1,6 +1,6 @@
 let async = require('asyncawait/async');
 let await = require('asyncawait/await');
-const errors = require('feathers-errors');
+const errors = require('@feathersjs/errors');
 let config = require('config');
 var axios = require('axios');
 var _ = require('lodash');

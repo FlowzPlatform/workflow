@@ -1,5 +1,5 @@
 let email = require('emailjs')
-const errors = require('feathers-errors');
+const errors = require('@feathersjs/errors');
 
 let user = process.env.SMTP_USER || ''
 let password = process.env.SMTP_PASS || ''

@@ -17,6 +17,7 @@ const databases = require('./databases/databases.service.js');
 const finstance = require('./finstance/finstance.service.js');
 const flowzdata = require('./flowzdata/flowzdata.service.js');
 const sendmail = require('./sendmail/sendmail.service.js');
+const emailReceive = require('./email-receive/email-receive.service.js');
 module.exports = function() {
   const app = this; // eslint-disable-line no-unused-vars
   app.configure(schema);
@@ -38,4 +39,5 @@ module.exports = function() {
   app.configure(finstance);
   app.configure(flowzdata);
   app.configure(sendmail);
+  app.configure(emailReceive);
 };
