@@ -42,6 +42,7 @@ import flowLog from '@/pages/flow/systemLog'
 import Login from '@/pages/Login'
 // import EmailVerification from '@/pages/EmailVerification'
 import Register from '@/pages/Register'
+
 // // Approval area
 // import ApprovalList from '@/pages/approval/List'
 // import ApprovalNew from '@/pages/approval/New'
@@ -166,6 +167,15 @@ const mroutes = [
             name: 'flow/list',
             component: FlowzList,
             meta: { description: 'Flow' }
+          },
+          {
+            path: 'analytics/:id',
+            alias: '',
+            component: Analytics,
+            name: 'Analytics',
+            props: {
+              id: String
+            }
           },
           {
             path: 'new',

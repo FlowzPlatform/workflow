@@ -11,6 +11,9 @@ then
     RANCHER_SECRETKEY="$RANCHER_SECRETKEY_MASTER";
     RANCHER_URL="$RANCHER_URL_MASTER";
     DOMAINKEY="$DOMAINKEY_MASTER";
+    SMTP_USER="$SMTP_USER_MASTER";
+    SMTP_PASS="$SMTP_PASS_MASTER";
+    SMTP_HOST="$SMTP_HOST_MASTER";
   }
 elif [ "$TRAVIS_BRANCH" = "develop" ]
 then
@@ -25,6 +28,9 @@ then
       RANCHER_SECRETKEY="$RANCHER_SECRETKEY_DEVELOP";
       RANCHER_URL="$RANCHER_URL_DEVELOP";
       DOMAINKEY="$DOMAINKEY_DEVELOP";
+      SMTP_USER="$SMTP_USER_DEVELOP";
+      SMTP_PASS="$SMTP_PASS_DEVELOP";
+      SMTP_HOST="$SMTP_HOST_DEVELOP";
   }
 elif [ "$TRAVIS_BRANCH" = "staging" ]
 then
@@ -39,6 +45,9 @@ then
       RANCHER_SECRETKEY="$RANCHER_SECRETKEY_STAGING";
       RANCHER_URL="$RANCHER_URL_STAGING";
       DOMAINKEY="$DOMAINKEY_STAGING";
+      SMTP_USER="$SMTP_USER_STAGING";
+      SMTP_PASS="$SMTP_PASS_STAGING";
+      SMTP_HOST="$SMTP_HOST_STAGING";
   }  
 else
   {
@@ -52,6 +61,9 @@ else
       RANCHER_SECRETKEY="$RANCHER_SECRETKEY_QA";
       RANCHER_URL="$RANCHER_URL_QA";
       DOMAINKEY="$DOMAINKEY_QA";
+      SMTP_USER="$SMTP_USER_QA";
+      SMTP_PASS="$SMTP_PASS_QA";
+      SMTP_HOST="$SMTP_HOST_QA";
   }
 fi
 
@@ -85,5 +97,5 @@ curl -u ""$RANCHER_ACCESSKEY":"$RANCHER_SECRETKEY"" \
 -H 'Accept: application/json' \
 -H 'Content-Type: application/json' \
 -d '{
-     "inServiceStrategy":{"launchConfig": {"imageUuid":"docker:'$USERNAME'/flowz_backend_flowz:'$TAG'","kind": "container","labels":{"io.rancher.container.pull_image": "always","io.rancher.scheduler.affinity:host_label": "machine=cluster-flowz"},"ports": ["3033:3033/tcp","4033:4033/tcp"],"environment": {"rauth":"'"$RAUTH"'","cert":"'"$CERT_FLOWZ_BACKEND_FLOWZ"'","RDB_HOST":"'"$RDB_HOST"'","RDB_PORT":"'"$RDB_PORT"'","domainKey":"'"$DOMAINKEY"'"},"healthCheck": {"type": "instanceHealthCheck","healthyThreshold": 2,"initializingTimeout": 60000,"interval": 2000,"name": null,"port": 3033,"recreateOnQuorumStrategyConfig": {"type": "recreateOnQuorumStrategyConfig","quorum": 1},"reinitializingTimeout": 60000,"responseTimeout": 60000,"strategy": "recreateOnQuorum","unhealthyThreshold": 3},"networkMode": "managed"}},"toServiceStrategy":null}' \
+     "inServiceStrategy":{"launchConfig": {"imageUuid":"docker:'$USERNAME'/flowz_backend_flowz:'$TAG'","kind": "container","labels":{"io.rancher.container.pull_image": "always","io.rancher.scheduler.affinity:host_label": "machine=cluster-flowz"},"ports": ["3033:3033/tcp","4033:4033/tcp"],"environment": {"rauth":"'"$RAUTH"'","cert":"'"$CERT_FLOWZ_BACKEND_FLOWZ"'","RDB_HOST":"'"$RDB_HOST"'","RDB_PORT":"'"$RDB_PORT"'","domainKey":"'"$DOMAINKEY"'","SMTP_USER":"'"$SMTP_USER"'","SMTP_PASS":"'"$SMTP_PASS"'","SMTP_HOST":"'"$SMTP_HOST"'"},"healthCheck": {"type": "instanceHealthCheck","healthyThreshold": 2,"initializingTimeout": 60000,"interval": 2000,"name": null,"port": 3033,"recreateOnQuorumStrategyConfig": {"type": "recreateOnQuorumStrategyConfig","quorum": 1},"reinitializingTimeout": 60000,"responseTimeout": 60000,"strategy": "recreateOnQuorum","unhealthyThreshold": 3},"networkMode": "managed"}},"toServiceStrategy":null}' \
 $RANCHER_URL/v2-beta/projects/$ENV_ID/services/$SERVICE_ID_BACKEND?action=upgrade

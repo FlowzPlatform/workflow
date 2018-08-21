@@ -12,8 +12,8 @@
           
         <div class="table-wrapper">
           <!-- {{tableData}} -->
-            <h4 align="center" style="margin-bottom: 10px">{{titleCase(module)}}</h4>
-            <div v-if="tableData != undefined || tableData != null">
+            <h4 align="center" style="margin-bottom: 10px">{{titleCase(selectedFlowName)}}</h4>
+            <div v-if="showTable == true">
               <table align="center" class="table-bordered" style="font-size: 115%;">
                 <thead class="header">
 
@@ -35,7 +35,7 @@
                                 <tr class="row">
                                     <template v-for="(field,fieldNumber) in fields[moduleName]">
                                         <td v-if="fieldNumber ==0" style="padding:10px;font-weight:bold;border-right: 3px solid #cdd0d4;">
-                                            {{ titleCase(item.service) }}
+                                            {{ item.serviceName }}
                                         </td>
                                         <td v-else>
                                             <table class="table-bordered" style="width:100%">
@@ -107,6 +107,60 @@
 
       </div>
     </div>
+
+    <!-- <Button type="primary" @click="modal1 = true">Display dialog box</Button> -->
+    <Modal
+        v-model="modal1"
+        title="Invite"
+        @on-ok="ok"
+        @on-cancel="cancel" width='1000'>
+        <div>
+            <div class="container-fluid">
+            <div class="row" style="background-color:#ffffff">
+            <div class="col-md-4">
+                <el-input placeholder="Please enter email id" v-model="input"></el-input>
+            </div>  
+            <div class="col-md-3" >
+                <el-select v-model="value1" placeholder="Select Role">
+                <el-option
+                v-for="item in options"
+                :key="item.value1"
+                :label="item.label1"
+                :value="item.value1">
+                </el-option>
+            </el-select>
+            </div>
+            <div class="col-md-5">
+                <div class="col-md-8">
+                <el-select v-model="value2" placeholder="Select subscription">
+                    <el-option
+                    v-for="item in options2"
+                    :key="item.value2"
+                    :label="item.label2"
+                    :value="item.value2">
+                    </el-option>
+                </el-select>
+                <!-- <subscription :token="$store.state.token" :value="value2" @on-change="handleAssign"></subscription> -->
+                </div>
+                <div class="col-md-4">
+            <el-button type="primary" :loading="loading" @click="inviteNow()">Invite Now</el-button>
+                </div>
+            </div>
+            </div>
+            <Tabs  style="margin-top: 20px">
+                <TabPane label="Own Subscription">
+                    <Table :columns="columns3" :data="data3" stripe></Table>
+                </TabPane>
+                <TabPane label="Assigned Subscription">
+                    <Table :columns="columns2" :data="data2" stripe></Table>
+                </TabPane>
+                <TabPane label="Assigned History">
+                    <Table :columns="columns4" :data="data4" stripe></Table>
+                </TabPane>
+            </Tabs>
+        </div>
+        </div>
+    </Modal>
 
     <!-- <Modal v-if="selectedFlowObject != null"
         v-model="permissionsModal"
@@ -261,25 +315,35 @@ import approvalModel from '@/api/approval'
 import instanceModel from '@/api/flowzinstance'
 import expandRow from './table-expand.vue'
 import axios from 'axios'
+import psl from 'psl'
+import subscription from '@/components/subscription'
 
-import Vue from 'vue'
-import VueWidgets from 'vue-widgets'
-import 'vue-widgets/dist/styles/vue-widgets.css'
+// import Vue from 'vue'
+// import VueWidgets from 'vue-widgets'
+// import 'vue-widgets/dist/styles/vue-widgets.css'
 import config from '../../config/index'
+import expandRow2 from './assigned_invite_table-expand.vue'
+let subscriptionUrl = config.subscriptionUrl
 
-Vue.use(VueWidgets)
+// Vue.use(VueWidgets)
 
 // import Permissions from './permissions'
 const deepRecord = require('../../assets/js/deepstream/deepRecord.js')
+import expandInviteRow from './own_assign.vue'
+import moment from 'moment'
+import Cookies from 'js-cookie'
 
 export default {
   name: 'Flowz',
   components: {
-    expandRow
+    expandRow,
+    expandRow2,
+    subscription
     // 'permissions': Permissions
   },
   data () {
     return {
+      showTable: false,
       isDone: 'abc',
       loadingPermisions: true,
       tableData: null,
@@ -290,8 +354,11 @@ export default {
       currentMsgInst: this.$store.state.currentMsgInst,
       instanceId: null,
       module: null,
+      selectedFlowName: null,
       selectedFlowObject: null,
       permissionsModal: false,
+      inviteModal: false,
+      modal1: false,
       loading: true,
       limit: 10,
       cpage: 1,
@@ -392,6 +459,24 @@ export default {
                 props: {
                   type: 'text',
                   size: 'large',
+                  icon: 'ios-personadd'
+                },
+                style: {
+                  marginRight: '3px',
+                  padding: '0px',
+                  fontSize: '20px',
+                  color: '#703636'
+                },
+                on: {
+                  click: () => {
+                    this.showInviteDialog(params)
+                  }
+                }
+              }, ''),
+              h('Button', {
+                props: {
+                  type: 'text',
+                  size: 'large',
                   icon: 'android-delete'
                 },
                 domProps: {
@@ -430,6 +515,138 @@ export default {
             ])
           }
         }
+      ],
+      options: '',
+      value1: '',
+      options2: '',
+      value2: '',
+      roleOption1: '',
+      roleValue1: '',
+      input: '',
+      // loading :false,
+      data2: [],
+      data3: [],
+      data4: [],
+      assigned_Arr2: [],
+      assigned_Arr3: [],
+      assigned_Arr4: [],
+      columns2: [
+        {
+          type: 'expand',
+          width: 50,
+          render: (h, params) => {
+            return h(expandInviteRow, {
+              props: {
+                row: params.row
+              }
+            })
+          }
+        },
+        {
+          title: 'Subscription Name',
+          key: 'name'
+        },
+        {
+          title: 'Subscription Id',
+          key: 'subscriptionId'
+        },
+        {
+          title: 'Assigned By',
+          key: 'invitedBy'
+        }
+      ],
+      columns3: [
+        {
+          type: 'expand',
+          width: 50,
+          render: (h, params) => {
+            return h(expandRow2, {
+              props: {
+                row: params.row
+              }
+            })
+          }
+        },
+        {
+          title: 'Subscription Name',
+          key: 'name'
+        },
+        {
+          title: 'Subscription Id',
+          key: 'subscriptionId'
+        },
+        {
+          title: 'Role',
+          key: 'role',
+          render: (h, params) => {
+            return h('div', [
+              h('p', this.capitalize(params.row.role))
+            ])
+          }
+        }
+      ],
+      columns4: [
+        {
+          title: 'Subscription Name',
+          key: 'name'
+        },
+        {
+          title: 'Subscription Id',
+          key: 'subscriptionId'
+        },
+        {
+          title: 'Role',
+          key: 'role',
+          render: (h, params) => {
+            return h('div', [
+              h('strong', this.capitalize(params.row.role[Object.keys(params.row.role)]))
+            ])
+          }
+        },
+        {
+          title: 'Module',
+          key: 'role',
+          render: (h, params) => {
+            return h('div', [
+              h('p', this.capitalize(Object.keys(params.row.role)[0]))
+            ])
+          }
+        },
+        {
+          title: 'Assigned By',
+          key: 'fromEmail'
+        },
+        {
+          title: 'Assigned Date',
+          key: 'assignDate',
+          render: (h, params) => {
+            var date1 = moment(params.assignDate).format('DD-MMM-YYYY')
+            return h('div', [
+              h('span', date1)
+            ])
+          }
+        },
+        {
+          title: 'Un-Assigned Date',
+          key: 'unassignDate',
+          render: (h, params) => {
+            var date1 = moment(params.unassignDate).format('DD-MMM-YYYY')
+            return h('div', [
+              h('span', date1)
+            ])
+          }
+        },
+        {
+          title: 'Assign Period',
+          key: '',
+          render: (h, params) => {
+            var now = moment(params.assignDate)
+            var end = moment(params.unassignDate)
+            var duration = moment.duration(now.diff(end))
+            var days = duration.asDays()
+            return days + ' Days'
+          }
+        }
       ]
     }
   },
@@ -445,6 +662,7 @@ export default {
     //   console.log(error)
     // })
     this.init()
+    this.getDataOfSubscriptionUser()
   },
   feathers: {
     'flowz-instance': {
@@ -479,13 +697,170 @@ export default {
       .catch(function (error) {
         console.log(error)
       })
+      this.showTable = false
       this.tableData = null
       this.instanceId = this.selectedFlowObject.id
+      this.selectedFlowName = this.selectedFlowObject.ProcessName
       this.module = 'workflow_' + this.selectedFlowObject.id
       this.getRoles('workflow_' + this.selectedFlowObject.id)
       // Permissions.methods.getRoles('workflow_' + this.selectedFlowObject.id)
       console.log('Permissions: ', Permissions)
       this.permissionsModal = true
+    },
+    ok () {
+      this.$Message.info('Clicked ok')
+    },
+    cancel () {
+      this.$Message.info('Clicked cancel')
+    },
+    handleAssign (value) {
+      console.log(value)
+      this.value2 = value
+    },
+    showInviteDialog (query) {
+      console.log('query: ', query)
+      if (query.row.roles !== undefined) {
+        this.flowId = 'Workflow_' + query.row.id
+        let temp1 = query.row.roles.split(',')
+        let roles = []
+        for (let index = 0; index < temp1.length; index++) {
+          roles.push({
+            value1: temp1[index],
+            label1: temp1[index]
+          })
+          console.log({roles})
+          this.options = roles
+        }
+        this.modal1 = true
+      } else {
+        alert('First add roles')
+      }
+    },
+    capitalize (str) {
+      str = str[0].toUpperCase() + str.slice(1)
+      return str
+    },
+    async getHistory () {
+      axios.get(subscriptionUrl + 'subscription-invitation', {
+        // axios.get('http://172.16.230.86:3030/subscription-invitation', {
+        headers: {
+          'Authorization': Cookies.get('auth_token')
+        },
+        params: {isDeleted: true, own: false}
+      })
+      .then(response => {
+        this.data4 = response.data.data
+      })
+      .catch((err) => {
+        console.log('Error:', err)
+      })
+    },
+    async getDataOfSubscriptionUser () {
+      this.$Loading.start()
+      let subId = []
+      // await axios.get(subscriptionUrl + 'register-roles', {
+      //   params: {module: 'webbuilder'}
+      // })
+      // .then(response => {
+      //   let newData = response.data.data
+      //   for (let index = 0; index < newData.length; index++) {
+      //     roleId.push({
+      //       value1: newData[index].role,
+      //       label1: newData[index].role
+      //     })
+      //   }
+      //   this.options = roleId
+      // })
+      // .catch((err) => {
+      //   console.log(err)
+      // })
+      axios.get(config.loginURL + '/userdetails', {
+        headers: {
+          authorization: Cookies.get('auth_token')
+        }
+      })
+      .then(response => {
+        console.log({response})
+        let newData = response.data.data.package
+        for (var key in newData) {
+          if (newData.hasOwnProperty(key)) {
+            if (newData[key].role === 'admin') {
+              subId.push({
+                value2: newData[key].subscriptionId,
+                label2: newData[key].name
+              })
+              this.assigned_Arr3.push(newData[key])
+            } else {
+              this.assigned_Arr2.push(newData[key])
+            }
+          }
+        }
+        this.data2 = this.assigned_Arr2
+        this.data3 = this.assigned_Arr3
+        this.options2 = subId
+        this.$Loading.finish()
+      })
+      .catch((err) => {
+        console.log('Error:', err)
+      })
+    },
+    async inviteNow () {
+      console.log(this.value2, this.value1)
+      if (this.value2 === undefined || this.value2 === '' || this.value1 === '') {
+        this.$message.warning('Please select both subscription & role for invitation')
+      } else {
+        this.loading = true
+        let self = this
+        let obj = _.find(this.options2, {value2: this.value2})
+        let params = {
+          toEmail: this.input,
+          subscriptionId: this.value2,
+          name: obj.label2,
+          role: {
+            [this.flowId]: this.value1
+          },
+          fromEmail: this.$store.state.user.email
+        }
+        await axios({
+          method: 'POST',
+          url: subscriptionUrl + 'invite',
+          headers: {
+            authorization: Cookies.get('auth_token')
+          },
+          data: params
+        })
+        .then(function (response) {
+          self.loading = false
+          if (response.data.status === 404) {
+            self.$message.warning(response.data.data)
+          } else if (response.data.code === '201') {
+            // self.$message.success(response.data.message);
+            self.$message.success('User assigned successfully')
+          } else if (response.data.code === '200') {
+            // self.$message.success(response.data.message);
+            self.$message.warning('User already assigned for this subscription with same role')
+          }
+        })
+        .catch(function (error) {
+          self.loading = false
+          if (error.response.status === 401) {
+            let location = psl.parse(window.location.hostname)
+            location = location.domain === null ? location.input : location.domain
+            Cookies.remove('auth_token', {domain: location})
+            Cookies.remove('subscriptionId', {domain: location})
+            self.$store.commit('logout', self)
+            self.$router.push({
+              name: 'login'
+            })
+          } else if (error.response.status === 403) {
+            self.$Notice.error({
+              duration: 0,
+              title: error.response.statusText,
+              desc: error.response.data.message + '. Please <a href="' + config.flowzDashboardUrl + '/subscription-list" target="_blank">Subscribe</a>'}
+            )
+          }
+        })
+      }
     },
     handlePage (page) {
       this.cpage = page
@@ -805,8 +1180,8 @@ export default {
         return obj
       }))
     },
-    getName: function (taskId) {
-      return new Promise(async resolve => {
+    getName: async function (taskId) {
+      let respond = await Promise(async resolve => {
         taskId = this.titleCase(taskId)
         deepRecord.deepRecord.getCurrentTraget(this.instanceId, taskId).then(res => {
           console.log('res: ', res)
@@ -818,7 +1193,7 @@ export default {
           resolve('ERROR')
         })
       })
-      // console.log('Name: ', JSON.stringify(name))
+      console.log('Name: ', respond)
       // return name
     },
     getAllPermissions: async function (appName, totalApps) {
@@ -919,7 +1294,11 @@ export default {
         console.log('arrResources: ', arrResources)
         // self.tableData = arrResources
         // self.tableData = ['hi']
-        self.tableData = _.extend(self.tableData, arrResources)
+        self.tableData = await _.extend(self.tableData, arrResources)
+        console.log('self.tableData.length: ', self.tableData)
+        // for (let k = 0; k < self.tableData.length; k++) {
+        //   console.log('task id: ', self.tableData[k])
+        // }
         console.log('table data: ', JSON.stringify(self.tableData))
         self.loadingPermisions = false
       }).catch(function (error) {
@@ -927,10 +1306,23 @@ export default {
         console.log(error)
       })
       self.loadingPermisions = false
+
       for (var tblData in self.tableData) {
-        console.log('table data for loop: ', self.tableData)
+        console.log('table data for loop: ', self.tableData[tblData][0].service)
+        // get task name from task id
+        for (let i = 0; i < self.tableData[tblData].length; i++) {
+          let taskId = self.titleCase(self.tableData[tblData][i].service)
+          await deepRecord.deepRecord.getCurrentTraget(self.instanceId, taskId).then(res => {
+            console.log('res: ', res)
+            let name = res.name
+            self.tableData[tblData][i]['serviceName'] = name
+          }).catch(err => {
+            console.log('err: ', err)
+          })
+        }
         await self.getAllPermissions(tblData, Object.keys(self.tableData).length)
       }
+      this.showTable = true
       // axios.get(config.subscriptionUrl+'register-resource', {
       // headers: {
       // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
@@ -1040,6 +1432,9 @@ export default {
 }
 </script>
 <style scoped>
+  .ivu-modal{
+    width: 1000px !important
+  }
   .ui.table {
     font-size: 1em;
     display: inline-table;
@@ -1196,7 +1591,7 @@ export default {
 
   @media (min-width: 600px) {
     .modal-content {
-      max-width: 600px;
+      max-width: 800px;
       top: 10%;
       right: 0;
       margin: 0 auto;

@@ -302,19 +302,38 @@
             // console.log('processTask', processTask)
             // console.log('ex', m['_camunda:executeIfAny'])
             // let executeAny = m._executeIfAny === undefined ? ((m['_camunda:executeIfAny']) ? m['_camunda:countany'] : false) : ((m._executeIfAny) ? m._countany : false)
-            return {
-              id: m._id,
-              capacity: (m._isFormInput) ? m._capacity : false,
-              isProcessTask: m._isProcessTask !== undefined ? (m._isProcessTask === 'true') : (m['_camunda:isProcessTask'] === 'true'),
-              name: m._name,
-              type: m.workerType.toLowerCase(),
-              executeAny: m['_camunda:executeIfAny'] !== undefined ? ((m['_camunda:executeIfAny']) ? m['_camunda:countany'] : false) : false,
-              // isProcessTask: m.workerType.toLowerCase() === 'tweet' ? 'true' : false,
-              target: m.outgoing ? self.getTargetId(m, jsonXML) : [],
-              mapping: (_.union(..._mapping)),
-              configurations: self.getConfigurationsProperties(m),
-              inputProperty: await self.getInputProperties(m),
-              outputProperty: await self.getOutputProperties(m)
+            let isSMTP = self.getSMTPProperties(m)
+            if (isSMTP !== null) {
+              return {
+                id: m._id,
+                capacity: (m._isFormInput) ? m._capacity : false,
+                isProcessTask: m._isProcessTask !== undefined ? (m._isProcessTask === 'true') : (m['_camunda:isProcessTask'] === 'true'),
+                name: m._name,
+                type: m.workerType.toLowerCase(),
+                executeAny: m['_camunda:executeIfAny'] !== undefined ? ((m['_camunda:executeIfAny']) ? m['_camunda:countany'] : false) : false,
+                // isProcessTask: m.workerType.toLowerCase() === 'tweet' ? 'true' : false,
+                target: m.outgoing ? self.getTargetId(m, jsonXML) : [],
+                mapping: (_.union(..._mapping)),
+                configurations: self.getConfigurationsProperties(m),
+                smtp: self.getSMTPProperties(m),
+                inputProperty: await self.getInputProperties(m),
+                outputProperty: await self.getOutputProperties(m)
+              }
+            } else {
+              return {
+                id: m._id,
+                capacity: (m._isFormInput) ? m._capacity : false,
+                isProcessTask: m._isProcessTask !== undefined ? (m._isProcessTask === 'true') : (m['_camunda:isProcessTask'] === 'true'),
+                name: m._name,
+                type: m.workerType.toLowerCase(),
+                executeAny: m['_camunda:executeIfAny'] !== undefined ? ((m['_camunda:executeIfAny']) ? m['_camunda:countany'] : false) : false,
+                // isProcessTask: m.workerType.toLowerCase() === 'tweet' ? 'true' : false,
+                target: m.outgoing ? self.getTargetId(m, jsonXML) : [],
+                mapping: (_.union(..._mapping)),
+                configurations: self.getConfigurationsProperties(m),
+                inputProperty: await self.getInputProperties(m),
+                outputProperty: await self.getOutputProperties(m)
+              }
             }
           }).head()
           .value()
@@ -358,6 +377,8 @@
         })
       },
       getConfigurationsProperties (proccess) {
+        // console.log('process..config', proccess.extensionElements.myConfigurations)
+        // console.log('process..config', proccess.extensionElements.myConfigurations.configuration)
         if (proccess.extensionElements && proccess.extensionElements.myConfigurations && proccess.extensionElements.myConfigurations.configuration) {
           if (!_.isArray(proccess.extensionElements.myConfigurations.configuration)) {
             proccess.extensionElements.myConfigurations.configuration = [proccess.extensionElements.myConfigurations.configuration]
@@ -370,6 +391,18 @@
           })
         } else {
           return []
+        }
+      },
+      getSMTPProperties (proccess) {
+        if (proccess.workerType === 'sendproofmail') {
+          console.log('here', proccess._host)
+          return {
+            host: proccess._host,
+            user: proccess._user,
+            password: proccess._password
+          }
+        } else {
+          return null
         }
       },
       async getInputProperties (proccess) {

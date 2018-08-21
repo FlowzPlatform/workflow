@@ -25,6 +25,7 @@ var serviceTaskDelegateProps = require('./parts/ServiceTaskDelegateProps'),
   myPropertiesIOProps = require('./parts/myPropertiesIOProps'),
   myOutputProps = require('./parts/myOutputProps'),
   myConfigProps = require('./parts/MyConfigProps'),
+  mySMTPProps = require('./parts/MySMTPProps'),
   // myRoles = require('./parts/MyRoles'),
   capacityProps = require('./parts/CapacityProps'),
   startEventInitiator = require('./parts/StartEventInitiator'),
@@ -244,14 +245,12 @@ function createIOMappingGroups(element, bpmnFactory, elementRegistry, translate,
 function createOutputGroups(element, bpmnFactory, elementRegistry, translate, data) {
   if (data != undefined) {
     options = data
-    console.log("hello")
   }
   var propertiesGroup = {
     id: 'outputs',
     label: translate('Output'),
     entries: []
   };
-  console.log("options from createOutputGroups", options)
   myOutputProps(propertiesGroup, element, bpmnFactory, translate, options);
   return [
     propertiesGroup
@@ -264,7 +263,6 @@ function createAddRolesTabGroups(element, bpmnFactory, elementRegistry, translat
     label: translate('add Roles'),
     entries: []
   };
-  console.log("options from createAddRolesTabGroups", options)
   AddRoles(generalGroup, element, translate, options);
   // var configGroup = {
   //   id: 'configs',
@@ -285,6 +283,18 @@ function createConfigGroups(element, bpmnFactory, elementRegistry, translate, da
     entries: []
   }
   myConfigProps(configGroup, element, bpmnFactory, translate)
+  return [
+    configGroup
+  ]
+}
+
+function createsmtpConfig(element, bpmnFactory, elementRegistry, translate, data) {
+  var configGroup = {
+    id: 'smtp',
+    label: translate('SMTP config'),
+    entries: []
+  }
+  mySMTPProps(configGroup, element, translate)
   return [
     configGroup
   ]
@@ -512,6 +522,11 @@ function CamundaPropertiesProvider(eventBus, bpmnFactory, elementRegistry, eleme
       label: translate('Config'),
       groups: createConfigGroups(element, bpmnFactory, elementRegistry, translate)
     }
+    var smtpTab = {
+      id: 'ConfigurationSMTP',
+      label: translate('smtp'),
+      groups: createsmtpConfig(element, bpmnFactory, elementRegistry, translate)
+    }
     return [
       generalTab,
       ioMapping,
@@ -521,7 +536,8 @@ function CamundaPropertiesProvider(eventBus, bpmnFactory, elementRegistry, eleme
       // connectorTab,
       propertiesTab,
       outputTab,
-      configTab
+      configTab,
+      smtpTab
       // formsTab,
       // listenersTab,
       // inputOutputTab,
