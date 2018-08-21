@@ -37,7 +37,7 @@ export default {
     // api.request('get', '/flowz')
     flowz.get(null, {
       $paginate: false,
-      $select: ['id', 'ProcessName', 'json', 'allowedusers']
+      $select: ['id', 'json']
     })
       .then(response => {
         commit('SET_FLOWZDATA', response.data)

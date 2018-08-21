@@ -154,6 +154,7 @@ export default {
             return
           })
           if (auth) {
+            // console.log('auth', auth)
             this.$store.commit('SET_TOKEN', auth.logintoken)
 						// Token Store in cookie
 						let location = psl.parse(window.location.hostname)    // get parent domain
