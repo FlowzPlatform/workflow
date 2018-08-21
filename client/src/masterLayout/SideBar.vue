@@ -147,7 +147,7 @@ export default {
             })
             return m
           })
-          // this.setCounters()
+          this.setCounters()
         } else {
           flowzModal.get(null, {
             $select: ['json', 'id'],
@@ -164,7 +164,7 @@ export default {
               })
               return m
             })
-            // this.setCounters()
+            this.setCounters()
             // console.log('flowzlist: ', this.flowzList)
           })
           .catch(error => {
@@ -240,6 +240,7 @@ export default {
           }
           this.loading = false
           this.flowzList = fData
+          this.setCounters()
         } else {
           this.flowzList = []
         }
@@ -254,9 +255,10 @@ export default {
           fid: sitem.id
         }).then(res => {
           // console.log('res count', res.data)
-          sitem.count = res.data.length
+          // sitem.count = res.data.length
           for (let pitem of sitem.json.processList) {
             pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
+            sitem.count += pitem.count
           }
         }).catch(err => {
           console.log('error', err)
@@ -271,9 +273,10 @@ export default {
             fid: item.id
           }).then(res => {
             // console.log('res count', res.data)
-            item.count = res.data.length
+            // item.count = res.data.length
             for (let pitem of item.json.processList) {
               pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
+              item.count += pitem.count
             }
           }).catch(err => {
             console.log('error', err)
@@ -304,32 +307,32 @@ export default {
     this.init()
   },
   feathers: {
-    // 'finstance': {
-    //   created (data) {
-    //     // console.log('created', data)
-    //     let finx = _.findIndex(this.flowzList, {id: data.fid})
-    //     if (finx !== -1) {
-    //       // this.flowzList[finx].count += 1
-    //       this.setCounters(this.flowzList[finx])
-    //     }
-    //   },
-    //   updated (data) {
-    //     // console.log('updated', data)
-    //     let finx = _.findIndex(this.flowzList, {id: data.fid})
-    //     if (finx !== -1) {
-    //       // this.flowzList[finx].count += 1
-    //       this.setCounters(this.flowzList[finx])
-    //     }
-    //   },
-    //   removed (data) {
-    //     // console.log('removed', data)
-    //     let finx = _.findIndex(this.flowzList, {id: data.fid})
-    //     if (finx !== -1) {
-    //       // this.flowzList[finx].count += 1
-    //       this.setCounters(this.flowzList[finx])
-    //     }
-    //   }
-    // }
+    'finstance': {
+      created (data) {
+        // console.log('created', data)
+        let finx = _.findIndex(this.flowzList, {id: data.fid})
+        if (finx !== -1) {
+          // this.flowzList[finx].count += 1
+          this.setCounters(this.flowzList[finx])
+        }
+      },
+      updated (data) {
+        // console.log('updated', data)
+        let finx = _.findIndex(this.flowzList, {id: data.fid})
+        if (finx !== -1) {
+          // this.flowzList[finx].count += 1
+          this.setCounters(this.flowzList[finx])
+        }
+      },
+      removed (data) {
+        // console.log('removed', data)
+        let finx = _.findIndex(this.flowzList, {id: data.fid})
+        if (finx !== -1) {
+          // this.flowzList[finx].count += 1
+          this.setCounters(this.flowzList[finx])
+        }
+      }
+    }
   }
 }
 </script>
