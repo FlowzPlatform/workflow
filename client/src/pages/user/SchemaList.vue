@@ -134,6 +134,33 @@
       },
       setColumns () {
         const cols = []
+        if (this.dynamicData) {
+          cols.push({
+            title: 'Action',
+            width: 100,
+            align: 'center',
+            render: (h, params) => {
+              return h('div', [
+                h('Button', {
+                  props: {
+                    type: 'ghost',
+                    icon: 'ios-play'
+                  },
+                  on: {
+                    'click': () => {
+                      console.log('CLick: ', params.row, params.index)
+                    }
+                  }
+                }, '')
+              ])
+            }
+          })
+          cols.push({
+            title: 'ID',
+            key: 'id',
+            width: 260
+          })
+        }
         if (this.configuration) {
           if (this.config.index) {
             cols.push({
@@ -153,14 +180,6 @@
             }
           }
         } else {
-          if (this.dynamicData) {
-            cols.push({
-              title: 'ID',
-              key: 'id',
-              width: 60,
-              align: 'center'
-            })
-          }
           if (this.schema.hasOwnProperty('entity')) {
             for (let item of this.schema.entity) {
               cols.push({
@@ -176,6 +195,7 @@
     },
     mounted () {
       this.mdata = this.data
+      console.log('dynamicData: ', this.dynamicData)
       console.log('this.schema: ', this.data)
     },
     methods: {
