@@ -54,6 +54,7 @@ import Register from '@/pages/Register'
 
 // // import UserDashboard from '@/pages/user/dashboard'
 // // import UserProcesslist from '@/pages/user/processlist'
+import Analytics from '@/pages/flow/analytics'
 import ManageBPMNPlugin from '@/pages/BPMNPlugins/Manage'
 
 import SchemaView from '@/components/SchemaView'
