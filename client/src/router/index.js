@@ -44,6 +44,7 @@ import ApprovalNew from '@/pages/approval/New'
 import Reply from '@/pages/approval/MailReply'
 import FormReply from '@/pages/approval/FormReply'
 import Analytics from '@/pages/flow/analytics'
+import FlowOverview from '@/pages/flow/FlowOverview'
 // User area
 // import UserDashboard from '@/pages/user/dashboard'
 // import ManageBPMNPlugin from '@/pages/BPMNPlugins/Manage'
@@ -168,6 +169,15 @@ const routes = [
             alias: '',
             component: Analytics,
             name: 'Analytics',
+            props: {
+              id: String
+            }
+          },
+          {
+            path: 'flowoverview/:id',
+            alias: '',
+            component: FlowOverview,
+            name: 'FlowOverview',
             props: {
               id: String
             }
