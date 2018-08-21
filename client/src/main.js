@@ -131,41 +131,96 @@ router.beforeEach((to, from, next) => {
     })
   } else {
     if (to.matched.some(record => record.meta.requiresAuth) || (to.path === '/login')) {
+      // console.log('Hereeeeeeee', to.path)
+      // to.matched.some(record => {
+      //   console.log(record.meta.role)
+      // })
       store.dispatch('authenticate', token).then(response => {
+        // console.log('authenticate', response)
+        if (store.state.subscription !== '' && store.state.subscription !== null) {
+          if (response.hasOwnProperty('package')) {
+            if (response.package[store.state.subscription] === undefined) {
+              if (response.hasOwnProperty('defaultSubscriptionId')) {
+                store.state.subscription = response.defaultSubscriptionId
+              } else {
+                store.state.subscription = ''
+              }
+            }
+          }
+        }
+
         store.commit('SET_USER', response)
           // get user role
         if (to.matched.some(record => record.meta.role)) {
-          store.dispatch('getUser', response.email).then(user => {
-            if (user) {
-              if (store.state.role !== null) {
-                store.commit('SET_ROLE', user.role)
-                if (to.matched.find(record => record.meta.role).meta.role.indexOf(parseInt(user.role)) === -1) {
-                  next({
-                    path: '/login'
-                    // query: { redirect: to.fullPath }
-                  })
-                  // next()
-                } else {
-                  next()
-                }
+          // console.log('1')
+          if (store.state.subscription !== '' && store.state.subscription !== null) {
+            // console.log('2')
+            if (response.hasOwnProperty('package')) {
+              // console.log('3')
+              if (response.package[store.state.subscription].role === 'admin') {
+                // console.log('4')
+                store.commit('SET_ROLE', 1)
+                // next({
+                //   path: '/admin/dashboard'
+                // })
               } else {
-                store.commit('SET_ROLE', user.role)
-                next({
-                  path: parseInt(user.role) === 1 ? '/admin/dashboard' : '/'
-                })
+                // console.log('5')
+                store.commit('SET_ROLE', 2)
+                // next({
+                //   path: '/'
+                // })
               }
             } else {
+              // console.log('6')
+              store.commit('SET_ROLE', 2)
+              // next({
+              //   path: '/'
+              // })
+            }
+          } else {
+            // console.log('7')
+            store.commit('SET_ROLE', 2)
+            // next({
+            //   path: '/'
+            // })
+          }
+          // store.dispatch('getUser', response.email).then(user => {
+          // if (user) {
+          // console.log('8')
+          if (store.state.role !== null) {
+            // store.commit('SET_ROLE', user.role)
+            // console.log('9')
+            if (to.matched.find(record => record.meta.role).meta.role.indexOf(parseInt(store.state.role)) === -1) {
+              // console.log('10')
+              next({
+                path: '/login'
+                // query: { redirect: to.fullPath }
+              })
+              // next()
+            } else {
+              // console.log('11')
               next()
             }
-          }).catch(error => {
-            console.log(error)
-              // window.console.log('Not authenticated')
+          } else {
+            // console.log('12')
+            store.commit('SET_ROLE', 2)
             next({
-              path: '/login'
-                // query: { redirect: to.fullPath }
+              path: parseInt(store.state.role) === 1 ? '/admin/dashboard' : '/'
             })
-          })
+          }
+          // } else {
+          //   next()
+          // }
+          // }).catch(error => {
+            // console.log(error)
+              // // window.console.log('Not authenticated')
+            // next({
+              // path: '/login'
+                // // query: { redirect: to.fullPath }
+            // })
+          // })
         } else {
+          // console.log('13')
           next({
             path: (to.path === '/login') ? (parseInt(store.state.role) === 1 ? '/admin/dashboard' : '/') : to.path
           })
@@ -188,6 +243,7 @@ router.beforeEach((to, from, next) => {
         }
       })
     } else {
+      // console.log('16')
       // let path = token ? ((to.path === '/login') ? (parseInt(store.state.role) === 1 ? '/admin/dashboard' : '/') : to.path) : '/login'
       // console.log(path)
       // path: (token ? ((to.path === '/login') ? (parseInt(store.state.role) === 1 ? '/admin/dashboard' : '/') : to.path) : '/login')

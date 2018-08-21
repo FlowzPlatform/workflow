@@ -73,6 +73,7 @@
     "vue2-dropzone": "^3.2.2",
     "vuedraggable": "^2.16.0",
     "vuex": "^2.4.0",
+    "vuex-cache": "^1.1.1",
     "vuex-persistedstate": "^2.4.2",
     "vuex-router-sync": "^4.3.2",
     "x2js": "^3.1.1",

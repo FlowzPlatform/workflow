@@ -66,13 +66,22 @@ function sendmail (data, params) {
     return new Promise((resolve, reject) => {
       SMTPServer.send({
         text: data['body'],
+        // html: '<html>Nikita</html>',
         from: data['from'],
         to: data['to'],
         cc: data['cc'],
         bcc: data['bcc'],
-        subject: data['subject']
+        subject: data['subject'],
+        attachment: 
+         [
+            {
+              data: data['html'] || '',
+              alternative:true
+            }
+         ]
       }, function (err, message) {
         if (err) {
+          console.log('err', err)
           reject(err)
         }
         resolve({

@@ -21,7 +21,7 @@
       }
     },
     mounted () {
-      // console.log('Token', this.token)
+      // console.log('Value', this.value)
       this.subid = this.value
       this.init()
     },
@@ -32,8 +32,12 @@
             authorization: this.token
           }
         }).then(res => {
-          console.log('res', res.data.data)
-          this.packages = res.data.data.package
+          // console.log('res', res.data.data)
+          if (res.data.data.package) {
+            this.packages = res.data.data.package
+          } else {
+            this.$Notice.error({title: 'No Subscription', desc: 'Please Buy Subscription!! <a href="https://dashboard.' + process.env.domainKey + '/" target="_blank">Click Here</a>', duration: 0})
+          }
         }).catch(err => {
           // this.$Notice.error({title: 'Error'})
           console.log('Err', err)
