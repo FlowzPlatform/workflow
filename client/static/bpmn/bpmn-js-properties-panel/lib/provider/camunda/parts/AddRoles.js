@@ -20,7 +20,6 @@ module.exports = function (group, element, translate, options) {
     // Get all roles
     let arr_roles = ["flow"]
     if(options.cdata){
-      console.log('options.cdata: ', options.cdata)
       if(options.cdata.roles){
         let roles = options.cdata.roles.split(',')
         for (let index = 0; index < roles.length; index++) {
@@ -34,9 +33,6 @@ module.exports = function (group, element, translate, options) {
             process.push({ name:  options.cdata.json.processList[index].name, type: options.cdata.json.processList[index].type})
           }
         }
-
-        console.log("arr_roles", arr_roles.length)
-        console.log("process", process.length)
         //id : camunda-addRoles
         
         setTimeout(() => {
@@ -45,7 +41,6 @@ module.exports = function (group, element, translate, options) {
 
           let tab1 = null
           tab1 = document.getElementsByClassName('tab1')
-          console.log('tab1tab1tab1tab1tab1tab1: ', tab1)
 
           if(tab1.length == 0){
             var div1 = document.createElement('div');
@@ -63,7 +58,6 @@ module.exports = function (group, element, translate, options) {
             }
 
             for (var i = 0; i < process.length; i++) {
-              console.log('process: ', process[i].type)
               if(process[i].type !== 'start' || process[i].type !== 'endevent' || process[i].type !== 'intermediatethrowevent'){
                 p1 += `<tr><td>` + process[i].name
                 for (var j = 1; j < arr_roles.length; j++) {
@@ -97,7 +91,6 @@ module.exports = function (group, element, translate, options) {
 
         
         var bo = getBusinessObject(element);
-        console.log({bo})
         if (!bo) {
           return;
         }
@@ -125,8 +118,6 @@ module.exports = function (group, element, translate, options) {
           }
         }
 
-        console.log("arr_roles", arr_roles.length)
-        console.log("process", process.length)
         //id : camunda-addRoles
         
         setTimeout(() => {
@@ -135,7 +126,6 @@ module.exports = function (group, element, translate, options) {
 
           let tab1 = null
           tab1 = document.getElementsByClassName('tab1')
-          console.log('tab1tab1tab1tab1tab1tab1: ', tab1)
 
           if(tab1.length == 0){
             var div1 = document.createElement('div');
@@ -153,7 +143,6 @@ module.exports = function (group, element, translate, options) {
             }
 
             for (var i = 0; i < process.length; i++) {
-              console.log('process: ', process[i].type)
               if(process[i].type !== 'start' || process[i].type !== 'endevent' || process[i].type !== 'intermediatethrowevent'){
                 p1 += `<tr><td>` + process[i].name
                 for (var j = 1; j < arr_roles.length; j++) {
@@ -187,7 +176,6 @@ module.exports = function (group, element, translate, options) {
 
         
         var bo = getBusinessObject(element);
-        console.log({bo})
         if (!bo) {
           return;
         }

@@ -1,13 +1,12 @@
 // Initializes the `receive-form` service on path `/receive-form`
 const createService = require('./receive-form.class.js');
 const hooks = require('./receive-form.hooks');
-const filters = require('./receive-form.filters');
 
 module.exports = function () {
   const app = this;
   const paginate = app.get('paginate');
   const swagger = require('feathers-swagger');
-  
+
   const options = {
     name: 'receive-form',
     paginate
@@ -31,8 +30,4 @@ module.exports = function () {
   const service = app.service('receive-form');
 
   service.hooks(hooks);
-
-  if (service.filter) {
-    service.filter(filters);
-  }
 };
