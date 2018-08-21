@@ -1,9 +1,9 @@
 var common = require('./common')
 const config = require('./config')
 const registerWorker = config.registerWorker
-const pino = require('pino')
-const PINO = config.pino
-const PINO_DB_OPTION = config.pinoDB
+const pino = require('pino')(config.pino)
+const pinoDB = require('pino')
+const PINO_DB_OPTION = config.pinoDB // TODO: check where is used and set proper options
 const chokidar = require('chokidar')
 const fs = require('fs')
 const Queue = require('rethinkdb-job-queue')
@@ -12,7 +12,7 @@ const rethinkdbdash = require('rethinkdbdash')
 const rdash = require('rethinkdbdash')(cxnOptions)
 
 process.on('message', (m) => {
-  pino(PINO).info('CHILD got message:', m)
+  pino.info('CHILD got message:', m)
 })
 
 const vm = require('vm')
@@ -34,7 +34,7 @@ function getJobTypeWorkerProcess (jobType) {
 }
 
 let runWorker = function (options) {
-  pino(PINO).info("Worker Start", options)
+  pino.info("Worker Start", options)
   common.getJobQueue(options).then(async result => {
     try {
       function enableWatcher(SYSTEM_LOGS_TABLE) {
@@ -45,11 +45,14 @@ let runWorker = function (options) {
         watcher.on('change', path =>
           fs.readFile('./logs','utf8', function (err, data) {
             if (err) throw err
+            if(!data) {
+              return false;
+            }
             let parsedData = JSON.parse(data)
             rdash.table(SYSTEM_LOGS_TABLE).insert(parsedData).run(function (err , result) {
               if (err) {
-                pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).error({},err)
-                pino(PINO).error({},err)
+                pinoDB(PINO_DB_OPTION,fs.createWriteStream('./logs')).error({},err)
+                pino.error({},err)
               }
             })
           })
@@ -57,53 +60,54 @@ let runWorker = function (options) {
       }
 
       enableWatcher(config.system_logs_table)
-      pino(PINO).info('job queue object created', options.queue.name)
+      pino.info('job queue object created', options.queue.name)
       let qObj = result.q
       qObj.process(async (job, next, onCancel) => {
         try {
           JobExecute(job)
-            .then(result => { pino(PINO).info('worker done', options.queue.name); next(null, result) })
+            .then(result => { pino.info('worker done', options.queue.name); next(null, result) })
             .catch(err => {
               qObj.getJob(job.id).then((savedJobs) => {
                 const processDate = new Date((new Date()).getTime() + (2 * 60 * 1000))
                 savedJobs[0].status = 'active'
                 return qObj.reanimateJob(savedJobs[0], processDate)
-              }).catch(err => pino(PINO).error(err))
-              pino(PINO).error('worker error', options.queue.name)
+              }).catch(err => pino.error(err))
+              pino.error('worker error', options.queue.name)
             })
-          pino(PINO).info('worker name', options.queue.name)
+          pino.info('worker name', options.queue.name)
         } catch (err) {
-          pino(PINO).error('handle by try-catch', options.queue.name)
+          pino.error('handle by try-catch', options.queue.name)
           return next(err)
         }
       })
       qObj.on('terminated', (queueId, jobId) => {
         qObj.getJob(jobId).then((job) => {
           processError(job[0].data, job[0].id, job[0].scheduler, job[0].flowz_table)
-          pino(PINO).info({ 'fId': job[0].data.fId, 'jobId': job[0].data.id }, 'job terminated');
-          pino(PINO_DB_OPTION, fs.createWriteStream('./logs')).info({ 'fId': job[0].data.fId, 'jobId': job[0].data.id }, 'job terminated')
+          pino.info({ 'fId': job[0].data.fId, 'jobId': job[0].data.id }, 'job terminated');
+          pinoDB(PINO_DB_OPTION, fs.createWriteStream('./logs')).info({ 'fId': job[0].data.fId, 'jobId': job[0].data.id }, 'job terminated')
         }).catch(err => {
-          pino(PINO).error(new Error(err));
-          pino(PINO_DB_OPTION, fs.createWriteStream('./logs')).error({ "error": err }, 'job terminated')
+          pino.error(new Error(err));
+          pinoDB(PINO_DB_OPTION, fs.createWriteStream('./logs')).error({ "error": err }, 'job terminated')
         })
       })
 
       qObj.on('completed', (queueId, jobId, isRepeating) => {
         qObj.getJob(jobId).then((job) => {
+          console.log("COmpleted job id: ", jobId);
           processSuccess(job[0].data, job[0].id, job[0].scheduler, job[0].flowz_table)
-          pino(PINO).info({ 'fId': job[0].data.fId, 'jobId': job[0].data.id }, 'job completed')
-          pino(PINO_DB_OPTION, fs.createWriteStream('./logs')).info({ 'fId': job[0].data.fId, 'jobId': job[0].data.id }, 'job completed')
+          pino.info({ 'fId': job[0].data.fId, 'jobId': job[0].data.id }, 'job completed')
+          pinoDB(PINO_DB_OPTION, fs.createWriteStream('./logs')).info({ 'fId': job[0].data.fId, 'jobId': job[0].data.id }, 'job completed')
         }).catch(err => {
-          pino(PINO).error(new Error(err));
-          pino(PINO_DB_OPTION, fs.createWriteStream('./logs')).error({ "error": err }, 'job compleated')
+          pino.error(new Error(err));
+          pinoDB(PINO_DB_OPTION, fs.createWriteStream('./logs')).error({ "error": err }, 'job compleated')
         })
       })
 
       async function checkIdle ()
       {
-        pino(PINO).warn('checking idle')
+        pino.warn('checking idle')
         if (qObj.idle) {
-          pino(PINO).info("worker process id :", process.pid)
+          pino.info("worker process id :", process.pid)
           process.send({ 'subprocess': 'exit', 'pid': process.pid })
           process.exit()
         }
@@ -111,7 +115,7 @@ let runWorker = function (options) {
 
       async function processSuccess (job, jobId, scheduler, flowz_table) {
         await notifyScheduler(job.fId, job.output, job.input, job.id, job.type, job.forProcess, scheduler)
-          .catch((err) => pino(PINO).error(err))
+          .catch((err) => pino.error(err))
         await updateFlowInstance('completed', job.fId, job.forProcess, job.id, job.output, job.type, job.input, jobId, job.sourceCount, scheduler, flowz_table)
         await checkIdle()
       }
@@ -159,13 +163,13 @@ let runWorker = function (options) {
         sourceCount = sourceCount ? sourceCount : []
         let tmp = await r.table(flowz_table).get(fId).update({'process_log': r.row('process_log').append({job: current, jobType: type.toLowerCase(), jobId: jobId, input: input, sourceCount: sourceCount, output: output, status: newStatus, lastModified: new Date()})}).run()
         r.getPoolMaster().drain()
-        pino(PINO).info({ 'fId': fId, 'job': current, 'jobId': jobId },'process in flow instance updated')
-        pino(PINO_DB_OPTION, fs.createWriteStream('./logs')).info({ 'fId': fId, 'job': current, 'jobId': jobId },'process in flow instance updated')
+        pino.info({ 'fId': fId, 'job': current, 'jobId': jobId },'process in flow instance updated')
+        pinoDB(PINO_DB_OPTION, fs.createWriteStream('./logs')).info({ 'fId': fId, 'job': current, 'jobId': jobId },'process in flow instance updated')
       }
     } catch (e) {
-      pino(PINO).error(e)
+      pino.error(e)
     }
-  }).catch(e => pino(PINO).error(e))
+  }).catch(e => pino.error(e))
 }
 
 module.exports.runWorker = runWorker
@@ -173,6 +177,10 @@ module.exports.runWorker = runWorker
 let executeWorker = async function (jobType, options) {
   try {
     let jobProcessCode = await getJobTypeWorkerProcess(jobType)
+    // if(jobType === 'Sendproofmail_worker')
+    {
+        // console.log("=====",jobType,"============",jobProcessCode,"==========");
+    }
     const script = new vm.Script(`
       (function(require) {
         JobExecute = function(job) {
@@ -191,10 +199,10 @@ let executeWorker = async function (jobType, options) {
       { filename: 'jobProcessTrace.vm' })
     script.runInThisContext()(require)
     runWorker(options)
-    pino(PINO).info('Child Process as Worker Executed')
+    pino.info('Child Process as Worker Executed')
   } catch (e) {
-    pino(PINO).error(e)
-    pino(PINO).error('unable to load child worker.')
+    pino.error(e)
+    pino.error('unable to load child worker.')
   }
 }
 

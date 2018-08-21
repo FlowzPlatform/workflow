@@ -45,5 +45,8 @@ export default {
   REMOVE_XML (state) {
     state.BPMNxml = ''
   }
+  // SET_ACTIVE_FLOW (state, data) {
+  //   state.activeFlow = data
+  // }
 }
 

@@ -1,7 +1,6 @@
 // Initializes the `approval` service on path `/approval`
 const createService = require('feathers-rethinkdb');
 const hooks = require('./approval.hooks');
-const filters = require('./approval.filters');
 
 module.exports = function () {
   const app = this;
@@ -21,8 +20,4 @@ module.exports = function () {
   const service = app.service('approval');
 
   service.hooks(hooks);
-
-  if (service.filter) {
-    service.filter(filters);
-  }
 };

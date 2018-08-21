@@ -1,12 +1,15 @@
 import api from '../../api'
 let model = 'flowz'
 export default {
-  get: (id) => {
-    if (id === undefined) {
-      return api.request('get', '/' + model)
+  get: (id = null, params = null) => {
+    if (id === null) {
+      return api.request('get', '/' + model, null, params)
     } else {
-      return api.request('get', '/' + model + '/' + id)
+      return api.request('get', '/' + model + '/' + id, null, params)
     }
+  },
+  getCustom: (string) => {
+    return api.request('get', '/' + model + string)
   },
   post: (data) => {
     return api.request('post', '/' + model, data)

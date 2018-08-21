@@ -19,5 +19,9 @@ export default {
   sidenavpin: true,
   mappingTemp: [],
   BPMNxml: '',
-  isLoggedIn: false
+  isLoggedIn: false,
+  limitPage: 5,
+  activeFlow: null,
+  activeList: null,
+  subscription: ''
 }

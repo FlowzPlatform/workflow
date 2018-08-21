@@ -1,24 +1,24 @@
 <template>
   <div class="SchemaMapping">
-    <h5>Schema Mapping</h5>
+    <h4>Schema Mapping</h4>
     <Row style="padding:20px;">
         <Form ref="formMapping" :model="formMapping" :rules="ruleMapping" inline>
           <Row>
-            <FormItem :label-width="75" prop="title" label="Title">
+            <FormItem :label-width="80" prop="title" label="Title">
                 <Input type="text" v-model="formMapping.title" placeholder="Title"></Input>
             </FormItem>
-            <FormItem :label-width="75" prop="producer" label="producer ">
+            <FormItem :label-width="80" prop="producer" label="producer ">
                     <Select v-model="formMapping.producer" disabled style="width:200px">
                         <Option v-for="item in SourceOptionDt" :value="item.value" :key="item.value">{{ item.label }}</Option>
                     </Select>
             </FormItem>
             <!-- {{TargetOptionDt}} -->
-            <FormItem :label-width="75" prop="consumer" label="consumer">
+            <FormItem :label-width="80" prop="consumer" label="consumer">
                   <Select v-model="formMapping.consumer" style="width:200px"  @on-change="mapStart">
                       <Option v-for="item in TargetOptionDt" :value="item.value" :key="item.value">{{ item.label }}</Option>
                   </Select>
             </FormItem>
-            <FormItem :label-width="75" label="Notes">
+            <FormItem :label-width="80" label="Notes">
                 <Input v-model="formMapping.notes" type="textarea" placeholder="Notes..."></Input>
             </FormItem>
           </Row>
@@ -52,7 +52,7 @@
                             </tr>
                         </thead>
                         <tbody class="ivu-table-tbody">
-                           <template v-for="(ent, index) in sourceSchemaEntity">
+                            <template v-for="(ent, index) in sourceSchemaEntity">
                               <tr class="ivu-table-row" >
                                   <td class="">
                                     <div class="ivu-table-cell">
@@ -61,24 +61,25 @@
                                     </div>
                                   </td>
                                   <td class="">
-                                  <!-- {{formMapping.MapData}} -->
-                                      <div class="ivu-table-cell" v-if="!ent.customtype">
-                                          <Cascader v-if="formMapping.consumer" :data="cascadDt" v-model="formMapping.MapData[index].consumerField"></Cascader>
-                                      </div>
-                                      <div class="ivu-table-cell" v-if="ent.customtype">
-                                      <div v-if="formMapping.consumer">
-                                        <span v-if="customDtRecord[index].data.length != 0">
-                                          <!-- {{customDtRecord}} -->
-                                          <Select v-if="formMapping.consumer" v-model="formMapping.MapData[index].consumerField" style="width:200px">
-                                              <Option v-for="opt in customDtRecord[index].data" :value="opt.value" :key="opt.value">{{ opt.label }}</Option>
-                                          </Select>
-                                        </span>
-                                          <a v-if="formMapping.consumer" @click="saveTostore(ent.type)" style="color:#2d8cf0">
-                                              Map
-                                          </a>
+                                      <template v-if="formMapping.MapData[index]">
+                                        <div class="ivu-table-cell" v-if="!ent.customtype">
+                                            <Cascader v-if="formMapping.consumer" :data="cascadDt" v-model="formMapping.MapData[index].consumerField"></Cascader>
                                         </div>
-                                      </div>
+                                        <div class="ivu-table-cell" v-if="ent.customtype">
+                                        <div v-if="formMapping.consumer">
+                                          <span v-if="customDtRecord.length > 0 && customDtRecord[index].length != 0">
+                                            <Select v-if="formMapping.consumer" v-model="formMapping.MapData[index].consumerField" style="width:200px">
+                                                <Option v-for="opt in customDtRecord[index]" :value="opt.value" :key="opt.value">{{ opt.label }}</Option>
+                                            </Select>
+                                          </span>
+                                            <a v-if="formMapping.consumer" @click="saveTostore(ent.type)" style="color:#2d8cf0">
+                                                Map
+                                            </a>
+                                          </div>
+                                        </div>
+                                      </template>
                                   </td>
+                                  
                                   <td class="">
                                     <div class="ivu-table-cell" v-if="!ent.customtype">
                                       <a v-if="formMapping.consumer" @click="openTrasformEditor(index)"><Icon type="edit"></Icon>
@@ -135,7 +136,6 @@ export default {
         theme: 'base16-light',
         lineNumbers: true,
         line: true,
-        // keyMap: 'sublime',
         extraKeys: { 'Ctrl': 'autocomplete' },
         foldGutter: true,
         gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
@@ -171,52 +171,23 @@ export default {
     }
   },
   async mounted () {
-    // console.log('Calling..1', this.formMapping.MapData)
-    let schemaId = (this.$route.params.id !== '') ? this.$route.params.id : this.$route.params.mappingid
-    let fetchData = await this.fetch(schemaId)
-    console.log('fetchData', fetchData)
-    var mappingId = this.$route.params.mappingid
-    if (mappingId && schemaId && mappingId !== schemaId) {
-      let schemaMappingData = await schemamapping.get(mappingId)
-      let mappingData = schemaMappingData.data
-      this.formMapping.mappingId = mappingId
-      this.formMapping.title = mappingData.title
-      this.formMapping.notes = mappingData.notes
-      this.formMapping.consumer = mappingData.consumer
-      this.formMapping.MapData = mappingData.MapData
-      // let MapDataArray = []
-      // if (Array.isArray(mappingData.MapData) && mappingData.MapData.length) {
-      //   mappingData.MapData.forEach(function (mapdata, index) {
-      //     let mappingObj = {
-      //       consumerField: mapdata.consumerField,
-      //       producerField: mapdata.producerField,
-      //       transform: mapdata.transform,
-      //       ctype: mapdata.ctype
-      //     }
-      //     MapDataArray.push(mappingObj)
-      //   })
-      //   this.formMapping.MapData = MapDataArray
-      // }
+    await this.fetch(this.$route.params.id)
+    if (this.$route.params.mappingid) {
+      let schemaMappingData = await schemamapping.get(this.$route.params.mappingid)
+      this.formMapping = schemaMappingData.data
+      this.formMapping.mappingId = this.$route.params.mappingid
     }
-    // console.log('Calling..2', this.formMapping.MapData)
   },
   methods: {
     back () {
       this.$router.go(-1)
     },
     saveTostore (nPath) {
-      // alert('saveTostore')
       var self = this
-      // console.log('before', this.formMapping, this.rid, nPath)
-      // console.log('Temp storee Dt111111111111: ', this.$store.state.mappingTemp)
-      // console.log('id', this.$route.params.id, Id)
       var mapTemp = this.$store.state.mappingTemp
       var flag = false
       _.forEach(mapTemp, function (obj, index) {
-        console.log('#### producer ####', obj.producer)
         if (obj.producer === self.rid) {
-          // alert('match' + index + JSON.stringify(obj))
-          // self.$store.state.mappingTemp[index] = self.formMapping
           flag = true
         }
       })
@@ -241,43 +212,34 @@ export default {
     onEditorCodeChange (newCode, index) {
       this.formMapping.MapData[index].transform = newCode
     },
-    fetch (id) {
+    async fetch (id) {
       var self = this
       this.rid = id
-      self.resetData()
-      return schema.get().then((response) => {
-        // console.log('mapping', this.formMapping)
-        // console.log('response from fetch', response)
-        // var _formMapping = {}
-        self.allSchema = response.data
-        self._sourceSchema = _.find(self.allSchema, {_id: self.rid})
+      return await schema.get(null, {
+        $paginate: false,
+        isdeleted: false
+      }).then((response) => {
+        self.allSchema = response
+        self._sourceSchema = _.find(self.allSchema, {id: self.rid})
         self.sourceSchemaEntity = self._sourceSchema.entity
-        // console.log('this.sourceSchemaEntity', this.sourceSchemaEntity)
-        self.SourceOptionDt.push({value: self._sourceSchema._id, label: self._sourceSchema.title})
-        self.formMapping.producer = self._sourceSchema._id
+        self.SourceOptionDt.push({value: self._sourceSchema.id, label: self._sourceSchema.title})
+        self.formMapping.producer = self._sourceSchema.id
         self._targetSchema = self.allSchema // _.reject(self.allSchema, {_id: self.rid})
         self.TargetOptionDt = _.map(self._targetSchema, (m) => {
-          return {value: m._id, label: m.title}
+          return {value: m.id, label: m.title}
         })
-
         var checkDt = _.find(this.$store.state.mappingTemp, { 'producer': self.rid })
-        // console.log('checkDt', JSON.stringify(checkDt))
-        // for already try a new map for this instance
         if (checkDt !== undefined) {
           self.testStoreAvail = checkDt
-          // console.log(checkDt.MapData, JSON.stringify(checkDt.MapData))
-          // self.formMapping = checkDt
-          self.formMapping.title = checkDt.title
-          self.formMapping.notes = checkDt.notes
+          // self.formMapping.title = checkDt.title
+          // self.formMapping.notes = checkDt.notes
           self.mapStart(checkDt.consumer)
-          // self.formMapping.MapData[1].transform = 123333
         } else {
           self.testStoreAvail = {}
         }
       })
     },
     resetData () {
-      // alert('reset')
       this.SourceOptionDt = []
       this.TargetOptionDt = []
       this.formMapping.MapData = []
@@ -294,20 +256,18 @@ export default {
     },
     mapStart (value) {
       var self = this
-      // console.log('...........', this.testStoreAvail.consumer)
       if (this.testStoreAvail.consumer) {
-        console.log('add')
         self.formMapping.consumer = value
         self.formMapping.MapData = this.testStoreAvail.MapData
         self.customDtRecord = []
         self.cascadDt = []
-        self.targetSchemaEntity = (_.find(self._targetSchema, {_id: this.testStoreAvail.consumer})).entity
+        self.targetSchemaEntity = (_.find(self._targetSchema, {id: this.testStoreAvail.consumer})).entity
         _.forEach(self._sourceSchema.entity, function (ent) {
           if (ent.customtype) {
             var data5 = []
-            schemamapping.get()
+            schemamapping.get(null, {$paginate: false})
             .then(response => {
-              response.data.data.forEach(function (result, i) {
+              response.data.forEach(function (result, i) {
                 if (result.producer === ent.type) {
                   data5.push({value: result.id, label: result.title})
                 }
@@ -316,10 +276,10 @@ export default {
             .catch(error => {
               console.log(error)
             })
-            self.customDtRecord.push({data: data5})
+            self.customDtRecord.push(data5)
           } else {
             var dt = []
-            self.customDtRecord.push({data: dt})
+            self.customDtRecord.push(dt)
           }
         })
         _.forEach(this.targetSchemaEntity, function (ent) {
@@ -327,7 +287,6 @@ export default {
             self.cascadDt.push({label: ent.name, value: ent.name, children: []})
           } else {
             var _child = self.getChildren(ent.type)
-            // console.log('_child', _child)
             self.cascadDt.push({label: ent.name, value: ent.name, children: _child})
           }
         })
@@ -339,17 +298,20 @@ export default {
         }
         self.customDtRecord = []
         self.cascadDt = []
-        self.targetSchemaEntity = (_.find(self._targetSchema, {_id: self.formMapping.consumer})).entity
+        self.targetSchemaEntity = (_.find(self._targetSchema, {id: self.formMapping.consumer})).entity
         _.forEach(self._sourceSchema.entity, function (ent, index) {
           if (!self.$route.params.mappingid) {
             self.formMapping.MapData.push({producerField: ent.name, consumerField: [], transform: '', ctype: ent.customtype})
+          } else {
+            if (_.findIndex(self.formMapping.MapData, (f) => { return f.producerField === ent.name }) === -1) {
+              self.formMapping.MapData.push({producerField: ent.name, consumerField: [], transform: '', ctype: ent.customtype})
+            }
           }
           if (ent.customtype) {
             var data5 = []
-            schemamapping.get()
+            schemamapping.get(null, {$paginate: false})
             .then(response => {
-              console.log('response', response.data.data, ent.type)
-              response.data.data.forEach(function (result, i) {
+              response.data.forEach(function (result, i) {
                 if (result.producer === ent.type) {
                   data5.push({value: result.id, label: result.title})
                 }
@@ -358,19 +320,17 @@ export default {
             .catch(error => {
               console.log(error)
             })
-            self.customDtRecord.push({data: data5})
+            self.customDtRecord.push(data5)
           } else {
             var dt = []
-            self.customDtRecord.push({data: dt})
+            self.customDtRecord.push(dt)
           }
         })
-        // console.log('customDtRecord', self.customDtRecord)
         _.forEach(this.targetSchemaEntity, function (ent) {
           if (!ent.customtype) {
             self.cascadDt.push({label: ent.name, value: ent.name, children: []})
           } else {
             var _child = self.getChildren(ent.type)
-            // console.log('_child', _child)
             self.cascadDt.push({label: ent.name, value: ent.name, children: _child})
           }
         })
@@ -380,8 +340,7 @@ export default {
     getChildren (id) {
       var self = this
       let child = []
-      schema.getThis(id).then((res) => {
-        // console.log('ssf', res)
+      schema.get(id).then((res) => {
         _.forEach(res.data.entity, function (e, i) {
           // alert(e.customtype)
           if (e.customtype) {
@@ -391,7 +350,6 @@ export default {
             child.push({label: e.name, value: e.name, children: []})
           }
         })
-        // console.log('AAAAAAAA')
       })
       return child
     },
@@ -400,13 +358,6 @@ export default {
       this.$refs[name].validate(async(valid) => {
         if (valid) {
           let actionResponse
-          // remove non-selected mapping fields
-          // for (var i = 0; i < this.formMapping.MapData.length; i++) {
-          //   if (this.formMapping.MapData[i].consumerField.length < 1) {
-          //     this.formMapping.MapData.splice(i, 1)
-          //   }
-          // }
-          console.log(this.formMapping)
           if (this.formMapping.hasOwnProperty('mappingId')) {
             actionResponse = await schemamapping.update(this.formMapping, this.formMapping.mappingId)
           } else {
@@ -431,11 +382,9 @@ export default {
       this.resetMapTemp()
     },
     resetMapTemp () {
-      // alert('resetmap')
       var self = this
       _.forEach(self.$store.state.mappingTemp, function (obj, index) {
         if (obj.producer === self.rid) {
-          // console.log('#### producer ####', index)
           self.$store.dispatch('delThisMapTemp', {index: index})
         }
       })

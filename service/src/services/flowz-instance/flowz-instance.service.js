@@ -1,8 +1,7 @@
 // Initializes the `emailtemplate` service on path `/emailtemplate`
 const createService = require('feathers-rethinkdb');
 const hooks = require('./flowz-instance.hooks');
-const filters = require('./flowz-instance.filters');
-module.exports = function() {
+module.exports = function () {
   const app = this;
   const Model = app.get('rethinkdbClient');
   const paginate = app.get('paginate');
@@ -16,7 +15,20 @@ module.exports = function() {
   // Get our initialized service so that we can register hooks and filters
   const service = app.service('flowz-instance');
   service.hooks(hooks);
-  if (service.filter) {
-    service.filter(filters);
-  }
+  service.hooks({
+    before: {
+      find(context) {
+        if (context.params.query.$useremail) {
+          let useremail = context.params.query.$useremail;
+          delete context.params.query.$useremail;
+          const query = this.createQuery(context.params.query);
+          context.params.rethinkdb = query.filter((row) => {
+            return row('allowedusers').setIntersection(
+              [useremail]
+            ).count().ge(1);
+          });
+        }
+      }
+    }
+  });
 };

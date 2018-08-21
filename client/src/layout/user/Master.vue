@@ -1,6 +1,5 @@
 <template>
   <div class="layout">
-   
     <Row type="flex">
       <i-col v-if="$store.state.sidenavtoggle" :span="5" :style="styles">
         <f-sidebar></f-sidebar>
@@ -19,12 +18,9 @@
 </template>
 
 <script>
-// eslint-disable
 import Header from './Header'
 import SideBar from './SideBar'
 import Footer from './Footer'
-// import Vue from 'vue'
-// let events = new Vue({})
 export default {
   name: 'app',
   components: {
@@ -57,9 +53,17 @@ export default {
     }
   },
   methods: {
+  },
+  mounted () {
+    // console.log(this.$store.state.sidenavtoggle, this.$store.state.sidenavpin)
+    // this.$store.state.sidenavtoggle = false
+    // this.$store.state.sidenavpin = false
   }
 }
 </script>
-<style lang="css">
+<!-- <style lang="css">
     @import "../../assets/styles/user.css";
+</style> -->
+<style lang="less">
+    @import "../../assets/styles/index.less";
 </style>

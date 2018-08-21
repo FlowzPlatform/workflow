@@ -4,7 +4,9 @@ const logger = require('./hooks/logger');
 module.exports = {
   before: {
     all: [],
-    find: [],
+    find: [
+      hook => beforeFind(hook)
+    ],
     get: [],
     create: [],
     update: [],
@@ -32,3 +34,10 @@ module.exports = {
     remove: []
   }
 };
+
+function beforeFind(hook) {
+  if (hook.params.query && hook.params.query.$paginate) {
+    hook.params.paginate = hook.params.query.$paginate === 'false' || hook.params.query.$paginate === false;
+    delete hook.params.query.$paginate;
+  }
+} 

@@ -8,7 +8,7 @@
   },
   "scheduler_table": "scheduler",
   "qJobTimeout": 3600000,
-  "qJobRetryMax": 0,
+  "qJobRetryMax": 5,
   "instance_table": "flowzinstance",
   "approvar_table": "approvalClass",
   "system_logs_table": "system_logs",
@@ -18,5 +18,14 @@
   "rdb_password": "",
   "rdb_db": "FlowzEngine",
   "registerWokerAPI": "http://localhost:4001/upload-worker-process",
-  "registerProcessAPI": "http://localhost:4003/register-jobtype/"
+  "registerProcessAPI": "http://localhost:4003/register-jobtype/",
+  "rethinkdb": {
+    "db": "service",
+    "servers": [
+      {
+        "host": "localhost",
+        "port": "28015"
+      }
+    ]
+  }
 }

@@ -14,11 +14,14 @@
           <Split style="height: calc(100vh - 97.51px);">
             <SplitArea :size="80" :minSize="800">
               <div id="js-canvas" style="width: 100%;height: calc(100vh - 110px);position: relative;"></div>
-            </SplitArea >
+            </SplitArea>
             <SplitArea :size="20" :minSize="200">
               <Tooltip content="Save" placement="left" class="upload-icon">
-                <a  @click="save">
+                <a v-if="!btnLoading" @click="handleSave">
                   <i class="fa fa-floppy-o"></i>
+                </a>
+                <a v-if="btnLoading">
+                  <i class="fa fa-spinner fa-spin"></i>
                 </a>
               </Tooltip>
               <div id="js-properties-panel"></div>
@@ -31,6 +34,7 @@
 </template>
 
 <script>
+  const subscriptionNew = require('flowz-subscription')
   import _ from 'lodash'
   import schemaModel from '@/api/schema'
   import approvalModel from '@/api/approval'
@@ -60,27 +64,93 @@
     },
     data () {
       return {
+        permissions: ['read', 'write'],
         loading: true,
+        btnLoading: false,
         processVar: null,
         bpmnModeler: null,
         bpmnXML: '<?xml version="1.0" encoding="UTF-8"?><bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn"><bpmn:process id="Process_1" isExecutable="false"><bpmn:startEvent id="StartEvent_1" /></bpmn:process><bpmndi:BPMNDiagram id="BPMNDiagram_1"><bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1"><bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1"><dc:Bounds x="173" y="102" width="36" height="36" /></bpmndi:BPMNShape></bpmndi:BPMNPlane></bpmndi:BPMNDiagram></bpmn:definitions>'
       }
     },
     methods: {
-      async save () {
+      async handleSave () {
+        this.btnLoading = true
         let xmlData
+        let svgData = ''
+        // console.log('this.bpmnModeler', this.bpmnModeler)
+        this.bpmnModeler.saveSVG({ format: true },
+          function (e, svg) {
+            svgData = svg
+          })
         this.bpmnModeler.saveXML({ format: true },
           function (e, xml) {
             xmlData = xml
           })
         let x2js = new X2JS()
         let data = x2js.xml2js(xmlData)
+
+        // console.log('Final Data: Final Data:Final Data:Final Data: ', data.definitions.process['_camunda:addedRoles'])
+        let userRoles = null
+        if (data.definitions.process['_camunda:addedRoles']) {
+          userRoles = data.definitions.process['_camunda:addedRoles']
+        }
+        let userRolesArr = []
+        if (userRoles !== null) {
+          userRolesArr = userRoles.split(',')
+        } else {
+          userRolesArr = []
+        }
+        console.log('userRolesArr: ', userRolesArr)
+
         if (data.definitions.process._name !== undefined) {
           let flowObject = {}
           flowObject.ProcessName = data.definitions.process._name
           flowObject.xml = xmlData
+          flowObject.roles = userRoles
           flowObject.json = await this.generateJson(xmlData)
+
+          let actions = []
+          console.log('actions: ', flowObject.json.processList)
+          let filteredProcesses = await _.filter(flowObject.json.processList, (o) => {
+            console.log('type: ', o.type)
+            if (o.type !== 'start' && o.type !== 'endevent' && o.type !== 'intermediatethrowevent') {
+              return o
+            }
+            // return (o.type !== 'start' || o.type !== 'endevent' || o.type !== 'intermediatethrowevent')
+          })
+
+          for (var i = 0; i < filteredProcesses.length; i++) {
+            console.log('id: ', filteredProcesses[i].id)
+            actions.push(filteredProcesses[i].id)
+          }
+          console.log('actions: ', actions)
+
+          let actionsObj = {}
+          for (let i = 0; i < actions.length; i++) {
+            // let str = '\'' + actions[i] + '\':' + this.permissions
+            actionsObj[actions[i]] = this.permissions
+          }
+
+          console.log('actions obj: ', actionsObj)
+          subscriptionNew.moduleResource.moduleName = 'workflow_' + this.$route.params.id
+  
+          let registerAppModuleNew = actionsObj
+
+          console.log('registerAppModuleNew: ', registerAppModuleNew)
+  
+          subscriptionNew.moduleResource.registerAppModule = registerAppModuleNew
+          subscriptionNew.moduleResource.appRoles = userRolesArr
+          subscriptionNew.registeredAppModulesRole()
+
+          flowObject.svg = svgData
           // console.log('xmlData', flowObject.json)
+          flowObject.allowedusers = _.union(...(_.chain(_.union(...(_.map(flowObject.json.processList, m => {
+            return _.filter(m.configurations, f => {
+              return f.key === 'allowedusers'
+            })
+          })))).map(m => {
+            return m.value.split(',')
+          }).value()))
           let result = null
           if (this.$route.params.id !== undefined) {
             result = flowz.put(this.$route.params.id, flowObject)
@@ -91,12 +161,15 @@
             this.$Notice.success({title: 'Success..!', desc: 'Flow Saved..'})
             this.$router.push({name: 'flow/list'})
             localStorage.removeItem('BPMNXml')
+            this.btnLoading = false
           }).catch(error => {
             console.log(error)
             this.$Notice.error({title: 'Error..!', desc: 'Flow Not Saved...'})
+            this.btnLoading = false
           })
         } else {
           this.$Message.error('Please Add Process name !')
+          this.btnLoading = false
         }
       },
       async initBPMN (data) {
@@ -139,6 +212,7 @@
               camunda: camundaModdleDescriptor
             }
           })
+          // console.log('this.bpmnXML', this.bpmnXML)
           this.bpmnModeler.importXML(this.bpmnXML, function (err) {
             if (err) {
               console.error(err)
@@ -223,26 +297,43 @@
           })
           .map(async (m) => {
             let _mapping = await self.getMapping(m, mergeModules)
-            console.log('m', m)
             // console.log('m', m._isProcessTask)
             // let processTask = m._isProcessTask !== undefined ? (m._isProcessTask === 'true') : (m['_camunda:isProcessTask'] === 'true')
             // console.log('processTask', processTask)
             // console.log('ex', m['_camunda:executeIfAny'])
             // let executeAny = m._executeIfAny === undefined ? ((m['_camunda:executeIfAny']) ? m['_camunda:countany'] : false) : ((m._executeIfAny) ? m._countany : false)
-            console.log('executeAny', m['_camunda:executeIfAny'] !== undefined ? ((m['_camunda:executeIfAny']) ? m['_camunda:countany'] : false) : false)
-            return {
-              id: m._id,
-              capacity: (m._isFormInput) ? m._capacity : false,
-              isProcessTask: m._isProcessTask !== undefined ? (m._isProcessTask === 'true') : (m['_camunda:isProcessTask'] === 'true'),
-              name: m._name,
-              type: m.workerType.toLowerCase(),
-              executeAny: m['_camunda:executeIfAny'] !== undefined ? ((m['_camunda:executeIfAny']) ? m['_camunda:countany'] : false) : false,
-              // isProcessTask: m.workerType.toLowerCase() === 'tweet' ? 'true' : false,
-              target: m.outgoing ? self.getTargetId(m, jsonXML) : [],
-              mapping: (_.union(..._mapping)),
-              configurations: self.getConfigurationsProperties(m),
-              inputProperty: await self.getInputProperties(m),
-              outputProperty: await self.getOutputProperties(m)
+            let isSMTP = self.getSMTPProperties(m)
+            if (isSMTP !== null) {
+              return {
+                id: m._id,
+                capacity: (m._isFormInput) ? m._capacity : false,
+                isProcessTask: m._isProcessTask !== undefined ? (m._isProcessTask === 'true') : (m['_camunda:isProcessTask'] === 'true'),
+                name: m._name,
+                type: m.workerType.toLowerCase(),
+                executeAny: m['_camunda:executeIfAny'] !== undefined ? ((m['_camunda:executeIfAny']) ? m['_camunda:countany'] : false) : false,
+                // isProcessTask: m.workerType.toLowerCase() === 'tweet' ? 'true' : false,
+                target: m.outgoing ? self.getTargetId(m, jsonXML) : [],
+                mapping: (_.union(..._mapping)),
+                configurations: self.getConfigurationsProperties(m),
+                smtp: self.getSMTPProperties(m),
+                inputProperty: await self.getInputProperties(m),
+                outputProperty: await self.getOutputProperties(m)
+              }
+            } else {
+              return {
+                id: m._id,
+                capacity: (m._isFormInput) ? m._capacity : false,
+                isProcessTask: m._isProcessTask !== undefined ? (m._isProcessTask === 'true') : (m['_camunda:isProcessTask'] === 'true'),
+                name: m._name,
+                type: m.workerType.toLowerCase(),
+                executeAny: m['_camunda:executeIfAny'] !== undefined ? ((m['_camunda:executeIfAny']) ? m['_camunda:countany'] : false) : false,
+                // isProcessTask: m.workerType.toLowerCase() === 'tweet' ? 'true' : false,
+                target: m.outgoing ? self.getTargetId(m, jsonXML) : [],
+                mapping: (_.union(..._mapping)),
+                configurations: self.getConfigurationsProperties(m),
+                inputProperty: await self.getInputProperties(m),
+                outputProperty: await self.getOutputProperties(m)
+              }
             }
           }).head()
           .value()
@@ -254,7 +345,6 @@
         let self = this
         return await Promise.all(_.chain(process.startEvent)
         .map(async (m) => {
-          console.log('m', m)
           return {
             id: m._id,
             capacity: (m._isFormInput) ? m._capacity : false,
@@ -287,11 +377,12 @@
         })
       },
       getConfigurationsProperties (proccess) {
-        if (proccess.extensionElements && proccess.extensionElements.myConfigurations) {
+        // console.log('process..config', proccess.extensionElements.myConfigurations)
+        // console.log('process..config', proccess.extensionElements.myConfigurations.configuration)
+        if (proccess.extensionElements && proccess.extensionElements.myConfigurations && proccess.extensionElements.myConfigurations.configuration) {
           if (!_.isArray(proccess.extensionElements.myConfigurations.configuration)) {
             proccess.extensionElements.myConfigurations.configuration = [proccess.extensionElements.myConfigurations.configuration]
           }
-          console.log('proccess.extensionElements.myConfigurations', proccess.extensionElements.myConfigurations)
           return _.map(proccess.extensionElements.myConfigurations.configuration, (m) => {
             return {
               key: m._key,
@@ -300,6 +391,18 @@
           })
         } else {
           return []
+        }
+      },
+      getSMTPProperties (proccess) {
+        if (proccess.workerType === 'sendproofmail') {
+          console.log('here', proccess._host)
+          return {
+            host: proccess._host,
+            user: proccess._user,
+            password: proccess._password
+          }
+        } else {
+          return null
         }
       },
       async getInputProperties (proccess) {
@@ -428,9 +531,14 @@
       initFlow () {
         this.processVar = [
           new Promise((resolve, reject) => {
-            schemaModel.get().then((response) => {
-              response.data.splice(0, 0, { title: '---select---', id: 0 })
-              resolve(response.data)
+            schemaModel.get(null, {
+              $paginate: false,
+              isdeleted: false
+              // $limit: 0,
+              // $skip: 0
+            }).then((response) => {
+              response.splice(0, 0, { title: '---select---', id: 0 })
+              resolve(response)
             }).catch(error => {
               reject(error)
             })
@@ -450,8 +558,8 @@
             })
           }),
           new Promise((resolve, reject) => {
-            schemamappingModel.get().then((response) => {
-              resolve(response.data.data)
+            schemamappingModel.get(null, {$paginate: false}).then((response) => {
+              resolve(response.data)
             }).catch(error => {
               reject(error)
             })
@@ -464,17 +572,21 @@
           response[2].splice(0, 0, { name: '---select---', value: 0 })
           if (this.$route.params.id !== undefined) {
             this.bpmnXML = flowz.get(this.$route.params.id).then(async (result) => {
+              console.log('result Data: ', result.data)
               this.bpmnXML = result.data.xml
               await this.initBPMN({
+                cdata: result.data,
+                id: this.$route.params.id,
                 schema: response[0],
                 approval: response[1],
                 emailtemplate: response[2],
                 schemamapping: response[3],
+                createTemplate: [],
                 AddEntity: () => {
                   this.storeXMLtolocalStorage()
                   this.$router.push('/schema/new')
                 },
-                createTemplate: () => {
+                openTemplate: () => {
                   this.storeXMLtolocalStorage()
                   this.$router.push('/schema/edit/717fde77-032f-4ac0-bebe-7f5b16a658e5')
                 },
@@ -541,7 +653,7 @@
   .palette-img > img {
     padding: 10px;
   }
-  // #js-properties-panel {
+  // #js-properties-panel {init
   //   position: absolute;
   //   top: -15px;
   //   bottom: 0;
