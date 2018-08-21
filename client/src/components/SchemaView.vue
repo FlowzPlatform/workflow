@@ -974,4 +974,13 @@ export default {
 	.ivu-form-item-content{
 		/*line-height: 15px !important;*/
 	}
+
+
+</style>
+
+<style>
+  .ivu-modal-body{
+    max-height: 550px !important;
+    overflow-y: auto !important;
+  }
 </style>
