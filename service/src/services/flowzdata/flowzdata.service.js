@@ -1,7 +1,6 @@
 // Initializes the `flowzdata` service on path `/flowzdata`
 const createService = require('feathers-rethinkdb');
 const hooks = require('./flowzdata.hooks');
-const filters = require('./flowzdata.filters');
 
 module.exports = function () {
   const app = this;
@@ -21,8 +20,4 @@ module.exports = function () {
   const service = app.service('flowzdata');
 
   service.hooks(hooks);
-
-  if (service.filter) {
-    service.filter(filters);
-  }
 };

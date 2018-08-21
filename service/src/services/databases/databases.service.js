@@ -1,7 +1,6 @@
 // Initializes the `databases` service on path `/databases`
 const createService = require('feathers-rethinkdb');
 const hooks = require('./databases.hooks');
-const filters = require('./databases.filters');
 
 module.exports = function () {
   const app = this;
@@ -21,8 +20,4 @@ module.exports = function () {
   const service = app.service('databases');
 
   service.hooks(hooks);
-
-  if (service.filter) {
-    service.filter(filters);
-  }
 };
