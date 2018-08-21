@@ -43,11 +43,12 @@ class Service {
   }
 
   async create (data, params) {
+    console.log(data, params);
     if (Array.isArray(data)) {
       return Promise.all(data.map(current => this.create(current, params)));
     }
-
-    return data;
+    
+    return {msg:"your response saved"};
   }
 
   async update (id, data, params) {
