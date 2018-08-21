@@ -42,6 +42,16 @@ import flowLog from '@/pages/flow/systemLog'
 import Login from '@/pages/Login'
 // import EmailVerification from '@/pages/EmailVerification'
 import Register from '@/pages/Register'
+// Approval area
+// import ApprovalList from '@/pages/approval/List'
+// import ApprovalNew from '@/pages/approval/New'
+// import Reply from '@/pages/approval/MailReply'
+// import FormReply from '@/pages/approval/FormReply'
+import Analytics from '@/pages/flow/analytics'
+import FlowOverview from '@/pages/flow/FlowOverview'
+// User area
+// import UserDashboard from '@/pages/user/dashboard'
+// import ManageBPMNPlugin from '@/pages/BPMNPlugins/Manage'
 
 // // Approval area
 // import ApprovalList from '@/pages/approval/List'
@@ -173,6 +183,15 @@ const mroutes = [
             alias: '',
             component: Analytics,
             name: 'Analytics',
+            props: {
+              id: String
+            }
+          },
+          {
+            path: 'flowoverview/:id',
+            alias: '',
+            component: FlowOverview,
+            name: 'FlowOverview',
             props: {
               id: String
             }

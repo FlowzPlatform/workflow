@@ -91,6 +91,7 @@
       </Menu> -->
       <Row>
         <Menu theme="dark" width="auto" style="overflow: auto;height: calc(100% - 104px);" accordion @on-select="handleopenChange">
+          <!-- @on-select="handleopenChange" -->
           <template v-if="loading" align="center">
             <div class="demo-spin-col">
               <Spin size="large">
@@ -128,10 +129,13 @@
                   <div :title="subItem.id">
                     <a @click="handleSubmenu(item, subItem)">
                       {{subItem.name}}
-                      <span style="float:right;">
+                      <span style="margin-left: 20px">
                         <Badge :count="subItem.count"  class-name="demo-badge-alone"></Badge>
                       </span>
                     </a>
+                    <!-- <span style="float:right;" title="Overview" @click="viewOverview(item)">
+                      <i class="fa fa-eye"></i>
+                    </span> -->
                   </div>
                 </Menu-item>
               </template>
@@ -223,6 +227,10 @@
       }
     },
     methods: {
+      // viewOverview (item) {
+      //   console.log('Overview Item: ', item)
+      //   this.$router.push('/admin/flow/flowoverview/' + item.id)
+      // },
       viewProgress (item) {
         console.log('item: ', item)
         this.$router.push('/admin/flow/analytics/' + item.id)

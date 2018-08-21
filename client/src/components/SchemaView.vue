@@ -2,69 +2,170 @@
   <div class="SchemaView">
   	<div class="container-fluid">
 
-      <!-- <mycustom></mycustom> -->
-
-  		<list-instances v-on:setValues="setValues"></list-instances>
-
-			<div>
-				<div class="row" v-if="id != null">
-					<div class="col-md-10" id="top">
-						<div class="row" style="margin-top: 15px;">
-		    			<div class="col-md-12">
-		    				<div class="ui-card">
-		    					<h3 class="formTitle">{{formTitle}}<span style="font-size:12px">&nbsp;&nbsp;({{item.id}})</span></h3>
-		    				</div>
-		    			</div>
-		    		</div>
-
-		    		<div class="row">
-		    			<div class="col-md-12">
-		    				<schemasubform :schemainstance="formSchemaInstance"></schemasubform>
-						    <!-- <i-button type="dashed" class="btnAdd" long @click="handleAdd" icon="plus-round">Add</i-button> -->
-                <div v-if="isMultiple">
+      <Tabs>
+        <TabPane label="Instances" icon="ios-list">
+          <list-instances v-on:setValues="setValues"></list-instances>
+          <div>
+            <div class="row" v-if="id != null">
+              <div class="col-md-10" id="top">
                 <div class="row" style="margin-top: 15px;">
                   <div class="col-md-12">
                     <div class="ui-card">
-                      <!-- <h3 class="formTitle">{{formTitle}}<span style="font-size:12px">&nbsp;&nbsp;({{item.id}})</span></h3> -->
-                      <Row>
-                        <Col :span="4">
-                          <b class="field-label">Target</b>
-                        </Col>
-                        <Col :span="20">
-                          <Select v-model="nextTarget.value" placeholder="Choose Target">
-                            <Option v-for="dpd in nextTarget.options" :value="dpd.value" :key="dpd.value">{{ dpd.label }}</Option>
-                          </Select>
-                        </Col>
-                      </Row>
+                      <h3 class="formTitle">{{formTitle}}<span style="font-size:12px">&nbsp;&nbsp;({{item.id}})</span></h3>
                     </div>
                   </div>
                 </div>
-                </div>
-						    <div style="padding: 5px 0 5px 0">
-						        <Button type="primary" @click="handleSubmit('formSchemaInstance')" :loading="bLoading">{{ savebutton }}</Button>
-						        <!-- <Button @click="handleReset('formSchemaInstance')" style="margin-left: 10px">Reset</Button> -->
-						    </div>
 
-						    <div v-if="validErr.length != 0" style="color: #a94442;background-color: #f2dede;border:1px solid #ebccd1;padding: 5px">
-						        <div v-for="item in validErr">
-						            <!-- <i-icon type="record" style="font-size:10px"></i-icon> -->
-						            <i class="fa fa-exclamation-triangle"></i>
-						            {{item.name}} -- {{item.errmsg}}
-						        </div>
-						    </div>
-		    			</div>
-		    		</div>
-					</div>
-					<div class="col-md-1 fixed-div">
-						<strong>Jump To:</strong>
-						<ul class="jumper-links">
-							<a href="#top" class="btn btn-info btn-block btnJumperLink"><li>Top</li></a>
-							<a :href="'#' + item" v-for="item in jumperLinks" class="btn btn-info btn-block btnJumperLink"><li>{{item}}</li></a>
-						</ul>
-						<!-- <pre>{{formSchemaInstance}}</pre> -->
-					</div>
-				</div>
-			</div>
+                <div class="row">
+                  <div class="col-md-12">
+                    <schemasubform :schemainstance="formSchemaInstance"></schemasubform>
+                    <!-- <i-button type="dashed" class="btnAdd" long @click="handleAdd" icon="plus-round">Add</i-button> -->
+                    <div v-if="isMultiple">
+                    <div class="row" style="margin-top: 15px;">
+                      <div class="col-md-12">
+                        <div class="ui-card">
+                          <!-- <h3 class="formTitle">{{formTitle}}<span style="font-size:12px">&nbsp;&nbsp;({{item.id}})</span></h3> -->
+                          <Row>
+                            <Col :span="4">
+                              <b class="field-label">Target</b>
+                            </Col>
+                            <Col :span="20">
+                              <Select v-model="nextTarget.value" placeholder="Choose Target">
+                                <Option v-for="dpd in nextTarget.options" :value="dpd.value" :key="dpd.value">{{ dpd.label }}</Option>
+                              </Select>
+                            </Col>
+                          </Row>
+                        </div>
+                      </div>
+                    </div>
+                    </div>
+                    <div style="padding: 5px 0 5px 0">
+                        <Button type="primary" @click="handleSubmit('formSchemaInstance')" :loading="bLoading">{{ savebutton }}</Button>
+                        <!-- <Button @click="handleReset('formSchemaInstance')" style="margin-left: 10px">Reset</Button> -->
+                    </div>
+
+                    <div v-if="validErr.length != 0" style="color: #a94442;background-color: #f2dede;border:1px solid #ebccd1;padding: 5px">
+                        <div v-for="item in validErr">
+                            <!-- <i-icon type="record" style="font-size:10px"></i-icon> -->
+                            <i class="fa fa-exclamation-triangle"></i>
+                            {{item.name}} -- {{item.errmsg}}
+                        </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-1 fixed-div">
+                <strong>Jump To:</strong>
+                <ul class="jumper-links">
+                  <a href="#top" class="btn btn-info btn-block btnJumperLink"><li>Top</li></a>
+                  <a :href="'#' + item" v-for="item in jumperLinks" class="btn btn-info btn-block btnJumperLink"><li>{{item}}</li></a>
+                </ul>
+                <!-- <pre>{{formSchemaInstance}}</pre> -->
+              </div>
+            </div>
+          </div>
+        </TabPane>
+        <!-- <TabPane label="Data" icon="ios-albums">
+          <b-row>
+            <b-col md="6" class="my-1">
+              <b-form-group horizontal label="Filter" class="mb-0">
+                <b-input-group>
+                  <b-form-input v-model="filter" placeholder="Type to Search" />
+                  <b-input-group-append>
+                    <b-btn :disabled="!filter" @click="filter = ''">Clear</b-btn>
+                  </b-input-group-append>
+                </b-input-group>
+              </b-form-group>
+            </b-col>
+            <b-col md="4" class="my-1">
+              <b-form-group horizontal label="Sort direction" class="mb-0">
+                <b-input-group>
+                  <b-form-select v-model="sortDirection" slot="append">
+                    <option value="asc">Asc</option>
+                    <option value="desc">Desc</option>
+                    <option value="last">Last</option>
+                  </b-form-select>
+                </b-input-group>
+              </b-form-group>
+            </b-col>
+            <b-col md="2" class="my-1">
+              <b-form-group horizontal label="Per page" class="mb-0">
+                <b-form-select :options="pageOptions" v-model="perPage" />
+              </b-form-group>
+            </b-col>
+          </b-row>
+
+          <b-table show-empty
+                   stacked="md"
+                   :items="items"
+                   :fields="fields"
+                   :current-page="currentPage"
+                   :per-page="perPage"
+                   :filter="filter"
+                   :sort-by.sync="sortBy"
+                   :sort-desc.sync="sortDesc"
+                   :sort-direction="sortDirection"
+                   @filtered="onFiltered"
+          >
+            <template slot="name" slot-scope="row">{{row.value.first}} {{row.value.last}}</template>
+            <template slot="isActive" slot-scope="row">{{row.value?'Yes :)':'No :('}}</template>
+            <template slot="actions" slot-scope="row">
+              <!- We use @click.stop here to prevent a 'row-clicked' event from also happening  ->
+              <b-button size="sm" @click.stop="info(row.item, row.index, $event.target)" class="mr-1">
+                Info modal
+              </b-button>
+              <b-button size="sm" @click.stop="row.toggleDetails">
+                {{ row.detailsShowing ? 'Hide' : 'Show' }} Details
+              </b-button>
+            </template>
+            <template slot="row-details" slot-scope="row">
+              <b-card>
+                <ul>
+                  <li v-for="(value, key) in row.item" :key="key">{{ key }}: {{ value}}</li>
+                </ul>
+              </b-card>
+            </template>
+          </b-table>
+
+          <b-row>
+            <b-col md="6" class="my-1">
+              <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" class="my-0" />
+            </b-col>
+          </b-row>
+
+          <b-modal id="modalInfo" @hide="resetModal" :title="modalInfo.title" ok-only>
+            <pre>{{ modalInfo.content }}</pre>
+          </b-modal>
+
+          <div>
+            <table class="table table-striped table-hover">
+              <thead>
+                <tr>
+                  <th width="50">#</th>
+                  <th>Instance ID</th>
+                  <th width="150">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(instance, index) in instanceEntries">
+                  <td>{{(index + 1)}}</td>
+                  <td>{{instance.id}}</td>
+                  <td>
+                    <button class="btn btn-sm btn-success"><i class="fa fa-play"></i></button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </TabPane> -->
+        <TabPane label="Data" icon="ios-albums">
+          <schemalist :schema="dataSchema" :data="dataData" :configuration="configuration" :dynamicData="dynamicData"></schemalist>
+        </TabPane>
+      </Tabs>
+
+      <!-- <mycustom></mycustom> -->
+
+  		
 		</div>
 
 		<!-- <template id="dynamicinput">
@@ -96,7 +197,12 @@ import ListInstances from './ListInstances'
 import SchemaSubForm from './SchemaSubForm'
 
 import flowzdataModal from '@/api/flowzdata'
+import flowzModel from '@/api/flowz'
 
+import schemalist from '@/pages/user/SchemaList'
+import schemaModel from '@/api/schema'
+
+import finstanceModal from '@/api/finstance'
 // const deepstream = require('deepstream.io-client-js')
 
 // const DeepRecord = require('@/assets/js/deepstream/deepRecord')
@@ -124,6 +230,8 @@ export default {
         entity: []
       },
       schema: {},
+      dataSchema: {},
+      dataData: [],
       entity: [],
       savebutton: 'Save',
       validFlag: true,
@@ -145,14 +253,32 @@ export default {
       nextTarget: {
         value: '',
         options: []
-      }
+      },
+      configuration: true,
+      dynamicData: true,
+      instanceEntries: null
     }
   },
   components: {
     'list-instances': ListInstances,
-    'schemasubform': SchemaSubForm
+    'schemasubform': SchemaSubForm,
+    'schemalist': schemalist
   },
   methods: {
+    info (item, index, button) {
+      this.modalInfo.title = `Row index: ${index}`
+      this.modalInfo.content = JSON.stringify(item, null, 2)
+      this.$root.$emit('bv::show::modal', 'modalInfo', button)
+    },
+    resetModal () {
+      this.modalInfo.title = ''
+      this.modalInfo.content = ''
+    },
+    onFiltered (filteredItems) {
+      // Trigger pagination to update the number of buttons/pages due to filtering
+      this.totalRows = filteredItems.length
+      this.currentPage = 1
+    },
     async getChildData (id) {
       // alert(id)
       var arrObj = []
@@ -630,7 +756,7 @@ export default {
         this.item = values.item
         this.formTitle = values.formName
         this.flowData = values.flowzData
-        // console.log('values.flowData', this.flowData)
+        console.log('values.flowData', this.flowData)
         let targetObj = _.find(values.flowzData.json.processList, {id: values.currentState})
         if (Object.keys(targetObj).length > 0) {
           if (targetObj.target.length > 1) {
@@ -659,10 +785,102 @@ export default {
       // console.log('form instance data: ', this.formSchemaInstance.data)
       // this.nextState = values.nextState
       // this.currentState = values.currentState
+    },
+
+    async getFData (item) {
+      // console.log('item: ', item)
+      let returnData = null
+      if (item) {
+        let lastItem = _.last(item)
+        let stageRecordId = lastItem.stageRecordId
+        await flowzdataModal.get(null, {
+          id: stageRecordId
+        }).then( (resData) => {
+          // console.log('resultDatadadadaadd: ', resData.data[0].data)
+          returnData = resData.data[0].data
+        }).catch( (err) => {
+          console.log('err: ', err)
+        })
+      }
+      return(returnData)
     }
   },
-  mounted () {
+  async mounted () {
     // console.log('DeepRecord: ', DeepRecord)
+    // console.log('ROuter params: ', this.$route.params)
+    flowzModel.get(null, {
+      id: this.$route.params.id
+    })
+    .then( (res) => {
+      // console.log('res flowz get call: ', res.data.data[0].json.processList)
+      let taskData = _.find(res.data.data[0].json.processList, (o) => { return o.id == this.$route.params.stateid})
+      let inputschemaId = taskData.inputProperty[0].entityschema.id
+
+      schemaModel.getAll(inputschemaId).then(res => {
+        this.dataSchema = res
+        // console.log('Res:: ', res)
+        // get flowz data
+        flowzdataModal.get(null, {
+          fid: this.$route.params.id,
+          state: this.$route.params.stateid,
+          $paginate: false
+        }).then( (resultData) => {
+          // console.log('FData: ', resultData)
+          let finalData = _.map(resultData, (o) => { return o.data })
+          console.log('Final Data: ', finalData)
+          this.dataData = finalData
+        })
+      }).catch(err => {
+        console.error('Error: ', err)
+      })
+      // console.log('Task Data: ', inputschemaId)
+    })
+
+    let query = {
+      fid: this.$route.params.id,
+      currentStatus: this.$route.params.stateid,
+      '$paginate': false
+    }
+
+    // await finstanceModal.get(null, query).then(resp => {
+    //   console.log('Instance response Data: ', resp)
+    //   this.instanceEntries = resp.data
+    // }).catch(err => {
+    //   this.tableLoading = false
+    //   this.instanceEntries = null
+    //   console.log('err', err)
+    // })
+
+    await flowzModel.get(this.$route.params.id, {
+      $select: ['json']
+    }).then(async res => {
+      console.log('res: ', res)
+      // if (this.$route.params.stateid) {
+      //   let m = _.find(this.flowzData.json.processList, {id: this.$route.params.stateid})
+      //   if (m && m !== null && Object.keys(m).length > 0) {
+      //     this.breadItem.state = m.name
+      //   }
+      // }
+      await finstanceModal.get(null, query).then(async resp => {
+        console.log('>>>>>>>>>>>', resp)
+        this.instanceEntries = resp.data
+        for ( let i = 0; i < this.instanceEntries.length; i++) {
+          console.log('this.instanceEntries[i]: ', this.instanceEntries[i])
+          this.instanceEntries[i]['lastData'] = await this.getFData(this.instanceEntries[i].stageReference)
+          this.instanceEntries[i].lastData['id'] = this.instanceEntries[i].id
+        }
+
+        this.dataData = _.map(this.instanceEntries, (o) => { return o.lastData })
+        console.log('###########: ', this.dataData)
+      }).catch(err => {
+        console.log('err', err)
+      })
+
+    }).catch(err => {
+      console.log('....', err)
+    })
+  },
+  computed: {
   }
 }
 

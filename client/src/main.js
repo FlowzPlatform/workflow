@@ -10,6 +10,11 @@ import routes from './router'
 import store from './store'
 import config from '@/config'
 
+import BootstrapVue from 'bootstrap-vue'
+import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap-vue/dist/bootstrap-vue.css'
+Vue.use(BootstrapVue)
+
 // Include and set up feathers client
 const Feathers = require('feathers/client')
 const hooks = require('feathers-hooks')

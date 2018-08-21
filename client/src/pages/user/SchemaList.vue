@@ -1,7 +1,7 @@
 <template>
 	<div class="SchemaList">
     <div v-if="configuration" style="">
-      <Button @click="handleConfiguration" ghost>Configuration</Button>
+      <Button style="float: right; margin-top: -50px;" @click="handleConfiguration" ghost><i class="fa fa-cog"></i></Button>
       <Modal v-model="isShow" title="Set Configuration" width="750px"  style="">
         <div style="margin: 10px">
           Display border <i-switch v-model="config.border" style="margin-right: 5px"></i-switch>
@@ -14,7 +14,7 @@
       </Modal>
     </div>
     <div>
-      <Table :columns="setColumns" :data="mdata" :border="config.border" :stripe="config.stripe"></Table>
+      <Table :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
     </div>
 	</div>
 </template>
@@ -24,7 +24,8 @@
     props: {
       'schema': Object,
       'data': Array,
-      'configuration': Boolean
+      'configuration': Boolean,
+      'dynamicData': Boolean
     },
     data () {
       return {
@@ -88,6 +89,7 @@
                   props: {
                   },
                   attrs: {
+                    class: 'form-control',
                     type: 'number',
                     value: params.row.width
                   },
@@ -132,6 +134,33 @@
       },
       setColumns () {
         const cols = []
+        if (this.dynamicData) {
+          cols.push({
+            title: 'Action',
+            width: 100,
+            align: 'center',
+            render: (h, params) => {
+              return h('div', [
+                h('Button', {
+                  props: {
+                    type: 'ghost',
+                    icon: 'ios-play'
+                  },
+                  on: {
+                    'click': () => {
+                      console.log('CLick: ', params.row, params.index)
+                    }
+                  }
+                }, '')
+              ])
+            }
+          })
+          cols.push({
+            title: 'ID',
+            key: 'id',
+            width: 260
+          })
+        }
         if (this.configuration) {
           if (this.config.index) {
             cols.push({
@@ -166,6 +195,8 @@
     },
     mounted () {
       this.mdata = this.data
+      console.log('dynamicData: ', this.dynamicData)
+      console.log('this.schema: ', this.data)
     },
     methods: {
       handleConfiguration () {

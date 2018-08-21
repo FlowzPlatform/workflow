@@ -42,6 +42,9 @@
                   <span style="float:right;">
                     <Badge :count="item.count"  class-name="demo-badge-alone"></Badge>
                   </span>
+                  <span v-if="$store.state.role === 1" style="float:right;" title="Preview Progress" @click.prevent="viewProgress(item)">
+                    <i class="fa fa-line-chart"></i>
+                  </span>
               </template>
               <template
                 v-for="(subItem, inx) in item.json.processList" 
@@ -90,6 +93,10 @@ export default {
     // console.log('this.$store.state.activeFlow', this.$store.state.activeFlow)
   },
   methods: {
+    viewProgress (item) {
+      console.log('item: ', item)
+      this.$router.push('/admin/flow/analytics/' + item.id)
+    },
     handleopenChange (node) {
       node = node.split('/')
       console.log('node', node)
@@ -354,5 +361,8 @@ export default {
 <style>
   .demo-badge-alone {
     background-color: #5cb85c !important;
+  }
+  .ivu-menu-vertical .ivu-menu-submenu-title-icon{
+    float: left;
   }
 </style>
