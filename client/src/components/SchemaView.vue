@@ -3,7 +3,7 @@
   	<div class="container-fluid">
 
       <Tabs>
-        <TabPane label="Instances" icon="ios-list">
+        <!-- <TabPane label="Instances" icon="ios-list">
           <list-instances v-on:setValues="setValues"></list-instances>
           <div>
             <div class="row" v-if="id != null">
@@ -19,12 +19,12 @@
                 <div class="row">
                   <div class="col-md-12">
                     <schemasubform :schemainstance="formSchemaInstance"></schemasubform>
-                    <!-- <i-button type="dashed" class="btnAdd" long @click="handleAdd" icon="plus-round">Add</i-button> -->
+                    <!-- <i-button type="dashed" class="btnAdd" long @click="handleAdd" icon="plus-round">Add</i-button> ->
                     <div v-if="isMultiple">
                     <div class="row" style="margin-top: 15px;">
                       <div class="col-md-12">
                         <div class="ui-card">
-                          <!-- <h3 class="formTitle">{{formTitle}}<span style="font-size:12px">&nbsp;&nbsp;({{item.id}})</span></h3> -->
+                          <!-- <h3 class="formTitle">{{formTitle}}<span style="font-size:12px">&nbsp;&nbsp;({{item.id}})</span></h3> ->
                           <Row>
                             <Col :span="4">
                               <b class="field-label">Target</b>
@@ -41,12 +41,12 @@
                     </div>
                     <div style="padding: 5px 0 5px 0">
                         <Button type="primary" @click="handleSubmit('formSchemaInstance')" :loading="bLoading">{{ savebutton }}</Button>
-                        <!-- <Button @click="handleReset('formSchemaInstance')" style="margin-left: 10px">Reset</Button> -->
+                        <!-- <Button @click="handleReset('formSchemaInstance')" style="margin-left: 10px">Reset</Button> ->
                     </div>
 
                     <div v-if="validErr.length != 0" style="color: #a94442;background-color: #f2dede;border:1px solid #ebccd1;padding: 5px">
                         <div v-for="item in validErr">
-                            <!-- <i-icon type="record" style="font-size:10px"></i-icon> -->
+                            <!-- <i-icon type="record" style="font-size:10px"></i-icon> ->
                             <i class="fa fa-exclamation-triangle"></i>
                             {{item.name}} -- {{item.errmsg}}
                         </div>
@@ -60,11 +60,11 @@
                   <a href="#top" class="btn btn-info btn-block btnJumperLink"><li>Top</li></a>
                   <a :href="'#' + item" v-for="item in jumperLinks" class="btn btn-info btn-block btnJumperLink"><li>{{item}}</li></a>
                 </ul>
-                <!-- <pre>{{formSchemaInstance}}</pre> -->
+                <!-- <pre>{{formSchemaInstance}}</pre> ->
               </div>
             </div>
           </div>
-        </TabPane>
+        </TabPane> -->
         <!-- <TabPane label="Data" icon="ios-albums">
           <b-row>
             <b-col md="6" class="my-1">
@@ -159,7 +159,67 @@
           </div>
         </TabPane> -->
         <TabPane label="Data" icon="ios-albums">
-          <schemalist :schema="dataSchema" :data="dataData" :configuration="configuration" :dynamicData="dynamicData"></schemalist>
+          <schemalist :schema="dataSchema" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData"></schemalist>
+
+          <div>
+            <div class="row" v-if="id != null">
+              <div class="col-md-10" id="top">
+                <div class="row" style="margin-top: 15px;">
+                  <div class="col-md-12">
+                    <div class="ui-card">
+                      <h3 class="formTitle">{{formTitle}}<span style="font-size:12px">&nbsp;&nbsp;({{item.id}})</span></h3>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-12">
+                    <schemasubform :schemainstance="formSchemaInstance"></schemasubform>
+                    <!-- <i-button type="dashed" class="btnAdd" long @click="handleAdd" icon="plus-round">Add</i-button> -->
+                    <div v-if="isMultiple">
+                    <div class="row" style="margin-top: 15px;">
+                      <div class="col-md-12">
+                        <div class="ui-card">
+                          <!-- <h3 class="formTitle">{{formTitle}}<span style="font-size:12px">&nbsp;&nbsp;({{item.id}})</span></h3> -->
+                          <Row>
+                            <Col :span="4">
+                              <b class="field-label">Target</b>
+                            </Col>
+                            <Col :span="20">
+                              <Select v-model="nextTarget.value" placeholder="Choose Target">
+                                <Option v-for="dpd in nextTarget.options" :value="dpd.value" :key="dpd.value">{{ dpd.label }}</Option>
+                              </Select>
+                            </Col>
+                          </Row>
+                        </div>
+                      </div>
+                    </div>
+                    </div>
+                    <div style="padding: 5px 0 5px 0">
+                        <Button type="primary" @click="handleSubmit('formSchemaInstance')" :loading="bLoading">{{ savebutton }}</Button>
+                        <!-- <Button @click="handleReset('formSchemaInstance')" style="margin-left: 10px">Reset</Button> -->
+                    </div>
+
+                    <div v-if="validErr.length != 0" style="color: #a94442;background-color: #f2dede;border:1px solid #ebccd1;padding: 5px">
+                        <div v-for="item in validErr">
+                            <!-- <i-icon type="record" style="font-size:10px"></i-icon> -->
+                            <i class="fa fa-exclamation-triangle"></i>
+                            {{item.name}} -- {{item.errmsg}}
+                        </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-1 fixed-div">
+                <strong>Jump To:</strong>
+                <ul class="jumper-links">
+                  <a href="#top" class="btn btn-info btn-block btnJumperLink"><li>Top</li></a>
+                  <a :href="'#' + item" v-for="item in jumperLinks" class="btn btn-info btn-block btnJumperLink"><li>{{item}}</li></a>
+                </ul>
+                <!-- <pre>{{formSchemaInstance}}</pre> -->
+              </div>
+            </div>
+          </div>
         </TabPane>
       </Tabs>
 
@@ -224,6 +284,7 @@ export default {
   },
   data () {
     return {
+      flowzData: null,
       loading: false,
       formSchemaInstance: {
         data: [],
@@ -806,6 +867,7 @@ export default {
     }
   },
   async mounted () {
+    this.$Spin.show()
     // console.log('DeepRecord: ', DeepRecord)
     // console.log('ROuter params: ', this.$route.params)
     flowzModel.get(null, {
@@ -855,6 +917,7 @@ export default {
       $select: ['json']
     }).then(async res => {
       console.log('res: ', res)
+      this.flowzData = res.data
       // if (this.$route.params.stateid) {
       //   let m = _.find(this.flowzData.json.processList, {id: this.$route.params.stateid})
       //   if (m && m !== null && Object.keys(m).length > 0) {
@@ -872,12 +935,15 @@ export default {
 
         this.dataData = _.map(this.instanceEntries, (o) => { return o.lastData })
         console.log('###########: ', this.dataData)
+        this.$Spin.hide()
       }).catch(err => {
         console.log('err', err)
+        this.$Spin.hide()
       })
 
     }).catch(err => {
       console.log('....', err)
+      this.$Spin.hide()
     })
   },
   computed: {
