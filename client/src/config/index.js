@@ -3,10 +3,10 @@ console.log('process.env.NODE_ENV', process.env.NODE_ENV)
 console.log('process.env.domain', process.env.domainKey)
 // console.log('process.env', process.env)
 var temp = {
-  serverURI: 'http://localhost:3030', // 'http://172.16.230.86:3030'
-  socketURI: 'http://localhost:4033',
-  // serverURI: 'https://api.' + process.env.domainKey + '/eng',
-  // socketURI: 'wss://ws.' + process.env.domainKey + ':4033',
+  // serverURI: 'http://localhost:3030', // 'http://172.16.230.86:3030'
+  // socketURI: 'http://localhost:4033',
+  serverURI: 'https://api.' + process.env.domainKey + '/eng',
+  socketURI: 'wss://ws.' + process.env.domainKey + ':4033',
   workerRegisterURL: 'http://localhost:4001',
   approvalRoleURI: 'http://api.' + process.env.domainKey + '/authldap/',
   fixedLayout: false,

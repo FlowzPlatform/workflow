@@ -54,10 +54,15 @@
 </template>
 <script>
 import sendmailModal from '@/api/sendmail'
+import config from '@/config'
   /*eslint-disable*/
   export default {
     name: 'email',
     computed: {
+    },
+    props: {
+    'btnArr': Object,
+    'iid': String
     },
     mounted () {
     },
@@ -69,20 +74,36 @@ import sendmailModal from '@/api/sendmail'
           from: 'testnewpo@officebrain.com',
           to: 'abc@officebrain.com',
           type: '',
-          titleDescription: '',
+          subject: '',
           Comment: '',
           body: 'Hello',
           html : ''
-        },
-        approve: '',
-        approvedChanges: '',
-        revision: ''
+        }
       }
     },
     methods: {
-      sendEmail(){
-        this.emailForm.html = "<!DOCTYPE html><html lang=\"en\" ><head> <meta charset=\"UTF-8\"> <title>bootstrap form</title> <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css'> </head><body><div class=\"container\"> <h2>Customer Proof:</h2> <a href="+ this.approve +" target=\"_black\"><button type=\"submit\" class=\"btn btn-success\"><span class=\"glyphicon glyphicon-ok\" style=\"color:black; margin-right:8px\"></span> APPROVED: move to production</button><br><br></a> <a href="+ this.approvedChanges +" target=\"_black\"><button type=\"submit\" class=\"btn btn-warning\"><span class=\"glyphicon glyphicon-check\" style=\"color:black; margin-right:8px\"></span>APPROVED: make changes</button></a><br><br><a href="+ this.revision +" target=\"_black\"><button type=\"submit\" class=\"btn btn-danger\"><span class=\"glyphicon glyphicon-warning-sign\" style=\"color:black; margin-right:8px\"></span>REVISION: please new proof.</button></a><br><br><h4>While we strongly you to take advantage of this time saving option, your proof may still be fixed back to company name at: <strong>Toll Free Fax:</strong> 800-238-0082 <strong>Local Fax:<strong> 716-773-2332</h4></div></body></html>"
-        
+      sendEmail() {
+        let config11 = config
+        let btn = ''
+        console.log(this.btnArr)
+        for(let idx in this.btnArr) {
+          let targetId = (new Buffer(this.btnArr[idx])).toString('base64')
+          btn = btn + `
+          <a href="${config11.serverURI}/email-receive/${this.iid}/${targetId}">
+          <button type=\"submit\" class=\"btn btn-success\">
+          <span class=\"glyphicon glyphicon-ok\" style=\"color:black; margin-right:8px\"></span> ${idx.toUpperCase()}: move to production</button><br><br>
+          </a>
+          `
+        }
+        this.emailForm.html = `<!DOCTYPE html><html lang=\"en\" ><head> <meta charset=\"UTF-8\"><title>Email Proof</title>
+          <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css'> </head>
+          <body><div class=\"container\">
+          <h2>Customer Proof:</h2>
+          ${btn}
+          <h4>While we strongly you to take advantage of this time saving option,
+              your proof may still be fixed back to company name at: <strong>Toll Free Fax:</strong> 800-238-0082
+              <strong>Local Fax:<strong> 716-773-2332</h4></div></body></html>`
+
         sendmailModal.post(this.emailForm)
         .then((res)=>{
           console.log(res)
