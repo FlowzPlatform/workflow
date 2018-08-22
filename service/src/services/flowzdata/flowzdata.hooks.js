@@ -59,8 +59,10 @@ function afterCreate (hook) {
       return hook.app.service('finstance').get(hook.data.iid).then(finstRes => {
         let mdata = {
           currentStatus: nextTargetObj.id,
-          stageReference: finstRes.stageReference
-        }
+          stageReference: finstRes.stageReference,
+          createdAt: new Date().toISOString(),
+          userId: hook.params.userPackageDetails
+        };
         if (hook.params.hasOwnProperty('nextTarget')) {
           mdata.currentStatus = hook.params.nextTarget
         }
@@ -78,7 +80,7 @@ function afterCreate (hook) {
         }).catch(err => {
           throw new errors.BadRequest('Error', {
             errors: { message: err.toString() }
-          });  
+          });
         })
       }).catch(err => {
         throw new errors.BadRequest('Error', {
