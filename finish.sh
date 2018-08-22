@@ -7,6 +7,9 @@ then
     RANCHER_ACCESSKEY="$RANCHER_ACCESSKEY_MASTER";
     RANCHER_SECRETKEY="$RANCHER_SECRETKEY_MASTER";
     RANCHER_URL="$RANCHER_URL_MASTER";
+    SERVICE_NAME_SENECA="$SERVICE_NAME_SENECA_MASTER";
+    SERVICE_NAME_BACKEND="$SERVICE_NAME_BACKEND_MASTER";
+    SERVICE_NAME_FRONTEND="$SERVICE_NAME_FRONTEND_MASTER";
   }
 elif [ "$TRAVIS_BRANCH" = "develop" ]
 then
@@ -17,6 +20,9 @@ then
       RANCHER_ACCESSKEY="$RANCHER_ACCESSKEY_DEVELOP";
       RANCHER_SECRETKEY="$RANCHER_SECRETKEY_DEVELOP";
       RANCHER_URL="$RANCHER_URL_DEVELOP";
+      SERVICE_NAME_SENECA="$SERVICE_NAME_SENECA_DEVELOP";
+      SERVICE_NAME_BACKEND="$SERVICE_NAME_BACKEND_DEVELOP";
+      SERVICE_NAME_FRONTEND="$SERVICE_NAME_FRONTEND_DEVELOP";
   }
 elif [ "$TRAVIS_BRANCH" = "staging" ]
 then
@@ -27,25 +33,31 @@ then
       RANCHER_ACCESSKEY="$RANCHER_ACCESSKEY_STAGING";
       RANCHER_SECRETKEY="$RANCHER_SECRETKEY_STAGING";
       RANCHER_URL="$RANCHER_URL_STAGING";
+      SERVICE_NAME_SENECA="$SERVICE_NAME_SENECA_STAGING";
+      SERVICE_NAME_BACKEND="$SERVICE_NAME_BACKEND_STAGING";
+      SERVICE_NAME_FRONTEND="$SERVICE_NAME_FRONTEND_STAGING";
   }  
 else
   {
       echo "call $TRAVIS_BRANCH branch"
-      ENV_ID=`curl -u ""$RANCHER_ACCESSKEY_QA":"$RANCHER_SECRETKEY_QA"" -X GET -H 'Accept: application/json' -H 'Content-Type: application/json' "$RANCHER_URL_QA/v2-beta/projects?name=QA" | jq '.data[].id' | tr -d '"'`
+      ENV_ID=`curl -u ""$RANCHER_ACCESSKEY_QA":"$RANCHER_SECRETKEY_QA"" -X GET -H 'Accept: application/json' -H 'Content-Type: application/json' "$RANCHER_URL_QA/v2-beta/projects?name=Develop" | jq '.data[].id' | tr -d '"'`
       echo $ENV_ID
       RANCHER_ACCESSKEY="$RANCHER_ACCESSKEY_QA";
       RANCHER_SECRETKEY="$RANCHER_SECRETKEY_QA";
       RANCHER_URL="$RANCHER_URL_QA";
+      SERVICE_NAME_SENECA="$SERVICE_NAME_SENECA_QA";
+      SERVICE_NAME_BACKEND="$SERVICE_NAME_BACKEND_QA";
+      SERVICE_NAME_FRONTEND="$SERVICE_NAME_FRONTEND_QA";
   }
 fi
 
-SERVICE_ID_JOBQUEUE=`curl -u ""$RANCHER_ACCESSKEY":"$RANCHER_SECRETKEY"" -X GET -H 'Accept: application/json' -H 'Content-Type: application/json' "$RANCHER_URL/v2-beta/projects/$ENV_ID/services?name=jobqueue-flowz" | jq '.data[].id' | tr -d '"'`
+SERVICE_ID_JOBQUEUE=`curl -u ""$RANCHER_ACCESSKEY":"$RANCHER_SECRETKEY"" -X GET -H 'Accept: application/json' -H 'Content-Type: application/json' "$RANCHER_URL/v2-beta/projects/$ENV_ID/services?name=$SERVICE_NAME_SENECA" | jq '.data[].id' | tr -d '"'`
 echo $SERVICE_ID_JOBQUEUE
 
-SERVICE_ID_FRONTEND=`curl -u ""$RANCHER_ACCESSKEY":"$RANCHER_SECRETKEY"" -X GET -H 'Accept: application/json' -H 'Content-Type: application/json' "$RANCHER_URL/v2-beta/projects/$ENV_ID/services?name=engine-fronted-flowz" | jq '.data[].id' | tr -d '"'`
+SERVICE_ID_FRONTEND=`curl -u ""$RANCHER_ACCESSKEY":"$RANCHER_SECRETKEY"" -X GET -H 'Accept: application/json' -H 'Content-Type: application/json' "$RANCHER_URL/v2-beta/projects/$ENV_ID/services?name=$SERVICE_NAME_FRONTEND" | jq '.data[].id' | tr -d '"'`
 echo $SERVICE_ID_FRONTEND
 
-SERVICE_ID_BACKEND=`curl -u ""$RANCHER_ACCESSKEY":"$RANCHER_SECRETKEY"" -X GET -H 'Accept: application/json' -H 'Content-Type: application/json' "$RANCHER_URL/v2-beta/projects/$ENV_ID/services?name=engine-flowz" | jq '.data[].id' | tr -d '"'`
+SERVICE_ID_BACKEND=`curl -u ""$RANCHER_ACCESSKEY":"$RANCHER_SECRETKEY"" -X GET -H 'Accept: application/json' -H 'Content-Type: application/json' "$RANCHER_URL/v2-beta/projects/$ENV_ID/services?name=$SERVICE_NAME_BACKEND" | jq '.data[].id' | tr -d '"'`
 echo $SERVICE_ID_BACKEND
 
 echo "waiting for service to upgrade "
