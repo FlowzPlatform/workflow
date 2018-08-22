@@ -3,7 +3,7 @@
   	<div class="container-fluid">
 
       <Tabs>
-        <!-- <TabPane label="Instances" icon="ios-list">
+        <TabPane label="Instances" icon="ios-list">
           <list-instances v-on:setValues="setValues"></list-instances>
           <div>
             <div class="row" v-if="id != null">
@@ -19,12 +19,12 @@
                 <div class="row">
                   <div class="col-md-12">
                     <schemasubform :schemainstance="formSchemaInstance"></schemasubform>
-                    <!-- <i-button type="dashed" class="btnAdd" long @click="handleAdd" icon="plus-round">Add</i-button> ->
+                    <!-- <i-button type="dashed" class="btnAdd" long @click="handleAdd" icon="plus-round">Add</i-button> -->
                     <div v-if="isMultiple">
                     <div class="row" style="margin-top: 15px;">
                       <div class="col-md-12">
                         <div class="ui-card">
-                          <!-- <h3 class="formTitle">{{formTitle}}<span style="font-size:12px">&nbsp;&nbsp;({{item.id}})</span></h3> ->
+                          <!-- <h3 class="formTitle">{{formTitle}}<span style="font-size:12px">&nbsp;&nbsp;({{item.id}})</span></h3> -->
                           <Row>
                             <Col :span="4">
                               <b class="field-label">Target</b>
@@ -41,12 +41,12 @@
                     </div>
                     <div style="padding: 5px 0 5px 0">
                         <Button type="primary" @click="handleSubmit('formSchemaInstance')" :loading="bLoading">{{ savebutton }}</Button>
-                        <!-- <Button @click="handleReset('formSchemaInstance')" style="margin-left: 10px">Reset</Button> ->
+                        <!-- <Button @click="handleReset('formSchemaInstance')" style="margin-left: 10px">Reset</Button> -->
                     </div>
 
                     <div v-if="validErr.length != 0" style="color: #a94442;background-color: #f2dede;border:1px solid #ebccd1;padding: 5px">
                         <div v-for="item in validErr">
-                            <!-- <i-icon type="record" style="font-size:10px"></i-icon> ->
+                            <!-- <i-icon type="record" style="font-size:10px"></i-icon> -->
                             <i class="fa fa-exclamation-triangle"></i>
                             {{item.name}} -- {{item.errmsg}}
                         </div>
@@ -60,11 +60,11 @@
                   <a href="#top" class="btn btn-info btn-block btnJumperLink"><li>Top</li></a>
                   <a :href="'#' + item" v-for="item in jumperLinks" class="btn btn-info btn-block btnJumperLink"><li>{{item}}</li></a>
                 </ul>
-                <!-- <pre>{{formSchemaInstance}}</pre> ->
+                <!-- <pre>{{formSchemaInstance}}</pre> -->
               </div>
             </div>
           </div>
-        </TabPane> -->
+        </TabPane>
         <!-- <TabPane label="Data" icon="ios-albums">
           <b-row>
             <b-col md="6" class="my-1">
@@ -157,8 +157,8 @@
               </tbody>
             </table>
           </div>
-        </TabPane> -->
-        <TabPane label="Data" icon="ios-albums">
+        </TabPane> 
+        <!-- <TabPane label="Data" icon="ios-albums">
           <schemalist :schema="dataSchema" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData"></schemalist>
 
           <div>
@@ -175,12 +175,10 @@
                 <div class="row">
                   <div class="col-md-12">
                     <schemasubform :schemainstance="formSchemaInstance"></schemasubform>
-                    <!-- <i-button type="dashed" class="btnAdd" long @click="handleAdd" icon="plus-round">Add</i-button> -->
                     <div v-if="isMultiple">
                     <div class="row" style="margin-top: 15px;">
                       <div class="col-md-12">
                         <div class="ui-card">
-                          <!-- <h3 class="formTitle">{{formTitle}}<span style="font-size:12px">&nbsp;&nbsp;({{item.id}})</span></h3> -->
                           <Row>
                             <Col :span="4">
                               <b class="field-label">Target</b>
@@ -197,12 +195,10 @@
                     </div>
                     <div style="padding: 5px 0 5px 0">
                         <Button type="primary" @click="handleSubmit('formSchemaInstance')" :loading="bLoading">{{ savebutton }}</Button>
-                        <!-- <Button @click="handleReset('formSchemaInstance')" style="margin-left: 10px">Reset</Button> -->
                     </div>
 
                     <div v-if="validErr.length != 0" style="color: #a94442;background-color: #f2dede;border:1px solid #ebccd1;padding: 5px">
                         <div v-for="item in validErr">
-                            <!-- <i-icon type="record" style="font-size:10px"></i-icon> -->
                             <i class="fa fa-exclamation-triangle"></i>
                             {{item.name}} -- {{item.errmsg}}
                         </div>
@@ -216,11 +212,10 @@
                   <a href="#top" class="btn btn-info btn-block btnJumperLink"><li>Top</li></a>
                   <a :href="'#' + item" v-for="item in jumperLinks" class="btn btn-info btn-block btnJumperLink"><li>{{item}}</li></a>
                 </ul>
-                <!-- <pre>{{formSchemaInstance}}</pre> -->
               </div>
             </div>
           </div>
-        </TabPane>
+        </TabPane> -->
       </Tabs>
 
       <!-- <mycustom></mycustom> -->
@@ -244,7 +239,9 @@
 			</div>
 
 		</template> -->
-
+    <div v-if="email">
+      <email v-on:on-done="emailService"></email>
+    </div>
   </div>
 </template>
 
@@ -255,6 +252,7 @@ import axios from 'axios'
 
 import ListInstances from './ListInstances'
 import SchemaSubForm from './SchemaSubForm'
+import email from './email'
 
 import flowzdataModal from '@/api/flowzdata'
 import flowzModel from '@/api/flowz'
@@ -266,6 +264,8 @@ import finstanceModal from '@/api/finstance'
 // const deepstream = require('deepstream.io-client-js')
 
 // const DeepRecord = require('@/assets/js/deepstream/deepRecord')
+
+// import _ form 'lodash'
 
 // const client = deepstream('ws://204.48.26.167:6020').login()
 // let instanceId = '39c53741_ec14_4ceb_a9db_97d7066cd424'
@@ -285,6 +285,7 @@ export default {
   data () {
     return {
       flowzData: null,
+      email: false,
       loading: false,
       formSchemaInstance: {
         data: [],
@@ -317,15 +318,22 @@ export default {
       },
       configuration: true,
       dynamicData: true,
-      instanceEntries: null
+      instanceEntries: null,
+      isEmailDone: false
     }
   },
   components: {
     'list-instances': ListInstances,
     'schemasubform': SchemaSubForm,
-    'schemalist': schemalist
+    'schemalist': schemalist,
+    'email' : email
   },
   methods: {
+    emailService (item) {
+      console.log("item", item)
+      this.isEmailDone = true
+      this.handleSubmit('formSchemaInstance')
+    },
     info (item, index, button) {
       this.modalInfo.title = `Row index: ${index}`
       this.modalInfo.content = JSON.stringify(item, null, 2)
@@ -638,73 +646,167 @@ export default {
     },
 
     async handleSubmit (name) {
-      // this.bLoading = true
-      var obj = this.makeObj()
-      this.validFlag = true
-      this.validErr = []
-      // var check = this.checkValidation(obj.data[0], this.entity)
-      let allcheck = []
-      // console.log("entity: ", this.entity)
-      for (let dobj of obj.data) {
-        let flag = this.checkValidation(dobj, this.entity)
-        allcheck.push(flag)
-      }
-      let check = _.indexOf(allcheck, false)
-      // console.log('mergeData', mergeData, obj.data)
-      // var check = this.checkValidation(obj.data[0], this.entity)
-      // console.log('checkkkkkkkkkkkk', check, obj.data[0], this.entity)
-      this.$Loading.start()
-      if (check === -1) {
-        let mergeData = this.mergeFileList(obj.data, obj)
-        obj.data = mergeData
+      console.log('values.flowData...handle submit', this.flowData)
+      console.log('values.flowData...handle submit', this.flowData.json.processList)
+      let currentStateId = this.$route.params.stateid
+      if(!this.isEmailDone){
+        // for (let index = 0; index < this.flowData.json.processList.length; index++) {
+        //   if (this.flowData.json.processList[index].id == currentStateId) {
+        //     console.log(this.flowData.json.processList[index].id)
+        //     let dummVar = this.flowData.json.processList[index].target[0].id
+        //     // if(this.flowData.json.processList[index + 1].id === dummVar && this.flowData.json.processList[index + 1].type === 'sendproofmail') {
+        //     //   this.id = null
+        //     //   this.email = true
+        //     //   break;
+        //     // }
+        //   }else{
+        //     this.email = true
+        //     // this.bLoading = true
+        //     var obj = this.makeObj()
+        //     this.validFlag = true
+        //     this.validErr = []
+        //     // var check = this.checkValidation(obj.data[0], this.entity)
+        //     let allcheck = []
+        //     // console.log("entity: ", this.entity)
+        //     for (let dobj of obj.data) {
+        //       let flag = this.checkValidation(dobj, this.entity)
+        //       allcheck.push(flag)
+        //     }
+        //     let check = _.indexOf(allcheck, false)
+        //     // console.log('mergeData', mergeData, obj.data)
+        //     // var check = this.checkValidation(obj.data[0], this.entity)
+        //     // console.log('checkkkkkkkkkkkk', check, obj.data[0], this.entity)
+        //     this.$Loading.start()
+        //     if (check === -1) {
+        //       let mergeData = this.mergeFileList(obj.data, obj)
+        //       obj.data = mergeData
 
-        console.log('Data: ', obj.data[0])
+        //       console.log('Data: ', obj.data[0])
 
-        // let returnObj = await DeepRecord.deepRecord.instanceStageSubmit(client, this.item, obj.data[0])
-        // console.log('Data: ', returnObj)
-        let saveObj = {
-          fid: this.item.fid,
-          iid: this.item.id,
-          state: this.item.currentStatus,
-          data: obj.data[0]
+        //       // let returnObj = await DeepRecord.deepRecord.instanceStageSubmit(client, this.item, obj.data[0])
+        //       // console.log('Data: ', returnObj)
+        //       let saveObj = {
+        //         fid: this.item.fid,
+        //         iid: this.item.id,
+        //         state: this.item.currentStatus,
+        //         data: obj.data[0]
+        //       }
+        //       if (this.isMultiple) {
+        //         saveObj.nextTarget = this.nextTarget.value
+        //       }
+        //       this.bLoading = true
+        //       // this.bLoading = false
+        //       await flowzdataModal.post(saveObj).then(res => {
+        //         // console.log('--------------Saved-------------', res.data)
+        //         this.id = null
+        //         this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
+        //         this.$Loading.finish()
+        //         this.bLoading = false
+        //       }).catch(err => {
+        //         console.log('Error', err)
+        //         this.$Loading.finish()
+        //         this.bLoading = false
+        //         this.$Notice.error({title: 'Not Saved!'})
+        //       })
+        //   }
+        // }
+        let currentStageObject = _.find(this.flowData.json.processList, {'id': currentStateId})
+        console.log(currentStateId)
+        let nextTargetId
+        if (currentStageObject.target.length > 1) {
+          //nextTargetId = _.find(this.flowData.json.processList, {'id': currentStageObject})
+        } else {
+          nextTargetId = _.find(this.flowData.json.processList, {'id': currentStageObject.target[0].id})
+          if (nextTargetId.type === 'sendproofmail') {
+            this.id = null
+            this.email = true
+            if (nextTargetId.target.length > 1) {
+              let arr = []
+              for (let index = 0; index < nextTargetId.target.length; index++) {
+                let target = _.find(this.flowData.json.processList, {'id': nextTargetId.target[index].id})
+                arr.push({[target.name]: target.id})
+              }
+            } else {
+              let arr = []
+              arr.push({'approve': nextTargetId.target[0]})
+            }
+          } else {
+            this.saveDataMethod()
+          }
         }
-        if (this.isMultiple) {
-          saveObj.nextTarget = this.nextTarget.value
-        }
-        this.bLoading = true
-        await flowzdataModal.post(saveObj).then(res => {
-          // console.log('--------------Saved-------------', res.data)
-          this.id = null
-          this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
-          this.$Loading.finish()
-          this.bLoading = false
-        }).catch(err => {
-          console.log('Error', err)
-          this.$Loading.finish()
-          this.bLoading = false
-          this.$Notice.error({title: 'Not Saved!'})
-        })
-        // let instanceObj = await DeepRecord.deepRecord.getRecordObject(client, this.item)
-        // instanceObj.set('currentStatus', this.nextState)
-        
-
-        // axios.post('http://192.81.213.41:3033/eng/instance/', { data: obj.data })
-        // .then(response => {
-        //   // console.log('response', response.data)
-        //   this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
-        //   this.$Loading.finish()
-        // })
-        // .catch(error => {
-        //   console.log('Error', error)
-        //   this.$Notice.error({title: 'Error!', desc: 'Instance not saved...'})
-        //   this.$Loading.error()
-        // })
-      } else {
-        this.validErr = _.uniqBy(this.validErr, 'name')
-        this.$Notice.error({title: 'Validation Error!'})
+      } else{
+        this.saveDataMethod();
       }
     },
+    async saveDataMethod () {
+        // this.bLoading = true
+        var obj = this.makeObj()
+        this.validFlag = true
+        this.validErr = []
+        // var check = this.checkValidation(obj.data[0], this.entity)
+        let allcheck = []
+        // console.log("entity: ", this.entity)
+        for (let dobj of obj.data) {
+          let flag = this.checkValidation(dobj, this.entity)
+          allcheck.push(flag)
+        }
+        let check = _.indexOf(allcheck, false)
+        // console.log('mergeData', mergeData, obj.data)
+        // var check = this.checkValidation(obj.data[0], this.entity)
+        // console.log('checkkkkkkkkkkkk', check, obj.data[0], this.entity)
+        this.$Loading.start()
+        if (check === -1) {
+          let mergeData = this.mergeFileList(obj.data, obj)
+          obj.data = mergeData
 
+          console.log('Data: ', obj.data[0])
+
+          // let returnObj = await DeepRecord.deepRecord.instanceStageSubmit(client, this.item, obj.data[0])
+          // console.log('Data: ', returnObj)
+          let saveObj = {
+            fid: this.item.fid,
+            iid: this.item.id,
+            state: this.item.currentStatus,
+            data: obj.data[0]
+          }
+          if (this.isMultiple) {
+            saveObj.nextTarget = this.nextTarget.value
+          }
+          this.bLoading = true
+          // this.bLoading = false
+          await flowzdataModal.post(saveObj).then(res => {
+            // console.log('--------------Saved-------------', res.data)
+            this.id = null
+            this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
+            this.$Loading.finish()
+            this.bLoading = false
+          }).catch(err => {
+            console.log('Error', err)
+            this.$Loading.finish()
+            this.bLoading = false
+            this.$Notice.error({title: 'Not Saved!'})
+          })
+
+          // let instanceObj = await DeepRecord.deepRecord.getRecordObject(client, this.item)
+          // instanceObj.set('currentStatus', this.nextState)
+          
+
+          // axios.post('http://192.81.213.41:3033/eng/instance/', { data: obj.data })
+          // .then(response => {
+          //   // console.log('response', response.data)
+          //   this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
+          //   this.$Loading.finish()
+          // })
+          // .catch(error => {
+          //   console.log('Error', error)
+          //   this.$Notice.error({title: 'Error!', desc: 'Instance not saved...'})
+          //   this.$Loading.error()
+          // })
+        } else {
+          this.validErr = _.uniqBy(this.validErr, 'name')
+          this.$Notice.error({title: 'Validation Error!'})
+        }
+    },
     checkValidation (data, ent) {
       // console.log('Validation....', data, ent)
       var self = this
