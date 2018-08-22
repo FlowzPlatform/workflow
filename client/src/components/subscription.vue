@@ -21,7 +21,7 @@
       }
     },
     mounted () {
-      // console.log('Value', this.value)
+      console.log('Value', this.value)
       this.subid = this.value
       this.init()
     },
