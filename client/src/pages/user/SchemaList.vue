@@ -143,12 +143,12 @@
               return h('div', [
                 h('Button', {
                   props: {
-                    type: 'ghost',
+                    shape: 'circle',
                     icon: 'ios-play'
                   },
                   on: {
                     'click': () => {
-                      console.log('CLick: ', params.row, params.index)
+                      console.log('Click: ', params.row, params.index)
                     }
                   }
                 }, '')
