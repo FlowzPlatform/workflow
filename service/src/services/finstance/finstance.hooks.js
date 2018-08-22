@@ -7,15 +7,17 @@ let _ = require('lodash');
 module.exports = {
   before: {
     all: [],
-    find: [
-      hook => beforeFind(hook)
-    ],
+    find: [],
     get: [],
     create: [
       hook => beforeCreate(hook)
     ],
-    update: [],
-    patch: [],
+    update: [
+      hook => beforeUpdate(hook)
+    ],
+    patch: [
+      hook => beforeUpdate(hook)
+    ],
     remove: []
   },
 
@@ -41,8 +43,8 @@ module.exports = {
 };
 
 
-function beforeFind (hook) {
-  // console.log('hook', hook.params)
+function beforeUpdate (hook) {
+  hook.data.modifiedAt = new Date().toISOString();
 }
 
 function beforeCreate (hook) {

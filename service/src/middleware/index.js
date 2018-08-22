@@ -13,7 +13,7 @@ module.exports = function () {
   subscription.moduleResource.moduleName = 'workflow';
   let registerAppModule = {
     'flowz': ['create','update', 'patch'],
-    'finstance': ['create','update', 'patch'],
+    'finstance': ['create','update'],
     'flowzdata': ['create','update', 'patch'],
     'schema': ['create','update', 'patch', 'find', 'get', 'remove']
   };
