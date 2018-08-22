@@ -14,7 +14,7 @@ module.exports = function () {
   let registerAppModule = {
     'flowz': ['create','update', 'patch'],
     'finstance': ['create','update'],
-    'flowzdata': ['create','update', 'patch'],
+    'flowzdata': ['update', 'patch'],
     'schema': ['create','update', 'patch', 'find', 'get', 'remove']
   };
 

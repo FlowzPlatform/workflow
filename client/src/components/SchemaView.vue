@@ -157,7 +157,7 @@
               </tbody>
             </table>
           </div>
-        </TabPane> 
+        </TabPane>
         <!-- <TabPane label="Data" icon="ios-albums">
           <schemalist :schema="dataSchema" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData"></schemalist>
 
@@ -220,18 +220,18 @@
 
       <!-- <mycustom></mycustom> -->
 
-  		
+
 		</div>
 
 		<!-- <template id="dynamicinput">
 
 			<div>
 				<i-input v-if="type == 'text' || type == 'email' || type == 'phone'" v-model="modelName" type="text" :placeholder="placeholder" :min="min"></i-input>
-		                                            
+
 			  <input-number v-if="type == 'number'" :min="min" :max="max" v-model="modelName" :type="type" :placeholder="placeholder"></input-number>
-			  
+
 			  <date-picker v-if="type == 'date'" type="date" v-model="modelName" :placeholder="placeholder"></date-picker>
-			  
+
 			  <i-select v-if="type == 'dropdown'" v-model="modelName" :placeholder="placeholder">
 			      <i-option v-for="dpd in options" :value="dpd" :key="dpd">{{ dpd }}</i-option>
 			  </i-select>
@@ -240,7 +240,7 @@
 
 		</template> -->
     <div v-if="email">
-      <email v-on:on-done="emailService"></email>
+      <email :btnArr="btnArr" :iid="item.id" v-on:on-done="emailService"></email>
     </div>
   </div>
 </template>
@@ -291,6 +291,7 @@ export default {
         data: [],
         entity: []
       },
+      btnArr: {},
       schema: {},
       dataSchema: {},
       dataData: [],
@@ -298,8 +299,6 @@ export default {
       savebutton: 'Save',
       validFlag: true,
       validErr: [],
-      // id: '2f12480c-22bf-4223-aa18-87cf76b0166b',
-      // id: 'a2fa8564-ff55-4755-ada7-5b8299a25913',
       id: null,
       item: null,
       nextState: null,
@@ -721,14 +720,18 @@ export default {
             this.id = null
             this.email = true
             if (nextTargetId.target.length > 1) {
-              let arr = []
+              let arr = {}
               for (let index = 0; index < nextTargetId.target.length; index++) {
                 let target = _.find(this.flowData.json.processList, {'id': nextTargetId.target[index].id})
-                arr.push({[target.name]: target.id})
+                arr[target.name] = target.id
               }
+              this.btnArr = arr
             } else {
-              let arr = []
-              arr.push({'approve': nextTargetId.target[0]})
+              let arr = {}
+              arr['approve'] = nextTargetId.target[0].id
+              console.log("============arr===", arr)
+              this.btnArr = arr
+              console.log("============this.btnArr===",this.btnArr)
             }
           } else {
             this.saveDataMethod()
@@ -789,7 +792,7 @@ export default {
 
           // let instanceObj = await DeepRecord.deepRecord.getRecordObject(client, this.item)
           // instanceObj.set('currentStatus', this.nextState)
-          
+
 
           // axios.post('http://192.81.213.41:3033/eng/instance/', { data: obj.data })
           // .then(response => {

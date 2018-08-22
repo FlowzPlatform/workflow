@@ -30,7 +30,7 @@ class Service {
     let lastIndex = fInstance.stageReference.length - 1
     // get Flowz data
     let flowzData = await this.app.service('flowzdata').get(fInstance.stageReference[lastIndex].stageRecordId);
-
+    
     let flowzDataRecord = await this.app.service('flowzdata').create({
       data: flowzData.data,
       fid: fInstance.fid,
@@ -47,7 +47,7 @@ class Service {
     if (Array.isArray(data)) {
       return Promise.all(data.map(current => this.create(current, params)));
     }
-    
+
     return {msg:"your response saved"};
   }
 
