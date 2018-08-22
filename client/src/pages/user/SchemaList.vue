@@ -19,13 +19,20 @@
 	</div>
 </template>
 <script>
+  // import finstanceModal from '@/api/finstance'
+  // import flowzModal from '@/api/flowz'
+  import flowzdataModal from '@/api/flowzdata'
+
+  import _ from 'lodash'
   export default {
     name: 'schemalist',
     props: {
       'schema': Object,
       'data': Array,
       'configuration': Boolean,
-      'dynamicData': Boolean
+      'dynamicData': Boolean,
+      'flowzData': Object,
+      'instanceEntries': Array
     },
     data () {
       return {
@@ -147,8 +154,37 @@
                     icon: 'ios-play'
                   },
                   on: {
-                    'click': () => {
-                      console.log('Click: ', params.row, params.index)
+                    'click': async () => {
+                      this.$Spin.show()
+                      let indexFind = _.findIndex(this.instanceEntries, (o) => { return o.id === params.row.id })
+                      // console.log('indexfind: ', indexFind)
+                      // this.$emit('setValues', this.instanceEntries[indexFind])
+                      // console.log('Click: ', params.row, params.index)
+                      console.log('this.flozdata: ', this.flowzData)
+                      let currentObj = _.find(this.flowzData.json.processList, {id: this.instanceEntries[indexFind].currentStatus})
+                      console.log('currentObj: ', currentObj)
+                      let values = {
+                        id: currentObj.inputProperty[0].entityschema.id,
+                        item: this.instanceEntries[indexFind],
+                        formName: currentObj.name,
+                        currentState: currentObj.id,
+                        flowzData: this.flowzData,
+                        formData: {}
+                        // nextState: resp[currentState].next,
+                        // currentState: currentState
+                      }
+                      // console.log('_____________values', item)
+                      if (this.instanceEntries[indexFind].stageReference.length > 0) {
+                        let lastObj = this.instanceEntries[indexFind].stageReference[this.instanceEntries[indexFind].stageReference.length - 1]
+                        await flowzdataModal.get(lastObj.stageRecordId).then(res => {
+                          values.formData = res.data.data
+                          this.$Spin.hide()
+                        }).catch(err => {
+                          console.log('previous data getting error', err)
+                          this.$Spin.hide()
+                        })
+                      }
+                      await this.$emit('setValues', values)
                     }
                   }
                 }, '')
@@ -197,6 +233,23 @@
       this.mdata = this.data
       console.log('dynamicData: ', this.dynamicData)
       console.log('this.schema: ', this.data)
+
+      // if (this.dynamicData) {
+      //   await flowzModal.get(id, {
+      //     $select: ['json']
+      //   }).then(async res => {
+      //     this.flowzData = res.data
+      //     await finstanceModal.get(null, query).then(resp => {
+      //       this.instanceEntries = resp.data
+      //     }).catch(err => {
+      //       this.instanceEntries = null
+      //       console.log('err', err)
+      //     })
+      //   }).catch(err => {
+      //     this.instanceEntries = null
+      //     console.log('....', err)
+      //   })
+      // }
     },
     methods: {
       handleConfiguration () {
