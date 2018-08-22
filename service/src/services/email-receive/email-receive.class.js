@@ -30,12 +30,13 @@ class Service {
     let lastIndex = fInstance.stageReference.length - 1
     // get Flowz data
     let flowzData = await this.app.service('flowzdata').get(fInstance.stageReference[lastIndex].stageRecordId);
-    
+
     let flowzDataRecord = await this.app.service('flowzdata').create({
       data: flowzData.data,
       fid: fInstance.fid,
       iid: data.finstanceId,
-      state: stageId
+      state: fInstance.currentStatus,
+      nextTarget: stageId
     }).catch((err)=> {
       throw new Error(err.message)
     });

@@ -59,19 +59,16 @@ function afterCreate (hook) {
       return hook.app.service('finstance').get(hook.data.iid).then(finstRes => {
         let mdata = {
           currentStatus: nextTargetObj.id,
-          stageReference: finstRes.stageReference,
-          createdAt: new Date().toISOString(),
-          userId: hook.params.userPackageDetails
+          stageReference: finstRes.stageReference
         };
         if (hook.params.hasOwnProperty('nextTarget')) {
           mdata.currentStatus = hook.params.nextTarget;
         }
-        console.log('mdata', mdata);
         mdata.stageReference.push({
           StageName: finstRes.currentStatus,
           stageRecordId: hook.result.id,
           createdAt: new Date().toISOString(),
-          userId: hook.params.userPackageDetails
+          userId: (hook.params.userPackageDetails !== undefined ? hook.params.userPackageDetails.id:null)
         });
         if (nextTargetObj.type === 'endevent') {
           mdata.mainStatus = 'completed';
@@ -80,18 +77,18 @@ function afterCreate (hook) {
           return hook;
         }).catch(err => {
           throw new errors.BadRequest('Error', {
-            errors: { message: err.toString() }
+            errors: { message: err.message }
           });
         });
       }).catch(err => {
         throw new errors.BadRequest('Error', {
-          errors: { message: err.toString() }
+          errors: { message: err.message }
         });
       });
       return hook;
     }).catch(err => {
       throw new errors.BadRequest('Error', {
-        errors: { message: err.toString() }
+        errors: { message: err.message }
       });
     });
   }
