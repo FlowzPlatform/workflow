@@ -118,7 +118,6 @@ export default {
             Body: files[i]
           }
           bucket.upload(params).on('httpUploadProgress', function (evt) {
-            console.log('Uploaded :: ' + parseInt((evt.loaded * 100) / evt.total) + '%')
           }).send(function (err, data) {
             if (err) {
               alert(err)
@@ -146,7 +145,6 @@ export default {
           // obj.Schemaid = _res._id
           for (let v of _res.entity) {
             if (v.customtype) {
-              // console.log('child', self.getChildData(v.type))
               obj[v.name] = await self.getChildData(v.type)
             } else {
               if (v.type === 'number') {
@@ -177,7 +175,6 @@ export default {
             }
           }
           arrObj.push(obj)
-          // console.log('response', arrObj)
         })
         .catch(error => {
           console.log('Error: ', error)
@@ -185,23 +182,17 @@ export default {
       return arrObj
     },
     getObject (eIndex, dataIndex, fname, ftype) {
-      // console.log('get object: ', fname)
       var obj = {}
       obj.data = this.schemainstance.data[dataIndex][fname]
-      // console.log('this.schemainstance.entity[eIndex]', this.schemainstance.entity[eIndex])
       obj.entity = this.schemainstance.entity[eIndex].entity[0].entity
       let indexx = $.inArray(fname, this.jumperLinks)
       if (indexx === -1) {
         this.jumperLinks.push(fname)
       }
-      // console.log('recursive obj', obj)
       return obj
     },
     async handleAdd (eIndex, dataIndex, ent, data, fname) {
-      // console.log('Called')
-      // console.log('Data', data, ent)
       var self = this
-      // console.log('self.$refs', self.$refs['formSchema'])
       // var self.$refs['formSchema'][0].validate()
       // self.$refs['formSchema'][0].validate((valid) => {
       //   alert(1)
@@ -216,7 +207,6 @@ export default {
       // alert(ent.database)
       // obj.database = ent.database
       // obj.Schemaid = ent._id
-      // console.log("###########: ", ent);
       for (let v of ent.entity) {
         if (v.customtype) {
           obj[v.name] = await self.getChildData(v.type)
@@ -292,11 +282,9 @@ export default {
       if (row.property.allowedValue.length > 0) {
         rules.push({type: 'enum', enum: row.property.allowedValue})
       }
-      // console.log('rules', rules)
       return rules
     },
     handleEdit (row) {
-      console.log(row)
     },
     handleRemove (index) {
       this.$Modal.confirm({
@@ -311,10 +299,8 @@ export default {
     }
   },
   mounted () {
-    // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
   },
   created () {
-    // console.log('created >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
   }
 }
 

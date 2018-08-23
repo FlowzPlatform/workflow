@@ -154,7 +154,6 @@ export default {
             return
           })
           if (auth) {
-            // console.log('auth', auth)
             this.$store.commit('SET_TOKEN', auth.logintoken)
 						// Token Store in cookie
 						let location = psl.parse(window.location.hostname)    // get parent domain
@@ -170,11 +169,9 @@ export default {
       })
     },
     handleFacebook () {
-      console.log('connect facebook')
       document.getElementById('form-facebook').submit()
     },
     handleGoogle () {
-      console.log('connect google')
       document.getElementById('form-google').submit()
     },
     handleTwitter () {

@@ -35,16 +35,18 @@ module.exports = function () {
 
   const options = {
     name: 'email-receive',
-    paginate
+    paginate,
+    app
   };
 
+  const serviceObj = createService(options);
   // Initialize our service with any options it requires
   app.use('/email-receive', createService(options));
 
   app.use('/email-receive/:finstanceId/:taskid', {
     find (data, params) {
       // do complex stuff here
-      return serviceObj.updateStatus(data.route, params);
+      return serviceObj.updateStatus(data, params);
     }
   });
 
@@ -53,4 +55,3 @@ module.exports = function () {
 
   service.hooks(hooks);
 };
-
