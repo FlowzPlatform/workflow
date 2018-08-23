@@ -629,28 +629,28 @@ export default {
       if(!this.isEmailDone){
         let currentStageObject = _.find(this.flowData.json.processList, {'id': currentStateId})
         let nextTargetId
-        if (currentStageObject.target.length > 1) {
-          //nextTargetId = _.find(this.flowData.json.processList, {'id': currentStageObject})
+        if (this.isMultiple) {
+          nextTargetId = _.find(this.flowData.json.processList, {'id': this.nextTarget.value})
         } else {
           nextTargetId = _.find(this.flowData.json.processList, {'id': currentStageObject.target[0].id})
-          if (nextTargetId.type === 'sendproofmail') {
-            this.id = null
-            this.email = true
-            if (nextTargetId.target.length > 1) {
-              let arr = {}
-              for (let index = 0; index < nextTargetId.target.length; index++) {
-                let target = _.find(this.flowData.json.processList, {'id': nextTargetId.target[index].id})
-                arr[target.name] = target.id
-              }
-              this.btnArr = arr
-            } else {
-              let arr = {}
-              arr['approve'] = nextTargetId.target[0].id
-              this.btnArr = arr
+        }
+        if (nextTargetId.type === 'sendproofmail') {
+          this.id = null
+          this.email = true
+          if (nextTargetId.target.length > 1) {
+            let arr = {}
+            for (let index = 0; index < nextTargetId.target.length; index++) {
+              let target = _.find(this.flowData.json.processList, {'id': nextTargetId.target[index].id})
+              arr[target.name] = target.id
             }
+            this.btnArr = arr
           } else {
-            this.saveDataMethod()
+            let arr = {}
+            arr['approve'] = nextTargetId.target[0].id
+            this.btnArr = arr
           }
+        } else {
+          this.saveDataMethod()
         }
       } else{
         this.saveDataMethod();
