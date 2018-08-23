@@ -24,22 +24,16 @@
     methods: {
     },
     mounted () {
-      console.log('row', this.row.id)
       var self = this
       instance.getThis(this.row.id).then(response => {
-        console.log('RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR', response)
         Schema.getThis(response.data.Schemaid).then(res => {
-          console.log('res.viewTemplate.url', res)
           if (res.data.viewTemplate.length !== 0) {
             var urlViewtemplate = res.data.viewTemplate[0].url
-            console.log('FFFFFFFFFFFFFFFFFFFFFFF', urlViewtemplate)
             axios.get(res.data.viewTemplate[0].url).then(html => {
               self.viewTemplate = html.data
             })
           } else {
-            console.log('llllllllllllllllllllllllll', response.data)
             this.instanceOneData.push(response.data)
-            console.log('this.instanceOneData', this.instanceOneData)
             _.forEach(response.data, (v, k) => {
               this.instanceOneCol.push({title: k, key: k})
             })

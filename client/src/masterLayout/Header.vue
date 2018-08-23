@@ -115,16 +115,20 @@
       },
       handleChange (value) {
         this.$store.state.subscription = value
-        this.$router.push('/')
         if (this.$store.state.user.package) {
           if (this.$store.state.user.package[value] && this.$store.state.user.package[value].role === 'admin') {
             this.$store.commit('SET_ROLE', 1)
+            this.$router.push('/admin/dashboard')
           } else {
             this.$store.commit('SET_ROLE', 2)
+            this.$router.push('/')
           }
         } else {
           this.$store.commit('SET_ROLE', 2)
+          this.$router.push('/')
         }
+        // console.log('done')
+        // this.$router.push('/')
         // this.$store.dispatch('getFlowzdata')
       }
     }

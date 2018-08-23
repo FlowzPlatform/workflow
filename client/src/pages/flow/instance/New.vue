@@ -308,12 +308,10 @@ export default {
         })
         viewer.importXML(xml, function (err) {
           if (err) {
-            console.log('error rendering', err)
           } else {
             _.forEach(self.flowInstance.processList, function (process) {
               var lastProcess = process.log[_.findLastKey(process.log)]
               if (lastProcess) {
-                console.log('>>>>>>>>>>>>>>>>>>>>......', process.id, self.getCurrentStatus(lastProcess))
                 viewer.get('canvas').addMarker(process.id, self.getCurrentStatus(lastProcess))
               }
             })
@@ -334,7 +332,6 @@ export default {
           eventBus.on(event, function (e) {
             // e.element = the model element
             // e.gfx = the graphical element
-            console.log(event, 'on', e.element.id)
           })
         })
       }
@@ -369,10 +366,8 @@ export default {
     handleMappingRequireStatus (data) {
       // handle mapping required
       if (data.log && _.keys(data.log).length > 0) {
-        console.log('data', data)
         _.forEach(data.log, f => {
           if (this.getCurrentStatus(f).toLowerCase() === 'mappingrequired') {
-            console.log('f', f)
             let _lastLog = this.getLastLog(f)
             let dataObject = {
               'fId': this.$route.params.id,
@@ -382,11 +377,9 @@ export default {
               'jobId': _lastLog.jobId,
               'job': _lastLog.job
             }
-            console.log('dataObject', dataObject)
             let uri = config.serverURI + '/addInputToJobQue'
             axios.post(uri, dataObject)
             .then(response => {
-              console.log(response)
             })
             .catch(error => {
               console.log(error)

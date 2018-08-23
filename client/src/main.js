@@ -22,6 +22,10 @@ const hooks = require('feathers-hooks')
 const socketio = require('feathers-socketio/client')
 const io = require('socket.io-client')
 let socket = io(config.socketURI)
+socket.on('connect', function () {
+})
+socket.on('disconnect', function () {
+})
   // if (process.env.NODE_ENV !== 'development') {
   //   socket = io(config.serverURI, {path: '/eng/socket.io'})
   // } else {
@@ -33,7 +37,7 @@ const feathers = Feathers()
   // .configure(authentication({storage: window.localStorage}))
   // Include it as a CommonJS module
 const vueFeathers = require('vue-feathers')
-  // And plug it in
+  // And plug it in]
 Vue.use(vueFeathers, feathers)
 
 import ElementUI from 'element-ui'
@@ -96,10 +100,21 @@ var router = new VueRouter({
   }
 })
 
+// iView.LoadingBar.config({
+//   color: '#5cb85c',
+//   height: 5
+// })
+iView.LoadingBar.config({
+  color: '#5cb85c',
+  failedColor: '#f0ad4e',
+  height: 5
+})
+
 import axios from 'axios'
 import psl from 'psl'
 // Some middleware to help us ensure the user is authenticated.
 router.beforeEach((to, from, next) => {
+  iView.LoadingBar.start()
   iView.LoadingBar.config({ color: '#0e406d' })
     // window.console.log('Transition', transition)
     // router.app.$store.state.token
@@ -116,6 +131,7 @@ router.beforeEach((to, from, next) => {
     router.app.$cookie.set('auth_token', to.query.token, { expires: 1, domain: location })
   }
   const token = router.app.$cookie.get('auth_token')
+  store.state.token = token
   // set token in axios
   if (token) {
     axios.defaults.headers.common['authorization'] = token
@@ -123,13 +139,11 @@ router.beforeEach((to, from, next) => {
     delete axios.defaults.headers.common['authorization']
   }
   if (to.matched.some(record => record.meta.requiresAuth) && obId) {
-    window.console.log('ob_id obtained')
     next({
       path: '/email-verification',
       query: { ob_id: obId }
     })
   } else if (to.matched.some(record => record.meta.requiresAuth) && (!token || token === 'null')) {
-    window.console.log('Not authenticated')
     next({
       path: '/login'
         // query: { redirect: to.fullPath }
@@ -142,75 +156,123 @@ router.beforeEach((to, from, next) => {
       // })
       store.dispatch('authenticate', token).then(response => {
         // console.log('authenticate', response)
-        if (store.state.subscription !== '' && store.state.subscription !== null) {
-          if (response.hasOwnProperty('package')) {
-            if (response.package[store.state.subscription] === undefined) {
-              if (response.hasOwnProperty('defaultSubscriptionId')) {
-                store.state.subscription = response.defaultSubscriptionId
-              } else {
-                store.state.subscription = ''
-              }
-            }
-          }
-        }
-
-        store.commit('SET_USER', response)
-          // get user role
-        if (to.matched.some(record => record.meta.role)) {
-          // console.log('1')
-          if (store.state.subscription !== '' && store.state.subscription !== null) {
-            // console.log('2')
-            if (response.hasOwnProperty('package')) {
-              // console.log('3')
-              if (response.package[store.state.subscription].role === 'admin') {
-                // console.log('4')
-                store.commit('SET_ROLE', 1)
-                // next({
-                //   path: '/admin/dashboard'
-                // })
-              } else {
-                // console.log('5')
-                store.commit('SET_ROLE', 2)
-                // next({
-                //   path: '/'
-                // })
-              }
+        // if (store.state.subscription !== '' && store.state.subscription !== null) {
+        if (response.hasOwnProperty('package')) {
+          // if (response.package[store.state.subscription] === undefined) {
+          if (store.state.subscription !== '' && store.state.subscription !== undefined) {
+            if (response.package[store.state.subscription].role === 'admin') {
+              store.commit('SET_ROLE', 1)
+              // next({
+              //   path: '/admin/dashboard'
+              // })
             } else {
-              // console.log('6')
               store.commit('SET_ROLE', 2)
               // next({
               //   path: '/'
               // })
             }
           } else {
-            // console.log('7')
-            store.commit('SET_ROLE', 2)
-            // next({
-            //   path: '/'
-            // })
+            if (response.hasOwnProperty('defaultSubscriptionId')) {
+              store.state.subscription = response.defaultSubscriptionId
+              if (response.package[store.state.subscription].role === 'admin') {
+                store.commit('SET_ROLE', 1)
+                // next({
+                //   path: '/admin/dashboard'
+                // })
+              } else {
+                store.commit('SET_ROLE', 2)
+                // next({
+                //   path: '/'
+                // })
+              }
+            }
           }
+          // }
+        } else {
+          store.commit('SET_ROLE', 2)
+        }
+        // }
+
+        store.commit('SET_USER', response)
+          // get user role
+        if (to.matched.some(record => record.meta.role)) {
+          // console.log('1')
+          // if (store.state.subscription !== '' && store.state.subscription !== null) {
+          //   console.log('2')
+          //   if (response.hasOwnProperty('package')) {
+          //     console.log('3')
+          //     if (response.package[store.state.subscription].role === 'admin') {
+          //       console.log('4')
+          //       store.commit('SET_ROLE', 1)
+          //       // next({
+          //       //   path: '/admin/dashboard'
+          //       // })
+          //     } else {
+          //       console.log('5')
+          //       store.commit('SET_ROLE', 2)
+          //       // next({
+          //       //   path: '/'
+          //       // })
+          //     }
+          //   } else {
+          //     console.log('6')
+          //     store.commit('SET_ROLE', 2)
+          //     // next({
+          //     //   path: '/'
+          //     // })
+          //   }
+          // } else {
+          //   // console.log('7')
+          //   store.commit('SET_ROLE', 2)
+          //   // next({
+          //   //   path: '/'
+          //   // })
+          // }
           // store.dispatch('getUser', response.email).then(user => {
           // if (user) {
           // console.log('8')
           if (store.state.role !== null) {
-            // store.commit('SET_ROLE', user.role)
+            // store.commit('SET_ROLE', 2)
             // console.log('9')
-            if (to.matched.find(record => record.meta.role).meta.role.indexOf(parseInt(store.state.role)) === -1) {
-              // console.log('10')
-              next({
-                path: '/login'
-                // query: { redirect: to.fullPath }
-              })
-              // next()
+            // if (to.matched.find(record => record.meta.role).meta.role.indexOf(parseInt(store.state.role)) === -1) {
+            //   console.log('10')
+            //   next({
+            //     path: '/login'
+            //     // query: { redirect: to.fullPath }
+            //   })
+            //   // next()
+            // } else {
+            //   console.log('11')
+            //   next()
+            // }
+            // next({
+            //   path: parseInt(store.state.role) === 1 ? '/admin/dashboard' : '/'
+            // })
+            // console.log('.........', to.path, store.state.role)
+            if (to.path === '/') {
+              if (store.state.role === 1) {
+                next({
+                  path: '/admin/dashboard'
+                })
+              } else {
+                next({
+                  path: '/dashboard'
+                })
+              }
             } else {
-              // console.log('11')
-              next()
+              if (to.matched.find(record => record.meta.role).meta.role.indexOf(parseInt(store.state.role)) === -1) {
+                next({
+                  path: '/'
+                })
+              } else {
+                next()
+              }
             }
           } else {
             // console.log('12')
             store.commit('SET_ROLE', 2)
             next({
-              path: parseInt(store.state.role) === 1 ? '/admin/dashboard' : '/'
+              path: '/'
             })
           }
           // } else {
@@ -261,6 +323,10 @@ router.beforeEach((to, from, next) => {
       next()
     }
   }
+})
+
+router.afterEach(route => {
+  iView.LoadingBar.finish()
 })
 
 sync(store, router)

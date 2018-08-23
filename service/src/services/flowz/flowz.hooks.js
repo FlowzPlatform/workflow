@@ -4,7 +4,9 @@ module.exports = {
     find: [
       hook => beforeFind(hook)
     ],
-    get: [],
+    get: [
+      hook => beforeGet(hook)
+    ],
     create: [],
     update: [],
     patch: [],
@@ -35,4 +37,10 @@ let beforeFind = function(hook) {
     hook.params.paginate = hook.params.query.$paginate === 'false' || hook.params.query.$paginate === false;
     delete hook.params.query.$paginate;
   }
+}
+
+let beforeGet = function (hook) {
+  console.log('-------------------------------------------------------------------')
+  console.log('hook.params.headers', hook.params)
+  console.log('-------------------------------------------------------------------')
 }

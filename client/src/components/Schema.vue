@@ -434,7 +434,6 @@ export default {
         callback(new Error('Not Allowed Special Character'))
       } else {
         var res = await this.validateTitle(value)
-        // console.log('res..// ', res)
         if (res === 'yes') {
           callback(new Error('Already Exist....'))
         } else {
@@ -515,28 +514,21 @@ export default {
     }
   },
   mounted () {
-    console.log('mounted Called')
     this.$store.state.editTemplate = undefined
-    // console.log('------->>>', this.$store.state.viewTemplate)
     this.fetch(this.$route.params.id)
     // this.mjmlUpload = this.$store.state.emailTemplate
-    // console.log(this.mjmlUpload)
     api.request('get', '/settings')
       .then(response => {
         var result = response.data
-        // console.log('settings',result)
 
         for(var db in result){
           var obj = {}
           // if(result[db].dbdefault == 'true'){
-            // console.log('aaaaaaa',db)
             obj.value = db,
             obj.label = db,
             obj.children = []
-            // console.log(result[db].dbinstance)
             result[db].dbinstance.forEach(function(instance, i){
               if(instance.isenable){
-                // console.log(instance.cname)
                 obj.children.push({label: instance.connection_name, value:instance.id})
               }
             })
@@ -544,14 +536,12 @@ export default {
               obj.disabled = true
             }
           // }
-          // console.log(obj)
           this.CascaderData.push(obj)
         }
         // this.$Loading.finish()
       })
       .catch(error => {
         console.log(error)
-        // this.$Loading.error()
       })
       // if(this.$store.state.viewTemplate != undefined && this.$store.state.viewTemplate.length > 0)
       // {
@@ -581,7 +571,6 @@ export default {
       else {
         this.formSchema.entity[index].customtype = false
       }
-      console.log('defaultType', val)
       // alert(type)
     },
     deleteViewTemplate(index) {
@@ -726,11 +715,9 @@ export default {
             // this.formSchema['viewTemplate'] = this.viewtemplate
             // this.formSchema['createTemplate'] = this.createtemplate
             // this.formSchema['_id'] = this.formSchema._id
-            // console.log('aaa', this.formSchema)
             api.request('put', '/schema/' + this.formSchema._id, this.formSchema).then(response => {
               // this.toggleLoading()
               // this.$router.push(data.redirect)
-              console.log(response)
               this.$Message.success('success!')
               this.loading = false
               this.$router.push('/')
@@ -844,7 +831,6 @@ export default {
     },
     handleCloseMjmlClick (self) {
       // this.mjmlUpload.push(self)
-      console.log('hgys',self)
       this.isMjmlEditor = !this.isMjmlEditor
     },
     savegriddata(index, template, isViewTemplate) {
@@ -886,14 +872,12 @@ export default {
       let bucket = new AWS.S3({ params: { Bucket: 'airflowbucket1/obexpense/expenses' } });
       var params = { Key: filename + ".html", ContentType: "html", Body: bodycontent};
       let result = bucket.upload(params).on('httpUploadProgress', function (evt) {
-        console.log("Uploaded :: " + parseInt((evt.loaded * 100) / evt.total) + '%');
       }).send(function (err, data) {
         if(err) {
           // return null;
         } else {
           let template = {'filename':filename, 'url':data.Location, 'usingGrapesManager':isUsingGridmanager};
           self.savegriddata(index, template, isViewTemplate)
-          //console.log('after', templatearray)
         }
       })
     },

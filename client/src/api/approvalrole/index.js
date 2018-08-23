@@ -13,7 +13,6 @@ export default {
     } else {
       return axios.get(config.approvalRoleURI + 'userslist/' + roleName)
         .then(response => {
-          console.log(':::', response.data.data.roles)
           return response.data.data.roles
         })
         .catch(error => {

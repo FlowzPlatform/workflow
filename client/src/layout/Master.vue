@@ -63,8 +63,6 @@ export default {
   },
   methods: {
     addTab (targetName) {
-      console.log('this.$store.getters.TabData ready', this.$store.getters.TabData)
-      // console.log('Called.........')
       let newTabName = ++this.tabIndex + ''
       this.editableTabs2.push({
         title: 'New Tab',

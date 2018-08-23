@@ -71,12 +71,7 @@ let nameProps = require('../../bpmn/parts/NameProps');
  * @return {Object} an entryFactory.textField object
  */
 module.exports = function (group, element, translate, options) {
-
-  var bo = getBusinessObject(element);
-
-  // if (is(element, 'bpmn:Process') || is(element, 'bpmn:Participant') && bo.get('sendproffmail')) {
-    console.log({is})
-    console.log({bo})
+  
   if (is(element, 'camunda:Sendproofmail')) {
     var versionTagEntry = entryFactory.textField({
       id: 'host',

@@ -100,7 +100,6 @@
         } else {
           userRolesArr = []
         }
-        console.log('userRolesArr: ', userRolesArr)
 
         if (data.definitions.process._name !== undefined) {
           let flowObject = {}
@@ -110,9 +109,7 @@
           flowObject.json = await this.generateJson(xmlData)
 
           let actions = []
-          console.log('actions: ', flowObject.json.processList)
           let filteredProcesses = await _.filter(flowObject.json.processList, (o) => {
-            console.log('type: ', o.type)
             if (o.type !== 'start' && o.type !== 'endevent' && o.type !== 'intermediatethrowevent') {
               return o
             }
@@ -120,10 +117,8 @@
           })
 
           for (var i = 0; i < filteredProcesses.length; i++) {
-            console.log('id: ', filteredProcesses[i].id)
             actions.push(filteredProcesses[i].id)
           }
-          console.log('actions: ', actions)
 
           let actionsObj = {}
           for (let i = 0; i < actions.length; i++) {
@@ -131,12 +126,9 @@
             actionsObj[actions[i]] = this.permissions
           }
 
-          console.log('actions obj: ', actionsObj)
           subscriptionNew.moduleResource.moduleName = 'workflow_' + this.$route.params.id
   
           let registerAppModuleNew = actionsObj
-
-          console.log('registerAppModuleNew: ', registerAppModuleNew)
   
           subscriptionNew.moduleResource.registerAppModule = registerAppModuleNew
           subscriptionNew.moduleResource.appRoles = userRolesArr
@@ -395,7 +387,6 @@
       },
       getSMTPProperties (proccess) {
         if (proccess.workerType === 'sendproofmail') {
-          console.log('here', proccess._host)
           return {
             host: proccess._host,
             user: proccess._user,
@@ -572,7 +563,6 @@
           response[2].splice(0, 0, { name: '---select---', value: 0 })
           if (this.$route.params.id !== undefined) {
             this.bpmnXML = flowz.get(this.$route.params.id).then(async (result) => {
-              console.log('result Data: ', result.data)
               this.bpmnXML = result.data.xml
               await this.initBPMN({
                 cdata: result.data,

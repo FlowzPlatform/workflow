@@ -1,16 +1,13 @@
 import api from '../../api'
-let model = 'finstance'
+let model = 'sendmail'
 export default {
-  get: (id = null, params = null, headers = null) => {
+  get: (id = null, params = null) => {
     if (id === null) {
-      return api.request('get', '/' + model, null, params, headers)
+      return api.request('get', '/' + model, null, params)
     } else {
-      return api.request('get', '/' + model + '/' + id, null, params, headers)
+      return api.request('get', '/' + model + '/' + id, params)
     }
   },
-  // getThis: (id) => {
-  //   return api.request('get', '/' + model + '/' + id)
-  // },
   post: (data) => {
     return api.request('post', '/' + model, data)
   },
