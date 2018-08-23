@@ -50,7 +50,7 @@
     </div>
 
     <div class="registerfooter">
-        <p>© 2017. Flowz technology. All Rights Reserved.</p>
+        <p>© 2018. Flowz technology. All Rights Reserved.</p>
     </div>
   </div>
   </div>
