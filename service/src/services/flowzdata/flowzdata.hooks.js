@@ -47,9 +47,7 @@ function beforeCreate (hook) {
 }
 
 function afterCreate (hook) {
-  // console.log('_________________________', hook.result.id)
   if (hook.params.hasOwnProperty('isdone') && hook.params.isdone) {
-    console.log('------', hook.result.id, '------');
     hook.params.query = {};
     hook.params.query.$select = ['json'];
     const query = Object.assign({}, hook.params.query);
@@ -100,7 +98,7 @@ function getNextTarget (processList, targetId) {
     return targetObj;
   }
   if(targetObj.inputProperty.length === 0) {
-    targetObj = getNextTarget(instanceId, targetObj.target[0].id);
+    targetObj = getNextTarget(processList, targetObj.target[0].id);
   }
   return targetObj;
 }
