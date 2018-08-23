@@ -114,8 +114,12 @@ export default {
         this.$Loading.finish()
       }).catch(e => {
         this.$Loading.error()
-        console.log('error', e)
-        this.$Notice.error({title: 'Error', desc: 'Instace Not Generated'})
+        console.log('error', e.response)
+        if (e.response.data.message) {
+          this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+        } else {
+          this.$Notice.error({title: 'Error', desc: 'Instace Not Generated'})
+        }
       })
     },
     viewProgress (item) {
