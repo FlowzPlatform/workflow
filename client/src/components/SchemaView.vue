@@ -332,7 +332,6 @@ export default {
     async emailService (item) {
       this.isEmailDone = true
       await this.handleSubmit('formSchemaInstance')
-      this.email = false
     },
     info (item, index, button) {
       this.modalInfo.title = `Row index: ${index}`
@@ -690,11 +689,15 @@ export default {
             this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
             this.$Loading.finish()
             this.bLoading = false
+            this.email = false
+            this.isEmailDone = false
           }).catch(err => {
             console.log('Error', err)
             this.$Loading.finish()
             this.bLoading = false
             this.$Notice.error({title: 'Not Saved!'})
+            this.email = false
+            this.isEmailDone = false
           })
 
           // let instanceObj = await DeepRecord.deepRecord.getRecordObject(client, this.item)
