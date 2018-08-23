@@ -131,10 +131,8 @@
             //   'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
             // },
         }).then(function (response) {
-          console.log('ResponseResponseResponseResponseResponseResponse: ', response)
           if (response.data.data.length > 0) {
             self.count++
-            console.log('Count:', self.count, totalApps)
             self.permissionsAll = _.union(self.permissionsAll, response.data.data)
             self.permissionsAll = _.map(self.permissionsAll, o => _.extend({
               app: appName
@@ -152,13 +150,11 @@
           return response.data.data
         })
           .catch(function (error) {
-            console.log('Get all permission error:', error)
             console.log(error)
             self.loading = false
           })
       },
       getRoles: async function (newValue) {
-        console.log('called: ', newValue)
         var self = this
         // console.log('Subscription roles URL: ' + config.subscriptionUrl + 'register-roles?module=' + newValue)
         await axios.get(config.subscriptionUrl + 'register-roles?module=' + newValue, {
@@ -189,7 +185,6 @@
         })
           .catch(function (error) {
             self.loading = false
-            console.log('Get all roles error:', error)
             // console.log(error.response.status)
             // console.log('error: ', error)
             if (error.response.status === 500) {
@@ -217,19 +212,15 @@
           }
         }).then(async function (response) {
           let arrResources = await _.groupBy(response.data.data, 'module')
-          console.log('arrResources: ', arrResources)
           // self.tableData = arrResources
           self.tableData = ['hi']
           // self.tableData = _.extend(self.tableData, arrResources)
-          console.log('table data: ', JSON.stringify(self.tableData))
           self.loading = false
         }).catch(function (error) {
-          console.log('Get role permissions error:', error)
           console.log(error)
         })
         self.loading = false
         for (var tblData in self.tableData) {
-          console.log('table data for loop: ', self.tableData)
           await self.getAllPermissions(tblData, Object.keys(self.tableData).length)
         }
         // axios.get(config.subscriptionUrl+'register-resource', {
@@ -274,7 +265,6 @@
         if (event.target.checked) {
           accessVal = 1
         }
-        console.log('Set permission params 1:', event.target.checked)
 
         let updateValue = {
           resourceId: item.id + '_' + action, // resourceid_action
@@ -284,20 +274,17 @@
           app: moduleName
         }
 
-        console.log('Set permission params: 2', item)
         axios.post(config.setPermissionUrl, updateValue, {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
           }
         })
           .then(function (response) {
-            console.log('Set permission response:', response)
 
             let resID = item.id + '_' + action
             let index = _.findIndex(self.permissionsAll, function (d) {
               return (d.roleId === roleField.id) && (d.resourceId === resID)
             })
-            console.log('Set permission response index:', index)
             if (index > -1) {
               if (self.permissionsAll[index].access_value === '1') {
                 self.permissionsAll.splice(index, 1)
@@ -322,7 +309,6 @@
           })
           .catch(function (error) {
             self.showOverlay = false
-            console.log('Set permission error:', error)
             console.log(error)
           })
       },

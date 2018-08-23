@@ -685,14 +685,12 @@ export default {
 
     },
     showSecurityDialog (query) {
-      console.log('query: ', query)
       this.selectedFlowObject = null
       this.selectedFlowObject = query.row
       axios.post('https://api.flowzcluster.tk/authldap/init', {
         'app': 'workflow_' + this.selectedFlowObject.id
       })
       .then(function (response) {
-        console.log(response)
       })
       .catch(function (error) {
         console.log(error)
@@ -704,7 +702,6 @@ export default {
       this.module = 'workflow_' + this.selectedFlowObject.id
       this.getRoles('workflow_' + this.selectedFlowObject.id)
       // Permissions.methods.getRoles('workflow_' + this.selectedFlowObject.id)
-      console.log('Permissions: ', Permissions)
       this.permissionsModal = true
     },
     ok () {
@@ -714,11 +711,9 @@ export default {
       this.$Message.info('Clicked cancel')
     },
     handleAssign (value) {
-      console.log(value)
       this.value2 = value
     },
     showInviteDialog (query) {
-      console.log('query: ', query)
       if (query.row.roles !== undefined) {
         this.flowId = 'Workflow_' + query.row.id
         let temp1 = query.row.roles.split(',')
@@ -728,7 +723,6 @@ export default {
             value1: temp1[index],
             label1: temp1[index]
           })
-          console.log({roles})
           this.options = roles
         }
         this.modal1 = true
@@ -780,7 +774,6 @@ export default {
         }
       })
       .then(response => {
-        console.log({response})
         let newData = response.data.data.package
         for (var key in newData) {
           if (newData.hasOwnProperty(key)) {
@@ -805,7 +798,6 @@ export default {
       })
     },
     async inviteNow () {
-      console.log(this.value2, this.value1)
       if (this.value2 === undefined || this.value2 === '' || this.value1 === '') {
         this.$message.warning('Please select both subscription & role for invitation')
       } else {
@@ -876,11 +868,9 @@ export default {
       var string = '?$skip=' + this.skip + '&$limit=' + this.limit
       flowz.getCustom(string)
       .then(response => {
-        // console.log('response', response)
         this.total = response.data.total
         this.flowzList = response.data.data
         this.loading = false
-        // console.log('this.flowzList', this.flowzList)
       })
       .catch(error => {
         this.loading = false
@@ -891,7 +881,6 @@ export default {
     async createNewInstance (index, id) {
       // let generatedJson = await this.generateJson(this.flowzList[index].xml)
       let generatedJson = this.flowzList[index].json
-      console.log('this.flowzList[index]', this.flowzList[index])
       generatedJson.allowedusers = this.flowzList[index].allowedusers ? this.flowzList[index].allowedusers : []
       // console.log('generatedJson', JSON.stringify(generatedJson))
       // console.log('generatedJson', generatedJson)
@@ -920,7 +909,6 @@ export default {
           .then(response => {
             // console.log('response.data', response.data)
             this.$Notice.success({title: 'Success!!', desc: 'Flowz Deleted...'})
-            console.log('inx, ', inx)
             this.flowzList.splice(inx, 1)
           })
           .catch(error => {
@@ -929,7 +917,6 @@ export default {
           })
         },
         onCancel: () => {
-          console.log('inx, ', inx)
         }
       })
     },
@@ -938,7 +925,6 @@ export default {
       let x2js = new X2JS()
       let jsonXML = x2js.xml2js(xml)
       jsonXML = jsonXML.definitions.process
-      console.log('jsonXML', jsonXML)
       let instanceObject = {}
       instanceObject.name = jsonXML._name
       instanceObject.start_delay = 3000
@@ -976,7 +962,6 @@ export default {
       for (let d of process.target) {
       // _.forEach(process.target, (d) => {
         // merge all module
-        console.log('jsonXML', jsonXML)
         var mergeModules = _.chain(jsonXML).map((m, k) => {
           if (typeof m === 'object') {
             m = _.isArray(m) ? m : [m]
@@ -1003,7 +988,6 @@ export default {
         .map(async (m) => {
           // console.log('m', m)
           let _mapping = await self.getMapping(m, mergeModules)
-          console.log('m', m)
           return {
             id: m._id,
             capacity: (m._isFormInput) ? m._capacity : false,
@@ -1184,16 +1168,13 @@ export default {
       let respond = await Promise(async resolve => {
         taskId = this.titleCase(taskId)
         deepRecord.deepRecord.getCurrentTraget(this.instanceId, taskId).then(res => {
-          console.log('res: ', res)
           // let name = res.name
-          console.log('name: ', name)
           resolve('name')
         }).catch(err => {
-          console.log('err: ', err)
-          resolve('ERROR')
+          resolve('ERROR', err)
         })
       })
-      console.log('Name: ', respond)
+      console.log(respond)
       // return name
     },
     getAllPermissions: async function (appName, totalApps) {
@@ -1204,10 +1185,8 @@ export default {
           //   'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
           // },
       }).then(function (response) {
-        console.log('ResponseResponseResponseResponseResponseResponse: ', response)
         if (response.data.data.length > 0) {
           self.count++
-          console.log('Count:', self.count, totalApps)
           self.permissionsAll = _.union(self.permissionsAll, response.data.data)
           self.permissionsAll = _.map(self.permissionsAll, o => _.extend({
             app: appName
@@ -1225,23 +1204,18 @@ export default {
         return response.data.data
       })
         .catch(function (error) {
-          console.log('Get all permission error:', error)
-          console.log(error)
           self.loadingPermisions = false
+          console.log(error)
         })
     },
     getRoles: async function (newValue) {
-      console.log('called: ', newValue)
       // this.tableData = {}
       var self = this
-      // console.log('Subscription roles URL: ' + config.subscriptionUrl + 'register-roles?module=' + newValue)
       await axios.get(config.subscriptionUrl + 'register-roles?module=' + newValue, {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded;'
         }
       }).then(function (response) {
-          // console.log("Get all roles:",_.groupBy(response.data.data, 'module'));
-        // console.log('all roles:', response)
         if (response.data.data.length > 0) {
           self.isDone = tblData
           var arrRoles = _.groupBy(response.data.data, 'module')
@@ -1252,7 +1226,6 @@ export default {
               sortField: 'name'
             }
             arrRoles[tblData].splice(0, 0, obj)
-            // console.log('arraData', arrRoles)
           }
           self.fields = arrRoles
           self.callTaskList(newValue)
@@ -1263,9 +1236,6 @@ export default {
       })
         .catch(function (error) {
           self.loadingPermisions = false
-          console.log('Get all roles error:', error)
-          // console.log(error.response.status)
-          // console.log('error: ', error)
           if (error.response.status === 500) {
             let msg = error.response.data.message.substr(error.response.data.message.indexOf(':') + 1)
             self.$Modal.warning({
@@ -1291,33 +1261,27 @@ export default {
         }
       }).then(async function (response) {
         let arrResources = await _.groupBy(response.data.data, 'module')
-        console.log('arrResources: ', arrResources)
         // self.tableData = arrResources
         // self.tableData = ['hi']
         self.tableData = await _.extend(self.tableData, arrResources)
-        console.log('self.tableData.length: ', self.tableData)
         // for (let k = 0; k < self.tableData.length; k++) {
         //   console.log('task id: ', self.tableData[k])
         // }
-        console.log('table data: ', JSON.stringify(self.tableData))
         self.loadingPermisions = false
       }).catch(function (error) {
-        console.log('Get role permissions error:', error)
         console.log(error)
       })
       self.loadingPermisions = false
 
       for (var tblData in self.tableData) {
-        console.log('table data for loop: ', self.tableData[tblData][0].service)
         // get task name from task id
         for (let i = 0; i < self.tableData[tblData].length; i++) {
           let taskId = self.titleCase(self.tableData[tblData][i].service)
           await deepRecord.deepRecord.getCurrentTraget(self.instanceId, taskId).then(res => {
-            console.log('res: ', res)
             let name = res.name
             self.tableData[tblData][i]['serviceName'] = name
           }).catch(err => {
-            console.log('err: ', err)
+            console.log(err)
           })
         }
         await self.getAllPermissions(tblData, Object.keys(self.tableData).length)
@@ -1365,7 +1329,6 @@ export default {
       if (event.target.checked) {
         accessVal = 1
       }
-      console.log('Set permission params 1:', event.target.checked)
 
       let updateValue = {
         resourceId: item.id + '_' + action, // resourceid_action
@@ -1375,20 +1338,16 @@ export default {
         app: moduleName
       }
 
-      console.log('Set permission params: 2', item)
       axios.post(config.setPermissionUrl, updateValue, {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
         }
       })
         .then(function (response) {
-          console.log('Set permission response:', response)
-
           let resID = item.id + '_' + action
           let index = _.findIndex(self.permissionsAll, function (d) {
             return (d.roleId === roleField.id) && (d.resourceId === resID)
           })
-          console.log('Set permission response index:', index)
           if (index > -1) {
             if (self.permissionsAll[index].access_value === '1') {
               self.permissionsAll.splice(index, 1)
@@ -1413,7 +1372,6 @@ export default {
         })
         .catch(function (error) {
           self.showOverlay = false
-          console.log('Set permission error:', error)
           console.log(error)
         })
     },

@@ -17,11 +17,9 @@ export const deepRecord = {
         let recordObj = dpClient.record.getRecord(id)
         recordObj.whenReady((record) => {
           record.set(payload)
-          console.log('=====recordId:', id)
           resolve({recordId: id, recordObj: record})
         })
       } catch (err) {
-        console.log(err)
         reject(err)
       }
     })
@@ -142,7 +140,6 @@ export const deepRecord = {
       let stageListObj = dpClient.record.getList(stageListName)
       stageListObj.addEntry(returnObj.recordId)
       await this.setNextStage(dpClient, instanceRecordId, returnObj.recordId)
-      console.log('Completed')
       resolve({stageListName, stageListObj, recordId: returnObj.recordId, recordObj: returnObj.recordObj})
     })
   }

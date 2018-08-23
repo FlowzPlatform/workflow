@@ -117,7 +117,6 @@ export default {
         $paginate: false
       }).then(res => {
         this.flowName = res.data[0].ProcessName
-        console.log('Flow Response: ', res)
         this.currentFlowzJson = res.data[0].json
         this.tableHeaders = this.currentFlowzJson.processList
       }).catch(err => {
@@ -129,7 +128,6 @@ export default {
         fid: this.id,
         $paginate: false
       }).then(response => {
-        console.log('Instances Response: ', response.data)
         this.tableData = response.data
         // for (let i = 0; i < response.data.data.length; i++) {
         //   let instances = {

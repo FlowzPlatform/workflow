@@ -23,10 +23,8 @@ const socketio = require('feathers-socketio/client')
 const io = require('socket.io-client')
 let socket = io(config.socketURI)
 socket.on('connect', function () {
-  console.log('Socket Connected')
 })
 socket.on('disconnect', function () {
-  console.log('Socket Disconnect')
 })
   // if (process.env.NODE_ENV !== 'development') {
   //   socket = io(config.serverURI, {path: '/eng/socket.io'})
@@ -141,13 +139,11 @@ router.beforeEach((to, from, next) => {
     delete axios.defaults.headers.common['authorization']
   }
   if (to.matched.some(record => record.meta.requiresAuth) && obId) {
-    window.console.log('ob_id obtained')
     next({
       path: '/email-verification',
       query: { ob_id: obId }
     })
   } else if (to.matched.some(record => record.meta.requiresAuth) && (!token || token === 'null')) {
-    window.console.log('Not authenticated')
     next({
       path: '/login'
         // query: { redirect: to.fullPath }

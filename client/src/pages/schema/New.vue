@@ -825,7 +825,6 @@ export default {
       else {
         this.formSchema.entity[index].customtype = false
       }
-      console.log('defaultType', val)
       // alert(type)
     },
     deleteViewTemplate(name, index) {
@@ -1164,7 +1163,6 @@ export default {
     },
     handleCloseMjmlClick (self) {
       // this.mjmlUpload.push(self)
-      console.log(this.mjmlUpload)
       this.isMjmlEditor = !this.isMjmlEditor
     },
     savegriddata(index, template, isViewTemplate) {
@@ -1206,7 +1204,6 @@ export default {
       let bucket = new AWS.S3({ params: { Bucket: 'airflowbucket1/obexpense/expenses' } });
       var params = { Key: filename + ".html", ContentType: "html", Body: bodycontent};
       let result = bucket.upload(params).on('httpUploadProgress', function (evt) {
-        console.log("Uploaded :: " + parseInt((evt.loaded * 100) / evt.total) + '%');
       }).send(function (err, data) {
         if(err) {
           // return null;

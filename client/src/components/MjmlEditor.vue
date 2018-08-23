@@ -84,14 +84,12 @@ export default {
         if (valid) {
           this.formInline.loading = true
           let bucket = new AWS.S3({ params: { Bucket: 'airflowbucket1/obexpense/expenses' } })
-          console.log(bucket)
           var mjmlData = {
             Key: this.formInline.filename+'.html',
             ContentType: 'application/mjml',
             Body: mjmlTemplate
           }
           bucket.upload(mjmlData).on('httpUploadProgress', function (evt) {
-            console.log('Uploaded :: ' + parseInt((evt.loaded * 100) / evt.total) + '%')
           }).send(function (err, data) {
             if (err) { alert(err) } else {
               mjmlobj = {'filename': filename , 'url': data.Location, 'notes': notes}

@@ -46,7 +46,6 @@ export default {
   },
   methods: {
     savedata () {
-      console.log('Savedata')
       if (this.templatename !== '' && this.templatename !== undefined) {
         let gridobject = {}
         let canvas = gm.$el.find('#' + gm.options.canvasId)

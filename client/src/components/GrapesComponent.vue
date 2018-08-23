@@ -538,7 +538,6 @@ export default {
     //   var end = '<script src="./js/client-navbar-plugin.js"><\/script><script src="./js/client-listing-plugin.js"><\/script><script src="./js/client-product-detail-plugin.js"><\/script><script src="./js/client-invoices-plugin.js"><\/script> <script src="./js/client-customers-plugin.js"><script src="./js/client-payment-plugin.js"><\/script><script src="./assets/main.js"><\/script></body></html>';
     },
     saveJsonFile: function (name) {
-      console.log(editor.DomComponents)
       let cssObject = editor.DomComponents.getWrapper().attributes.style.custom
       let bindingProperties = []
       if (cssObject !== undefined) {
@@ -566,7 +565,6 @@ export default {
           let bucket = new AWS.S3({ params: { Bucket: 'airflowbucket1/obexpense/expenses' } })
           var params = { Key: this.formInline.filename, ContentType: 'html', Body: newContent }
           bucket.upload(params).on('httpUploadProgress', function (evt) {
-            console.log('Uploaded :: ' + parseInt((evt.loaded * 100) / evt.total) + '%')
           }).send(function (err, data) {
             if (err) {
               alert(err)
@@ -586,7 +584,7 @@ export default {
           bucketInstance.deleteObject(params, function (err, data) {
             if (err) {
               console.log(err)
-            } else { console.log('1111111111111111111', params) }
+            } else {  }
           })
           // setTimeout(function() {
           //     self.formInline.loading = false
@@ -597,7 +595,6 @@ export default {
     },
     cancel () {
       this.dispatch('schema', 'close-click', false)
-      //  console.log('close')
       //       this.$Modal.confirm({
       //             title: 'Confirm',
       //             content: '<p>Are you sure you want to cancel?</p>',

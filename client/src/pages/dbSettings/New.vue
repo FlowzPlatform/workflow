@@ -222,7 +222,6 @@ export default{
                     self.loading = true;
                     var params = { Key: file.name, ContentType: file.type, Body: file };
                     bucket.upload(params).on('httpUploadProgress', function (evt) {
-                        console.log("Uploaded :: " + parseInt((evt.loaded * 100) / evt.total) + '%');
                     }).send(function (err, data) {
                         if(err) {
                             alert(err);
