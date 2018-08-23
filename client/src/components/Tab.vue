@@ -46,7 +46,6 @@ export default {
     				else {
     					this.activetab -= 1
 	    				this.$store.state.activetab = this.$store.state.activetab - 1
-	    				// console.log(this.activetab , this.$store.state.activetab)
 					    var deldobj = this.$store.state.tabdata.splice(name, 1)
 				  	    this.$router.push(this.$store.state.tabdata[this.activetab].url)
     				}

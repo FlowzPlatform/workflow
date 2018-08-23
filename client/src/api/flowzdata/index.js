@@ -2,7 +2,6 @@ import api from '../../api'
 let model = 'flowzdata'
 export default {
   get: (id = null, params = null, headers = null) => {
-    // console.log('headers', headers)
     if (id === null) {
       return api.request('get', '/' + model, null, params, headers).then(response => {
         return response.data

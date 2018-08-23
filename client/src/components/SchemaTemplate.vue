@@ -534,7 +534,6 @@ export default {
                   }
                   break
                 default:
-                  console.log(element.name, ': ', val)
               }
             }
           }

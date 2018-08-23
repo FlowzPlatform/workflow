@@ -24,7 +24,6 @@
     import axios from 'axios'
     import config from '../../config/index'
     let subscriptionUrl = config.subscriptionUrl
-    console.log(subscriptionUrl)
     import Cookies from 'js-cookie'
     import moment from 'moment'
     import Vue from 'vue'

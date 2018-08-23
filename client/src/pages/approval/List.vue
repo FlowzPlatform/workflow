@@ -116,7 +116,6 @@
         getapproval: async function(){
           this.approvalData = await approval.get()
           this.loading = false
-          console.log(this.approvalData)
         },
         addApproval: function(){
           this.$router.push('approval/new')

@@ -91,7 +91,6 @@ CustomContextPadProvider.prototype.getContextPadEntries = function (element) {
   // if (popupMenu._providers['bpmn-replace']) {
   //   replaceMenu = popupMenu.create('bpmn-replace', element)
   // }
-  // console.log('element', element)
   // if (is(element, 'camunda:Custom')) {
   if ((element.type).match(/flowz:/gi)) {
     assign(actions, {

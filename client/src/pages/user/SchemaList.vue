@@ -160,9 +160,7 @@
                       // console.log('indexfind: ', indexFind)
                       // this.$emit('setValues', this.instanceEntries[indexFind])
                       // console.log('Click: ', params.row, params.index)
-                      console.log('this.flozdata: ', this.flowzData)
                       let currentObj = _.find(this.flowzData.json.processList, {id: this.instanceEntries[indexFind].currentStatus})
-                      console.log('currentObj: ', currentObj)
                       let values = {
                         id: currentObj.inputProperty[0].entityschema.id,
                         item: this.instanceEntries[indexFind],
@@ -180,8 +178,8 @@
                           values.formData = res.data.data
                           this.$Spin.hide()
                         }).catch(err => {
-                          console.log('previous data getting error', err)
                           this.$Spin.hide()
+                          console.log(err)
                         })
                       }
                       await this.$emit('setValues', values)
@@ -231,8 +229,6 @@
     },
     mounted () {
       this.mdata = this.data
-      console.log('dynamicData: ', this.dynamicData)
-      console.log('this.schema: ', this.data)
 
       // if (this.dynamicData) {
       //   await flowzModal.get(id, {

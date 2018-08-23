@@ -86,7 +86,6 @@ export default {
         if (key === 'url') {
           result = 'http://' + this.currentEntitySchema.userID + '.' + value[0] + '.' + config.grapesDomain + '/' + value[1] + '.html'
           // result = 'http://localhost/person.html'
-          console.log('result ::: ', value[0], value[1], result)
           // result = 'https://' + this.currentEntitySchema.userID + '.' + value[0] + '.' + config.grapesDomain + '/' + value[1] + '.html'
           // result = 'http://localhost/person.html'
           // console.log('Active File ::: ', value[1])
@@ -148,7 +147,6 @@ export default {
           customSchema.push(ent)
         }
       }
-      console.log('entity:: ', array, ' formData :: ', self.lastLog.input, ' schema :: ', customSchema)
       document.getElementById('filecontainer').contentWindow.postMessage({
         entity: array,
         formData: self.lastLog.input,
@@ -157,9 +155,7 @@ export default {
       }, '*')
       // handle Listener Event
       messageEvent = function (event) {
-        console.log('event', event.data)
         if (_.isArray(event.data)) {
-          console.log('Received...', event.data)
           self.handleSubmit(event.data)
         }
         window.removeEventListener('message', messageEvent)
@@ -193,7 +189,6 @@ export default {
     async handleSubmit (maindata) {
       this.submitLoading = true
       for (let [inx, mObj] of maindata.entries()) {
-        console.log('inx', inx)
         mObj.Schemaid = this.currentEntitySchema.id
       }
       let dataObject1 = {

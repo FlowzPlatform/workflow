@@ -113,7 +113,6 @@
         this.$router.push('/login')
       },
       handleChange (value) {
-        // console.log('value parent', value)
         this.$store.state.subscription = value
         // this.$store.state.sidenavtoggle = !this.$store.state.sidenavtoggle
         // let self = this
