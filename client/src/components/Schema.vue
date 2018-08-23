@@ -515,7 +515,6 @@ export default {
     }
   },
   mounted () {
-    console.log('mounted Called')
     this.$store.state.editTemplate = undefined
     // console.log('------->>>', this.$store.state.viewTemplate)
     this.fetch(this.$route.params.id)
@@ -581,7 +580,6 @@ export default {
       else {
         this.formSchema.entity[index].customtype = false
       }
-      console.log('defaultType', val)
       // alert(type)
     },
     deleteViewTemplate(index) {
@@ -730,7 +728,6 @@ export default {
             api.request('put', '/schema/' + this.formSchema._id, this.formSchema).then(response => {
               // this.toggleLoading()
               // this.$router.push(data.redirect)
-              console.log(response)
               this.$Message.success('success!')
               this.loading = false
               this.$router.push('/')
@@ -844,7 +841,6 @@ export default {
     },
     handleCloseMjmlClick (self) {
       // this.mjmlUpload.push(self)
-      console.log('hgys',self)
       this.isMjmlEditor = !this.isMjmlEditor
     },
     savegriddata(index, template, isViewTemplate) {
@@ -886,14 +882,12 @@ export default {
       let bucket = new AWS.S3({ params: { Bucket: 'airflowbucket1/obexpense/expenses' } });
       var params = { Key: filename + ".html", ContentType: "html", Body: bodycontent};
       let result = bucket.upload(params).on('httpUploadProgress', function (evt) {
-        console.log("Uploaded :: " + parseInt((evt.loaded * 100) / evt.total) + '%');
       }).send(function (err, data) {
         if(err) {
           // return null;
         } else {
           let template = {'filename':filename, 'url':data.Location, 'usingGrapesManager':isUsingGridmanager};
           self.savegriddata(index, template, isViewTemplate)
-          //console.log('after', templatearray)
         }
       })
     },

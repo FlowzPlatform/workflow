@@ -329,7 +329,6 @@ export default {
   },
   methods: {
     emailService (item) {
-      console.log("item", item)
       this.isEmailDone = true
       this.handleSubmit('formSchemaInstance')
     },
@@ -420,7 +419,6 @@ export default {
       // const result = await Schema.getAll(id)
       // console.log('result', result)
       var response = await axios.get('https://api.flowzcluster.tk/eng/schema/' + id).catch(function (error) { console.log(error) })
-      console.log('Cluster response: ', response)
       // this.formTitle = response.data.title
       // console.log('this.lastLog', JSON.stringify(this.lastLog))
       // if (this.lastLog === undefined) {

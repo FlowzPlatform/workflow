@@ -155,7 +155,6 @@ AWS.config.region = 'us-west-2'
              Body: files[i]
             }
             bucket.upload(params).on('httpUploadProgress', function (evt) {
-              console.log('Uploaded :: ' + parseInt((evt.loaded * 100) / evt.total) + '%')
             }).send(function (err, data) {
               if (err) {
                 alert(err)
@@ -217,7 +216,7 @@ AWS.config.region = 'us-west-2'
             // console.log('response', arrObj)
           })
           .catch(error => {
-            console.log('Errorrr')
+            console.log('Error', error)
           }) 
         return arrObj
       },
