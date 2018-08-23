@@ -40,7 +40,7 @@ class Service {
     }).catch((err)=> {
       throw new Error(err.message)
     });
-    return flowzDataRecord
+    return "Your response saved successfully"
   }
 
   async create (data, params) {
