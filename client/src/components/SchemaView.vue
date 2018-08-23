@@ -898,13 +898,20 @@ export default {
             this.itsFirstState = true
             this.$Spin.hide()
           } else {
+            // console.log('resp data: ', resp.data)
             this.itsFirstState = false
             this.instanceEntries = resp.data
             for ( let i = 0; i < this.instanceEntries.length; i++) {
-              this.instanceEntries[i]['lastData'] = await this.getFData(this.instanceEntries[i].stageReference)
-              this.instanceEntries[i].lastData['id'] = this.instanceEntries[i].id
+              if (this.instanceEntries[i].stageReference.length > 0) {
+                this.instanceEntries[i]['lastData'] = await this.getFData(this.instanceEntries[i].stageReference)
+                this.instanceEntries[i].lastData['id'] = this.instanceEntries[i].id
+              } else {
+                this.itsFirstState = true
+              }
             }
-            this.dataData = _.map(this.instanceEntries, (o) => { return o.lastData })
+            if (this.itsFirstState === false) {
+              this.dataData = _.map(this.instanceEntries, (o) => { return o.lastData })
+            }
             this.$Spin.hide()
           }
         }).catch(err => {
