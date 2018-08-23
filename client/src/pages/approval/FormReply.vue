@@ -1,296 +1,464 @@
 <template>
-<div style="background:#eee;padding: 20px">
-  <Card :bordered="false">
-    <p slot="title">Make Request</p>
-    <p slot="extra" v-show="notes">Notes : {{ notes }}</p>
-    <iframe id="filecontainer" allowtransparency="true" frameborder="0" @load="iframeload()" :src="html"></iframe>
-    <!--  + this.$route.params.fiid + '&&pid=' + this.$route.params.pid + '' -->
-    <ul class="error">
-      <li v-for="item in err">{{item}}</li>
-    </ul>
-  </Card>
+<div>
+  <Row>
+  <!-- {{loading}} {{isallow}} {{lastLog.status}} -->
+    <Col v-show="loading" class="demo-spin-col" span="24" style="margin-top:35px;">
+        <Spin fix>
+            <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
+            <div>Loading..</div>
+        </Spin>
+    </Col>
+  </Row>
+  <Row>
+    <Col v-show="!loading" span="24">
+      <div v-if="isallow">
+        {{isTemplate}}
+        <div v-if="lastLog.status === 'inputRequired' && isTemplate !== undefined && isAccess">
+          <iframe id="filecontainer" allowtransparency="true" frameborder="0" @load="iframeload()" :src="html"></iframe>
+        </div>
+        <div v-else-if="lastLog.status === 'inputRequired' && isAccess">
+          <schema-instance :id="currentEntitySchema.id" :processid="lastLog.job" :instanceid="$route.params.fiid" :lastLog="lastLog"></schema-instance>
+        </div>
+        <div v-show="lastLog.status !== 'inputRequired' || (lastLog.status === 'inputRequired' && !isAccess)">
+        <!-- <div v-else> -->
+          <div id="canvas" style="height: calc(100vh - 130px); min-height: 400px;"></div>
+        </div>
+        <Spin size="large" fix v-if="submitLoading">
+          <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
+          <div>Submiting..</div>
+        </Spin>
+      </div>
+      <div v-else>
+        Unuthorized User
+      </div>
+    </Col>
+  </Row>
 </div>
 </template>
 <script>
-import flowInstance from '@/api/flowzinstance'
-import _ from 'lodash'
+import config from '@/config'
+
+// Models
 import Schema from '@/api/schema'
-import ReceiveForm from '@/api/receiveform'
-import $ from 'jquery'
+import flowInstance from '@/api/flowzinstance'
+import Instance from '@/api/instance'
+import modelBpmnplugin from '@/api/bpmnplugins'
+import flowz from '@/api/flowz'
+// import ReceiveForm from '@/ap'
+
+// Lib
+import BpmnViewer from 'bpmn-js/lib/NavigatedViewer.js'
+import _ from 'lodash'
+
+// Components
+import SchemaInstance from '../../components/SchemaInstance.vue'
+import dynamicTable from './expand-FormReply.vue'
+
+// Static - lib
+import camundaModdleDescriptor from '../../../static/bpmn/camunda-bpmn-moddle/resources/camunda'
+
+let viewer
+let messageEvent
 
 export default {
+  components: {'schema-instance': SchemaInstance},
   data () {
     return {
-      Aloading: false,
       notes: '',
-      input: [],
-      selectedProcess: {},
-      entitySchema: [],
-      customSchema: [],
-      URL: '',
-      err: [],
-      log: {}
+      submitLoading: false,
+      loading: true,
+      flowInstance: {},
+      // isAccess: false,
+      isallow: false,
+      // istemplate: false,
+      // lastLog: {},
+      entitySchema: {},
+      isInputStatus: false
     }
   },
-  asyncComputed: {
-    async html () {
-      if (this.selectedProcess.inputProperty) {
-        let index = await _.findIndex(this.selectedProcess.inputProperty[0].entityschema.createTemplate, ['filename', this.selectedProcess.inputProperty[0].createTemplate])
-        var url = this.selectedProcess.inputProperty[0].entityschema.createTemplate[index].url
-        url = url.substr(0, 4) + url.substr(5)
-        return url
-      }
+  computed: {
+    html () {
+      return _.chain(this.flowInstance.processList).find(f => {
+        return f.id === this.lastLog.job
+      }).result('inputProperty[0].entityschema.createTemplate').find(f => {
+        return f.filename === this.isTemplate
+      }).reduce((result, value, key) => {
+        if (key === 'url') {
+          result = 'http://' + this.currentEntitySchema.userID + '.' + value[0] + '.' + config.grapesDomain + '/' + value[1] + '.html'
+          // result = 'http://localhost/person.html'
+          console.log('result ::: ', value[0], value[1], result)
+          // result = 'https://' + this.currentEntitySchema.userID + '.' + value[0] + '.' + config.grapesDomain + '/' + value[1] + '.html'
+          // result = 'http://localhost/person.html'
+          // console.log('Active File ::: ', value[1])
+          // result = 'https://work247.flowzcluster.tk/' + value[1] + '.html'
+          // result = 'http://localhost/' + value[1] + '.html'
+          // result = 'http://592fd3b09df25d00f7a11393.67671226-1635-43e0-a1b8-30e6524805e2.flowzcluster.tk/'+ value[1]+ '.html'
+        }
+        return result
+      }, '').value()
+    },
+    currentEntitySchema () {
+      return _.chain(this.flowInstance.processList).find(f => {
+        return f.id === this.lastLog.job
+      }).result('inputProperty[0].entityschema').value()
+    },
+    lastLog () {
+      return _.chain(this.flowInstance.process_log).orderBy(['lastModified'], ['desc']).head().value()
+    },
+    isTemplate () {
+      return _.chain(this.flowInstance.processList).find(f => {
+        return f.id === this.lastLog.job
+      }).result('inputProperty[0].createTemplate').value()
+    },
+    isAccess () {
+      return _.chain(this.flowInstance.processList).find(f => {
+        return f.id === this.lastLog.job
+      }).result('configurations').findIndex(f => {
+        return f.key === 'allowedusers' && (_.indexOf(f.value.split(',').map(item => item.trim()), this.$store.state.user.email) >= 0)
+      }).value() >= 0
     }
   },
   methods: {
     async iframeload () {
       let self = this
       let array = []
-      let data = []
-      let custom = []
+      // let custom = []
       let customSchema = []
-
-      await flowInstance.getThis(self.$route.params.fiid)
-      .then(async function (response) {
-        self.selectedProcess = await _.find(response.data.processList, ['id', self.$route.params.pid])
-        self.entitySchema = await self.getSchema(self.selectedProcess.inputProperty[0].entityschema._id)
-        self.log = await _.chain(response.data.process_log).orderBy(['lastModified'], ['asc']).findLast((f) => { return f.job === self.$route.params.pid }).value()
-      })
-      .catch(function (error) {
-        self.$Notice.error({title: 'Error..!', desc: error})
-      })
-      for (let i = 0; i < self.entitySchema.entity.length; i++) {
-        if (self.entitySchema.entity[i].customtype === true) {
-          custom = await self.getCustom(self.entitySchema.entity[i].type, true)
-          array.push({customtype: true, name: self.entitySchema.entity[i].name, entity: custom})
-          custom = await self.getCustom(self.entitySchema.entity[i].type, false)
-          customSchema.push(custom)
+      // for (let i = 0; i < self.currentEntitySchema.entity.length; i++) {
+      //   // if (self.currentEntitySchema.entity[i].customtype === true) {
+      //   if (self.currentEntitySchema.entity[i].type === 'object' || self.currentEntitySchema.entity[i].type === 'array') {
+      //     // console.log('self.currentEntitySchema.entity[i]', self.currentEntitySchema.entity[i])
+      //     custom = await self.getCustom(self.currentEntitySchema.entity[i].id, true)
+      //     array.push({customtype: true, name: self.currentEntitySchema.entity[i].name, entity: custom})
+      //     custom = await self.getCustom(self.currentEntitySchema.entity[i].id, false)
+      //     customSchema.push(custom)
+      //   } else {
+      //     array.push({name: self.currentEntitySchema.entity[i].name})
+      //     customSchema.push(self.currentEntitySchema.entity[i])
+      //   }
+      // }
+      // console.log('entity:: ', array, ' formData :: ', self.lastLog.input, ' schema :: ', customSchema)
+      for (let ent of self.currentEntitySchema.entity) {
+        if (ent.type === 'object' || ent.type === 'array') {
+          let mdata = await self.getCustomData(ent.entity)
+          array.push({customtype: true, name: ent.name, entity: mdata.arr})
+          customSchema.push(mdata.custom)
         } else {
-          array.push({name: self.entitySchema.entity[i].name})
-          customSchema.push(self.entitySchema.entity[i])
+          array.push({name: ent.name, type: ent.type})
+          customSchema.push(ent)
         }
       }
-      _.forEach(self.log.input, function (item) {
-        data.push(item)
-      })
-      self.customSchema = customSchema
-      document.getElementById('filecontainer').contentWindow.postMessage({entity: array, formData: data}, '*')
+      console.log('entity:: ', array, ' formData :: ', self.lastLog.input, ' schema :: ', customSchema)
+      document.getElementById('filecontainer').contentWindow.postMessage({
+        entity: array,
+        formData: self.lastLog.input,
+        schema: customSchema,
+        configs: { accesskey: process.env.accesskey, secretkey: process.env.secretkey }
+      }, '*')
+      // handle Listener Event
+      messageEvent = function (event) {
+        console.log('event', event.data)
+        if (_.isArray(event.data)) {
+          console.log('Received...', event.data)
+          self.handleSubmit(event.data)
+        }
+        window.removeEventListener('message', messageEvent)
+      }
+      window.addEventListener('message', messageEvent)
     },
-    async getCustom (id, flag) {
-      let tempSchema
-      let tempData = []
+    async getCustomData (entity) {
+      let array = []
       let customData = []
-      let data = []
-      let self = this
-      tempSchema = await self.getSchema(id)
-      for (let i = 0; i < tempSchema.entity.length; i++) {
-        if (tempSchema.entity[i].customtype === true) {
-          tempData = await self.getCustom(tempSchema.entity[i].type, true)
-          data.push({customtype: true, name: tempSchema.entity[i].name, entity: tempData})
-          tempData = await self.getCustom(tempSchema.entity[i].type, false)
-          customData.push(tempData)
+      for (let ent of entity) {
+        if (ent.type === 'object' || ent.type === 'array') {
+          let mdata = await this.getCustomData(ent.entity)
+          array.push({customtype: true, name: ent.name, entity: mdata.arr})
+          customData.push(mdata.custom)
         } else {
-          data.push({name: tempSchema.entity[i].name})
-          customData.push(tempSchema.entity[i])
+          array.push({name: ent.name, type: ent.type})
+          customData.push(ent)
         }
       }
-      return flag ? data : customData
+      return {arr: array, custom: customData}
     },
     async getSchema (id) {
-      let data
-      await Schema.getThis(id).then((res) => {
-        data = res.data
+      var resp = await Schema.getThis(id).then((res) => {
+        return res.data
+      }).catch(err => {
+        console.log(err)
+        return {}
       })
-      return data
+      return resp
     },
-    async handleSubmit (validated) {
-      let dataObject = {
-        'fId': this.$route.params.fiid,
-        'inputs': this.input,
-        'job': this.$route.params.pid
+    async handleSubmit (maindata) {
+      this.submitLoading = true
+      for (let [inx, mObj] of maindata.entries()) {
+        console.log('inx', inx)
+        mObj.Schemaid = this.currentEntitySchema.id
       }
-      console.log(validated, this.input.length)
-      if (validated && this.input.length > 0) {
-        ReceiveForm.post(dataObject)
+      let dataObject1 = {
+        'instanceid': this.$route.params.fiid,
+        'data': maindata,
+        'processid': this.lastLog.job,
+        'jobId': this.lastLog.jobId
+      }
+      if (maindata.length > 0) {
+        Instance.post(dataObject1)
         .then(response => {
-          this.$Notice.success({title: 'Success..!', desc: 'Form request sent.'})
-          this.$router.push('/')
+          // this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
         })
-        .catch(err => {
-          this.$Notice.success({title: 'Error..!', desc: err})
+        .catch(error => {
+          console.log('Error', error)
+          this.submitLoading = false
+          this.$Notice.error({title: 'Error!', desc: 'Instance not saved...'})
         })
       } else {
         this.$Notice.error({
           title: 'Error..!',
           desc: 'Details are in bottom of page.'
         })
-        this.input = []
       }
-    }, // method for validation purpos
-    async getValidate (event, schema) {
+    },
+    async beforeinit (fid) {
+      this.flowInstance = await flowInstance.getThis(fid).then(response => {
+        return response.data
+      }).catch(error => {
+        if (error.response) {
+          this.$Message.error(error.response.data)
+        } else {
+          this.$Message.error('Server not connected.')
+        }
+        return {}
+      })
+      this.flowInstance.processList = _.chain(this.flowInstance.processList).map(m => {
+        m.log = _.chain(this.flowInstance.process_log).filter(f => {
+          return f.job === m.id
+        }).orderBy(['lastModified'], ['desc']).groupBy('jobId').value()
+        return m
+      }).value()
+      // console.log('this.flowInstance', this.flowInstance)
+      // check authentication
+      if (_.indexOf(this.flowInstance.allowedusers, this.$store.state.user.email) >= 0) {
+        // allowed
+        this.isallow = true
+        var bpmnXML = await flowz.get(this.flowInstance.fid)
+          .then(async response => {
+            return response.data
+          })
+        await this.initBPMN(bpmnXML.xml)
+        this.loading = false
+      } else {
+        // not allowed
+        this.isallow = false
+      }
+    },
+    getCurrentStatus (log) {
+      return (log && log.length > 0) ? _.head(log).status : ''
+    },
+    async initBPMN (xml) {
       let self = this
-      let err = this.err
-      let val, result, element, newSchema
-      schema === undefined ? newSchema = self.customSchema : newSchema = schema
-      let emailRegEx = '(\\w+)\\@(\\w+)\\.[a-zA-Z]'
-      let numberRegEx = '^[0-9]+$'
-      let dateRegEx = '(0?[1-9]|[12]\\d|30|31)[^\\w\\d\\r\\n:](0?[1-9]|1[0-2])[^\\w\\d\\r\\n:](\\d{4}|\\d{2})'
-      await Object.keys(event).forEach(async function (key, index) {
-        for (var i = 0; i < newSchema.length; i++) {
-          if (key === newSchema[i].name || Array.isArray(newSchema[i])) {
-            val = event[key]
-            result = newSchema[i]
-            element = {value: event[key], name: key, type: Array.isArray(event[key]) ? 'customtype' : newSchema[i].type}
-            if (element.type === 'customtype') {
-              self.getValidate(event[key][0], newSchema[i])
-            } else {
-              if (result.property.optional === false) {
-                if (val === '' || val === null || val === undefined) {
-                  err.push(element.name + ' - is required..!')
-                  if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
-                    $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> required..!</div>')
-                  }
-                } else {
-                  $('input[name="' + element.name + '"]').parent().next('.validation').remove()
-                }
-                if (result.property.regEx !== null || result.property.regEx !== undefined) {
-                  let pttrn = new RegExp(result.property.regEx)
-                  let regEx = pttrn.test(val)
-                  if (!regEx) {
-                    err.push(element.name + ' - Enter proper format..!')
-                    if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
-                      $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Enter proper format..!</div>')
-                    }
-                  } else {
-                    $('input[name="' + element.name + '"]').parent().next('.validation').remove()
-                  }
-                }
-                if (element.type === 'date') {
-                  let inputDate = new Date(val)
-                  if (result.property.maxdate !== '') {
-                    let maxDate = new Date(result.property.maxdate)
-                    if (inputDate > maxDate) {
-                      err.push(element.name + ' - Enter minimum date then ' + maxDate)
-                      if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
-                        $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Enter minimum date then ' + maxDate + '</div>')
-                      }
-                    } else {
-                      $('input[name="' + element.name + '"]').parent().next('.validation').remove()
-                    }
-                  } else if (result.property.mindate !== '') {
-                    let minDate = new Date(result.property.mindate)
-                    if (inputDate < minDate) {
-                      err.push(element.name + ' - Enter maximum date then ' + minDate)
-                      if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
-                        $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Enter minimum date then ' + minDate + '</div>')
-                      }
-                    } else {
-                      $('input[name="' + element.name + '"]').parent().next('.validation').remove()
-                    }
-                  }
-                }
-                if (result.property.min !== 0 || result.property.max !== 0) {
-                  if (val.length > result.property.min && val.length > result.property.max) {
-                    err.push(element.name + ' - Minimum length :' + result.property.min + ' Maximum length :' + result.property.max)
-                    if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
-                      $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Minimum length :' + result.property.min + ' Maximum length :' + result.property.max + '</div>')
-                    }
-                  } else if (val.length > result.property.max && val.length < result.property.min) {
-                    err.push(element.name + ' - Minimum length :' + result.property.min + ' Maximum length :' + result.property.max)
-                    if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
-                      $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Minimum length :' + result.property.min + ' Maximum length :' + result.property.max + '</div>')
-                    }
-                  } else {
-                    $('input[name="' + element.name + '"]').parent().next('.validation').remove()
-                  }
-                }
-                if (result.property.allowedValue.length > 0) {
-                  let check = _.includes(result.property.allowedValue, val)
-                  if (!check) {
-                    err.push(element.name + ' - Allowed value are' + result.property.allowedValue)
-                    if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
-                      $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Allowed value are' + result.property.allowedValue + '</div>')
-                    }
-                  } else {
-                    $('input[name="' + element.name + '"]').parent().next('.validation').remove()
-                  }
-                }
-              }
-              switch (element.type) {
-                case 'email':
-                  let re = new RegExp(emailRegEx)
-                  let testEmail = re.test(val)
-                  if (testEmail) {
-                    // temp[element.name] = val
-                    $('input[name="' + element.name + '"]').parent().next('.validation').remove()
-                  } else {
-                    err.push(element.name + ' - Enter valid email address..!')
-                    if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
-                      $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Enter valid email address..!</div>')
-                    }
-                  }
-                  break
-                case 'number':
-                  re = new RegExp(numberRegEx)
-                  testEmail = re.test(val)
-                  if (testEmail) {
-                    // temp[element.name] = val
-                    $('input[name="' + element.name + '"]').parent().next('.validation').remove()
-                  } else {
-                    err.push(element.name + ' - Enter numbers only..!')
-                    if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
-                      $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Enter numbers only..!</div>')
-                    }
-                  }
-                  break
-                case 'date':
-                  re = new RegExp(dateRegEx)
-                  testEmail = re.test(val)
-                  if (testEmail) {
-                    // temp[element.name] = val
-                    $('input[name="' + element.name + '"]').parent().next('.validation').remove()
-                  } else {
-                    err.push(element.name + ' - Invalid date format..!')
-                    if ($('input[name="' + element.name + '"]').parent().next('.validation').length === 0) {
-                      $('input[name="' + element.name + '"]').parent().after('<div class="validation" style="color:red;"> Invalid date format..!</div>')
-                    }
-                  }
-                  break
-                default:
-                  console.log(element.name, ': ', val)
-              }
-            }
-          }
+      let plugins = await modelBpmnplugin.get()
+      let types = _.map(plugins, plug => {
+        return {
+          'name': plug.pluginType,
+          'isAbstract': true,
+          'superClass': [
+            'bpmn:FlowNode'
+          ]
         }
       })
-      if (err.length > 0) { return false } else { return true }
+      if (types !== undefined) {
+        camundaModdleDescriptor.types = _.concat(camundaModdleDescriptor.types, types)
+        viewer = new BpmnViewer({
+          container: '#canvas',
+          additionalPlugins: plugins,
+          additionalModules: [
+            require('@/bpmn-custom-module/viewindex')
+          ],
+          moddleExtensions: {
+            camunda: camundaModdleDescriptor
+          }
+        })
+        viewer.importXML(xml, function (err) {
+          if (!err) {
+            _.forEach(self.flowInstance.processList, function (process) {
+              var lastProcess = _.chain(self.flowInstance.process_log).filter(f => {
+                return f.job === process.id
+              }).orderBy(['lastModified'], ['desc']).value()
+              if (lastProcess.length > 0) {
+                viewer.get('canvas').addMarker(process.id, self.getCurrentStatus(lastProcess))
+              }
+            })
+          }
+        })
+        var eventBus = viewer.get('eventBus')
+        // you may hook into any of the following events
+        var events = [
+          // 'element.hover',
+          // 'element.out',
+          'element.click'
+          // 'element.dblclick',
+          // 'element.mousedown',
+          // 'element.mouseup'
+        ]
+        events.forEach(function (event) {
+          eventBus.on(event, function (e) {
+            // e.element = the model element
+            // e.gfx = the graphical element
+            let myData = _.find(self.flowInstance.processList, {id: e.element.id})
+            // console.log('on :: ', e.element.id)
+            if (myData !== undefined) {
+              let checkallow = false
+              if (e.element.type === 'bpmn:EndEvent') {
+                checkallow = true
+              } else {
+                if (self.$store.state.user !== null && self.$store.state.user !== undefined) {
+                  let configUser = myData.configurations
+                  if (configUser.length !== 0) {
+                    let getUsers = _.find(configUser, {key: 'allowedusers'})
+                    if (getUsers !== undefined) {
+                      let users = getUsers.value.split(',')
+                      let checkuser = _.indexOf(users, self.$store.state.user.email)
+                      if (checkuser !== undefined && checkuser >= 0) {
+                        checkallow = true
+                      }
+                    }
+                  }
+                }
+              }
+              // data only shown if user is allowed by flow
+              if (checkallow) {
+                let tData = []
+                for (let k in myData.log) {
+                  tData.push(_.head(myData.log[k]))
+                }
+                let iCols = [{
+                  type: 'expand',
+                  width: 50,
+                  render: (h, params) => {
+                    return h(dynamicTable, {
+                      props: {
+                        data: params.row.input
+                      }
+                    })
+                  }
+                }, {
+                  title: 'Jobs',
+                  key: 'jobId'
+                }]
+                let oCols = [{
+                  type: 'expand',
+                  width: 50,
+                  render: (h, params) => {
+                    return h(dynamicTable, {
+                      props: {
+                        data: params.row.output
+                      }
+                    })
+                  }
+                }, {
+                  title: 'Jobs',
+                  key: 'jobId'
+                }]
+                // console.log('tData...', tData)
+                self.$Modal.info({
+                  title: e.element.id,
+                  width: '1200px',
+                  render: (h, params) => {
+                    return ('div', {}, [
+                      h('Tabs', {}, [
+                        h('TabPane', {
+                          props: {
+                            label: 'Input',
+                            icon: 'arrow-down-c'
+                          }
+                        }, [
+                          h('Table', {
+                            props: {
+                              columns: iCols,
+                              data: tData
+                            }
+                          })
+                        ]),
+                        h('TabPane', {
+                          props: {
+                            label: 'Output',
+                            icon: 'arrow-up-c'
+                          }
+                        }, [
+                          h('Table', {
+                            props: {
+                              columns: oCols,
+                              data: tData
+                            }
+                          })
+                        ])
+                      ])
+                    ])
+                  },
+                  onOk () {
+                  }
+                })
+              } else {
+                self.$Message.error('You have no rights.')
+              }
+            }
+          })
+        })
+      }
     }
   },
-  async mounted () {
-    let self = this
-    let validated
-
-    window.addEventListener('message', async function (event) {
-      self.err = []
-      if (_.isArray(event.data)) {
-        for (let j = 0; j < event.data.length; j++) {
-          validated = await self.getValidate(event.data[j])
-          self.input.push(event.data[j])
+  mounted () {
+    this.beforeinit(this.$route.params.fiid)
+  },
+  feathers: {
+    'flowz-instance': {
+      async updated (data) {
+        let self = this
+        if (this.$route.params.fiid !== undefined && this.$route.params.fiid === data.id) {
+          this.flowInstance = data
+          _.forEach(self.flowInstance.processList, function (process) {
+            var lastProcess = _.chain(self.flowInstance.process_log).filter(f => {
+              return f.job === process.id
+            }).orderBy(['lastModified'], ['desc']).value()
+            if (lastProcess.length > 0) {
+              viewer.get('canvas').addMarker(process.id, self.getCurrentStatus(lastProcess))
+            }
+          })
+          this.submitLoading = false
         }
-        self.handleSubmit(validated)
       }
-    })
+    }
   }
 }
 </script>
-<style scoped>
+<style>
 .error {
   color: red;
 }
 iframe {
-    min-height: 460px;
+    min-height: 405px;
     width: 100%;
     background: #FFFFFF;
     padding: 0px;
+    height: calc(100vh - 135px);
+}
+.running:not(.djs-connection) .djs-visual > :nth-child(1) {
+  fill: #d5d835 !important;
+}
+.created:not(.djs-connection) .djs-visual > :nth-child(1) {
+  fill: rgba(255, 251, 0, 0.56) !important;
+}
+.mappingRequired:not(.djs-connection) .djs-visual > :nth-child(1) {
+  fill: #d5d835 !important;
+}
+.inputRequired:not(.djs-connection) .djs-visual > :nth-child(1) {
+  fill: #E71A24 !important;
+}
+.processing:not(.djs-connection) .djs-visual > :nth-child(1) {
+  fill: #1DA8D3 !important;
+}
+.completed:not(.djs-connection) .djs-visual > :nth-child(1) {
+  fill: #1AE75E !important;
 }
 </style>

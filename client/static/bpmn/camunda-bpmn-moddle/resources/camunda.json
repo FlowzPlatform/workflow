@@ -236,6 +236,26 @@
           "type": "String"
         },
         {
+          "name": "addedRoles",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "host",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "user",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "password",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
           "name": "historyTimeToLive",
           "isAttr": true,
           "type": "String"

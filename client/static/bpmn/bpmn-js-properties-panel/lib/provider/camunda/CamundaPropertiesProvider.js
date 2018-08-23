@@ -25,9 +25,12 @@ var serviceTaskDelegateProps = require('./parts/ServiceTaskDelegateProps'),
   myPropertiesIOProps = require('./parts/myPropertiesIOProps'),
   myOutputProps = require('./parts/myOutputProps'),
   myConfigProps = require('./parts/MyConfigProps'),
+  mySMTPProps = require('./parts/MySMTPProps'),
+  // myRoles = require('./parts/MyRoles'),
   capacityProps = require('./parts/CapacityProps'),
   startEventInitiator = require('./parts/StartEventInitiator'),
   variableMapping = require('./parts/VariableMappingProps'),
+  AddRoles = require('./parts/AddRoles'),
   versionTag = require('./parts/VersionTagProps');
 var listenerProps = require('./parts/ListenerProps'),
   listenerDetails = require('./parts/ListenerDetailProps'),
@@ -254,6 +257,25 @@ function createOutputGroups(element, bpmnFactory, elementRegistry, translate, da
   ];
 }
 
+function createAddRolesTabGroups(element, bpmnFactory, elementRegistry, translate) {
+  var generalGroup = {
+    id: 'addroles',
+    label: translate('add Roles'),
+    entries: []
+  };
+  AddRoles(generalGroup, element, translate, options);
+  // var configGroup = {
+  //   id: 'configs',
+  //   label: translate('Config'),
+  //   entries: []
+  // }
+  // myConfigProps(configGroup, element, bpmnFactory, translate)
+  return [
+    // configGroup,
+    generalGroup
+  ];
+}
+
 function createConfigGroups(element, bpmnFactory, elementRegistry, translate, data) {
   var configGroup = {
     id: 'configs',
@@ -265,6 +287,30 @@ function createConfigGroups(element, bpmnFactory, elementRegistry, translate, da
     configGroup
   ]
 }
+
+function createsmtpConfig(element, bpmnFactory, elementRegistry, translate, data) {
+  var configGroup = {
+    id: 'smtp',
+    label: translate('SMTP config'),
+    entries: []
+  }
+  mySMTPProps(configGroup, element, translate)
+  return [
+    configGroup
+  ]
+}
+
+// function createRoles(element, bpmnFactory, elementRegistry, translate, data) {
+//   var rolesGroup = {
+//     id: 'roles',
+//     label: translate('Roles'),
+//     entries: []
+//   }
+//   myRoles(rolesGroup, element, bpmnFactory, translate)
+//   return [
+//     rolesGroup
+//   ]
+// }
 
 function createListenersTabGroups(element, bpmnFactory, elementRegistry, translate) {
   var listenersGroup = {
@@ -402,6 +448,11 @@ function CamundaPropertiesProvider(eventBus, bpmnFactory, elementRegistry, eleme
         element, bpmnFactory,
         elementRegistry, elementTemplates, translate)
     };
+    // var roles = {
+    //   id: 'Roles',
+    //   label: translate('Roles'),
+    //   groups: createRoles(element, bpmnFactory, elementRegistry, translate)
+    // };
     var ioMapping = {
       id: 'IOMapping',
       label: translate('I/O Mapping'),
@@ -461,19 +512,32 @@ function CamundaPropertiesProvider(eventBus, bpmnFactory, elementRegistry, eleme
       label: translate('Output'),
       groups: createOutputGroups(element, bpmnFactory, elementRegistry, translate)
     };
+    var addRoles = {
+      id: 'addRoles',
+      label: translate('Add Roles'),
+      groups: createAddRolesTabGroups(element, bpmnFactory,elementRegistry, translate)
+    };
     var configTab = {
       id: 'Configuration',
       label: translate('Config'),
       groups: createConfigGroups(element, bpmnFactory, elementRegistry, translate)
     }
+    var smtpTab = {
+      id: 'ConfigurationSMTP',
+      label: translate('smtp'),
+      groups: createsmtpConfig(element, bpmnFactory, elementRegistry, translate)
+    }
     return [
       generalTab,
       ioMapping,
+      // roles,
+      addRoles,
       // variablesTab,
       // connectorTab,
       propertiesTab,
       outputTab,
-      configTab
+      configTab,
+      smtpTab
       // formsTab,
       // listenersTab,
       // inputOutputTab,

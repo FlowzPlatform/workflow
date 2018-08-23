@@ -1,19 +1,20 @@
 import api from '../../api'
 let model = 'flowz-instance'
 export default {
-  get: () => {
-    return api.request('get', '/' + model)
+  get: (params = null, headers = null) => {
+    console.log('headers', headers)
+    return api.request('get', '/' + model, null, params, headers)
   },
-  getThis: (id) => {
-    return api.request('get', '/' + model + '/' + id)
+  getThis: (id, params = null, headers = null) => {
+    return api.request('get', '/' + model + '/' + id, null, params, headers)
   },
-  getByfid: (fid) => {
-    return api.request('get', '/' + model + '?fid=' + fid)
+  getByfid: (fid, params = null, headers = null) => {
+    return api.request('get', '/' + model + '?fid=' + fid, null, params, headers)
   },
-  post: (data) => {
-    return api.request('post', '/' + model, data)
+  post: (data, params = null, headers = null) => {
+    return api.request('post', '/' + model, data, null, params, headers)
   },
-  put: (id, data) => {
-    return api.request('put', '/' + model + '/' + id, data)
+  put: (id, data, params = null, headers = null) => {
+    return api.request('put', '/' + model + '/' + id, data, null, params, headers)
   }
 }

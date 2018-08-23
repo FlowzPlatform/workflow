@@ -16,12 +16,12 @@
         <i-col :span="18">
             <Row type="flex" justify="end">
                 <div class="layout-nav">
-                    <Menu-item name="1">
+                    <!-- <Menu-item name="1">
                         <router-link to="/admin/approval">
                             <Icon type="filing" :size="14"></Icon>
                             Approval
                         </router-link>
-                    </Menu-item>
+                    </Menu-item> -->
                     <Menu-item name="2">
                         <router-link to="/admin/schema">
                             <Icon type="filing" :size="14"></Icon>
@@ -40,11 +40,17 @@
                             Db-settings
                         </router-link>
                     </Menu-item>
+                    <Menu-item name="4.1">
+                        <!-- <router-link to="/admin/DbSettings"> -->
+                            <!-- <Icon type="gear-b" :size="14"></Icon> -->
+                            <subscription :value="$store.state.subscription" :token="$store.state.token" @on-change="handleChange"></subscription>
+                        <!-- </router-link> -->
+                    </Menu-item>
                     <Menu-item name="5">
                       <Submenu name="1">
                         <template slot="title">
                           <Icon type="person" :size="16"></Icon>
-                          {{$store.state.user.fullname}}
+                          {{getUserName}}
                         </template>
                         <Menu-item name="1-1">
                             <router-link to="/admin/bpmn-plugin">
@@ -74,12 +80,27 @@
 </template>
 <script>
   import psl from 'psl'
+  import subscription from '@/components/subscription'
 /*eslint-disable*/
   export default {
     computed: {
       toggeleEnable () {
         return !this.$store.state.sidenavpin || (!this.$store.state.sidenavtoggle)
+      },
+      getUserName () {
+        if (this.$store.state.user) {
+          let name = this.$store.state.user.fullname || ''
+          if (name === '' && this.$store.state.user.email) {
+            name = this.$store.state.user.email
+          }
+          return name
+        } else {
+          return ''
+        }
       }
+    },
+    components: {
+      subscription
     },
     methods:{
       handleRemove () {
@@ -90,6 +111,26 @@
         this.$store.commit('SET_USER', null)
         this.$store.commit('SET_ROLE', null)
         this.$router.push('/login')
+      },
+      handleChange (value) {
+        // console.log('value parent', value)
+        this.$store.state.subscription = value
+        // this.$store.state.sidenavtoggle = !this.$store.state.sidenavtoggle
+        // let self = this
+        // setTimeout(function() {
+        //   self.$store.state.sidenavtoggle = !self.$store.state.sidenavtoggle
+        // }, 100)
+        // this.$router.push('/')
+        // if (this.$store.state.user.package) {
+        //   if (this.$store.state.user.package[value] && this.$store.state.user.package[value].role === 'admin') {
+        //     this.$store.commit('SET_ROLE', 1)
+        //   } else {
+        //     this.$store.commit('SET_ROLE', 2)
+        //   }
+        // } else {
+        //   this.$store.commit('SET_ROLE', 2)
+        // }
+        this.$router.go(this.$router.currentRoute)
       }
     }
   }

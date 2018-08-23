@@ -1,6 +1,6 @@
 <template>
   <div class="dashboard">
-    Dashboard
+    Dashboard {{$store.state.role}}
   </div>
 </template>
 
