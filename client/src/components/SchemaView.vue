@@ -332,7 +332,6 @@ export default {
     async emailService (item) {
       this.isEmailDone = true
       await this.handleSubmit('formSchemaInstance')
-      this.email = false
     },
     info (item, index, button) {
       this.modalInfo.title = `Row index: ${index}`
@@ -625,14 +624,17 @@ export default {
     },
 
     async handleSubmit (name) {
+      console.log('this.isEmailDone',this.isEmailDone)
       let currentStateId = this.$route.params.stateid
       if(!this.isEmailDone){
         let currentStageObject = _.find(this.flowData.json.processList, {'id': currentStateId})
+        console.log("currentStageObject", currentStageObject)
         let nextTargetId
         if (currentStageObject.target.length > 1) {
           //nextTargetId = _.find(this.flowData.json.processList, {'id': currentStageObject})
         } else {
           nextTargetId = _.find(this.flowData.json.processList, {'id': currentStageObject.target[0].id})
+          console.log('nextTargetId', nextTargetId)
           if (nextTargetId.type === 'sendproofmail') {
             this.id = null
             this.email = true
@@ -690,11 +692,15 @@ export default {
             this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
             this.$Loading.finish()
             this.bLoading = false
+            this.email = false
+            this.isEmailDone = false
           }).catch(err => {
             console.log('Error', err)
             this.$Loading.finish()
             this.bLoading = false
             this.$Notice.error({title: 'Not Saved!'})
+            this.email = false
+            this.isEmailDone = false
           })
 
           // let instanceObj = await DeepRecord.deepRecord.getRecordObject(client, this.item)
