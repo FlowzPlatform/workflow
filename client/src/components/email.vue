@@ -85,7 +85,6 @@ import config from '@/config'
       sendEmail() {
         let config11 = config
         let btn = ''
-        console.log(this.btnArr)
         for(let idx in this.btnArr) {
           let targetId = (new Buffer(this.btnArr[idx])).toString('base64')
           btn = btn + `
@@ -106,7 +105,6 @@ import config from '@/config'
 
         sendmailModal.post(this.emailForm)
         .then((res)=>{
-          console.log(res)
           this.$emit('on-done', true)
         })
         .catch((err)=>{

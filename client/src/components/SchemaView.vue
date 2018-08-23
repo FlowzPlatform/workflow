@@ -395,7 +395,6 @@ export default {
       .catch(error => {
         console.log('Error', error)
       })
-      // console.log(arrObj)
       return arrObj
     },
 
@@ -417,10 +416,8 @@ export default {
       this.$Loading.start()
       const self = this
       // const result = await Schema.getAll(id)
-      // console.log('result', result)
       var response = await axios.get('https://api.flowzcluster.tk/eng/schema/' + id).catch(function (error) { console.log(error) })
       // this.formTitle = response.data.title
-      // console.log('this.lastLog', JSON.stringify(this.lastLog))
       // if (this.lastLog === undefined) {
       this.formSchemaInstance.data = []
       // } else {
@@ -431,15 +428,11 @@ export default {
       //     this.formSchemaInstance.data = this.lastLog.input
       //   }
       // }
-      // console.log('response.data', response.data)
       this.schema = response.data
-      // console.log("^^^^^^^^^^^^^^: ",response.data)
       this.entity = response.data.entity
-      // console.log("&&&&&&&&&&&&&&&&&: ", this.entity)
       this.formSchemaInstance.entity = this.schema.entity
       // this.formSchemaInstance.data[0] = {}
       for (let [index, entity] of self.formSchemaInstance.entity.entries()) {
-        // console.log('>>>>>>>>>>>>>>>>>>>>>>>', index, entity)
         if (entity.customtype) {
           self.formSchemaInstance.entity[index]['entity'] = await self.getChildEntity(entity.type)
         }
@@ -459,7 +452,6 @@ export default {
       } else {
         await this.handleAdd()
       }
-      // console.log('self.formSchemaInstance.data[0]', self.formSchemaInstance.data[0])
       // if (self.formSchemaInstance.data[0].length === 0) {
       // if (this.lastLog !== undefined && this.lastLog.input.length !== 0) {
       //   for (let mdata of self.lastLog.input) {
@@ -467,14 +459,11 @@ export default {
       //       if (ent.type === 'file') {
       //         mdata[ent.name + 'List'] = mdata[ent.name]
       //         mdata[ent.name] = []
-      //         // console.log(mdata, ent.name)
       //       } else if (ent.customtype) {
       //         mdata[ent.name] = self.setFileList(mdata[ent.name], ent.entity[0])
       //       }
       //     }
-      //     // console.log(mdata)
       //   }
-      //   // console.log('self.lastLog.input', self.lastLog.input)
       //   self.formSchemaInstance.data = _.map(self.lastLog.input, (entry) => {
       //     entry.Schemaid = self.schema.id
       //     return _.chain(entry).omit(['id', '_id']).reduce((result, value, key) => {
@@ -486,7 +475,6 @@ export default {
       //       return result
       //     }, {}).value()
       //   })
-      //   // console.log('self.formSchemaInstance.data', self.formSchemaInstance.data)
       //   // _.forEach(self.lastLog.input, (obj) => {
       //   //   // obj = this.lastLog.input[0]
       //   //   // obj.database = this.schema.database
@@ -520,13 +508,11 @@ export default {
     },
 
     setFileList (mdata, entity) {
-      // console.log('mdata', mdata, entity)
       for (let sdata of mdata) {
         for (let ent of entity.entity) {
           if (ent.type === 'file') {
             sdata[ent.name + 'List'] = sdata[ent.name]
             sdata[ent.name] = []
-            // console.log(mdata, ent.name)
           } else if (ent.customtype) {
             sdata[ent.name] = this.setFileList(sdata[ent.name], ent.entity[0])
           }
@@ -544,14 +530,11 @@ export default {
       //       if (ent.type === 'file') {
       //         mdata[ent.name + 'List'] = mdata[ent.name]
       //         mdata[ent.name] = []
-      //         // console.log(mdata, ent.name)
       //       } else if (ent.customtype) {
       //         mdata[ent.name] = self.setFileList(mdata[ent.name], ent.entity[0])
       //       }
       //     }
-      //     // console.log(mdata)
       //   }
-      //   // console.log('self.lastLog.input', self.lastLog.input)
       //   self.formSchemaInstance.data = _.map(self.lastLog.input, (entry) => {
       //     entry.Schemaid = self.schema.id
       //     return _.chain(entry).omit(['id', '_id']).reduce((result, value, key) => {
@@ -563,7 +546,6 @@ export default {
       //       return result
       //     }, {}).value()
       //   })
-      //   // console.log('self.formSchemaInstance.data', self.formSchemaInstance.data)
       //   // _.forEach(self.lastLog.input, (obj) => {
       //   //   // obj = this.lastLog.input[0]
       //   //   // obj.database = this.schema.database
@@ -575,10 +557,8 @@ export default {
       // } else {
         // obj.database = this.schema.database
       obj.Schemaid = this.schema.id
-      // console.log('this.entity', this.entity)
       // _.forEach(self.entity, async function (v) {
       for (let v of self.entity) {
-        // console.log("%%%%%%%%%%%%%%%%: ", self.entity)
         if (v.customtype) {
           obj[v.name] = await self.getChildData(v.type)
         } else {
@@ -610,14 +590,11 @@ export default {
         }
       }
       this.formSchemaInstance.data.push(obj)
-      // console.log('this.formSchemaInstance.data', JSON.stringify(this.formSchemaInstance.data))
 
       // }
-      // console.log('obj', obj)
     },
 
     makeObj () {
-      // console.log('this.schema', this.schema)
       var obj = this.schema
       obj.Schemaid = this.schema.id
       obj.data = this.formSchemaInstance.data
@@ -643,72 +620,9 @@ export default {
     },
 
     async handleSubmit (name) {
-      console.log('values.flowData...handle submit', this.flowData)
-      console.log('values.flowData...handle submit', this.flowData.json.processList)
       let currentStateId = this.$route.params.stateid
       if(!this.isEmailDone){
-        // for (let index = 0; index < this.flowData.json.processList.length; index++) {
-        //   if (this.flowData.json.processList[index].id == currentStateId) {
-        //     console.log(this.flowData.json.processList[index].id)
-        //     let dummVar = this.flowData.json.processList[index].target[0].id
-        //     // if(this.flowData.json.processList[index + 1].id === dummVar && this.flowData.json.processList[index + 1].type === 'sendproofmail') {
-        //     //   this.id = null
-        //     //   this.email = true
-        //     //   break;
-        //     // }
-        //   }else{
-        //     this.email = true
-        //     // this.bLoading = true
-        //     var obj = this.makeObj()
-        //     this.validFlag = true
-        //     this.validErr = []
-        //     // var check = this.checkValidation(obj.data[0], this.entity)
-        //     let allcheck = []
-        //     // console.log("entity: ", this.entity)
-        //     for (let dobj of obj.data) {
-        //       let flag = this.checkValidation(dobj, this.entity)
-        //       allcheck.push(flag)
-        //     }
-        //     let check = _.indexOf(allcheck, false)
-        //     // console.log('mergeData', mergeData, obj.data)
-        //     // var check = this.checkValidation(obj.data[0], this.entity)
-        //     // console.log('checkkkkkkkkkkkk', check, obj.data[0], this.entity)
-        //     this.$Loading.start()
-        //     if (check === -1) {
-        //       let mergeData = this.mergeFileList(obj.data, obj)
-        //       obj.data = mergeData
-
-        //       console.log('Data: ', obj.data[0])
-
-        //       // let returnObj = await DeepRecord.deepRecord.instanceStageSubmit(client, this.item, obj.data[0])
-        //       // console.log('Data: ', returnObj)
-        //       let saveObj = {
-        //         fid: this.item.fid,
-        //         iid: this.item.id,
-        //         state: this.item.currentStatus,
-        //         data: obj.data[0]
-        //       }
-        //       if (this.isMultiple) {
-        //         saveObj.nextTarget = this.nextTarget.value
-        //       }
-        //       this.bLoading = true
-        //       // this.bLoading = false
-        //       await flowzdataModal.post(saveObj).then(res => {
-        //         // console.log('--------------Saved-------------', res.data)
-        //         this.id = null
-        //         this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
-        //         this.$Loading.finish()
-        //         this.bLoading = false
-        //       }).catch(err => {
-        //         console.log('Error', err)
-        //         this.$Loading.finish()
-        //         this.bLoading = false
-        //         this.$Notice.error({title: 'Not Saved!'})
-        //       })
-        //   }
-        // }
         let currentStageObject = _.find(this.flowData.json.processList, {'id': currentStateId})
-        console.log(currentStateId)
         let nextTargetId
         if (currentStageObject.target.length > 1) {
           //nextTargetId = _.find(this.flowData.json.processList, {'id': currentStageObject})
@@ -727,9 +641,7 @@ export default {
             } else {
               let arr = {}
               arr['approve'] = nextTargetId.target[0].id
-              console.log("============arr===", arr)
               this.btnArr = arr
-              console.log("============this.btnArr===",this.btnArr)
             }
           } else {
             this.saveDataMethod()
@@ -746,24 +658,17 @@ export default {
         this.validErr = []
         // var check = this.checkValidation(obj.data[0], this.entity)
         let allcheck = []
-        // console.log("entity: ", this.entity)
         for (let dobj of obj.data) {
           let flag = this.checkValidation(dobj, this.entity)
           allcheck.push(flag)
         }
         let check = _.indexOf(allcheck, false)
-        // console.log('mergeData', mergeData, obj.data)
         // var check = this.checkValidation(obj.data[0], this.entity)
-        // console.log('checkkkkkkkkkkkk', check, obj.data[0], this.entity)
         this.$Loading.start()
         if (check === -1) {
           let mergeData = this.mergeFileList(obj.data, obj)
           obj.data = mergeData
-
-          console.log('Data: ', obj.data[0])
-
           // let returnObj = await DeepRecord.deepRecord.instanceStageSubmit(client, this.item, obj.data[0])
-          // console.log('Data: ', returnObj)
           let saveObj = {
             fid: this.item.fid,
             iid: this.item.id,
@@ -776,7 +681,6 @@ export default {
           this.bLoading = true
           // this.bLoading = false
           await flowzdataModal.post(saveObj).then(res => {
-            // console.log('--------------Saved-------------', res.data)
             this.id = null
             this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
             this.$Loading.finish()
@@ -794,7 +698,6 @@ export default {
 
           // axios.post('http://192.81.213.41:3033/eng/instance/', { data: obj.data })
           // .then(response => {
-          //   // console.log('response', response.data)
           //   this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
           //   this.$Loading.finish()
           // })
@@ -809,13 +712,10 @@ export default {
         }
     },
     checkValidation (data, ent) {
-      // console.log('Validation....', data, ent)
       var self = this
       // var flag = true
       for (let v of ent) {
         if (v.customtype) {
-          // console.log('data[v.name]', data[v.name])
-          console.log('Data V: ', v)
           for (let d of data[v.name]) {
             self.validFlag = self.checkValidation(d, v.entity[0].entity)
           }
@@ -911,7 +811,6 @@ export default {
     },
 
     setValues (values) {
-      // console.log('Values: ', values.currentState)
       this.nextTarget.value = ''
       this.nextTarget.options = []
       this.isMultiple = false
@@ -920,13 +819,11 @@ export default {
         this.item = values.item
         this.formTitle = values.formName
         this.flowData = values.flowzData
-        console.log('values.flowData', this.flowData)
         let targetObj = _.find(values.flowzData.json.processList, {id: values.currentState})
         if (Object.keys(targetObj).length > 0) {
           if (targetObj.target.length > 1) {
             let opts = []
             for (let m of targetObj.target) {
-              // console.log('------', m)
               let label = _.find(values.flowzData.json.processList, {id: m.id}).name
               opts.push({
                 label: label,
@@ -971,34 +868,27 @@ export default {
   },
   async mounted () {
     this.$Spin.show()
-    // console.log('DeepRecord: ', DeepRecord)
-    // console.log('ROuter params: ', this.$route.params)
     flowzModel.get(null, {
       id: this.$route.params.id
     })
     .then( (res) => {
-      // console.log('res flowz get call: ', res.data.data[0].json.processList)
       let taskData = _.find(res.data.data[0].json.processList, (o) => { return o.id == this.$route.params.stateid})
       let inputschemaId = taskData.inputProperty[0].entityschema.id
 
       schemaModel.getAll(inputschemaId).then(res => {
         this.dataSchema = res
-        // console.log('Res:: ', res)
         // get flowz data
         flowzdataModal.get(null, {
           fid: this.$route.params.id,
           state: this.$route.params.stateid,
           $paginate: false
         }).then( (resultData) => {
-          // console.log('FData: ', resultData)
           let finalData = _.map(resultData, (o) => { return o.data })
-          console.log('Final Data: ', finalData)
           this.dataData = finalData
         })
       }).catch(err => {
         console.error('Error: ', err)
       })
-      // console.log('Task Data: ', inputschemaId)
     })
 
     let query = {
@@ -1008,7 +898,6 @@ export default {
     }
 
     // await finstanceModal.get(null, query).then(resp => {
-    //   console.log('Instance response Data: ', resp)
     //   this.instanceEntries = resp.data
     // }).catch(err => {
     //   this.tableLoading = false
@@ -1019,7 +908,6 @@ export default {
     await flowzModel.get(this.$route.params.id, {
       $select: ['json']
     }).then(async res => {
-      console.log('res: ', res)
       this.flowzData = res.data
       // if (this.$route.params.stateid) {
       //   let m = _.find(this.flowzData.json.processList, {id: this.$route.params.stateid})
@@ -1028,16 +916,13 @@ export default {
       //   }
       // }
       await finstanceModal.get(null, query).then(async resp => {
-        console.log('>>>>>>>>>>>', resp)
         this.instanceEntries = resp.data
         for ( let i = 0; i < this.instanceEntries.length; i++) {
-          console.log('this.instanceEntries[i]: ', this.instanceEntries[i])
           this.instanceEntries[i]['lastData'] = await this.getFData(this.instanceEntries[i].stageReference)
           this.instanceEntries[i].lastData['id'] = this.instanceEntries[i].id
         }
 
         this.dataData = _.map(this.instanceEntries, (o) => { return o.lastData })
-        console.log('###########: ', this.dataData)
         this.$Spin.hide()
       }).catch(err => {
         console.log('err', err)

@@ -114,7 +114,6 @@ export default {
     },
     handleopenChange (node) {
       node = node.split('/')
-      console.log('node', node)
       if (this.$store.state.role === 1) {
         this.$router.push({name: 'schemaview', params: {id: node[0], stateid: node[1]}})
         // this.$router.push('/admin/schemaview/' + node[0] + '/' + node[1])
@@ -255,7 +254,6 @@ export default {
                 }
               }
             } else {
-              console.log('No Permission!! :: ', item.id)
             }
             _.remove(item.json.processList, (m) => {
               if (!m.hasOwnProperty('permission')) {
@@ -280,7 +278,6 @@ export default {
       }
     },
     setCounters (sitem) {
-      console.log('counter called...')
       if (sitem) {
         if (this.$store.state.role === 1) {
           finstanceModal.get(null, {
@@ -411,7 +408,6 @@ export default {
   feathers: {
     'finstance': {
       created (data) {
-        console.log('created', data)
         let finx = _.findIndex(this.flowzList, {id: data.fid})
         if (finx !== -1) {
           // this.flowzList[finx].count += 1

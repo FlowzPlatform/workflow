@@ -434,7 +434,6 @@ export default {
         callback(new Error('Not Allowed Special Character'))
       } else {
         var res = await this.validateTitle(value)
-        // console.log('res..// ', res)
         if (res === 'yes') {
           callback(new Error('Already Exist....'))
         } else {
@@ -516,26 +515,20 @@ export default {
   },
   mounted () {
     this.$store.state.editTemplate = undefined
-    // console.log('------->>>', this.$store.state.viewTemplate)
     this.fetch(this.$route.params.id)
     // this.mjmlUpload = this.$store.state.emailTemplate
-    // console.log(this.mjmlUpload)
     api.request('get', '/settings')
       .then(response => {
         var result = response.data
-        // console.log('settings',result)
 
         for(var db in result){
           var obj = {}
           // if(result[db].dbdefault == 'true'){
-            // console.log('aaaaaaa',db)
             obj.value = db,
             obj.label = db,
             obj.children = []
-            // console.log(result[db].dbinstance)
             result[db].dbinstance.forEach(function(instance, i){
               if(instance.isenable){
-                // console.log(instance.cname)
                 obj.children.push({label: instance.connection_name, value:instance.id})
               }
             })
@@ -543,14 +536,12 @@ export default {
               obj.disabled = true
             }
           // }
-          // console.log(obj)
           this.CascaderData.push(obj)
         }
         // this.$Loading.finish()
       })
       .catch(error => {
         console.log(error)
-        // this.$Loading.error()
       })
       // if(this.$store.state.viewTemplate != undefined && this.$store.state.viewTemplate.length > 0)
       // {
@@ -724,7 +715,6 @@ export default {
             // this.formSchema['viewTemplate'] = this.viewtemplate
             // this.formSchema['createTemplate'] = this.createtemplate
             // this.formSchema['_id'] = this.formSchema._id
-            // console.log('aaa', this.formSchema)
             api.request('put', '/schema/' + this.formSchema._id, this.formSchema).then(response => {
               // this.toggleLoading()
               // this.$router.push(data.redirect)

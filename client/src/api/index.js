@@ -31,7 +31,6 @@ export default {
     }
 
     var url = config.serverURI + uri
-    // console.log('Final header ==> ', headers)
     return axios({ method, url, data, params, headers })
   }
 }

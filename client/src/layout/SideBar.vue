@@ -180,12 +180,10 @@
     },
     computed: {
       // schema () {
-      //   // console.log('allSchema from sidebar computed', this.$store.getters.allSchema, this.$store.getters.allSettings)
       //   var _data = this.$store.getters.allSchema
       //   var _settings = this.$store.getters.allSettings
       //   if (_data.length > 0) {
       //     _.map(_data, function (obj) {
-      //       // console.log('obj', obj)
       //         _.forEach(_settings[obj.database[0]], function(res, i){
       //           var instance = _.find(res, {id: obj.database[1]})
 
@@ -196,7 +194,6 @@
       //             }
       //         })
       //     })
-      //     console.log(_data)
       //     return _.orderBy(_data, [checkcase => checkcase.title.toLowerCase()], [this.orderby])
       //   } else {
       //     return []
@@ -206,7 +203,6 @@
         var _flowz = this.$store.getters.flowzData
         this.flowzList = _flowz
         if(_flowz.length > 0) {
-          console.log('flowz data', _flowz)
           this.loading = false
           this.flowzList = _.orderBy(this.flowzList, [checkcase => checkcase.ProcessName.toLowerCase()], [this.orderby])
           return _.orderBy(this.flowzList, [checkcase => checkcase.ProcessName.toLowerCase()], [this.orderby])
@@ -228,11 +224,9 @@
     },
     methods: {
       // viewOverview (item) {
-      //   console.log('Overview Item: ', item)
       //   this.$router.push('/admin/flow/flowoverview/' + item.id)
       // },
       viewProgress (item) {
-        console.log('item: ', item)
         this.$router.push('/admin/flow/analytics/' + item.id)
       },
       addNewFlow () {
@@ -257,7 +251,6 @@
                   on: {
                     'on-change': (value) => {
                       this.deleteSchemaValue = value
-                      console.log('this.deleteSchemaValue', this.deleteSchemaValue)
                       // console.log(this.mongoDt[params.index].isenable);
                     }
                   }
@@ -283,13 +276,10 @@
                 .then(response => {
                   this.$Notice.success({title: 'Success!!', desc:'Schema Deleted...'});
                   this.$store.dispatch('getSchema')
-                  // this.schema = response.data
-                  // console.log(response.data)
                   // this.schema.splice(index, 1)
                 })
                 .catch(error => {
                   this.$Notice.error({title: 'Error!!', desc:'Schema Not Deleted...'});
-                  console.log(error)
                 })
             }
             else if(this.deleteSchemaValue == 'harddel') {
@@ -376,7 +366,6 @@
         let x2js = new X2JS()
         let jsonXML = x2js.xml2js(xml)
         jsonXML = jsonXML.definitions.process
-        console.log('jsonXML', jsonXML)
         let instanceObject = {}
         instanceObject.name = jsonXML._name
         instanceObject.start_delay = 3000
