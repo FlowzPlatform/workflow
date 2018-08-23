@@ -894,7 +894,6 @@ export default {
         //   }
         // }
         await finstanceModal.get(null, query).then(async resp => {
-          console.log('>>>>>>>>>>>', resp)
           if (resp.data.length === 0) {
             this.itsFirstState = true
             this.$Spin.hide()
@@ -902,12 +901,10 @@ export default {
             this.itsFirstState = false
             this.instanceEntries = resp.data
             for ( let i = 0; i < this.instanceEntries.length; i++) {
-              console.log('this.instanceEntries[i]: ', this.instanceEntries[i])
               this.instanceEntries[i]['lastData'] = await this.getFData(this.instanceEntries[i].stageReference)
               this.instanceEntries[i].lastData['id'] = this.instanceEntries[i].id
             }
             this.dataData = _.map(this.instanceEntries, (o) => { return o.lastData })
-            console.log('###########: ', this.dataData)
             this.$Spin.hide()
           }
         }).catch(err => {
