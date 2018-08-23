@@ -1,5 +1,5 @@
 <template>
-	<div class="SchemaList">
+  <div class="SchemaList">
     <div v-if="configuration" style="">
       <Button style="float: right; margin-top: -50px;" @click="handleConfiguration" ghost><i class="fa fa-cog"></i></Button>
       <Modal v-model="isShow" title="Set Configuration" width="750px"  style="">
@@ -14,15 +14,14 @@
       </Modal>
     </div>
     <div>
-      <Table :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
+      <Table class="thisTable" :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
     </div>
-	</div>
+  </div>
 </template>
 <script>
   // import finstanceModal from '@/api/finstance'
   // import flowzModal from '@/api/flowz'
   import flowzdataModal from '@/api/flowzdata'
-
   import _ from 'lodash'
   export default {
     name: 'schemalist',
@@ -174,8 +173,10 @@
                         // currentState: currentState
                       }
                       // console.log('_____________values', item)
+                      console.log('this.instanceEntries[indexFind].stageReference.length: ', this.instanceEntries[indexFind].stageReference.length)
                       if (this.instanceEntries[indexFind].stageReference.length > 0) {
                         let lastObj = this.instanceEntries[indexFind].stageReference[this.instanceEntries[indexFind].stageReference.length - 1]
+                        console.log('last obj: ', lastObj)
                         await flowzdataModal.get(lastObj.stageRecordId).then(res => {
                           values.formData = res.data.data
                           this.$Spin.hide()
@@ -184,6 +185,7 @@
                           this.$Spin.hide()
                         })
                       }
+                      console.log('Values emitted: ', values)
                       await this.$emit('setValues', values)
                     }
                   }
@@ -231,9 +233,9 @@
     },
     mounted () {
       this.mdata = this.data
+      console.log('schema data: ', this.schema)
       console.log('dynamicData: ', this.dynamicData)
-      console.log('this.schema: ', this.data)
-
+      console.log('this.data: ', this.data)
       // if (this.dynamicData) {
       //   await flowzModal.get(id, {
       //     $select: ['json']
@@ -258,3 +260,9 @@
     }
   }
 </script>
+<style scoped>
+  .thisTable {
+    max-height: 500px;
+    overflow-y: auto;
+  }
+</style>
