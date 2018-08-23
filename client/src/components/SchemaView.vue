@@ -332,7 +332,6 @@ export default {
     async emailService (item) {
       this.isEmailDone = true
       await this.handleSubmit('formSchemaInstance')
-      this.email = false
     },
     info (item, index, button) {
       this.modalInfo.title = `Row index: ${index}`
@@ -629,28 +628,28 @@ export default {
       if(!this.isEmailDone){
         let currentStageObject = _.find(this.flowData.json.processList, {'id': currentStateId})
         let nextTargetId
-        if (currentStageObject.target.length > 1) {
-          //nextTargetId = _.find(this.flowData.json.processList, {'id': currentStageObject})
+        if (this.isMultiple) {
+          nextTargetId = _.find(this.flowData.json.processList, {'id': this.nextTarget.value})
         } else {
           nextTargetId = _.find(this.flowData.json.processList, {'id': currentStageObject.target[0].id})
-          if (nextTargetId.type === 'sendproofmail') {
-            this.id = null
-            this.email = true
-            if (nextTargetId.target.length > 1) {
-              let arr = {}
-              for (let index = 0; index < nextTargetId.target.length; index++) {
-                let target = _.find(this.flowData.json.processList, {'id': nextTargetId.target[index].id})
-                arr[target.name] = target.id
-              }
-              this.btnArr = arr
-            } else {
-              let arr = {}
-              arr['approve'] = nextTargetId.target[0].id
-              this.btnArr = arr
+        }
+        if (nextTargetId.type === 'sendproofmail') {
+          this.id = null
+          this.email = true
+          if (nextTargetId.target.length > 1) {
+            let arr = {}
+            for (let index = 0; index < nextTargetId.target.length; index++) {
+              let target = _.find(this.flowData.json.processList, {'id': nextTargetId.target[index].id})
+              arr[target.name] = target.id
             }
+            this.btnArr = arr
           } else {
-            this.saveDataMethod()
+            let arr = {}
+            arr['approve'] = nextTargetId.target[0].id
+            this.btnArr = arr
           }
+        } else {
+          this.saveDataMethod()
         }
       } else{
         this.saveDataMethod();
@@ -690,10 +689,14 @@ export default {
             this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
             this.$Loading.finish()
             this.bLoading = false
+            this.email = false
+            this.isEmailDone = false
           }).catch(err => {
             console.log('Error', err)
             this.$Loading.finish()
             this.bLoading = false
+            this.email = false
+            this.isEmailDone = false
             this.$Notice.error({title: 'Not Saved!'})
           })
 
@@ -898,13 +901,20 @@ export default {
             this.itsFirstState = true
             this.$Spin.hide()
           } else {
+            // console.log('resp data: ', resp.data)
             this.itsFirstState = false
             this.instanceEntries = resp.data
             for ( let i = 0; i < this.instanceEntries.length; i++) {
-              this.instanceEntries[i]['lastData'] = await this.getFData(this.instanceEntries[i].stageReference)
-              this.instanceEntries[i].lastData['id'] = this.instanceEntries[i].id
+              if (this.instanceEntries[i].stageReference.length > 0) {
+                this.instanceEntries[i]['lastData'] = await this.getFData(this.instanceEntries[i].stageReference)
+                this.instanceEntries[i].lastData['id'] = this.instanceEntries[i].id
+              } else {
+                this.itsFirstState = true
+              }
             }
-            this.dataData = _.map(this.instanceEntries, (o) => { return o.lastData })
+            if (this.itsFirstState === false) {
+              this.dataData = _.map(this.instanceEntries, (o) => { return o.lastData })
+            }
             this.$Spin.hide()
           }
         }).catch(err => {
@@ -963,7 +973,33 @@ export default {
     '$route.params': function (value) {
       this.init()
     }
-  }
+  },
+  feathers: {
+      'finstance': {
+        created (data) {
+          // console.log('created called from parent: ', data)
+          // this.init()
+          // let findIndex = _.findIndex(this.data, (o) => { return o.id })
+          // if (findIndex !== -1) {
+          //   this.data.push(data)
+          // }
+        },
+        async updated (data) {
+          // console.log('called on parent: ', data)
+          if (data.currentStatus === this.$route.params.stateid) {
+            data['lastData'] = await this.getFData(data.stageReference)
+            data.lastData['id'] = data.id
+            this.instanceEntries.push(data)
+            this.dataData.push(data.lastData)
+          }
+          // this.init()
+          // console.log('updated called: ', data)
+          // _.remove(this.data, (o) => { return o.id === data.id })
+        },
+        removed (data) {
+        }
+      }
+    }
 }
 
 </script>

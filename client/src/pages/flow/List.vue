@@ -715,7 +715,7 @@ export default {
     },
     showInviteDialog (query) {
       if (query.row.roles !== undefined) {
-        this.flowId = 'Workflow_' + query.row.id
+        this.flowId = 'workflow_' + query.row.id
         let temp1 = query.row.roles.split(',')
         let roles = []
         for (let index = 0; index < temp1.length; index++) {
@@ -809,7 +809,7 @@ export default {
           subscriptionId: this.value2,
           name: obj.label2,
           role: {
-            [this.flowId]: this.value1
+            [this.flowId]: this.value1.toLowerCase()
           },
           fromEmail: this.$store.state.user.email
         }

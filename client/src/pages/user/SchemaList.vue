@@ -252,6 +252,23 @@
       handleConfiguration () {
         this.isShow = !this.isShow
       }
+    },
+    feathers: {
+      'finstance': {
+        created (data) {
+          // console.log('created called: ', data)
+          // let findIndex = _.findIndex(this.data, (o) => { return o.id })
+          // if (findIndex !== -1) {
+          //   this.data.push(data)
+          // }
+        },
+        updated (data) {
+          // console.log('updated called: ', data)
+          _.remove(this.data, (o) => { return o.id === data.id })
+        },
+        removed (data) {
+        }
+      }
     }
   }
 </script>
