@@ -1171,9 +1171,10 @@ export default {
           // let name = res.name
           resolve('name')
         }).catch(err => {
-          resolve('ERROR')
+          resolve('ERROR', err)
         })
       })
+      console.log(respond)
       // return name
     },
     getAllPermissions: async function (appName, totalApps) {
@@ -1204,6 +1205,7 @@ export default {
       })
         .catch(function (error) {
           self.loadingPermisions = false
+          console.log(error)
         })
     },
     getRoles: async function (newValue) {
@@ -1279,6 +1281,7 @@ export default {
             let name = res.name
             self.tableData[tblData][i]['serviceName'] = name
           }).catch(err => {
+            console.log(err)
           })
         }
         await self.getAllPermissions(tblData, Object.keys(self.tableData).length)
@@ -1341,7 +1344,6 @@ export default {
         }
       })
         .then(function (response) {
-
           let resID = item.id + '_' + action
           let index = _.findIndex(self.permissionsAll, function (d) {
             return (d.roleId === roleField.id) && (d.resourceId === resID)

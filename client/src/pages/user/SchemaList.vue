@@ -179,6 +179,7 @@
                           this.$Spin.hide()
                         }).catch(err => {
                           this.$Spin.hide()
+                          console.log(err)
                         })
                       }
                       await this.$emit('setValues', values)

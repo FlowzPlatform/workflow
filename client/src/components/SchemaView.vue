@@ -328,9 +328,10 @@ export default {
     'email' : email
   },
   methods: {
-    emailService (item) {
+    async emailService (item) {
       this.isEmailDone = true
-      this.handleSubmit('formSchemaInstance')
+      await this.handleSubmit('formSchemaInstance')
+      this.email = false
     },
     info (item, index, button) {
       this.modalInfo.title = `Row index: ${index}`

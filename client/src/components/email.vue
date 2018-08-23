@@ -83,6 +83,7 @@ import config from '@/config'
     },
     methods: {
       sendEmail() {
+        this.emailForm.subject = this.emailForm.type
         let config11 = config
         let btn = ''
         for(let idx in this.btnArr) {
