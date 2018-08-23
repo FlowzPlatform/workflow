@@ -973,7 +973,33 @@ export default {
     '$route.params': function (value) {
       this.init()
     }
-  }
+  },
+  feathers: {
+      'finstance': {
+        created (data) {
+          // console.log('created called from parent: ', data)
+          // this.init()
+          // let findIndex = _.findIndex(this.data, (o) => { return o.id })
+          // if (findIndex !== -1) {
+          //   this.data.push(data)
+          // }
+        },
+        async updated (data) {
+          // console.log('called on parent: ', data)
+          if (data.currentStatus === this.$route.params.stateid) {
+            data['lastData'] = await this.getFData(data.stageReference)
+            data.lastData['id'] = data.id
+            this.instanceEntries.push(data)
+            this.dataData.push(data.lastData)
+          }
+          // this.init()
+          // console.log('updated called: ', data)
+          // _.remove(this.data, (o) => { return o.id === data.id })
+        },
+        removed (data) {
+        }
+      }
+    }
 }
 
 </script>
