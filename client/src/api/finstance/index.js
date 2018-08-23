@@ -11,8 +11,8 @@ export default {
   // getThis: (id) => {
   //   return api.request('get', '/' + model + '/' + id)
   // },
-  post: (data) => {
-    return api.request('post', '/' + model, data)
+  post: (data, params = null, headers) => {
+    return api.request('post', '/' + model, data, params, headers)
   },
   put: (id, data) => {
     return api.request('put', '/' + model + '/' + id, data)
