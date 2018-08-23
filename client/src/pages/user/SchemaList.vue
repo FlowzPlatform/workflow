@@ -171,10 +171,10 @@
                         // currentState: currentState
                       }
                       // console.log('_____________values', item)
-                      console.log('this.instanceEntries[indexFind].stageReference.length: ', this.instanceEntries[indexFind].stageReference.length)
+                      // console.log('this.instanceEntries[indexFind].stageReference.length: ', this.instanceEntries[indexFind].stageReference.length)
                       if (this.instanceEntries[indexFind].stageReference.length > 0) {
                         let lastObj = this.instanceEntries[indexFind].stageReference[this.instanceEntries[indexFind].stageReference.length - 1]
-                        console.log('last obj: ', lastObj)
+                        // console.log('last obj: ', lastObj)
                         await flowzdataModal.get(lastObj.stageRecordId).then(res => {
                           values.formData = res.data.data
                           this.$Spin.hide()
@@ -183,7 +183,7 @@
                           console.log(err)
                         })
                       }
-                      console.log('Values emitted: ', values)
+                      // console.log('Values emitted: ', values)
                       await this.$emit('setValues', values)
                     }
                   }
