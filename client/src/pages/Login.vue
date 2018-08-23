@@ -96,7 +96,7 @@
     </div>
 
     <div class="loginfooter">
-        <p>© 2017. Flowz technology. All Rights Reserved.</p>
+        <p>© 2018. Flowz technology. All Rights Reserved.</p>
     </div>
 
   </div>
@@ -169,11 +169,9 @@ export default {
       })
     },
     handleFacebook () {
-      console.log('connect facebook')
       document.getElementById('form-facebook').submit()
     },
     handleGoogle () {
-      console.log('connect google')
       document.getElementById('form-google').submit()
     },
     handleTwitter () {

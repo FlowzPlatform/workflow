@@ -1,7 +1,6 @@
 // Initializes the `instance` service on path `/instance`
 const createService = require('./instance.class.js');
 const hooks = require('./instance.hooks');
-const filters = require('./instance.filters');
 
 module.exports = function () {
   const app = this;
@@ -19,8 +18,4 @@ module.exports = function () {
   const service = app.service('instance');
 
   service.hooks(hooks);
-
-  if (service.filter) {
-    service.filter(filters);
-  }
 };

@@ -17,12 +17,20 @@
             <Row type="flex" justify="end">
                 <div class="layout-nav">
                     <Menu-item name="1">
-                      <Submenu name="1">
+                      <router-link to="/">
+                              Home
+                      </router-link>
+                    </Menu-item>
+                    <Menu-item name="1.1">
+                      <subscription :value="$store.state.subscription" :token="$store.state.token" @on-change="handleChange"></subscription>
+                    </Menu-item>
+                    <Menu-item name="2">
+                      <Submenu name="2">
                         <template slot="title">
                           <Icon type="person" :size="16"></Icon>
-                          {{$store.state.user.fullname}}
+                          {{getUserName}}
                         </template>
-                        <Menu-item name="1-1">
+                        <Menu-item name="2-1">
                             <a @click="handleRemove">
                                 <Icon type="ios-locked-outline" :size="16"></Icon>
                                 Logout
@@ -38,10 +46,26 @@
 </template>
 <script>
   import psl from 'psl'
+  // import axios from 'axios'
+  import subscription from '@/components/subscription'
   export default {
+    components: {
+      subscription
+    },
     computed: {
       toggeleEnable () {
         return !this.$store.state.sidenavpin || (!this.$store.state.sidenavtoggle)
+      },
+      getUserName () {
+        if (this.$store.state.user) {
+          let name = this.$store.state.user.fullname || ''
+          if (name === '' && this.$store.state.user.email) {
+            name = this.$store.state.user.email
+          }
+          return name
+        } else {
+          return ''
+        }
       }
     },
     methods: {
@@ -53,6 +77,29 @@
         this.$store.commit('SET_USER', null)
         this.$store.commit('SET_ROLE', null)
         this.$router.push('/login')
+      },
+      handleChange (value) {
+        // console.log('value parent', value)
+        // console.log('', value)
+        this.$store.state.subscription = value
+        // this.$router.push('/')
+        // if (this.$store.state.user.package) {
+        //   if (this.$store.state.user.package[value] && this.$store.state.user.package[value].role === 'admin') {
+        //     this.$store.commit('SET_ROLE', 1)
+        //   } else {
+        //     this.$store.commit('SET_ROLE', 2)
+        //   }
+        // } else {
+        //   this.$store.commit('SET_ROLE', 2)
+        // }
+        this.$router.go(this.$router.currentRoute)
+        // this.$store.state.sidenavtoggle = !this.$store.state.sidenavtoggle
+        // let self = this
+        // setTimeout(function () {
+        //   self.$store.state.sidenavtoggle = !self.$store.state.sidenavtoggle
+        // }, 100)
+        // this.$store.state.sidenavtoggle = true
+        // axios.defaults.headers.common['subscriptionid'] = value
       }
     }
   }

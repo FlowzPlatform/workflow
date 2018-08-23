@@ -1,7 +1,7 @@
 let async = require('asyncawait/async');
 let await = require('asyncawait/await');
 var endecrypt = require('../encryption/security')
-const errors = require('feathers-errors');
+const errors = require('@feathersjs/errors');
 let config = require('config');
 var axios = require('axios');
 var _ = require('lodash');
@@ -66,6 +66,18 @@ let beforeCreate = async( function(hook) {
         errors: { message: 'connection already exist with connection name as ' + response.data[0].connection_name }
       });
     } else {
+      if (hook.data.isdefault) {
+        hook.app.service('databases').find({
+          query: {
+            $paginate: 'false',
+            $select: [ 'id' ]
+          }
+        }).then(res => {
+          for (let item of res) {
+            hook.app.service('databases').patch(item.id, {isdefault: false})
+          }
+        })
+      }
       hook.data.password = endecrypt.encrypt(hook.data.password);
     }
     return hook;
@@ -91,6 +103,22 @@ let beforePatch = async(function(hook) {
   //   }
   //   return hook;
   // });
+  if (hook.data.hasOwnProperty('isdefault') && hook.data.isdefault) {
+    hook.app.service('databases').find({
+      query: {
+        $paginate: 'false',
+        $select: [ 'id' ]
+      }
+    }).then(res => {
+      if (res !== undefined && res.length > 0) {
+        for (let item of res) {
+          if (hook.id !== item.id) {
+            hook.app.service('databases').patch(item.id, {isdefault: false})
+          }
+        }
+      }
+    })
+  }
 })
 
 let afterGet = function(hook) {

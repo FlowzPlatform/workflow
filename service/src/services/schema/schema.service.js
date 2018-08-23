@@ -1,7 +1,6 @@
 // Initializes the `emailtemplate` service on path `/emailtemplate`
 const createService = require('feathers-rethinkdb');
 const hooks = require('./schema.hooks');
-const filters = require('./schema.filters');
 module.exports = function() {
   const app = this;
   const Model = app.get('rethinkdbClient');
@@ -16,9 +15,6 @@ module.exports = function() {
   // Get our initialized service so that we can register hooks and filters
   const service = app.service('schema');
   service.hooks(hooks);
-  if (service.filter) {
-    service.filter(filters);
-  }
 };
 
 // // Initializes the `schema` service on path `/schema`
@@ -30,7 +26,7 @@ module.exports = function() {
 //   const app = this;
 //   const paginate = app.get('paginate');
 //   const swagger = require('feathers-swagger');
-  
+
 
 //   const options = {
 //     name: 'schema',

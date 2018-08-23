@@ -1,6 +1,6 @@
 <template>
   <div style="width: inherit;">
-    <div  style="background: rgb(54, 62, 79); height: 100%; position: fixed;width: inherit;">
+    <div id="style-5" style="background: rgb(54, 62, 79); height: 100%; overflow-y: auto; position: fixed;width: inherit;">
       <Row style="padding: 16.3px 10px;border-bottom: 1px solid #15171b;">
         <Col :span="20" :offset="2">
           <Col :span="3">
@@ -23,8 +23,8 @@
           </Col>
         </Col>
       </Row>
-      <Row style="padding: 10px;">
-        <Col span="12">
+      <!-- <Row style="padding: 10px;"> -->
+        <!-- <Col span="24"> -->
           <!-- <Dropdown trigger="click" @on-click='handleCommand' style="margin-left: 20px;">
             <a href="javascript:void(0)" class="list">Sort By
                 <Icon type="arrow-down-b"></Icon>
@@ -34,28 +34,26 @@
                 <DropdownItem name="desc">z-aZ-A</DropdownItem>
             </DropdownMenu>
           </Dropdown> -->
-          <Select @on-change="handleCommand" placeholder="Sort By" size="small" style="width:200px;margin-left: 20px;">
+          <!-- <Select @on-change="handleCommand" placeholder="Sort By" size="small" style="width:200px;margin-left: 20px;"> -->
             <!-- <Option v-for="item in cityList" :value="item.value" :key="item.value">{{ item.label }}</Option> -->
-            <Option value="asc"><span>A-Za-z</span>
-              <span style="float:right;">Ascending</span>
-            </Option>
-            <Option value="desc"><span>z-aZ-A</span>
-              <span style="float:right;">Descending</span>
-            </Option>
-        </Select>
+            <!-- <Option value="asc"><span>A-Za-z</span> -->
+              <!-- <span style="float:right;">Ascending</span> -->
+            <!-- </Option> -->
+            <!-- <Option value="desc"><span>z-aZ-A</span> -->
+              <!-- <span style="float:right;">Descending</span> -->
+            <!-- </Option> -->
+        <!-- </Select> -->
 
-        </Col>
-        <Col span="12">
+        <!-- </Col> -->
+        <!-- <Col span="12">
           <Row type="flex" justify="end" align="middle">
             <Col>
-            <!--   <router-link to="/schema/new"> -->
                 <Button type="default" size="small" icon="plus-round" @click="addNewFlow">Add</Button>
-              <!-- </router-link> -->
             </Col>
           </Row>
-        </Col>
-      </Row>
-      <Menu theme="dark" width="auto" style="overflow: auto;height: calc(100% - 104px);">
+        </Col> -->
+      <!-- </Row> -->
+      <!-- <Menu theme="dark" width="auto" style="overflow: auto;height: calc(100% - 104px);">
         <template v-if="loading" align="center">
           <div class="demo-spin-col">
             <Spin size="large">
@@ -67,10 +65,6 @@
         </template>
         <Menu-item :name="index" v-for="(item, index) in flowz" :key="index">
               <img :src="rethink" class="schema-icon">
-              <!-- <img v-else-if="item.iconpath === 'rethink'" :src="rethink" class="schema-icon">
-              <img v-else-if="item.iconpath === 'elastic'" :src="elastic" class="schema-icon">
-              <img v-else-if="item.iconpath === 'nedb'" :src="nedb" class="schema-icon">
-              <img v-else :src="item.iconpath" class="schema-icon"> -->
               <span>
                 {{item.ProcessName}}
               </span>
@@ -79,9 +73,6 @@
                   <a @click="createNewInstance(index, item.id)" style="margin-right:8px">
                     <Icon type="arrow-right-b" size="21" color="#003399"></Icon>
                   </a>
-                 <!--  <router-link :to="{name: 'schema/edit', params: {id: item._id}}" exact>
-                      <Icon type="ios-compose-outline" class="ficon edit"></Icon>
-                  </router-link> -->
                 </Tooltip>
                 <Tooltip content="Edit" placement="top">
                   <a style="margin-right:8px">
@@ -89,47 +80,95 @@
                     <Icon type="edit" size="17" color="#00cc00"></Icon>
                     </router-link>
                   </a>
-                  <!-- <router-link :to="{name: 'schema/mapping/list', params: {id: item._id}}">
-                    <Icon type="arrow-swap" class="ficon transform"></Icon>
-                  </router-link> -->
                 </Tooltip>
                 <Tooltip content="Delete" placement="top">
-                <a @click="deleteFlow(item.id)">
-                  <Icon type="android-delete" size="20" color="#e74c3c"></Icon>
-                </a>
-                 <!--  <a @click="handleRemove(index)">
-                    <Icon type="android-delete" class="ficon delete"></Icon>
-                  </a> -->
+                  <a @click="deleteFlow(item.id)">
+                    <Icon type="android-delete" size="20" color="#e74c3c"></Icon>
+                  </a>
                 </Tooltip>
               </div>
         </Menu-item>
-      </Menu>
+      </Menu> -->
+      <Row>
+        <Menu theme="dark" width="auto" style="overflow: auto;height: calc(100% - 104px);" accordion @on-select="handleopenChange">
+          <!-- @on-select="handleopenChange" -->
+          <template v-if="loading" align="center">
+            <div class="demo-spin-col">
+              <Spin size="large">
+                <div class="loader">
+                  <icon type="load-c" :size="18" class="demo-spin-icon-load"></icon>
+                </div>
+              </Spin>
+            </div>
+          </template>
+          <template v-else>
+            <Submenu :name="index" v-for="(item, index) in flowzList" :key="index">
+              <template slot="title">
+                  <!-- <Icon type="ios-people" /> -->
+                  {{item.json.name}}
+                  
+                  <span style="margin-left: 10px;">
+                    <Badge :count="item.count"  class-name="demo-badge-alone"></Badge>
+                  </span>
+                  <span style="float:right;" title="Preview Progress" @click.prevent="viewProgress(item)">
+                    <!-- <Icon type="android-analytics" /> -->
+                    <!-- <Icon type="ios-pie" size="24"/> -->
+                    <i class="fa fa-line-chart"></i>
+                  </span>
+              </template>
+              <template
+                v-for="(subItem, inx) in item.json.processList" 
+                v-if="subItem.type !== 'start' && subItem.type !== 'endevent' && subItem.type !== 'intermediatethrowevent'"
+              >
+                <Menu-item 
+                  :name="item.id + '/' + subItem.id" 
+                  :key="inx"
+                  class="submentItem"
+                >
+                
+                  <div :title="subItem.id">
+                    <a @click="handleSubmenu(item, subItem)">
+                      {{subItem.name}}
+                      <span style="margin-left: 20px">
+                        <Badge :count="subItem.count"  class-name="demo-badge-alone"></Badge>
+                      </span>
+                    </a>
+                    <!-- <span style="float:right;" title="Overview" @click="viewOverview(item)">
+                      <i class="fa fa-eye"></i>
+                    </span> -->
+                  </div>
+                </Menu-item>
+              </template>
+            </Submenu>
+          </template>
+        </Menu>
+      </Row>
     </div>
   </div>
 </template>
 <script>
 /*eslint-disable*/
-  import api from '../api'
-  const X2JS = require('x2js')
-  import schemaModel from '@/api/schema'
-  import schemamappingModel from '@/api/schemamapping'
-  // import approvalModel from '@/api/approval'
-  import instanceModel from '@/api/flowzinstance'
-  import mongo from '../assets/images/mongo.png'
-  import rethink from '../assets/images/rethink.png'
-  import elastic from '../assets/images/elasticsearch.png'
-  import nedb from '../assets/images/nedb.png'
-  import flowz from '@/api/flowz'
-  const _ = require('lodash')
+  // import api from '../api'
+  // const X2JS = require('x2js')
+  // import schemaModel from '@/api/schema'
+  // import schemamappingModel from '@/api/schemamapping'
+  // // import approvalModel from '@/api/approval'
+  // import instanceModel from '@/api/flowzinstance'
+  // import mongo from '../assets/images/mongo.png'
+  // import rethink from '../assets/images/rethink.png'
+  // import elastic from '../assets/images/elasticsearch.png'
+  // import nedb from '../assets/images/nedb.png'
+  // import flowz from '@/api/flowz'
+  // const _ = require('lodash')
+  import _ from 'lodash'
+  import flowzModal from '@/api/flowz'
+  import finstanceModal from '@/api/finstance'
+
   export default {
     data () {
       return {
         orderby: 'asc',
-        flowzList: [],
-        mongo,
-        rethink,
-        elastic,
-        nedb,
+        flowzList: null,
         deleteSchemaValue: 'softdel',
         loading: true
       }
@@ -137,16 +176,14 @@
     created () {
       // this.$store.dispatch('getSchema')
       // this.$store.dispatch('getSettings')
-      this.$store.dispatch('getFlowzdata')
+      // this.$store.dispatch('getFlowzdata')
     },
     computed: {
       // schema () {
-      //   // console.log('allSchema from sidebar computed', this.$store.getters.allSchema, this.$store.getters.allSettings)
       //   var _data = this.$store.getters.allSchema
       //   var _settings = this.$store.getters.allSettings
       //   if (_data.length > 0) {
       //     _.map(_data, function (obj) {
-      //       // console.log('obj', obj)
       //         _.forEach(_settings[obj.database[0]], function(res, i){
       //           var instance = _.find(res, {id: obj.database[1]})
 
@@ -157,7 +194,6 @@
       //             }
       //         })
       //     })
-      //     console.log(_data)
       //     return _.orderBy(_data, [checkcase => checkcase.title.toLowerCase()], [this.orderby])
       //   } else {
       //     return []
@@ -167,7 +203,6 @@
         var _flowz = this.$store.getters.flowzData
         this.flowzList = _flowz
         if(_flowz.length > 0) {
-          console.log('flowz data', _flowz)
           this.loading = false
           this.flowzList = _.orderBy(this.flowzList, [checkcase => checkcase.ProcessName.toLowerCase()], [this.orderby])
           return _.orderBy(this.flowzList, [checkcase => checkcase.ProcessName.toLowerCase()], [this.orderby])
@@ -188,6 +223,12 @@
       }
     },
     methods: {
+      // viewOverview (item) {
+      //   this.$router.push('/admin/flow/flowoverview/' + item.id)
+      // },
+      viewProgress (item) {
+        this.$router.push('/admin/flow/analytics/' + item.id)
+      },
       addNewFlow () {
         this.$store.dispatch('removeXMLtoLocalStorage')
         this.$router.push('/admin/flow/new')
@@ -210,7 +251,6 @@
                   on: {
                     'on-change': (value) => {
                       this.deleteSchemaValue = value
-                      console.log('this.deleteSchemaValue', this.deleteSchemaValue)
                       // console.log(this.mongoDt[params.index].isenable);
                     }
                   }
@@ -236,13 +276,10 @@
                 .then(response => {
                   this.$Notice.success({title: 'Success!!', desc:'Schema Deleted...'});
                   this.$store.dispatch('getSchema')
-                  // this.schema = response.data
-                  // console.log(response.data)
                   // this.schema.splice(index, 1)
                 })
                 .catch(error => {
                   this.$Notice.error({title: 'Error!!', desc:'Schema Not Deleted...'});
-                  console.log(error)
                 })
             }
             else if(this.deleteSchemaValue == 'harddel') {
@@ -329,7 +366,6 @@
         let x2js = new X2JS()
         let jsonXML = x2js.xml2js(xml)
         jsonXML = jsonXML.definitions.process
-        console.log('jsonXML', jsonXML)
         let instanceObject = {}
         instanceObject.name = jsonXML._name
         instanceObject.start_delay = 3000
@@ -575,10 +611,138 @@
           }
         })
       },
+      handleopenChange (node) {
+        node = node.split('/')
+        this.$router.push('/schemaview/' + node[0] + '/' + node[1])
+      },
+      handleSubmenu (item, subitem) {
+        // console.log(item, subitem)
+        this.$router.push('/schemaview/' + item.id + '/' + subitem.id)
+      },
+      async init () {
+        this.loading = true
+        flowzModal.get(null, {
+          $select: ['allowedusers', 'json', 'id'],
+          $paginate: false
+        })
+        .then((response) => {
+          this.loading = false
+          this.flowzList = _.map(response.data, (m) => {
+            m.count = 0
+            _.map(m.json.processList, (p) => {
+              p.count = 0
+              return p
+            })
+            return m
+          })
+          this.setCounters()
+          // console.log('flowzlist: ', this.flowzList)
+        })
+        .catch(error => {
+          console.log(error)
+          this.loading = false
+        })
+      },
+      setCounters (sitem) {
+        if (sitem) {
+          finstanceModal.get(null, {
+            $paginate: false,
+            $select: ['currentStatus'],
+            mainStatus: 'inprocess',
+            fid: sitem.id
+          }).then(res => {
+            // console.log('res count', res.data)
+            sitem.count = res.data.length
+            for (let pitem of sitem.json.processList) {
+              pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
+            }
+          }).catch(err => {
+            console.log('error', err)
+          })
+        } else {
+          for (let item of this.flowzList) {
+            // console.log('------------------', item)
+            finstanceModal.get(null, {
+              $paginate: false,
+              $select: ['currentStatus'],
+              mainStatus: 'inprocess',
+              fid: item.id
+            }).then(res => {
+              // console.log('res count', res.data)
+              item.count = res.data.length
+              for (let pitem of item.json.processList) {
+                pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
+              }
+            }).catch(err => {
+              console.log('error', err)
+            })
+          }
+        }
+      }
+    },
+    mounted () {
+      // this.activeFlow(this.$store.state.activeFlow)
+      this.init()
+    },
+    feathers: {
+      'finstance': {
+        created (data) {
+          // console.log('created', data)
+          let finx = _.findIndex(this.flowzList, {id: data.fid})
+          if (finx !== -1) {
+            // this.flowzList[finx].count += 1
+            this.setCounters(this.flowzList[finx])
+          }
+        },
+        updated (data) {
+          // console.log('updated', data)
+          let finx = _.findIndex(this.flowzList, {id: data.fid})
+          if (finx !== -1) {
+            // this.flowzList[finx].count += 1
+            this.setCounters(this.flowzList[finx])
+          }
+        },
+        removed (data) {
+          // console.log('removed', data)
+          let finx = _.findIndex(this.flowzList, {id: data.fid})
+          if (finx !== -1) {
+            // this.flowzList[finx].count += 1
+            this.setCounters(this.flowzList[finx])
+          }
+        }
+      }
     }
   }
 </script>
+<style scoped>
+  .submentItem a {
+    color: #c0c0c0;
+  }
+  .submentItem a:hover{
+    color: #fff;
+  }
 
+  #style-5::-webkit-scrollbar-track
+  {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+    background-color: #666;
+  }
+
+  #style-5::-webkit-scrollbar
+  {
+    width: 7px;
+    background-color: #666;
+  }
+
+  #style-5::-webkit-scrollbar-thumb
+  {
+    background-color: #000;
+    
+    /*background-image: -webkit-gradient(linear, 0 0, 0 100%,
+                       color-stop(.5, rgba(255, 255, 255, .2)),
+               color-stop(.5, transparent), to(transparent));*/
+  }
+</style>
 <style>
   .menu-item {
     background-color: #2b4c77;
@@ -638,4 +802,11 @@
     50%  { transform: rotate(180deg);}
     to   { transform: rotate(360deg);}
   }
+  .demo-badge-alone {
+    background-color: #5cb85c !important;
+  }
+  .ivu-menu-vertical .ivu-menu-submenu-title-icon{
+    float: left;
+  }
+  
 </style>

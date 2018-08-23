@@ -12,6 +12,7 @@
   <Row>
     <Col v-show="!loading" span="24">
       <div v-if="isallow">
+        {{isTemplate}}
         <div v-if="lastLog.status === 'inputRequired' && isTemplate !== undefined && isAccess">
           <iframe id="filecontainer" allowtransparency="true" frameborder="0" @load="iframeload()" :src="html"></iframe>
         </div>
@@ -35,7 +36,7 @@
 </div>
 </template>
 <script>
-// import config from '@/config'
+import config from '@/config'
 
 // Models
 import Schema from '@/api/schema'
@@ -83,10 +84,12 @@ export default {
         return f.filename === this.isTemplate
       }).reduce((result, value, key) => {
         if (key === 'url') {
+          result = 'http://' + this.currentEntitySchema.userID + '.' + value[0] + '.' + config.grapesDomain + '/' + value[1] + '.html'
+          // result = 'http://localhost/person.html'
           // result = 'https://' + this.currentEntitySchema.userID + '.' + value[0] + '.' + config.grapesDomain + '/' + value[1] + '.html'
           // result = 'http://localhost/person.html'
           // console.log('Active File ::: ', value[1])
-          result = 'https://work247.flowzcluster.tk/' + value[1] + '.html'
+          // result = 'https://work247.flowzcluster.tk/' + value[1] + '.html'
           // result = 'http://localhost/' + value[1] + '.html'
           // result = 'http://592fd3b09df25d00f7a11393.67671226-1635-43e0-a1b8-30e6524805e2.flowzcluster.tk/'+ value[1]+ '.html'
         }
@@ -144,7 +147,6 @@ export default {
           customSchema.push(ent)
         }
       }
-      console.log('entity:: ', array, ' formData :: ', self.lastLog.input, ' schema :: ', customSchema)
       document.getElementById('filecontainer').contentWindow.postMessage({
         entity: array,
         formData: self.lastLog.input,
@@ -187,7 +189,6 @@ export default {
     async handleSubmit (maindata) {
       this.submitLoading = true
       for (let [inx, mObj] of maindata.entries()) {
-        console.log('inx', inx)
         mObj.Schemaid = this.currentEntitySchema.id
       }
       let dataObject1 = {
@@ -393,6 +394,8 @@ export default {
                   onOk () {
                   }
                 })
+              } else {
+                self.$Message.error('You have no rights.')
               }
             }
           })

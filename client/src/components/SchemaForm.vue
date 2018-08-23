@@ -134,7 +134,6 @@ AWS.config.region = 'us-west-2'
       // draggable
     },
     mounted () {
-      // console.log('this.schemainstance', this.schemainstance)
     },
     data () {
       return {
@@ -146,7 +145,6 @@ AWS.config.region = 'us-west-2'
         var files = e.target.files || e.dataTransfer.files
         let allFiles = []
         if (files.length > 0) {
-          // console.log('files', files[0])
           for(let i = 0; i < files.length; i++) {
             let bucket = new AWS.S3({ params: { Bucket: 'airflowbucket1/obexpense/expenses' } })
             var params = { 
@@ -155,7 +153,6 @@ AWS.config.region = 'us-west-2'
              Body: files[i]
             }
             bucket.upload(params).on('httpUploadProgress', function (evt) {
-              console.log('Uploaded :: ' + parseInt((evt.loaded * 100) / evt.total) + '%')
             }).send(function (err, data) {
               if (err) {
                 alert(err)
@@ -183,7 +180,6 @@ AWS.config.region = 'us-west-2'
             // obj.Schemaid = _res._id
             _.forEach(_res.entity, function(v) {
               if (v.customtype) {
-                console.log('child', self.getChildData(v.type))
                 obj[v.name] = self.getChildData(v.type)
               }  else {
                 if (v.type === 'number') {
@@ -214,25 +210,20 @@ AWS.config.region = 'us-west-2'
               }
             })
             arrObj.push(obj)
-            // console.log('response', arrObj)
           })
           .catch(error => {
-            console.log('Errorrr')
+            console.log('Error', error)
           }) 
         return arrObj
       },
       getObject (eIndex, dataIndex, fname, ftype) {
         var obj = {}
         obj.data = this.schemainstance.data[dataIndex][fname]
-        // console.log('this.schemainstance.entity[eIndex]', this.schemainstance.entity[eIndex])
         obj.entity = this.schemainstance.entity[eIndex].entity[0].entity
-        // console.log('recursive obj', obj)
         return obj
       },
       handleAdd (eIndex, dataIndex, ent, data, fname) {
-        // console.log('Data', data, ent)
         var self = this
-        // console.log('self.$refs', self.$refs['formSchema'])
         // var self.$refs['formSchema'][0].validate()
         // self.$refs['formSchema'][0].validate((valid) => {
         //   alert(1)
@@ -321,11 +312,9 @@ AWS.config.region = 'us-west-2'
         if (row.property.allowedValue.length > 0) {
           rules.push({type: 'enum', enum: row.property.allowedValue})
         }
-        // console.log('rules', rules)
         return rules
       },
       handleEdit (row) {
-        console.log(row)
       },
       handleRemove (index) {
         this.$Modal.confirm({

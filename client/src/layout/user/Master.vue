@@ -35,7 +35,6 @@ export default {
       return this.spanLeft === 5 ? 14 : 24
     },
     tabdata () {
-      console.log('this.$store.getters.TabData', this.$store.getters.TabData)
       return this.$store.getters.TabData
     },
     styles () {
@@ -53,6 +52,11 @@ export default {
     }
   },
   methods: {
+  },
+  mounted () {
+    // console.log(this.$store.state.sidenavtoggle, this.$store.state.sidenavpin)
+    // this.$store.state.sidenavtoggle = false
+    // this.$store.state.sidenavpin = false
   }
 }
 </script>

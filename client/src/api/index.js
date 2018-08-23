@@ -1,8 +1,20 @@
 import axios from 'axios'
 import config from '../config'
+import store from '../store'
 
 export default {
-  request (method, uri, data = null, params = null) {
+  request (method, uri, data = null, params = null, headers) {
+    if (headers !== null && headers !== undefined) {
+      if (store.state.subscription !== undefined) {
+        headers.subscriptionId = store.state.subscription
+      } else {
+        headers.subscriptionId = ''
+      }
+    } else {
+      headers = {
+        subscriptionId: store.state.subscription
+      }
+    }
     if (!method) {
       console.error('API function call requires method argument')
       return
@@ -13,7 +25,12 @@ export default {
       return
     }
 
+    if (headers.subscription === '') {
+      console.error('API function call requires proper subscriptionId to be passed as a header')
+      return
+    }
+
     var url = config.serverURI + uri
-    return axios({ method, url, data, params })
+    return axios({ method, url, data, params, headers })
   }
 }

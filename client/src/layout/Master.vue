@@ -43,10 +43,10 @@ export default {
     }
   },
   computed: {
-    tabdata () {
-      console.log('this.$store.getters.TabData', this.$store.getters.TabData)
-      return this.$store.getters.TabData
-    },
+    // tabdata () {
+    //   // console.log('this.$store.getters.TabData', this.$store.getters.TabData)
+    //   return this.$store.getters.TabData
+    // },
     styles () {
       let style = {}
       if (this.$store.state.sidenavtoggle && !this.$store.state.sidenavtoggle || !this.$store.state.sidenavpin) {
@@ -63,8 +63,6 @@ export default {
   },
   methods: {
     addTab (targetName) {
-      console.log('this.$store.getters.TabData ready', this.$store.getters.TabData)
-      // console.log('Called.........')
       let newTabName = ++this.tabIndex + ''
       this.editableTabs2.push({
         title: 'New Tab',

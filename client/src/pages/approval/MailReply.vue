@@ -208,13 +208,11 @@ export default {
               })
               .catch(function (error) {
                 self.$Notice.error({title: 'Error..!', desc: 'Server is busy please try again after some time'})
-                console.log('Error..!', error)
                 self.Aloading = false
               })
           })
           .catch(function (error) {
             self.$Notice.error({title: 'Error..!', desc: 'Action can not perform please try again...'})
-            console.log('Error..!', error)
             self.Aloading = false
           })
       }
@@ -233,7 +231,6 @@ export default {
         let uri = await config.serverURI + '/addInputToJobQue'
         axios.post(uri, dataObject)
         .then(function (response) {
-          console.log(response)
         })
         .catch(function (error) {
           console.log(error)
@@ -282,7 +279,6 @@ export default {
         })
         viewTemplateUrl = _.find(self.process.inputProperty[0].entityschema.viewTemplate, ['filename', self.process.inputProperty[0].viewTemplate])
         viewTemplateUrl = viewTemplateUrl.url
-        console.log('viewTemplateUrl', viewTemplateUrl)
         await axios({
           method: 'get',
           url: viewTemplateUrl
@@ -294,7 +290,6 @@ export default {
       })
       .catch(function (error) {
         self.$Notice.error({title: 'Error..!', desc: 'Something went wrong please try after some time.'})
-        console.log('Error : ', error)
       })
     this.fillForm(processLog)
   }

@@ -121,11 +121,10 @@ export default {
     fetch (id) {
       var self = this
       // alert(id)
-      schemamapping.get()
+      schemamapping.get(null, {$paginate: false})
       .then(response => {
-        // console.log('response', response.data.data)
         self.data5 = []
-        response.data.data.forEach(function (result, i) {
+        response.data.forEach(function (result, i) {
           if (result.producer === self.$route.params.id) {
             Schema.getThis(result.producer)
             .then(res => {

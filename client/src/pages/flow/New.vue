@@ -14,7 +14,7 @@
           <Split style="height: calc(100vh - 97.51px);">
             <SplitArea :size="80" :minSize="800">
               <div id="js-canvas" style="width: 100%;height: calc(100vh - 110px);position: relative;"></div>
-            </SplitArea >
+            </SplitArea>
             <SplitArea :size="20" :minSize="200">
               <Tooltip content="Save" placement="left" class="upload-icon">
                 <a v-if="!btnLoading" @click="handleSave">
@@ -34,6 +34,7 @@
 </template>
 
 <script>
+  const subscriptionNew = require('flowz-subscription')
   import _ from 'lodash'
   import schemaModel from '@/api/schema'
   import approvalModel from '@/api/approval'
@@ -63,6 +64,7 @@
     },
     data () {
       return {
+        permissions: ['read', 'write'],
         loading: true,
         btnLoading: false,
         processVar: null,
@@ -86,11 +88,52 @@
           })
         let x2js = new X2JS()
         let data = x2js.xml2js(xmlData)
+
+        // console.log('Final Data: Final Data:Final Data:Final Data: ', data.definitions.process['_camunda:addedRoles'])
+        let userRoles = null
+        if (data.definitions.process['_camunda:addedRoles']) {
+          userRoles = data.definitions.process['_camunda:addedRoles']
+        }
+        let userRolesArr = []
+        if (userRoles !== null) {
+          userRolesArr = userRoles.split(',')
+        } else {
+          userRolesArr = []
+        }
+
         if (data.definitions.process._name !== undefined) {
           let flowObject = {}
           flowObject.ProcessName = data.definitions.process._name
           flowObject.xml = xmlData
+          flowObject.roles = userRoles
           flowObject.json = await this.generateJson(xmlData)
+
+          let actions = []
+          let filteredProcesses = await _.filter(flowObject.json.processList, (o) => {
+            if (o.type !== 'start' && o.type !== 'endevent' && o.type !== 'intermediatethrowevent') {
+              return o
+            }
+            // return (o.type !== 'start' || o.type !== 'endevent' || o.type !== 'intermediatethrowevent')
+          })
+
+          for (var i = 0; i < filteredProcesses.length; i++) {
+            actions.push(filteredProcesses[i].id)
+          }
+
+          let actionsObj = {}
+          for (let i = 0; i < actions.length; i++) {
+            // let str = '\'' + actions[i] + '\':' + this.permissions
+            actionsObj[actions[i]] = this.permissions
+          }
+
+          subscriptionNew.moduleResource.moduleName = 'workflow_' + this.$route.params.id
+  
+          let registerAppModuleNew = actionsObj
+  
+          subscriptionNew.moduleResource.registerAppModule = registerAppModuleNew
+          subscriptionNew.moduleResource.appRoles = userRolesArr
+          subscriptionNew.registeredAppModulesRole()
+
           flowObject.svg = svgData
           // console.log('xmlData', flowObject.json)
           flowObject.allowedusers = _.union(...(_.chain(_.union(...(_.map(flowObject.json.processList, m => {
@@ -161,6 +204,7 @@
               camunda: camundaModdleDescriptor
             }
           })
+          // console.log('this.bpmnXML', this.bpmnXML)
           this.bpmnModeler.importXML(this.bpmnXML, function (err) {
             if (err) {
               console.error(err)
@@ -250,19 +294,38 @@
             // console.log('processTask', processTask)
             // console.log('ex', m['_camunda:executeIfAny'])
             // let executeAny = m._executeIfAny === undefined ? ((m['_camunda:executeIfAny']) ? m['_camunda:countany'] : false) : ((m._executeIfAny) ? m._countany : false)
-            return {
-              id: m._id,
-              capacity: (m._isFormInput) ? m._capacity : false,
-              isProcessTask: m._isProcessTask !== undefined ? (m._isProcessTask === 'true') : (m['_camunda:isProcessTask'] === 'true'),
-              name: m._name,
-              type: m.workerType.toLowerCase(),
-              executeAny: m['_camunda:executeIfAny'] !== undefined ? ((m['_camunda:executeIfAny']) ? m['_camunda:countany'] : false) : false,
-              // isProcessTask: m.workerType.toLowerCase() === 'tweet' ? 'true' : false,
-              target: m.outgoing ? self.getTargetId(m, jsonXML) : [],
-              mapping: (_.union(..._mapping)),
-              configurations: self.getConfigurationsProperties(m),
-              inputProperty: await self.getInputProperties(m),
-              outputProperty: await self.getOutputProperties(m)
+            let isSMTP = self.getSMTPProperties(m)
+            if (isSMTP !== null) {
+              return {
+                id: m._id,
+                capacity: (m._isFormInput) ? m._capacity : false,
+                isProcessTask: m._isProcessTask !== undefined ? (m._isProcessTask === 'true') : (m['_camunda:isProcessTask'] === 'true'),
+                name: m._name,
+                type: m.workerType.toLowerCase(),
+                executeAny: m['_camunda:executeIfAny'] !== undefined ? ((m['_camunda:executeIfAny']) ? m['_camunda:countany'] : false) : false,
+                // isProcessTask: m.workerType.toLowerCase() === 'tweet' ? 'true' : false,
+                target: m.outgoing ? self.getTargetId(m, jsonXML) : [],
+                mapping: (_.union(..._mapping)),
+                configurations: self.getConfigurationsProperties(m),
+                smtp: self.getSMTPProperties(m),
+                inputProperty: await self.getInputProperties(m),
+                outputProperty: await self.getOutputProperties(m)
+              }
+            } else {
+              return {
+                id: m._id,
+                capacity: (m._isFormInput) ? m._capacity : false,
+                isProcessTask: m._isProcessTask !== undefined ? (m._isProcessTask === 'true') : (m['_camunda:isProcessTask'] === 'true'),
+                name: m._name,
+                type: m.workerType.toLowerCase(),
+                executeAny: m['_camunda:executeIfAny'] !== undefined ? ((m['_camunda:executeIfAny']) ? m['_camunda:countany'] : false) : false,
+                // isProcessTask: m.workerType.toLowerCase() === 'tweet' ? 'true' : false,
+                target: m.outgoing ? self.getTargetId(m, jsonXML) : [],
+                mapping: (_.union(..._mapping)),
+                configurations: self.getConfigurationsProperties(m),
+                inputProperty: await self.getInputProperties(m),
+                outputProperty: await self.getOutputProperties(m)
+              }
             }
           }).head()
           .value()
@@ -306,6 +369,8 @@
         })
       },
       getConfigurationsProperties (proccess) {
+        // console.log('process..config', proccess.extensionElements.myConfigurations)
+        // console.log('process..config', proccess.extensionElements.myConfigurations.configuration)
         if (proccess.extensionElements && proccess.extensionElements.myConfigurations && proccess.extensionElements.myConfigurations.configuration) {
           if (!_.isArray(proccess.extensionElements.myConfigurations.configuration)) {
             proccess.extensionElements.myConfigurations.configuration = [proccess.extensionElements.myConfigurations.configuration]
@@ -318,6 +383,17 @@
           })
         } else {
           return []
+        }
+      },
+      getSMTPProperties (proccess) {
+        if (proccess.workerType === 'sendproofmail') {
+          return {
+            host: proccess._host,
+            user: proccess._user,
+            password: proccess._password
+          }
+        } else {
+          return null
         }
       },
       async getInputProperties (proccess) {
@@ -473,8 +549,8 @@
             })
           }),
           new Promise((resolve, reject) => {
-            schemamappingModel.get().then((response) => {
-              resolve(response.data.data)
+            schemamappingModel.get(null, {$paginate: false}).then((response) => {
+              resolve(response.data)
             }).catch(error => {
               reject(error)
             })
@@ -489,6 +565,8 @@
             this.bpmnXML = flowz.get(this.$route.params.id).then(async (result) => {
               this.bpmnXML = result.data.xml
               await this.initBPMN({
+                cdata: result.data,
+                id: this.$route.params.id,
                 schema: response[0],
                 approval: response[1],
                 emailtemplate: response[2],
@@ -565,7 +643,7 @@
   .palette-img > img {
     padding: 10px;
   }
-  // #js-properties-panel {
+  // #js-properties-panel {init
   //   position: absolute;
   //   top: -15px;
   //   bottom: 0;
