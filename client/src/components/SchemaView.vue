@@ -990,7 +990,6 @@ export default {
       await flowzModel.get(this.$route.params.id, {
         $select: ['json']
       }).then(async res => {
-        console.log('res: ', res)
         this.flowzData = res.data
         // if (this.$route.params.stateid) {
         //   let m = _.find(this.flowzData.json.processList, {id: this.$route.params.stateid})
