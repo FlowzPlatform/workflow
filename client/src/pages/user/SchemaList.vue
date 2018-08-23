@@ -1,5 +1,5 @@
 <template>
-	<div class="SchemaList">
+  <div class="SchemaList">
     <div v-if="configuration" style="">
       <Button style="float: right; margin-top: -50px;" @click="handleConfiguration" ghost><i class="fa fa-cog"></i></Button>
       <Modal v-model="isShow" title="Set Configuration" width="750px"  style="">
@@ -14,18 +14,24 @@
       </Modal>
     </div>
     <div>
-      <Table :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
+      <Table class="thisTable" :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
     </div>
-	</div>
+  </div>
 </template>
 <script>
+  // import finstanceModal from '@/api/finstance'
+  // import flowzModal from '@/api/flowz'
+  import flowzdataModal from '@/api/flowzdata'
+  import _ from 'lodash'
   export default {
     name: 'schemalist',
     props: {
       'schema': Object,
       'data': Array,
       'configuration': Boolean,
-      'dynamicData': Boolean
+      'dynamicData': Boolean,
+      'flowzData': Object,
+      'instanceEntries': Array
     },
     data () {
       return {
@@ -143,12 +149,42 @@
               return h('div', [
                 h('Button', {
                   props: {
-                    type: 'ghost',
+                    shape: 'circle',
                     icon: 'ios-play'
                   },
                   on: {
-                    'click': () => {
-                      console.log('CLick: ', params.row, params.index)
+                    'click': async () => {
+                      this.$Spin.show()
+                      let indexFind = _.findIndex(this.instanceEntries, (o) => { return o.id === params.row.id })
+                      // console.log('indexfind: ', indexFind)
+                      // this.$emit('setValues', this.instanceEntries[indexFind])
+                      // console.log('Click: ', params.row, params.index)
+                      let currentObj = _.find(this.flowzData.json.processList, {id: this.instanceEntries[indexFind].currentStatus})
+                      let values = {
+                        id: currentObj.inputProperty[0].entityschema.id,
+                        item: this.instanceEntries[indexFind],
+                        formName: currentObj.name,
+                        currentState: currentObj.id,
+                        flowzData: this.flowzData,
+                        formData: {}
+                        // nextState: resp[currentState].next,
+                        // currentState: currentState
+                      }
+                      // console.log('_____________values', item)
+                      // console.log('this.instanceEntries[indexFind].stageReference.length: ', this.instanceEntries[indexFind].stageReference.length)
+                      if (this.instanceEntries[indexFind].stageReference.length > 0) {
+                        let lastObj = this.instanceEntries[indexFind].stageReference[this.instanceEntries[indexFind].stageReference.length - 1]
+                        // console.log('last obj: ', lastObj)
+                        await flowzdataModal.get(lastObj.stageRecordId).then(res => {
+                          values.formData = res.data.data
+                          this.$Spin.hide()
+                        }).catch(err => {
+                          this.$Spin.hide()
+                          console.log(err)
+                        })
+                      }
+                      // console.log('Values emitted: ', values)
+                      await this.$emit('setValues', values)
                     }
                   }
                 }, '')
@@ -195,8 +231,22 @@
     },
     mounted () {
       this.mdata = this.data
-      console.log('dynamicData: ', this.dynamicData)
-      console.log('this.schema: ', this.data)
+      // if (this.dynamicData) {
+      //   await flowzModal.get(id, {
+      //     $select: ['json']
+      //   }).then(async res => {
+      //     this.flowzData = res.data
+      //     await finstanceModal.get(null, query).then(resp => {
+      //       this.instanceEntries = resp.data
+      //     }).catch(err => {
+      //       this.instanceEntries = null
+      //       console.log('err', err)
+      //     })
+      //   }).catch(err => {
+      //     this.instanceEntries = null
+      //     console.log('....', err)
+      //   })
+      // }
     },
     methods: {
       handleConfiguration () {
@@ -205,3 +255,9 @@
     }
   }
 </script>
+<style scoped>
+  .thisTable {
+    max-height: 500px;
+    overflow-y: auto;
+  }
+</style>

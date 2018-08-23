@@ -1,6 +1,6 @@
 <template>
   <div class="dashboard">
-    Dashboard
+    Dashboard {{$store.state.role}}
   </div>
 </template>
 
@@ -69,7 +69,6 @@ export default {
           this.$refs[name].resetFields()
         },
         handleAdd (name) {
-          // console.log('this.$refs[name]', this.$refs[name])
           this.$refs[name].validate((valid) => {
             // alert(valid)
             if (valid) {

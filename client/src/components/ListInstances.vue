@@ -79,8 +79,6 @@ import _ from 'lodash'
 // let instanceName = 'NewWork247'
 // let instanceList = client.record.getList(instanceListName)
 
-// console.log('Data: ', instanceName, instanceList)
-
 export default {
   name: 'ListInstances',
   data () {
@@ -100,22 +98,16 @@ export default {
   methods: {
     valueStatus (value) {
       if (!value) return ''
-      // console.log(this.flowzData)
       return _.find(this.flowzData.json.processList, {id: value}).name
     },
     async getRecord (item) {
-      // console.log('item: ', item)
       // DeepRecord.deepRecord.getRecord(client, item, async (err, resp) => {
-      //   console.log('get record resp: ', resp)
       //   let stageRecordId = resp.stageReference[(resp.stageReference.length) - 1].stageRecordId
       //   let previousObject = await DeepRecord.deepRecord.getRecordObject(client, stageRecordId)
-      //   // console.log('stage record id:', previousObject.get())
       //   if (err) {
-      //     console.error('Error: ', err)
       //   }
 
       //   let result = await DeepRecord.deepRecord.getCurrentTraget(instanceId, resp.currentStatus)
-      //   // console.log('resprespresprespresprespresp: ', result)
       //   // let currentState = resp.currentStatus.toLowerCase()
       //   // let schemaId = resp[currentState].schemaId
       let currentObj = _.find(this.flowzData.json.processList, {id: item.currentStatus})
@@ -129,13 +121,12 @@ export default {
         // nextState: resp[currentState].next,
         // currentState: currentState
       }
-      // console.log('_____________values', item)
       if (item.stageReference.length > 0) {
         let lastObj = item.stageReference[item.stageReference.length - 1]
         await flowzdataModal.get(lastObj.stageRecordId).then(res => {
           values.formData = res.data.data
         }).catch(err => {
-          console.log('previous data getting error', err)
+          console.log('error', err)
         })
       }
       await this.$emit('setValues', values)
@@ -168,7 +159,6 @@ export default {
           }
         }
         await finstanceModal.get(null, query).then(resp => {
-          // console.log('>>>>>>>>>>>', resp)
           this.tableLoading = false
           this.instanceEntries = resp.data
         }).catch(err => {
@@ -194,10 +184,7 @@ export default {
     //         console.log('Error: ', err)
     //       }
 
-    //       console.log('resp: ', resp)
-
     //       let result = await DeepRecord.deepRecord.getCurrentTraget(instanceId, resp.currentStatus)
-    //       console.log('result: ', result)
 
     //       let pushValue = {
     //         instanceId: this.listEntries[i],
@@ -211,7 +198,6 @@ export default {
     // }
   },
   async mounted () {
-    // console.log('DeepRecord: ', DeepRecord)
     // await instanceList.subscribe(this.updateList, false)
     // this.updateList()
     if (this.$route.params.id) {
@@ -230,11 +216,9 @@ export default {
     'finstance': {
       created (data) {
         let self = this
-        // console.log('created', data)
         if (data.fid === this.$route.params.id) {
           if (this.$route.params.stateid) {
             if (data.currentStatus === this.$route.params.stateid) {
-              console.log('this.instanceEntries', this.instanceEntries)
               self.instanceEntries.push(data)
             }
           } else {
@@ -243,7 +227,6 @@ export default {
         }
       },
       updated (data) {
-        // console.log('updated', data)
         let self = this
         if (data.fid === this.$route.params.id) {
           if (this.$route.params.stateid) {

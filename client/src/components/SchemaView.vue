@@ -3,7 +3,7 @@
   	<div class="container-fluid">
 
       <Tabs>
-        <TabPane label="Instances" icon="ios-list">
+        <TabPane v-if="itsFirstState === true" label="Instances" icon="ios-list">
           <list-instances v-on:setValues="setValues"></list-instances>
           <div>
             <div class="row" v-if="id != null">
@@ -157,26 +157,81 @@
               </tbody>
             </table>
           </div>
-        </TabPane> -->
-        <TabPane label="Data" icon="ios-albums">
-          <schemalist :schema="dataSchema" :data="dataData" :configuration="configuration" :dynamicData="dynamicData"></schemalist>
+        </TabPane>-->
+        <TabPane v-if="itsFirstState === false" label="Data" icon="ios-albums">
+          <schemalist :schema="dataSchema" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData"></schemalist>
+
+          <div style="padding-left: 10px">
+            <div class="row" v-if="id != null">
+              <div class="col-md-10" id="top">
+                <div class="row" style="margin-top: 15px;">
+                  <div class="col-md-12">
+                    <div class="ui-card">
+                      <h3 class="formTitle">{{formTitle}}<span style="font-size:12px">&nbsp;&nbsp;({{item.id}})</span></h3>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-12">
+                    <schemasubform :schemainstance="formSchemaInstance"></schemasubform>
+                    <div v-if="isMultiple">
+                    <div class="row" style="margin-top: 15px;">
+                      <div class="col-md-12">
+                        <div class="ui-card">
+                          <Row>
+                            <Col :span="4">
+                              <b class="field-label">Target</b>
+                            </Col>
+                            <Col :span="20">
+                              <Select v-model="nextTarget.value" placeholder="Choose Target">
+                                <Option v-for="dpd in nextTarget.options" :value="dpd.value" :key="dpd.value">{{ dpd.label }}</Option>
+                              </Select>
+                            </Col>
+                          </Row>
+                        </div>
+                      </div>
+                    </div>
+                    </div>
+                    <div style="padding: 5px 0 5px 0">
+                        <Button type="primary" @click="handleSubmit('formSchemaInstance')" :loading="bLoading">{{ savebutton }}</Button>
+                    </div>
+
+                    <div v-if="validErr.length != 0" style="color: #a94442;background-color: #f2dede;border:1px solid #ebccd1;padding: 5px">
+                        <div v-for="item in validErr">
+                            <i class="fa fa-exclamation-triangle"></i>
+                            {{item.name}} -- {{item.errmsg}}
+                        </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-1 fixed-div">
+                <strong>Jump To:</strong>
+                <ul class="jumper-links">
+                  <a href="#top" class="btn btn-info btn-block btnJumperLink"><li>Top</li></a>
+                  <a :href="'#' + item" v-for="item in jumperLinks" class="btn btn-info btn-block btnJumperLink"><li>{{item}}</li></a>
+                </ul>
+              </div>
+            </div>
+          </div>
         </TabPane>
       </Tabs>
 
       <!-- <mycustom></mycustom> -->
 
-  		
+
 		</div>
 
 		<!-- <template id="dynamicinput">
 
 			<div>
 				<i-input v-if="type == 'text' || type == 'email' || type == 'phone'" v-model="modelName" type="text" :placeholder="placeholder" :min="min"></i-input>
-		                                            
+
 			  <input-number v-if="type == 'number'" :min="min" :max="max" v-model="modelName" :type="type" :placeholder="placeholder"></input-number>
-			  
+
 			  <date-picker v-if="type == 'date'" type="date" v-model="modelName" :placeholder="placeholder"></date-picker>
-			  
+
 			  <i-select v-if="type == 'dropdown'" v-model="modelName" :placeholder="placeholder">
 			      <i-option v-for="dpd in options" :value="dpd" :key="dpd">{{ dpd }}</i-option>
 			  </i-select>
@@ -184,7 +239,9 @@
 			</div>
 
 		</template> -->
-
+    <div v-if="email">
+      <email :btnArr="btnArr" :iid="item.id" v-on:on-done="emailService"></email>
+    </div>
   </div>
 </template>
 
@@ -195,6 +252,7 @@ import axios from 'axios'
 
 import ListInstances from './ListInstances'
 import SchemaSubForm from './SchemaSubForm'
+import email from './email'
 
 import flowzdataModal from '@/api/flowzdata'
 import flowzModel from '@/api/flowz'
@@ -206,6 +264,8 @@ import finstanceModal from '@/api/finstance'
 // const deepstream = require('deepstream.io-client-js')
 
 // const DeepRecord = require('@/assets/js/deepstream/deepRecord')
+
+// import _ form 'lodash'
 
 // const client = deepstream('ws://204.48.26.167:6020').login()
 // let instanceId = '39c53741_ec14_4ceb_a9db_97d7066cd424'
@@ -224,11 +284,14 @@ export default {
   },
   data () {
     return {
+      flowzData: null,
+      email: false,
       loading: false,
       formSchemaInstance: {
         data: [],
         entity: []
       },
+      btnArr: {},
       schema: {},
       dataSchema: {},
       dataData: [],
@@ -236,8 +299,6 @@ export default {
       savebutton: 'Save',
       validFlag: true,
       validErr: [],
-      // id: '2f12480c-22bf-4223-aa18-87cf76b0166b',
-      // id: 'a2fa8564-ff55-4755-ada7-5b8299a25913',
       id: null,
       item: null,
       nextState: null,
@@ -256,15 +317,23 @@ export default {
       },
       configuration: true,
       dynamicData: true,
-      instanceEntries: null
+      instanceEntries: null,
+      isEmailDone: false,
+      itsFirstState: false
     }
   },
   components: {
     'list-instances': ListInstances,
     'schemasubform': SchemaSubForm,
-    'schemalist': schemalist
+    'schemalist': schemalist,
+    'email' : email
   },
   methods: {
+    async emailService (item) {
+      this.isEmailDone = true
+      await this.handleSubmit('formSchemaInstance')
+      this.email = false
+    },
     info (item, index, button) {
       this.modalInfo.title = `Row index: ${index}`
       this.modalInfo.content = JSON.stringify(item, null, 2)
@@ -328,7 +397,6 @@ export default {
       .catch(error => {
         console.log('Error', error)
       })
-      // console.log(arrObj)
       return arrObj
     },
 
@@ -350,11 +418,8 @@ export default {
       this.$Loading.start()
       const self = this
       // const result = await Schema.getAll(id)
-      // console.log('result', result)
       var response = await axios.get('https://api.flowzcluster.tk/eng/schema/' + id).catch(function (error) { console.log(error) })
-      console.log('Cluster response: ', response)
       // this.formTitle = response.data.title
-      // console.log('this.lastLog', JSON.stringify(this.lastLog))
       // if (this.lastLog === undefined) {
       this.formSchemaInstance.data = []
       // } else {
@@ -365,15 +430,11 @@ export default {
       //     this.formSchemaInstance.data = this.lastLog.input
       //   }
       // }
-      // console.log('response.data', response.data)
       this.schema = response.data
-      // console.log("^^^^^^^^^^^^^^: ",response.data)
       this.entity = response.data.entity
-      // console.log("&&&&&&&&&&&&&&&&&: ", this.entity)
       this.formSchemaInstance.entity = this.schema.entity
       // this.formSchemaInstance.data[0] = {}
       for (let [index, entity] of self.formSchemaInstance.entity.entries()) {
-        // console.log('>>>>>>>>>>>>>>>>>>>>>>>', index, entity)
         if (entity.customtype) {
           self.formSchemaInstance.entity[index]['entity'] = await self.getChildEntity(entity.type)
         }
@@ -393,7 +454,6 @@ export default {
       } else {
         await this.handleAdd()
       }
-      // console.log('self.formSchemaInstance.data[0]', self.formSchemaInstance.data[0])
       // if (self.formSchemaInstance.data[0].length === 0) {
       // if (this.lastLog !== undefined && this.lastLog.input.length !== 0) {
       //   for (let mdata of self.lastLog.input) {
@@ -401,14 +461,11 @@ export default {
       //       if (ent.type === 'file') {
       //         mdata[ent.name + 'List'] = mdata[ent.name]
       //         mdata[ent.name] = []
-      //         // console.log(mdata, ent.name)
       //       } else if (ent.customtype) {
       //         mdata[ent.name] = self.setFileList(mdata[ent.name], ent.entity[0])
       //       }
       //     }
-      //     // console.log(mdata)
       //   }
-      //   // console.log('self.lastLog.input', self.lastLog.input)
       //   self.formSchemaInstance.data = _.map(self.lastLog.input, (entry) => {
       //     entry.Schemaid = self.schema.id
       //     return _.chain(entry).omit(['id', '_id']).reduce((result, value, key) => {
@@ -420,7 +477,6 @@ export default {
       //       return result
       //     }, {}).value()
       //   })
-      //   // console.log('self.formSchemaInstance.data', self.formSchemaInstance.data)
       //   // _.forEach(self.lastLog.input, (obj) => {
       //   //   // obj = this.lastLog.input[0]
       //   //   // obj.database = this.schema.database
@@ -433,6 +489,9 @@ export default {
       // setTimeout(async ()=>{
       // await this.handleAdd()
       this.$Loading.finish()
+      $('html, body').animate({
+          scrollTop: $("#top").offset().top
+      }, 500);
       // },4000)
       // }
       // }
@@ -454,13 +513,11 @@ export default {
     },
 
     setFileList (mdata, entity) {
-      // console.log('mdata', mdata, entity)
       for (let sdata of mdata) {
         for (let ent of entity.entity) {
           if (ent.type === 'file') {
             sdata[ent.name + 'List'] = sdata[ent.name]
             sdata[ent.name] = []
-            // console.log(mdata, ent.name)
           } else if (ent.customtype) {
             sdata[ent.name] = this.setFileList(sdata[ent.name], ent.entity[0])
           }
@@ -478,14 +535,11 @@ export default {
       //       if (ent.type === 'file') {
       //         mdata[ent.name + 'List'] = mdata[ent.name]
       //         mdata[ent.name] = []
-      //         // console.log(mdata, ent.name)
       //       } else if (ent.customtype) {
       //         mdata[ent.name] = self.setFileList(mdata[ent.name], ent.entity[0])
       //       }
       //     }
-      //     // console.log(mdata)
       //   }
-      //   // console.log('self.lastLog.input', self.lastLog.input)
       //   self.formSchemaInstance.data = _.map(self.lastLog.input, (entry) => {
       //     entry.Schemaid = self.schema.id
       //     return _.chain(entry).omit(['id', '_id']).reduce((result, value, key) => {
@@ -497,7 +551,6 @@ export default {
       //       return result
       //     }, {}).value()
       //   })
-      //   // console.log('self.formSchemaInstance.data', self.formSchemaInstance.data)
       //   // _.forEach(self.lastLog.input, (obj) => {
       //   //   // obj = this.lastLog.input[0]
       //   //   // obj.database = this.schema.database
@@ -509,10 +562,8 @@ export default {
       // } else {
         // obj.database = this.schema.database
       obj.Schemaid = this.schema.id
-      // console.log('this.entity', this.entity)
       // _.forEach(self.entity, async function (v) {
       for (let v of self.entity) {
-        // console.log("%%%%%%%%%%%%%%%%: ", self.entity)
         if (v.customtype) {
           obj[v.name] = await self.getChildData(v.type)
         } else {
@@ -544,14 +595,11 @@ export default {
         }
       }
       this.formSchemaInstance.data.push(obj)
-      // console.log('this.formSchemaInstance.data', JSON.stringify(this.formSchemaInstance.data))
 
       // }
-      // console.log('obj', obj)
     },
 
     makeObj () {
-      // console.log('this.schema', this.schema)
       var obj = this.schema
       obj.Schemaid = this.schema.id
       obj.data = this.formSchemaInstance.data
@@ -577,81 +625,102 @@ export default {
     },
 
     async handleSubmit (name) {
-      // this.bLoading = true
-      var obj = this.makeObj()
-      this.validFlag = true
-      this.validErr = []
-      // var check = this.checkValidation(obj.data[0], this.entity)
-      let allcheck = []
-      // console.log("entity: ", this.entity)
-      for (let dobj of obj.data) {
-        let flag = this.checkValidation(dobj, this.entity)
-        allcheck.push(flag)
-      }
-      let check = _.indexOf(allcheck, false)
-      // console.log('mergeData', mergeData, obj.data)
-      // var check = this.checkValidation(obj.data[0], this.entity)
-      // console.log('checkkkkkkkkkkkk', check, obj.data[0], this.entity)
-      this.$Loading.start()
-      if (check === -1) {
-        let mergeData = this.mergeFileList(obj.data, obj)
-        obj.data = mergeData
-
-        console.log('Data: ', obj.data[0])
-
-        // let returnObj = await DeepRecord.deepRecord.instanceStageSubmit(client, this.item, obj.data[0])
-        // console.log('Data: ', returnObj)
-        let saveObj = {
-          fid: this.item.fid,
-          iid: this.item.id,
-          state: this.item.currentStatus,
-          data: obj.data[0]
+      let currentStateId = this.$route.params.stateid
+      if(!this.isEmailDone){
+        let currentStageObject = _.find(this.flowData.json.processList, {'id': currentStateId})
+        let nextTargetId
+        if (currentStageObject.target.length > 1) {
+          //nextTargetId = _.find(this.flowData.json.processList, {'id': currentStageObject})
+        } else {
+          nextTargetId = _.find(this.flowData.json.processList, {'id': currentStageObject.target[0].id})
+          if (nextTargetId.type === 'sendproofmail') {
+            this.id = null
+            this.email = true
+            if (nextTargetId.target.length > 1) {
+              let arr = {}
+              for (let index = 0; index < nextTargetId.target.length; index++) {
+                let target = _.find(this.flowData.json.processList, {'id': nextTargetId.target[index].id})
+                arr[target.name] = target.id
+              }
+              this.btnArr = arr
+            } else {
+              let arr = {}
+              arr['approve'] = nextTargetId.target[0].id
+              this.btnArr = arr
+            }
+          } else {
+            this.saveDataMethod()
+          }
         }
-        if (this.isMultiple) {
-          saveObj.nextTarget = this.nextTarget.value
-        }
-        this.bLoading = true
-        await flowzdataModal.post(saveObj).then(res => {
-          // console.log('--------------Saved-------------', res.data)
-          this.id = null
-          this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
-          this.$Loading.finish()
-          this.bLoading = false
-        }).catch(err => {
-          console.log('Error', err)
-          this.$Loading.finish()
-          this.bLoading = false
-          this.$Notice.error({title: 'Not Saved!'})
-        })
-        // let instanceObj = await DeepRecord.deepRecord.getRecordObject(client, this.item)
-        // instanceObj.set('currentStatus', this.nextState)
-        
-
-        // axios.post('http://192.81.213.41:3033/eng/instance/', { data: obj.data })
-        // .then(response => {
-        //   // console.log('response', response.data)
-        //   this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
-        //   this.$Loading.finish()
-        // })
-        // .catch(error => {
-        //   console.log('Error', error)
-        //   this.$Notice.error({title: 'Error!', desc: 'Instance not saved...'})
-        //   this.$Loading.error()
-        // })
-      } else {
-        this.validErr = _.uniqBy(this.validErr, 'name')
-        this.$Notice.error({title: 'Validation Error!'})
+      } else{
+        this.saveDataMethod();
       }
     },
+    async saveDataMethod () {
+        // this.bLoading = true
+        var obj = this.makeObj()
+        this.validFlag = true
+        this.validErr = []
+        // var check = this.checkValidation(obj.data[0], this.entity)
+        let allcheck = []
+        for (let dobj of obj.data) {
+          let flag = this.checkValidation(dobj, this.entity)
+          allcheck.push(flag)
+        }
+        let check = _.indexOf(allcheck, false)
+        // var check = this.checkValidation(obj.data[0], this.entity)
+        this.$Loading.start()
+        if (check === -1) {
+          let mergeData = this.mergeFileList(obj.data, obj)
+          obj.data = mergeData
+          // let returnObj = await DeepRecord.deepRecord.instanceStageSubmit(client, this.item, obj.data[0])
+          let saveObj = {
+            fid: this.item.fid,
+            iid: this.item.id,
+            state: this.item.currentStatus,
+            data: obj.data[0]
+          }
+          if (this.isMultiple) {
+            saveObj.nextTarget = this.nextTarget.value
+          }
+          this.bLoading = true
+          // this.bLoading = false
+          await flowzdataModal.post(saveObj).then(res => {
+            this.id = null
+            this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
+            this.$Loading.finish()
+            this.bLoading = false
+          }).catch(err => {
+            console.log('Error', err)
+            this.$Loading.finish()
+            this.bLoading = false
+            this.$Notice.error({title: 'Not Saved!'})
+          })
 
+          // let instanceObj = await DeepRecord.deepRecord.getRecordObject(client, this.item)
+          // instanceObj.set('currentStatus', this.nextState)
+
+
+          // axios.post('http://192.81.213.41:3033/eng/instance/', { data: obj.data })
+          // .then(response => {
+          //   this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
+          //   this.$Loading.finish()
+          // })
+          // .catch(error => {
+          //   console.log('Error', error)
+          //   this.$Notice.error({title: 'Error!', desc: 'Instance not saved...'})
+          //   this.$Loading.error()
+          // })
+        } else {
+          this.validErr = _.uniqBy(this.validErr, 'name')
+          this.$Notice.error({title: 'Validation Error!'})
+        }
+    },
     checkValidation (data, ent) {
-      // console.log('Validation....', data, ent)
       var self = this
       // var flag = true
       for (let v of ent) {
         if (v.customtype) {
-          // console.log('data[v.name]', data[v.name])
-          console.log('Data V: ', v)
           for (let d of data[v.name]) {
             self.validFlag = self.checkValidation(d, v.entity[0].entity)
           }
@@ -747,7 +816,6 @@ export default {
     },
 
     setValues (values) {
-      // console.log('Values: ', values.currentState)
       this.nextTarget.value = ''
       this.nextTarget.options = []
       this.isMultiple = false
@@ -756,13 +824,11 @@ export default {
         this.item = values.item
         this.formTitle = values.formName
         this.flowData = values.flowzData
-        console.log('values.flowData', this.flowData)
         let targetObj = _.find(values.flowzData.json.processList, {id: values.currentState})
         if (Object.keys(targetObj).length > 0) {
           if (targetObj.target.length > 1) {
             let opts = []
             for (let m of targetObj.target) {
-              // console.log('------', m)
               let label = _.find(values.flowzData.json.processList, {id: m.id}).name
               opts.push({
                 label: label,
@@ -792,20 +858,67 @@ export default {
       let returnData = null
       if (item) {
         let lastItem = _.last(item)
-        let stageRecordId = lastItem.stageRecordId
-        await flowzdataModal.get(null, {
-          id: stageRecordId
-        }).then( (resData) => {
-          // console.log('resultDatadadadaadd: ', resData.data[0].data)
-          returnData = resData.data[0].data
-        }).catch( (err) => {
-          console.log('err: ', err)
-        })
+        if (lastItem.stageRecordId) {
+          let stageRecordId = lastItem.stageRecordId
+          await flowzdataModal.get(null, {
+            id: stageRecordId
+          }).then( (resData) => {
+            // console.log('resultDatadadadaadd: ', resData.data[0].data)
+            returnData = resData.data[0].data
+          }).catch( (err) => {
+            console.log('err: ', err)
+          })
+        }
       }
       return(returnData)
+    },
+
+    async init () {
+      this.id = null
+      this.$Spin.show()
+
+      let query = {
+        fid: this.$route.params.id,
+        currentStatus: this.$route.params.stateid,
+        '$paginate': false
+      }
+
+      await flowzModel.get(this.$route.params.id, {
+        $select: ['json']
+      }).then(async res => {
+        this.flowzData = res.data
+        // if (this.$route.params.stateid) {
+        //   let m = _.find(this.flowzData.json.processList, {id: this.$route.params.stateid})
+        //   if (m && m !== null && Object.keys(m).length > 0) {
+        //     this.breadItem.state = m.name
+        //   }
+        // }
+        await finstanceModal.get(null, query).then(async resp => {
+          if (resp.data.length === 0) {
+            this.itsFirstState = true
+            this.$Spin.hide()
+          } else {
+            this.itsFirstState = false
+            this.instanceEntries = resp.data
+            for ( let i = 0; i < this.instanceEntries.length; i++) {
+              this.instanceEntries[i]['lastData'] = await this.getFData(this.instanceEntries[i].stageReference)
+              this.instanceEntries[i].lastData['id'] = this.instanceEntries[i].id
+            }
+            this.dataData = _.map(this.instanceEntries, (o) => { return o.lastData })
+            this.$Spin.hide()
+          }
+        }).catch(err => {
+          console.log('err', err)
+          this.$Spin.hide()
+        })
+
+      }).catch(err => {
+        console.log('....', err)
+        this.$Spin.hide()
+      })
     }
   },
-  async mounted () {
+  mounted () {
     // console.log('DeepRecord: ', DeepRecord)
     // console.log('ROuter params: ', this.$route.params)
     flowzModel.get(null, {
@@ -815,33 +928,26 @@ export default {
       // console.log('res flowz get call: ', res.data.data[0].json.processList)
       let taskData = _.find(res.data.data[0].json.processList, (o) => { return o.id == this.$route.params.stateid})
       let inputschemaId = taskData.inputProperty[0].entityschema.id
-
       schemaModel.getAll(inputschemaId).then(res => {
         this.dataSchema = res
         // console.log('Res:: ', res)
         // get flowz data
-        flowzdataModal.get(null, {
-          fid: this.$route.params.id,
-          state: this.$route.params.stateid,
-          $paginate: false
-        }).then( (resultData) => {
-          // console.log('FData: ', resultData)
-          let finalData = _.map(resultData, (o) => { return o.data })
-          console.log('Final Data: ', finalData)
-          this.dataData = finalData
-        })
+        // flowzdataModal.get(null, {
+        //   fid: this.$route.params.id,
+        //   state: this.$route.params.stateid,
+        //   $paginate: false
+        // }).then( (resultData) => {
+        //   // console.log('FData: ', resultData)
+        //   let finalData = _.map(resultData, (o) => { return o.data })
+        //   console.log('Final Data: ', finalData)
+        //   this.dataData = finalData
+        // })
+        this.init()
       }).catch(err => {
         console.error('Error: ', err)
       })
       // console.log('Task Data: ', inputschemaId)
     })
-
-    let query = {
-      fid: this.$route.params.id,
-      currentStatus: this.$route.params.stateid,
-      '$paginate': false
-    }
-
     // await finstanceModal.get(null, query).then(resp => {
     //   console.log('Instance response Data: ', resp)
     //   this.instanceEntries = resp.data
@@ -850,37 +956,13 @@ export default {
     //   this.instanceEntries = null
     //   console.log('err', err)
     // })
-
-    await flowzModel.get(this.$route.params.id, {
-      $select: ['json']
-    }).then(async res => {
-      console.log('res: ', res)
-      // if (this.$route.params.stateid) {
-      //   let m = _.find(this.flowzData.json.processList, {id: this.$route.params.stateid})
-      //   if (m && m !== null && Object.keys(m).length > 0) {
-      //     this.breadItem.state = m.name
-      //   }
-      // }
-      await finstanceModal.get(null, query).then(async resp => {
-        console.log('>>>>>>>>>>>', resp)
-        this.instanceEntries = resp.data
-        for ( let i = 0; i < this.instanceEntries.length; i++) {
-          console.log('this.instanceEntries[i]: ', this.instanceEntries[i])
-          this.instanceEntries[i]['lastData'] = await this.getFData(this.instanceEntries[i].stageReference)
-          this.instanceEntries[i].lastData['id'] = this.instanceEntries[i].id
-        }
-
-        this.dataData = _.map(this.instanceEntries, (o) => { return o.lastData })
-        console.log('###########: ', this.dataData)
-      }).catch(err => {
-        console.log('err', err)
-      })
-
-    }).catch(err => {
-      console.log('....', err)
-    })
   },
   computed: {
+  },
+  watch: {
+    '$route.params': function (value) {
+      this.init()
+    }
   }
 }
 
@@ -974,4 +1056,13 @@ export default {
 	.ivu-form-item-content{
 		/*line-height: 15px !important;*/
 	}
+
+
+</style>
+
+<style>
+  .ivu-modal-body{
+    max-height: 550px !important;
+    overflow-y: auto !important;
+  }
 </style>

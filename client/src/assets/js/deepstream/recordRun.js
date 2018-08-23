@@ -5,7 +5,6 @@ const DeepRecord = require('./deepRecord')
 let id = 0
 
 async function startFlow () {
-  console.log('======Id ', id++)
   let instanceId = '39c53741-ec14-4ceb-a9db-97d7066cd424'
   let instanceRecordId = '39c53741_ec14_4ceb_a9db_97d7066cd424/jkkuymzw-2pe2i4djunm'
   let payload = {
@@ -15,7 +14,6 @@ async function startFlow () {
   }
   // ==================Flow initiated==============================
   let instanceObj = await DeepRecord.instanceStageSubmit(client, instanceRecordId, payload)
-  console.log('=====recordId===', instanceObj.recordId)
   // // ==================OrderEntry==============================
   // let StageName = 'OrderEntry'
   // payload = {

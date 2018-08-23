@@ -21,7 +21,6 @@
       }
     },
     mounted () {
-      // console.log('Value', this.value)
       this.subid = this.value
       this.init()
     },
@@ -32,7 +31,6 @@
             authorization: this.token
           }
         }).then(res => {
-          // console.log('res', res.data.data)
           if (res.data.data.package) {
             this.packages = res.data.data.package
           } else {
@@ -44,7 +42,6 @@
         })
       },
       handleChange (value) {
-        console.log('child value', value)
         // this.value = value
         this.subid = value
         this.$emit('on-change', value)

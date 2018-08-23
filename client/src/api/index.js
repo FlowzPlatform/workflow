@@ -3,8 +3,18 @@ import config from '../config'
 import store from '../store'
 
 export default {
-  request (method, uri, data = null, params = null, headers = {'subscriptionId': store.state.subscription}) {
-    // console.log('store.state.subscription', store.state.subscription)
+  request (method, uri, data = null, params = null, headers) {
+    if (headers !== null && headers !== undefined) {
+      if (store.state.subscription !== undefined) {
+        headers.subscriptionId = store.state.subscription
+      } else {
+        headers.subscriptionId = ''
+      }
+    } else {
+      headers = {
+        subscriptionId: store.state.subscription
+      }
+    }
     if (!method) {
       console.error('API function call requires method argument')
       return
@@ -21,6 +31,6 @@ export default {
     }
 
     var url = config.serverURI + uri
-    return axios({ method, url, data, params })
+    return axios({ method, url, data, params, headers })
   }
 }

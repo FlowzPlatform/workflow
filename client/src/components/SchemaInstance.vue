@@ -149,9 +149,7 @@ export default {
     async fetch (id) {
       const self = this
       // const result = await Schema.getAll(id)
-      // console.log('result', result)
       var response = await Schema.getThis(id)
-      // console.log('this.lastLog', JSON.stringify(this.lastLog))
       // if (this.lastLog === undefined) {
       this.formSchemaInstance.data = []
       // } else {
@@ -162,13 +160,11 @@ export default {
       //     this.formSchemaInstance.data = this.lastLog.input
       //   }
       // }
-      // console.log('response.data', response.data)
       this.schema = response.data
       this.entity = this.schema.entity
       this.formSchemaInstance.entity = this.schema.entity
       // this.formSchemaInstance.data[0] = {}
       for (let [index, entity] of self.formSchemaInstance.entity.entries()) {
-        // console.log('>>>>>>>>>>>>>>>>>>>>>>>', index, entity)
         if (entity.customtype) {
           self.formSchemaInstance.entity[index]['entity'] = await self.getChildEntity(entity.type)
         }
@@ -181,7 +177,6 @@ export default {
       //     }
       //   }
       }
-      // console.log('self.formSchemaInstance.data[0]', self.formSchemaInstance.data[0])
       // if (self.formSchemaInstance.data[0].length === 0) {
       if (this.lastLog !== undefined && this.lastLog.input.length !== 0) {
         for (let mdata of self.lastLog.input) {
@@ -189,14 +184,11 @@ export default {
             if (ent.type === 'file') {
               mdata[ent.name + 'List'] = mdata[ent.name]
               mdata[ent.name] = []
-              // console.log(mdata, ent.name)
             } else if (ent.customtype) {
               mdata[ent.name] = self.setFileList(mdata[ent.name], ent.entity[0])
             }
           }
-          // console.log(mdata)
         }
-        // console.log('self.lastLog.input', self.lastLog.input)
         self.formSchemaInstance.data = _.map(self.lastLog.input, (entry) => {
           entry.Schemaid = self.schema.id
           return _.chain(entry).omit(['id', '_id']).reduce((result, value, key) => {
@@ -208,7 +200,6 @@ export default {
             return result
           }, {}).value()
         })
-        // console.log('self.formSchemaInstance.data', self.formSchemaInstance.data)
         // _.forEach(self.lastLog.input, (obj) => {
         //   // obj = this.lastLog.input[0]
         //   // obj.database = this.schema.database
@@ -237,13 +228,11 @@ export default {
       })
     },
     setFileList (mdata, entity) {
-      // console.log('mdata', mdata, entity)
       for (let sdata of mdata) {
         for (let ent of entity.entity) {
           if (ent.type === 'file') {
             sdata[ent.name + 'List'] = sdata[ent.name]
             sdata[ent.name] = []
-            // console.log(mdata, ent.name)
           } else if (ent.customtype) {
             sdata[ent.name] = this.setFileList(sdata[ent.name], ent.entity[0])
           }
@@ -260,14 +249,11 @@ export default {
       //       if (ent.type === 'file') {
       //         mdata[ent.name + 'List'] = mdata[ent.name]
       //         mdata[ent.name] = []
-      //         // console.log(mdata, ent.name)
       //       } else if (ent.customtype) {
       //         mdata[ent.name] = self.setFileList(mdata[ent.name], ent.entity[0])
       //       }
       //     }
-      //     // console.log(mdata)
       //   }
-      //   // console.log('self.lastLog.input', self.lastLog.input)
       //   self.formSchemaInstance.data = _.map(self.lastLog.input, (entry) => {
       //     entry.Schemaid = self.schema.id
       //     return _.chain(entry).omit(['id', '_id']).reduce((result, value, key) => {
@@ -291,7 +277,6 @@ export default {
       // } else {
         // obj.database = this.schema.database
       obj.Schemaid = this.schema.id
-      // console.log('this.entity', this.entity)
       _.forEach(this.entity, function (v) {
         if (v.customtype) {
           obj[v.name] = self.getChildData(v.type)

@@ -35,7 +35,8 @@ class Service {
       data: flowzData.data,
       fid: fInstance.fid,
       iid: data.finstanceId,
-      state: stageId
+      state: fInstance.currentStatus,
+      nextTarget: stageId
     }).catch((err)=> {
       throw new Error(err.message)
     });
@@ -47,7 +48,7 @@ class Service {
     if (Array.isArray(data)) {
       return Promise.all(data.map(current => this.create(current, params)));
     }
-    
+
     return {msg:"your response saved"};
   }
 

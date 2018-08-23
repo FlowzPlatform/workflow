@@ -1,13 +1,13 @@
 import api from '../../api'
 let model = 'flowzdata'
 export default {
-  get: (id = null, params = null) => {
+  get: (id = null, params = null, headers = null) => {
     if (id === null) {
-      return api.request('get', '/' + model, null, params).then(response => {
+      return api.request('get', '/' + model, null, params, headers).then(response => {
         return response.data
       })
     } else {
-      return api.request('get', '/' + model + '/' + id, params)
+      return api.request('get', '/' + model + '/' + id, null, params, headers)
     }
   },
   // getThis: (id) => {
