@@ -3,7 +3,7 @@
   	<div class="container-fluid">
 
       <Tabs>
-        <TabPane label="Instances" icon="ios-list">
+        <TabPane v-if="itsFirstState === true" label="Instances" icon="ios-list">
           <list-instances v-on:setValues="setValues"></list-instances>
           <div>
             <div class="row" v-if="id != null">
@@ -157,11 +157,11 @@
               </tbody>
             </table>
           </div>
-        </TabPane>
-        <!-- <TabPane label="Data" icon="ios-albums">
+        </TabPane>-->
+        <TabPane v-if="itsFirstState === false" label="Data" icon="ios-albums">
           <schemalist :schema="dataSchema" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData"></schemalist>
 
-          <div>
+          <div style="padding-left: 10px">
             <div class="row" v-if="id != null">
               <div class="col-md-10" id="top">
                 <div class="row" style="margin-top: 15px;">
@@ -215,7 +215,7 @@
               </div>
             </div>
           </div>
-        </TabPane> -->
+        </TabPane>
       </Tabs>
 
       <!-- <mycustom></mycustom> -->
@@ -318,7 +318,8 @@ export default {
       configuration: true,
       dynamicData: true,
       instanceEntries: null,
-      isEmailDone: false
+      isEmailDone: false,
+      itsFirstState: false
     }
   },
   components: {
@@ -488,6 +489,9 @@ export default {
       // setTimeout(async ()=>{
       // await this.handleAdd()
       this.$Loading.finish()
+      $('html, body').animate({
+          scrollTop: $("#top").offset().top
+      }, 500);
       // },4000)
       // }
       // }
@@ -854,88 +858,111 @@ export default {
       let returnData = null
       if (item) {
         let lastItem = _.last(item)
-        let stageRecordId = lastItem.stageRecordId
-        await flowzdataModal.get(null, {
-          id: stageRecordId
-        }).then( (resData) => {
-          // console.log('resultDatadadadaadd: ', resData.data[0].data)
-          returnData = resData.data[0].data
-        }).catch( (err) => {
-          console.log('err: ', err)
-        })
+        if (lastItem.stageRecordId) {
+          let stageRecordId = lastItem.stageRecordId
+          await flowzdataModal.get(null, {
+            id: stageRecordId
+          }).then( (resData) => {
+            // console.log('resultDatadadadaadd: ', resData.data[0].data)
+            returnData = resData.data[0].data
+          }).catch( (err) => {
+            console.log('err: ', err)
+          })
+        }
       }
       return(returnData)
+    },
+
+    async init () {
+      this.id = null
+      this.$Spin.show()
+
+      let query = {
+        fid: this.$route.params.id,
+        currentStatus: this.$route.params.stateid,
+        '$paginate': false
+      }
+
+      await flowzModel.get(this.$route.params.id, {
+        $select: ['json']
+      }).then(async res => {
+        this.flowzData = res.data
+        // if (this.$route.params.stateid) {
+        //   let m = _.find(this.flowzData.json.processList, {id: this.$route.params.stateid})
+        //   if (m && m !== null && Object.keys(m).length > 0) {
+        //     this.breadItem.state = m.name
+        //   }
+        // }
+        await finstanceModal.get(null, query).then(async resp => {
+          if (resp.data.length === 0) {
+            this.itsFirstState = true
+            this.$Spin.hide()
+          } else {
+            this.itsFirstState = false
+            this.instanceEntries = resp.data
+            for ( let i = 0; i < this.instanceEntries.length; i++) {
+              this.instanceEntries[i]['lastData'] = await this.getFData(this.instanceEntries[i].stageReference)
+              this.instanceEntries[i].lastData['id'] = this.instanceEntries[i].id
+            }
+            this.dataData = _.map(this.instanceEntries, (o) => { return o.lastData })
+            this.$Spin.hide()
+          }
+        }).catch(err => {
+          console.log('err', err)
+          this.$Spin.hide()
+        })
+
+      }).catch(err => {
+        console.log('....', err)
+        this.$Spin.hide()
+      })
     }
   },
-  async mounted () {
-    this.$Spin.show()
+  mounted () {
+    // console.log('DeepRecord: ', DeepRecord)
+    // console.log('ROuter params: ', this.$route.params)
     flowzModel.get(null, {
       id: this.$route.params.id
     })
     .then( (res) => {
+      // console.log('res flowz get call: ', res.data.data[0].json.processList)
       let taskData = _.find(res.data.data[0].json.processList, (o) => { return o.id == this.$route.params.stateid})
       let inputschemaId = taskData.inputProperty[0].entityschema.id
-
       schemaModel.getAll(inputschemaId).then(res => {
         this.dataSchema = res
+        // console.log('Res:: ', res)
         // get flowz data
-        flowzdataModal.get(null, {
-          fid: this.$route.params.id,
-          state: this.$route.params.stateid,
-          $paginate: false
-        }).then( (resultData) => {
-          let finalData = _.map(resultData, (o) => { return o.data })
-          this.dataData = finalData
-        })
+        // flowzdataModal.get(null, {
+        //   fid: this.$route.params.id,
+        //   state: this.$route.params.stateid,
+        //   $paginate: false
+        // }).then( (resultData) => {
+        //   // console.log('FData: ', resultData)
+        //   let finalData = _.map(resultData, (o) => { return o.data })
+        //   console.log('Final Data: ', finalData)
+        //   this.dataData = finalData
+        // })
+        this.init()
       }).catch(err => {
         console.error('Error: ', err)
       })
+      // console.log('Task Data: ', inputschemaId)
     })
-
-    let query = {
-      fid: this.$route.params.id,
-      currentStatus: this.$route.params.stateid,
-      '$paginate': false
-    }
-
     // await finstanceModal.get(null, query).then(resp => {
+    //   console.log('Instance response Data: ', resp)
     //   this.instanceEntries = resp.data
     // }).catch(err => {
     //   this.tableLoading = false
     //   this.instanceEntries = null
     //   console.log('err', err)
     // })
-
-    await flowzModel.get(this.$route.params.id, {
-      $select: ['json']
-    }).then(async res => {
-      this.flowzData = res.data
-      // if (this.$route.params.stateid) {
-      //   let m = _.find(this.flowzData.json.processList, {id: this.$route.params.stateid})
-      //   if (m && m !== null && Object.keys(m).length > 0) {
-      //     this.breadItem.state = m.name
-      //   }
-      // }
-      await finstanceModal.get(null, query).then(async resp => {
-        this.instanceEntries = resp.data
-        for ( let i = 0; i < this.instanceEntries.length; i++) {
-          this.instanceEntries[i]['lastData'] = await this.getFData(this.instanceEntries[i].stageReference)
-          this.instanceEntries[i].lastData['id'] = this.instanceEntries[i].id
-        }
-
-        this.dataData = _.map(this.instanceEntries, (o) => { return o.lastData })
-        this.$Spin.hide()
-      }).catch(err => {
-        console.log('err', err)
-        this.$Spin.hide()
-      })
-
-    }).catch(err => {
-      console.log('....', err)
-      this.$Spin.hide()
-    })
   },
   computed: {
+  },
+  watch: {
+    '$route.params': function (value) {
+      this.init()
+    }
   }
 }
 
