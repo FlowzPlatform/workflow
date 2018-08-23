@@ -38,7 +38,6 @@ module.exports = {
 };
 
 function beforeCreate (hook) {
-  console.log('here1')
   hook.data.createdAt = new Date().toISOString();
   hook.params.isdone = true;
   if (hook.data.hasOwnProperty('nextTarget')) {
@@ -48,10 +47,7 @@ function beforeCreate (hook) {
 }
 
 function afterCreate (hook) {
-  console.log('here')
-  // console.log('_________________________', hook.result.id)
   if (hook.params.hasOwnProperty('isdone') && hook.params.isdone) {
-    // console.log('------', hook.result.id, '------');
     hook.params.query = {};
     hook.params.query.$select = ['json'];
     const query = Object.assign({}, hook.params.query);
