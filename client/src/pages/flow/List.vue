@@ -715,7 +715,7 @@ export default {
     },
     showInviteDialog (query) {
       if (query.row.roles !== undefined) {
-        this.flowId = 'Workflow_' + query.row.id
+        this.flowId = 'workflow_' + query.row.id
         let temp1 = query.row.roles.split(',')
         let roles = []
         for (let index = 0; index < temp1.length; index++) {
