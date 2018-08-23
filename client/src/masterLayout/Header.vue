@@ -10,7 +10,9 @@
         </Col>
         <i-col :span="4">
             <div class="f-logo">
+              <a href="javascript:void(0)" @click="gotoDashboard">
                 <img src="../assets/images/logo.png" style="width:100%;vertical-align: inherit;">
+              </a>
             </div>
         </i-col>
         <i-col :span="calculateLength">
@@ -104,6 +106,13 @@
       }
     },
     methods: {
+      gotoDashboard () {
+        if (this.$store.state.role === 1) {
+          this.$router.push('/admin/dashboard')
+        } else {
+          this.$router.push('/dashboard')
+        }
+      },
       handleRemove () {
         let location = psl.parse(window.location.hostname)
         location = location.domain === null ? location.input : location.domain
