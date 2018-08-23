@@ -22,6 +22,12 @@ const hooks = require('feathers-hooks')
 const socketio = require('feathers-socketio/client')
 const io = require('socket.io-client')
 let socket = io(config.socketURI)
+socket.on('connect', function () {
+  console.log('Socket Connected')
+})
+socket.on('disconnect', function () {
+  console.log('Socket Disconnect')
+})
   // if (process.env.NODE_ENV !== 'development') {
   //   socket = io(config.serverURI, {path: '/eng/socket.io'})
   // } else {
@@ -33,7 +39,7 @@ const feathers = Feathers()
   // .configure(authentication({storage: window.localStorage}))
   // Include it as a CommonJS module
 const vueFeathers = require('vue-feathers')
-  // And plug it in
+  // And plug it in]
 Vue.use(vueFeathers, feathers)
 
 import ElementUI from 'element-ui'
@@ -96,10 +102,21 @@ var router = new VueRouter({
   }
 })
 
+// iView.LoadingBar.config({
+//   color: '#5cb85c',
+//   height: 5
+// })
+iView.LoadingBar.config({
+  color: '#5cb85c',
+  failedColor: '#f0ad4e',
+  height: 5
+})
+
 import axios from 'axios'
 import psl from 'psl'
 // Some middleware to help us ensure the user is authenticated.
 router.beforeEach((to, from, next) => {
+  iView.LoadingBar.start()
   iView.LoadingBar.config({ color: '#0e406d' })
     // window.console.log('Transition', transition)
     // router.app.$store.state.token
@@ -310,6 +327,10 @@ router.beforeEach((to, from, next) => {
       next()
     }
   }
+})
+
+router.afterEach(route => {
+  iView.LoadingBar.finish()
 })
 
 sync(store, router)

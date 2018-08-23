@@ -45,7 +45,7 @@
                   <span v-if="$store.state.role === 1" style="float:right;" title="Create Instance" @click.prevent="createInstance(item)">
                     <i class="fa fa-plus"></i>
                   </span>
-                  <span v-if="$store.state.role === 1" style="float:right;" title="Preview Progress" @click.prevent="viewProgress(item)">
+                  <span v-if="$store.state.role === 1" style="float:right;padding-right:5px;" title="Preview Progress" @click.prevent="viewProgress(item)">
                     <i class="fa fa-line-chart"></i>
                   </span>
               </template>
@@ -58,12 +58,12 @@
                   :key="inx" 
                 >
                   <div :title="subItem.id" class="submentItem">
-                    <a @click="handleSubmenu(item, subItem)">
+                    <!-- <a @click="handleSubmenu(item, subItem)"> -->
                       {{subItem.name}}
                       <span style="float:right;">
                         <Badge :count="subItem.count"  class-name="demo-badge-alone"></Badge>
                       </span>
-                    </a>
+                    <!-- </a> -->
                   </div>
                 </Menu-item>
               </template>
@@ -98,9 +98,12 @@ export default {
   methods: {
     createInstance (item) {
       // console.log('item', item)
+      this.$Loading.start()
       finstanceModal.post({fid: item.id}).then(res => {
         this.$Notice.success({title: 'Instance Generated'})
+        this.$Loading.finish()
       }).catch(e => {
+        this.$Loading.error()
         console.log('error', e)
         this.$Notice.error({title: 'Error', desc: 'Instace Not Generated'})
       })
@@ -119,10 +122,10 @@ export default {
         this.$router.push('/schemaview/' + node[0] + '/' + node[1])
       }
     },
-    handleSubmenu (item, subitem) {
-      // console.log(item, subitem)
-      this.$router.push('/schemaview/' + item.id + '/' + subitem.id)
-    },
+    // handleSubmenu (item, subitem) {
+    //   // console.log(item, subitem)
+    //   this.$router.push('/schemaview/' + item.id + '/' + subitem.id)
+    // },
     async getModuleRoles (moduleId) {
       if (this.roles[moduleId]) {
         return this.roles[moduleId]
@@ -287,7 +290,7 @@ export default {
             fid: sitem.id
           }).then(res => {
             // console.log('res count', res.data)
-            // sitem.count = res.data.length
+            sitem.count = 0
             for (let pitem of sitem.json.processList) {
               pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
               sitem.count += pitem.count
@@ -298,6 +301,7 @@ export default {
         } else {
           let once = false
           let mdata = []
+          sitem.count = 0
           for (let pitem of sitem.json.processList) {
             if (!once) {
               finstanceModal.get(null, {
