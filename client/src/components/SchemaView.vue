@@ -240,7 +240,8 @@
 
 		</template> -->
     <div v-if="email">
-      <email :btnArr="btnArr" :iid="item.id" v-on:on-done="emailService"></email>
+      <email :btnArr="btnArr" :sendDataEmail="sendDataEmail" :iid="item.id" v-on:on-done="emailService"></email>
+      <schemasubformview ref="schemasubformview" :schemainstance="formSchemaInstance" id="schemasubformview"></schemasubformview>
     </div>
   </div>
 </template>
@@ -252,6 +253,7 @@ import axios from 'axios'
 
 import ListInstances from './ListInstances'
 import SchemaSubForm from './SchemaSubForm'
+import SchemaSubFormView from './SchemaSubFormView'
 import email from './email'
 
 import flowzdataModal from '@/api/flowzdata'
@@ -284,6 +286,7 @@ export default {
   },
   data () {
     return {
+      htmlcontent: false,
       flowzData: null,
       email: false,
       loading: false,
@@ -319,14 +322,16 @@ export default {
       dynamicData: true,
       instanceEntries: null,
       isEmailDone: false,
-      itsFirstState: false
+      itsFirstState: false,
+      sendDataEmail: null
     }
   },
   components: {
     'list-instances': ListInstances,
     'schemasubform': SchemaSubForm,
     'schemalist': schemalist,
-    'email' : email
+    'email' : email,
+    'schemasubformview': SchemaSubFormView
   },
   methods: {
     async emailService (item) {
@@ -636,6 +641,9 @@ export default {
         if (nextTargetId.type === 'sendproofmail') {
           this.id = null
           this.email = true
+          setTimeout(() => {
+            this.sendDataEmail = this.$refs.schemasubformview.$el.outerHTML
+          }, 5000)
           if (nextTargetId.target.length > 1) {
             let arr = {}
             for (let index = 0; index < nextTargetId.target.length; index++) {
@@ -929,8 +937,6 @@ export default {
     }
   },
   mounted () {
-    // console.log('DeepRecord: ', DeepRecord)
-    // console.log('ROuter params: ', this.$route.params)
     flowzModel.get(null, {
       id: this.$route.params.id
     })
@@ -1074,5 +1080,9 @@ export default {
   .ivu-modal-body{
     max-height: 550px !important;
     overflow-y: auto !important;
+  }
+
+  #schemasubformview{
+    display: none;
   }
 </style>
