@@ -71,11 +71,10 @@
 
 <script>
 
-import $ from 'jquery'
+// import $ from 'jquery'
 import SchemaSubFormView from './SchemaSubFormView'
 import axios from 'axios'
 import moment from 'moment'
-// let jumperLinks = [];
 
 var AWS = require('aws-sdk')
 AWS.config.update({
@@ -89,7 +88,6 @@ export default {
   props: ['schemainstance'],
   data () {
     return {
-      jumperLinks: []
     }
   },
   components: {
@@ -174,10 +172,6 @@ export default {
       var obj = {}
       obj.data = this.schemainstance.data[dataIndex][fname]
       obj.entity = this.schemainstance.entity[eIndex].entity[0].entity
-      let indexx = $.inArray(fname, this.jumperLinks)
-      if (indexx === -1) {
-        this.jumperLinks.push(fname)
-      }
       return obj
     },
     getObjectType (type) {
