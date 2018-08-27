@@ -893,9 +893,7 @@ export default {
 
     async init () {
       this.email = false
-      console.log('this.email',this.email)
       this.htmlcontent = false
-      console.log('this.email',this.htmlcontent)
       this.id = null
       this.$Spin.show()
 
