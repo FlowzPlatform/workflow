@@ -211,57 +211,11 @@ export default {
     margin-bottom: 10px;
   }
 
-  .btnAdd{
-    background-color: #53CAE8;
-    border-radius: 50px;
-    font-size: 14px;
-    text-transform: uppercase;
-    color: #fff;
-    border: none;
-    font-style: italic;
-  }
-
-  .btnAdd:hover{
-    background-color: #83d5ea;
-    color: #fff;
-  }
-
-  .btnDelete{
-    font-size: 14px;
-    border-radius: 50px;
-    color: #fff !important;
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    background-color: #FF0000;
-    width: 20px;
-    height: 20px;
-  }
-
-  .btnDelete i{
-    position: absolute;
-  top: 4px;
-  left: 5px;
-  }
-
   .field-label{
     text-transform: capitalize;
   }
 
   .formTitle{
-    text-transform: capitalize;
-  }
-
-  .jumper-links{
-    list-style: none;
-    font-size: 14px;
-  }
-
-  .jumper-links a{
-    text-decoration: none;
-    /*color: #53cae8;*/
-    text-align: left;
-    font-weight: bold;
     text-transform: capitalize;
   }
 
