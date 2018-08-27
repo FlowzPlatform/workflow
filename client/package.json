@@ -16,6 +16,7 @@
   "dependencies": {
     "@deveodk/vue-tinymce": "^1.0.0",
     "@feathersjs/errors": "^3.3.0",
+    "@tinymce/tinymce-vue": "^1.0.8",
     "FormData": "^0.10.1",
     "animate.css": "^3.5.2",
     "aws": "0.0.3-2",
