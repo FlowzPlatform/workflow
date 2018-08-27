@@ -84,7 +84,6 @@ import config from '@/config'
     },
     methods: {
       sendEmail() {
-        console.log("sendDataEmail", this.sendDataEmail)
         this.emailForm.subject = this.emailForm.type
         let config11 = config
         let btn = ''
@@ -106,7 +105,6 @@ import config from '@/config'
           <h4>While we strongly you to take advantage of this time saving option,
               your proof may still be fixed back to company name at: <strong>Toll Free Fax:</strong> 800-238-0082
               <strong>Local Fax:<strong> 716-773-2332</h4></div></body></html>`
-        console.log('this.emailForm',this.emailForm)
         sendmailModal.post(this.emailForm)
         .then((res)=>{
           this.$emit('on-done', true)

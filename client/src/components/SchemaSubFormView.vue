@@ -12,7 +12,6 @@
                             </Row>
                             <Row v-if="field.property.IsArray">
                                 <schemasubformView :schemainstance="getObject(inx, index, field.name, field.type)"></schemasubformView>
-                                <Button class="btnAdd" @click="handleAdd(inx, index, schemainstance.entity[inx].entity[0], schemainstance.data[index][field.name], field.name)" icon="plus-round"> <i class="fa fa-plus"></i> Add ({{field.name}})</Button>
                             </Row>
                             <Row v-else>
                                 <schemasubformView :schemainstance="getObject(inx, index, field.name, field.type)"></schemasubformView>
@@ -22,7 +21,7 @@
                 </template>
                 <template v-else>
                     <Col :span="12" style="padding:0px 20px 0px 2px" v-if="field.type !== 'file'">
-                        <FormItem :key="inx" :rules="createRules(field)" style="margin-bottom:10px;">
+                        <FormItem :key="inx" style="margin-bottom:10px;">
                             <Row>
                                 <Col :span="4">
                                     <b class="field-label">{{field.name}}</b>
@@ -46,7 +45,7 @@
                         </FormItem>
                     </Col>
                     <Col :span="24" style="padding:0px 20px 0px 2px" v-else>
-                        <FormItem :key="inx" :rules="createRules(field)" style="margin-bottom:10px;">
+                        <FormItem :key="inx" style="margin-bottom:10px;">
                             <Row>
                                 <Col :span="2">
                                     <!-- <b>{{field.name}}</b> -->
@@ -63,13 +62,6 @@
                         </FormItem>
                     </Col>
                 </template>
-            </div>
-
-            <div v-if="index != 0" style="float:right">
-                <a @click="handleRemove(index)" class="btnDelete">
-                    <!-- <i-icon type="trash-a" style="color:#e74c3c" size="20"></i-icon> -->
-                    <i class="fa fa-minus"></i>
-                </a>
             </div>
         </Row>
       </Form>
@@ -128,9 +120,6 @@ export default {
         }
       }
       self.schemainstance.data[index][fieldName] = allFiles
-    },
-    getValidationProps (index, fieldName) {
-      return 'data[' + index + '][' + fieldName + ']'
     },
     async getChildData (id) {
       // alert(id)
@@ -191,111 +180,8 @@ export default {
       }
       return obj
     },
-    async handleAdd (eIndex, dataIndex, ent, data, fname) {
-      var self = this
-      // var self.$refs['formSchema'][0].validate()
-      // self.$refs['formSchema'][0].validate((valid) => {
-      //   alert(1)
-      //   if (valid) {
-      //     this.$Message.success('Success!')
-      //   } else {
-      //     this.$Message.error('Error!')
-      //   }
-      // })
-      var obj = {}
-      // obj.id = this.getGuid();
-      // alert(ent.database)
-      // obj.database = ent.database
-      // obj.Schemaid = ent._id
-      for (let v of ent.entity) {
-        if (v.customtype) {
-          obj[v.name] = await self.getChildData(v.type)
-        } else {
-          if (v.type === 'number') {
-            if (v.property.defaultValue !== '') {
-              obj[v.name] = v.property.defaultValue
-            } else {
-              if (v.property.min !== 0 && v.property.min !== '') {
-                obj[v.name] = v.property.min
-              } else {
-                obj[v.name] = 1
-              }
-            }
-          } else if (v.type === 'boolean') {
-            if (v.property.defaultValue !== '' || v.property.defaultValue === 'true') {
-              obj[v.name] = true
-            } else {
-              obj[v.name] = false
-            }
-          } else if (v.type === 'file') {
-            obj[v.name] = []
-          } else {
-            if (v.property.defaultValue !== '') {
-              obj[v.name] = v.property.defaultValue
-            } else {
-              obj[v.name] = ''
-            }
-          }
-        }
-      }
-      this.schemainstance.data[dataIndex][fname].push(obj)
-      // console.log('schemainstance: ', this.schemainstance.data)
-    },
-    // getGuid () {
-    //   return (this.S4() + this.S4() + "-" + this.S4() + "-4" + this.S4().substr(0,3) + "-" + this.S4() + "-" + this.S4() + this.S4() + this.S4()).toLowerCase()
-    // },
-    // S4() {
-    //     return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
-    // },
     getObjectType (type) {
       return ['text', 'email', 'number', 'phone', 'boolean', 'date', 'dropdown', 'file'].indexOf(type) === -1
-    },
-    createRules (row) {
-      let rules = []
-      if (row.type === 'email') {
-        rules.push({ type: 'email', message: 'This field is email type.' })
-      }
-      if (row.type === 'phone') {
-        rules.push({
-          type: 'number',
-          validator: (rule, value, callback) => {
-            if (!value) {
-              return callback(new Error('Please input the value'))
-            }
-            if (value.match(/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/)) {
-              callback()
-            } else {
-              callback(new Error('Please input phone no'))
-            }
-          }
-        })
-      }
-      if (row.property.optional === false) {
-        rules.push({required: true, message: 'This field is required.', trigger: 'blur'})
-      }
-      if (row.property.min > 0 && row.type === 'text') {
-        rules.push({ type: 'string', min: row.property.min, message: 'min' + row.property.min + ' length req' })
-      }
-      if (row.property.max > 0 && row.type === 'text') {
-        rules.push({ type: 'string', max: row.property.max, message: 'max length ' + row.property.max + ' required.' })
-      }
-      if (row.property.allowedValue.length > 0) {
-        rules.push({type: 'enum', enum: row.property.allowedValue})
-      }
-      return rules
-    },
-    handleEdit (row) {
-    },
-    handleRemove (index) {
-      this.$Modal.confirm({
-        title: 'Confirm',
-        content: '<p>Are you sure you want to delete?</p>',
-        onOk: () => {
-          this.schemainstance.data.splice(index, 1)
-        },
-        onCancel: () => {
-        }
-      })
     }
   },
   mounted () {
