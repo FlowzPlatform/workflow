@@ -231,6 +231,11 @@
           "type": "String"
         },
         {
+          "name": "schema",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
           "name": "versionTag",
           "isAttr": true,
           "type": "String"

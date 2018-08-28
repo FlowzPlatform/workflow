@@ -111,8 +111,9 @@ export default {
       //   // let currentState = resp.currentStatus.toLowerCase()
       //   // let schemaId = resp[currentState].schemaId
       let currentObj = _.find(this.flowzData.json.processList, {id: item.currentStatus})
+      // console.log('this.flowzData.schema', this.flowzData)
       let values = {
-        id: currentObj.inputProperty[0].entityschema.id,
+        id: this.flowzData.schema,
         item: item,
         formName: currentObj.name,
         currentState: currentObj.id,
@@ -148,7 +149,7 @@ export default {
         query.currentStatus = stateid
       }
       await flowzModal.get(id, {
-        $select: ['json']
+        $select: ['json', 'schema']
       }).then(async res => {
         this.flowzData = res.data
         this.breadItem.name = this.flowzData.json.name

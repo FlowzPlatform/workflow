@@ -403,7 +403,10 @@ export default {
       // alert('entity')
       var self = this
       var res = []
-      var _res = await axios.get('https://api.flowzcluster.tk/eng/schema/' + id).catch(function (error) { console.log(error) })
+      // var _res = await axios.get('https://api.flowzcluster.tk/eng/schema/' + id).catch(function (error) { console.log(error) })
+      let _res = await schemaModel.get(id).catch(err => {
+        console.log('err', err)
+      })
       for (let [index, entity] of _res.data.entity.entries()) {
         if (entity.customtype) {
           _res.data.entity[index]['entity'] = await self.getChildEntity(entity.type)
@@ -417,7 +420,12 @@ export default {
       this.$Loading.start()
       const self = this
       // const result = await Schema.getAll(id)
-      var response = await axios.get('https://api.flowzcluster.tk/eng/schema/' + id).catch(function (error) { console.log(error) })
+      // var response = await axios.get('https://api.flowzcluster.tk/eng/schema/' + id).catch(function (error) { console.log(error) })
+      // console.log('...........', id)
+      let response = await schemaModel.get(id).catch(error => {
+        console.log(error)
+      })
+      // console.log('response', response)
       // this.formTitle = response.data.title
       // if (this.lastLog === undefined) {
       this.formSchemaInstance.data = []
@@ -887,7 +895,7 @@ export default {
       }
 
       await flowzModel.get(this.$route.params.id, {
-        $select: ['json']
+        $select: ['json', 'schema']
       }).then(async res => {
         this.flowzData = res.data
         // if (this.$route.params.stateid) {
@@ -935,9 +943,9 @@ export default {
       id: this.$route.params.id
     })
     .then( (res) => {
-      // console.log('res flowz get call: ', res.data.data[0].json.processList)
+      // console.log('res flowz get call: ', res.data.data[0])
       let taskData = _.find(res.data.data[0].json.processList, (o) => { return o.id == this.$route.params.stateid})
-      let inputschemaId = taskData.inputProperty[0].entityschema.id
+      let inputschemaId = res.data.data[0].schema
       schemaModel.getAll(inputschemaId).then(res => {
         this.dataSchema = res
         // console.log('Res:: ', res)
