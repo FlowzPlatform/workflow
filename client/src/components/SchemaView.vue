@@ -892,6 +892,8 @@ export default {
     },
 
     async init () {
+      this.email = false
+      this.htmlcontent = false
       this.id = null
       this.$Spin.show()
 
@@ -944,8 +946,6 @@ export default {
     }
   },
   mounted () {
-    this.email = false;
-    this.htmlcontent = false
     flowzModel.get(null, {
       id: this.$route.params.id
     })
