@@ -60,6 +60,7 @@ function beforeCreate (hook) {
       // console.log('res++++++++++++++++++++++++++++++', res)
       let startObj = _.find(res.json.processList, {"type": "start"});
       let nextTargetObj = getNextTarget(res.json.processList, startObj.target[0].id);
+      // console.log('nextTargetObj', nextTargetObj)
       hook.data.currentStatus = nextTargetObj.id;
       hook.data.mainStatus = 'inprocess';
       hook.data.stageReference = [];
@@ -75,11 +76,11 @@ function beforeCreate (hook) {
 
 function getNextTarget (processList, targetId) {
   let targetObj = _.find(processList,{"id": targetId})
-  if (targetObj.type === 'start' || targetObj.type === 'endevent' || targetObj.type === 'intermediatethrowevent') {
-    return targetObj;
-  }
-  if(targetObj.inputProperty.length === 0) {
-    targetObj = getNextTarget(instanceId, targetObj.target[0].id)
-  }
+  // if (targetObj.type === 'start' || targetObj.type === 'endevent' || targetObj.type === 'intermediatethrowevent') {
+  //   return targetObj;
+  // }
+  // if(targetObj.inputProperty.length === 0) {
+  // targetObj = getNextTarget(processList, targetObj.target[0].id)
+  // }
   return targetObj;
 };
