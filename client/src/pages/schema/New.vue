@@ -200,7 +200,7 @@
                   </Col>
               </Row>
           </Form-item>
-          <Form-item
+          <!-- <Form-item
           label="Select Database"
           prop="database"
           :label-width="115"
@@ -208,7 +208,7 @@
             <Cascader v-if="formSchema.id" :data="CascaderData" filterable v-model='formSchema.database' disabled></Cascader>
             <Cascader v-if="!formSchema.id" :data="CascaderData" filterable v-model='formSchema.database'></Cascader>
 
-          </Form-item>
+          </Form-item> -->
           <Form-item>
             <Collapse v-model="templates">
               <Panel name="1">
@@ -627,7 +627,7 @@ export default {
         label: 'File'
       }],
       types: [],
-      CascaderData: [],
+      // CascaderData: [],
       scdata: [],
       createtemplate: [],
       vtemplate: {
@@ -686,13 +686,14 @@ export default {
       }, {
         validator: validateEditTemplateTitle,
         trigger: 'blur'
-      }],
-      databases: {
-        'mongo': [],
-        'rethink': [],
-        'elastic': [],
-        'nebb': []
-      }
+      }]
+      // ,
+      // databases: {
+      //   'mongo': [],
+      //   'rethink': [],
+      //   'elastic': [],
+      //   'nebb': []
+      // }
     }
   },
   async mounted () {
@@ -701,59 +702,59 @@ export default {
      
     // this.mjmlUpload = this.$store.state.emailTemplate
     // console.log(this.mjmlUpload)
-    await api.request('get', '/databases', null, {$paginate: false})
-      .then(response => {
-        // var result = response.data
-        // console.log('settings',result)
-       let result =  _.filter(response.data, {isenable: true})
+    // await api.request('get', '/databases', null, {$paginate: false})
+      // .then(response => {
+      //   // var result = response.data
+      //   // console.log('settings',result)
+      //  let result =  _.filter(response.data, {isenable: true})
 
-        for (let db in this.databases) {
-          this.databases[db] = _.filter(result, {selectedDb: db}) 
-        }
+      //   for (let db in this.databases) {
+      //     this.databases[db] = _.filter(result, {selectedDb: db}) 
+      //   }
 
-        for (let db in this.databases) {
-          if (this.databases[db].length > 0) {
-            let childrens = []
-            for (let item of this.databases[db]) {
-              childrens.push({
-                label: item.connection_name,
-                value: item.id
-              })
-            }
-       this.CascaderData.push({
-              label: db,
-              value: db,
-              children: childrens
-            })
-          }
-        }
-        // for(var db in result){
-        //   var obj = {}
-        //   // if(result[db].dbdefault == 'true'){
-        //     // console.log('aaaaaaa',db)
-        //     obj.value = db,
-        //     obj.label = db,
-        //     obj.children = []
-        //     // console.log(result[db].dbinstance)
-        //     result[db].dbinstance.forEach(function(instance, i){
-        //       if(instance.isenable){
-        //         // console.log(instance.cname)
-        //         obj.children.push({label: instance.connection_name, value:instance.id})
-        //       }
-        //     })
-        //     if(obj.children.length == 0 && obj.label != 'nedb'){
-        //       obj.disabled = true
-        //     }
-        //   // }
-        //   // console.log(obj)
-        //   this.CascaderData.push(obj)
-        // }
-        // this.$Loading.finish()
-      })
-      .catch(error => {
-        console.log(error)
-        // this.$Loading.error()
-      })
+      //   for (let db in this.databases) {
+      //     if (this.databases[db].length > 0) {
+      //       let childrens = []
+      //       for (let item of this.databases[db]) {
+      //         childrens.push({
+      //           label: item.connection_name,
+      //           value: item.id
+      //         })
+      //       }
+      // //  this.CascaderData.push({
+      // //         label: db,
+      // //         value: db,
+      // //         children: childrens
+      // //       })
+      //     }
+      //   }
+      //   // for(var db in result){
+      //   //   var obj = {}
+      //   //   // if(result[db].dbdefault == 'true'){
+      //   //     // console.log('aaaaaaa',db)
+      //   //     obj.value = db,
+      //   //     obj.label = db,
+      //   //     obj.children = []
+      //   //     // console.log(result[db].dbinstance)
+      //   //     result[db].dbinstance.forEach(function(instance, i){
+      //   //       if(instance.isenable){
+      //   //         // console.log(instance.cname)
+      //   //         obj.children.push({label: instance.connection_name, value:instance.id})
+      //   //       }
+      //   //     })
+      //   //     if(obj.children.length == 0 && obj.label != 'nedb'){
+      //   //       obj.disabled = true
+      //   //     }
+      //   //   // }
+      //   //   // console.log(obj)
+      //   //   this.CascaderData.push(obj)
+      //   // }
+      //   // this.$Loading.finish()
+      // })
+      // .catch(error => {
+      //   console.log(error)
+      //   // this.$Loading.error()
+      // })
       // if(this.$store.state.viewTemplate != undefined && this.$store.state.viewTemplate.length > 0)
       // {
       //   this.viewtemplate = this.$store.state.viewTemplate
@@ -882,7 +883,7 @@ export default {
       if (id === undefined) {
         this.formSchema = {
           title: '',
-          database: [],
+          // database: [],
           entity: [
             {
               name: '',
