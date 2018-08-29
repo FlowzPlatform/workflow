@@ -970,6 +970,15 @@
         "name": "capacity",
         "type": "String",
         "isAttr": true
+      },{
+        "name": "isButton",
+        "isAttr": true,
+        "type": "Boolean"
+      },
+      {
+        "name": "buttonLabel",
+        "type": "String",
+        "isAttr": true
       }, {
         "name": "isProcessTask",
         "type": "Boolean",

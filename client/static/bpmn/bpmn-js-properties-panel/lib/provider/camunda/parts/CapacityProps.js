@@ -26,6 +26,22 @@ module.exports = function(group, element, translate) {
         return !isFormInput
       }
     }))
+  // button label
+  group.entries.push(entryFactory.checkbox({
+    id: 'isButton',
+    label: translate('Is Button'),
+    modelProperty: 'isButton'
+  }))
+  group.entries.push(entryFactory.textField({
+    id: 'buttonLabel',
+    label: 'Button Label',
+    modelProperty: 'buttonLabel',
+    hidden: function (element, node) {
+      var bo = getBusinessObject(element);
+      var isFormInput = bo.get('camunda:isButton');
+      return !isFormInput
+    }
+  }))
     //Execute Any
   group.entries.push(entryFactory.checkbox({
     id: 'execute-if-any',
