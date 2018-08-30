@@ -30,6 +30,7 @@
 </style>
 <template>
   <div class="schema">
+    <!-- {{types}} -->
     <Row>
       <Button type="primary" size="small" @click="back()" icon="chevron-left" style="float:right;">Back</Button>
     </Row>
@@ -111,6 +112,7 @@
                                 </td>
                                 <td class="">
                                     <div class="ivu-table-cell">
+                                      <!-- {{item.type}} -->
                                       <Select size="small" v-model="item.type" @on-change="checktype(item.type, index)" class="schema-form-input">
                                           <Option v-for="t in types" :value="t.value" :key="t.value">{{ t.label }}</Option>
                                       </Select>
@@ -198,7 +200,7 @@
                   </Col>
               </Row>
           </Form-item>
-          <Form-item
+          <!-- <Form-item
           label="Select Database"
           prop="database"
           :label-width="115"
@@ -206,7 +208,7 @@
             <Cascader v-if="formSchema.id" :data="CascaderData" filterable v-model='formSchema.database' disabled></Cascader>
             <Cascader v-if="!formSchema.id" :data="CascaderData" filterable v-model='formSchema.database'></Cascader>
 
-          </Form-item>
+          </Form-item> -->
           <Form-item>
             <Collapse v-model="templates">
               <Panel name="1">
@@ -495,12 +497,9 @@
                             </div>
                           </div>
                         </TabPane>
-
                         <Button type="info" v-if="activetab == 'email'" slot="extra" size="small" @click="openMjmlEditor">Add Template</Button>
                     </Tabs>
-                    
                   </p>
-                  
               </Panel>
           </Collapse>
           </Form-item>
@@ -628,7 +627,7 @@ export default {
         label: 'File'
       }],
       types: [],
-      CascaderData: [],
+      // CascaderData: [],
       scdata: [],
       createtemplate: [],
       vtemplate: {
@@ -687,74 +686,75 @@ export default {
       }, {
         validator: validateEditTemplateTitle,
         trigger: 'blur'
-      }],
-      databases: {
-        'mongo': [],
-        'rethink': [],
-        'elastic': [],
-        'nebb': []
-      }
+      }]
+      // ,
+      // databases: {
+      //   'mongo': [],
+      //   'rethink': [],
+      //   'elastic': [],
+      //   'nebb': []
+      // }
     }
   },
   async mounted () {
     this.$store.state.editTemplate = undefined
     // console.log('------->>>', this.$store.state.viewTemplate)
-    this.fetch(this.$route.params.id)
+     
     // this.mjmlUpload = this.$store.state.emailTemplate
     // console.log(this.mjmlUpload)
-    await api.request('get', '/databases', null, {$paginate: false})
-      .then(response => {
-        // var result = response.data
-        // console.log('settings',result)
-        let result = _.filter(response.data, {isenable: true})
+    // await api.request('get', '/databases', null, {$paginate: false})
+      // .then(response => {
+      //   // var result = response.data
+      //   // console.log('settings',result)
+      //  let result =  _.filter(response.data, {isenable: true})
 
-        for (let db in this.databases) {
-          this.databases[db] = _.filter(result, {selectedDb: db}) 
-        }
+      //   for (let db in this.databases) {
+      //     this.databases[db] = _.filter(result, {selectedDb: db}) 
+      //   }
 
-        for (let db in this.databases) {
-          if (this.databases[db].length > 0) {
-            let childrens = []
-            for (let item of this.databases[db]) {
-              childrens.push({
-                label: item.connection_name,
-                value: item.id
-              })
-            }
-            this.CascaderData.push({
-              label: db,
-              value: db,
-              children: childrens
-            })
-          }
-        }
-        // for(var db in result){
-        //   var obj = {}
-        //   // if(result[db].dbdefault == 'true'){
-        //     // console.log('aaaaaaa',db)
-        //     obj.value = db,
-        //     obj.label = db,
-        //     obj.children = []
-        //     // console.log(result[db].dbinstance)
-        //     result[db].dbinstance.forEach(function(instance, i){
-        //       if(instance.isenable){
-        //         // console.log(instance.cname)
-        //         obj.children.push({label: instance.connection_name, value:instance.id})
-        //       }
-        //     })
-        //     if(obj.children.length == 0 && obj.label != 'nedb'){
-        //       obj.disabled = true
-        //     }
-        //   // }
-        //   // console.log(obj)
-        //   this.CascaderData.push(obj)
-        // }
-        // this.$Loading.finish()
-      })
-      .catch(error => {
-        console.log(error)
-        // this.$Loading.error()
-      })
+      //   for (let db in this.databases) {
+      //     if (this.databases[db].length > 0) {
+      //       let childrens = []
+      //       for (let item of this.databases[db]) {
+      //         childrens.push({
+      //           label: item.connection_name,
+      //           value: item.id
+      //         })
+      //       }
+      // //  this.CascaderData.push({
+      // //         label: db,
+      // //         value: db,
+      // //         children: childrens
+      // //       })
+      //     }
+      //   }
+      //   // for(var db in result){
+      //   //   var obj = {}
+      //   //   // if(result[db].dbdefault == 'true'){
+      //   //     // console.log('aaaaaaa',db)
+      //   //     obj.value = db,
+      //   //     obj.label = db,
+      //   //     obj.children = []
+      //   //     // console.log(result[db].dbinstance)
+      //   //     result[db].dbinstance.forEach(function(instance, i){
+      //   //       if(instance.isenable){
+      //   //         // console.log(instance.cname)
+      //   //         obj.children.push({label: instance.connection_name, value:instance.id})
+      //   //       }
+      //   //     })
+      //   //     if(obj.children.length == 0 && obj.label != 'nedb'){
+      //   //       obj.disabled = true
+      //   //     }
+      //   //   // }
+      //   //   // console.log(obj)
+      //   //   this.CascaderData.push(obj)
+      //   // }
+      //   // this.$Loading.finish()
+      // })
+      // .catch(error => {
+      //   console.log(error)
+      //   // this.$Loading.error()
+      // })
       // if(this.$store.state.viewTemplate != undefined && this.$store.state.viewTemplate.length > 0)
       // {
       //   this.viewtemplate = this.$store.state.viewTemplate
@@ -763,6 +763,7 @@ export default {
       // {
       //   this.createTemplate = this.$store.state.createTemplate
       // }
+      this.fetch(this.$route.params.id)
   },
   methods: {
     addRowViewTemplate (name) {
@@ -882,7 +883,7 @@ export default {
       if (id === undefined) {
         this.formSchema = {
           title: '',
-          database: [],
+          // database: [],
           entity: [
             {
               name: '',
@@ -981,22 +982,22 @@ export default {
         })
       }
     },
-    setTypes (id) {
+     setTypes (id) {
       this.$store.dispatch('getSchema')
       let type = []
-      _.forEach(this.defaultType, function (t) {
-        type.push(t)
+     _.forEach(this.defaultType,async function (t) {
+       type.push(t)
       })
       // let checkType = '';
-      this.$store.getters.allSchema.forEach((schema) => {
+     this.$store.getters.allSchema.forEach((schema) => {
         if (id !== schema.id) {
-          type.push({
+       type.push({
             value: schema.id,
             label: schema.title
           })
         }
       })
-      this.types = type
+     this.types = type
       // this.
     },
     handleSubmit (name) {
@@ -1127,7 +1128,6 @@ export default {
         this.isGridManager = false
         this.$store.state.editTemplate = undefined
       }
-
     },
     opengrapesjs (isViewTemplate) {
 
@@ -1136,11 +1136,11 @@ export default {
       // this.isViewTemplate = isViewTemplate
       // this.isGrapesComponent = !this.isGrapesComponent
     },
-    handleCloseGrapesClick (self) {
+     handleCloseGrapesClick (self) {
       if(self != false && self != undefined) {
         //Edit
         if(this.$store.state.editTemplate != undefined){
-          if(!this.isViewTemplate)
+        if(!this.isViewTemplate)
             this.createtemplate[this.$store.state.editTemplate.index] = self
           else
             this.viewtemplate[this.$store.state.editTemplate.index] = self
@@ -1155,7 +1155,7 @@ export default {
             this.viewtemplate.push(self)
         }
       }
-      this.$store.state.editTemplate = undefined
+     this.$store.state.editTemplate = undefined
       this.isGrapesComponent = !this.isGrapesComponent
     },
     openMjmlEditor(){
@@ -1163,7 +1163,7 @@ export default {
     },
     handleCloseMjmlClick (self) {
       // this.mjmlUpload.push(self)
-      this.isMjmlEditor = !this.isMjmlEditor
+     this.isMjmlEditor = !this.isMjmlEditor
     },
     savegriddata(index, template, isViewTemplate) {
       if(index > 0)
@@ -1222,25 +1222,25 @@ export default {
       // this.$router.push(this.$store.state.tabdata[name].url)
     }
   },
-  created () {
+    created () {
     this.setTypes(this.$route.params.id)
-    this.$on('close-grid', this.handleCloseGridClick)
-    this.$on('close-click', this.handleCloseGrapesClick)
+    this.$on('close-grid',  this.handleCloseGridClick)
+    this.$on('close-click',  this.handleCloseGrapesClick)
     this.$on('close-mjml', this.handleCloseMjmlClick)
   },
-  watch: {
+   watch: {
     'formSchema.title' : function(v) {
        this.formSchema.title = v.toLowerCase().trim();
     },
-    '$route.params.id': function(newId, oldId) {
-      this.setTypes(newId)
+    '$route.params.id':  function(newId, oldId) {
+     this.setTypes(newId)
       // fetch data
       this.fetch(newId)
     },
     '$store.getters.allSchema': function() {
       this.$store.getters.allSchema.forEach((schema) => {
         if (this.$route.params.id !== schema.id) {
-          this.types.push({
+         this.types.push({
             value: schema.id,
             label: schema.title
           })

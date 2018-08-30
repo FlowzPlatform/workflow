@@ -38,7 +38,7 @@
   import _ from 'lodash'
   import schemaModel from '@/api/schema'
   import approvalModel from '@/api/approval'
-  import emailtemplate from '@/api/emailtemplate'
+  // import emailtemplate from '@/api/emailtemplate'
   import schemamappingModel from '@/api/schemamapping'
   import modelBpmnplugin from '@/api/bpmnplugins'
   import flowz from '@/api/flowz'
@@ -66,6 +66,7 @@
       return {
         permissions: ['read', 'write'],
         loading: true,
+        processData: [],
         btnLoading: false,
         processVar: null,
         bpmnModeler: null,
@@ -100,65 +101,72 @@
         } else {
           userRolesArr = []
         }
-
+        let schema = null
+        if (data.definitions.process['_camunda:schema']) {
+          schema = data.definitions.process['_camunda:schema']
+        }
         if (data.definitions.process._name !== undefined) {
-          let flowObject = {}
-          flowObject.ProcessName = data.definitions.process._name
-          flowObject.xml = xmlData
-          flowObject.roles = userRoles
-          flowObject.json = await this.generateJson(xmlData)
+          if (schema !== undefined && schema !== null && schema !== '' && schema !== '0') {
+            let flowObject = {}
+            flowObject.ProcessName = data.definitions.process._name
+            flowObject.xml = xmlData
+            flowObject.roles = userRoles
+            flowObject.schema = schema
+            flowObject.json = await this.generateJson(xmlData)
 
-          let actions = []
-          let filteredProcesses = await _.filter(flowObject.json.processList, (o) => {
-            if (o.type !== 'start' && o.type !== 'endevent' && o.type !== 'intermediatethrowevent') {
-              return o
-            }
-            // return (o.type !== 'start' || o.type !== 'endevent' || o.type !== 'intermediatethrowevent')
-          })
-
-          for (var i = 0; i < filteredProcesses.length; i++) {
-            actions.push(filteredProcesses[i].id)
-          }
-
-          let actionsObj = {}
-          for (let i = 0; i < actions.length; i++) {
-            // let str = '\'' + actions[i] + '\':' + this.permissions
-            actionsObj[actions[i]] = this.permissions
-          }
-
-          subscriptionNew.moduleResource.moduleName = 'workflow_' + this.$route.params.id
-  
-          let registerAppModuleNew = actionsObj
-  
-          subscriptionNew.moduleResource.registerAppModule = registerAppModuleNew
-          subscriptionNew.moduleResource.appRoles = userRolesArr
-          subscriptionNew.registeredAppModulesRole()
-
-          flowObject.svg = svgData
-          // console.log('xmlData', flowObject.json)
-          flowObject.allowedusers = _.union(...(_.chain(_.union(...(_.map(flowObject.json.processList, m => {
-            return _.filter(m.configurations, f => {
-              return f.key === 'allowedusers'
+            let actions = []
+            let filteredProcesses = await _.filter(flowObject.json.processList, (o) => {
+              if (o.type !== 'start' && o.type !== 'endevent' && o.type !== 'intermediatethrowevent') {
+                return o
+              }
+              // return (o.type !== 'start' || o.type !== 'endevent' || o.type !== 'intermediatethrowevent')
             })
-          })))).map(m => {
-            return m.value.split(',')
-          }).value()))
-          let result = null
-          if (this.$route.params.id !== undefined) {
-            result = flowz.put(this.$route.params.id, flowObject)
+
+            for (var i = 0; i < filteredProcesses.length; i++) {
+              actions.push(filteredProcesses[i].id)
+            }
+
+            let actionsObj = {}
+            for (let i = 0; i < actions.length; i++) {
+              // let str = '\'' + actions[i] + '\':' + this.permissions
+              actionsObj[actions[i]] = this.permissions
+            }
+
+            subscriptionNew.moduleResource.moduleName = 'workflow_' + this.$route.params.id
+            let registerAppModuleNew = actionsObj
+            subscriptionNew.moduleResource.registerAppModule = registerAppModuleNew
+            subscriptionNew.moduleResource.appRoles = userRolesArr
+            subscriptionNew.registeredAppModulesRole()
+
+            flowObject.svg = svgData
+            // console.log('xmlData', flowObject.json)
+            // flowObject.allowedusers = _.union(...(_.chain(_.union(...(_.map(flowObject.json.processList, m => {
+            //   return _.filter(m.configurations, f => {
+            //     return f.key === 'allowedusers'
+            //   })
+            // })))).map(m => {
+            //   return m.value.split(',')
+            // }).value()))
+            let result = null
+            if (this.$route.params.id !== undefined) {
+              result = flowz.put(this.$route.params.id, flowObject)
+            } else {
+              result = flowz.post(flowObject)
+            }
+            result.then(response => {
+              this.$Notice.success({title: 'Success..!', desc: 'Flow Saved..'})
+              this.$router.push({name: 'flow/list'})
+              localStorage.removeItem('BPMNXml')
+              this.btnLoading = false
+            }).catch(error => {
+              console.log(error)
+              this.$Notice.error({title: 'Error..!', desc: 'Flow Not Saved...'})
+              this.btnLoading = false
+            })
           } else {
-            result = flowz.post(flowObject)
+            this.$Message.error('Please Add Schema for Flow !')
+            this.btnLoading = false
           }
-          result.then(response => {
-            this.$Notice.success({title: 'Success..!', desc: 'Flow Saved..'})
-            this.$router.push({name: 'flow/list'})
-            localStorage.removeItem('BPMNXml')
-            this.btnLoading = false
-          }).catch(error => {
-            console.log(error)
-            this.$Notice.error({title: 'Error..!', desc: 'Flow Not Saved...'})
-            this.btnLoading = false
-          })
         } else {
           this.$Message.error('Please Add Process name !')
           this.btnLoading = false
@@ -288,7 +296,7 @@
             return f._id === d.id
           })
           .map(async (m) => {
-            let _mapping = await self.getMapping(m, mergeModules)
+            // let _mapping = await self.getMapping(m, mergeModules)
             // console.log('m', m._isProcessTask)
             // let processTask = m._isProcessTask !== undefined ? (m._isProcessTask === 'true') : (m['_camunda:isProcessTask'] === 'true')
             // console.log('processTask', processTask)
@@ -308,8 +316,10 @@
                 mapping: (_.union(..._mapping)),
                 configurations: self.getConfigurationsProperties(m),
                 smtp: self.getSMTPProperties(m),
+                emailbutton: self.emailButton(m, jsonXML),
                 inputProperty: await self.getInputProperties(m),
                 outputProperty: await self.getOutputProperties(m)
+
               }
             } else {
               return {
@@ -322,6 +332,7 @@
                 // isProcessTask: m.workerType.toLowerCase() === 'tweet' ? 'true' : false,
                 target: m.outgoing ? self.getTargetId(m, jsonXML) : [],
                 mapping: (_.union(..._mapping)),
+                emailbutton: self.emailButton(m, jsonXML),
                 configurations: self.getConfigurationsProperties(m),
                 inputProperty: await self.getInputProperties(m),
                 outputProperty: await self.getOutputProperties(m)
@@ -344,15 +355,16 @@
             executeAny: m['_camunda:executeIfAny'] !== undefined ? ((m['_camunda:executeIfAny']) ? m['_camunda:countany'] : false) : false,
             name: m._name,
             type: 'start',
-            target: self.getTargetId(m, process),
-            mapping: [],
-            configurations: self.getConfigurationsProperties(m),
-            inputProperty: await self.getInputProperties(m),
-            outputProperty: await self.getOutputProperties(m)
+            target: self.getTargetId(m, process)
+            // mapping: [],
+            // configurations: self.getConfigurationsProperties(m),
+            // inputProperty: await self.getInputProperties(m),
+            // outputProperty: await self.getOutputProperties(m)
           }
         }).value())
       },
       getTargetId (event, process) {
+        let buttonLabel = null
         if (!_.isArray(event.outgoing)) {
           event.outgoing = [event.outgoing]
         }
@@ -362,7 +374,8 @@
           }).map((m) => {
             return {
               id: m._targetRef,
-              outputid: m.extensionElements !== undefined ? m.extensionElements.myIOMapping.mapping._producer : ''
+              outputid: m.extensionElements !== undefined ? m.extensionElements.myIOMapping.mapping._producer : '',
+              buttonLabel: buttonLabel
             }
           }).value()[0]
           // return { id: targetMap.__text }
@@ -394,6 +407,54 @@
           }
         } else {
           return null
+        }
+      },
+      emailButton (process, xml) {
+        this.processData.push({'process': process})
+        if (process['_camunda:buttonLabel'] !== undefined && process['_camunda:buttonLabel'] !== null && process['_camunda:isButton'] === 'true') {
+          return {
+            buttonLabel: process['_camunda:buttonLabel']
+          }
+        } else {
+          let flag = false
+          if ((process['_camunda:buttonLabel'] === undefined || process['_camunda:buttonLabel'] === null) && process['_camunda:isButton'] === 'true') {
+            let dummyVar = []
+            for (let i = 0; i < process.incoming.length; i++) {
+              dummyVar.push({'name': process.incoming[i].__text})
+            }
+            for (let i = 0; i < this.processData.length; i++) {
+              for (let j = 0; j < dummyVar.length; j++) {
+                if (this.processData[i].process.outgoing !== undefined) {
+                  for (let k = 0; k < this.processData[i].process.outgoing.length; k++) {
+                    if (dummyVar[j].name === this.processData[i].process.outgoing[k].__text && this.processData[i].process.workerType === 'sendproofmail') {
+                      for (let index = 0; index < xml.sequenceFlow.length; index++) {
+                        if (xml.sequenceFlow[index]._id === dummyVar[j].name) {
+                          if (xml.sequenceFlow[index]._name.length > 0) {
+                            flag = true
+                            return {
+                              buttonLabel: xml.sequenceFlow[index]._name
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            if (flag === false) {
+              if (process._name !== undefined && process._name !== null) {
+                return {
+                  buttonLabel: process._name
+                }
+              } else {
+                return {
+                  buttonLabel: process._id
+                }
+              }
+            }
+            flag = false
+          }
         }
       },
       async getInputProperties (proccess) {
@@ -533,34 +594,34 @@
             }).catch(error => {
               reject(error)
             })
-          }),
-          new Promise((resolve, reject) => {
-            approvalModel.get().then((response) => {
-              resolve(response.map(f => ({ value: f.id, name: f.proccessname })))
-            }).catch(error => {
-              reject(error)
-            })
-          }),
-          new Promise((resolve, reject) => {
-            emailtemplate.get().then((response) => {
-              resolve(response.data.data.map(f => ({ value: f.id, name: f.name })))
-            }).catch(error => {
-              reject(error)
-            })
-          }),
-          new Promise((resolve, reject) => {
-            schemamappingModel.get(null, {$paginate: false}).then((response) => {
-              resolve(response.data)
-            }).catch(error => {
-              reject(error)
-            })
           })
+          // new Promise((resolve, reject) => {
+          //   approvalModel.get().then((response) => {
+          //     resolve(response.map(f => ({ value: f.id, name: f.proccessname })))
+          //   }).catch(error => {
+          //     reject(error)
+          //   })
+          // }),
+          // new Promise((resolve, reject) => {
+          //   emailtemplate.get().then((response) => {
+          //     resolve(response.data.data.map(f => ({ value: f.id, name: f.name })))
+          //   }).catch(error => {
+          //     reject(error)
+          //   })
+          // }),
+          // new Promise((resolve, reject) => {
+          //   schemamappingModel.get(null, {$paginate: false}).then((response) => {
+          //     resolve(response.data)
+          //   }).catch(error => {
+          //     reject(error)
+          //   })
+          // })
         ]
 
         Promise.all(this.processVar).then(async (response) => {
           // response[0].splice(0, 0, { name: '---select---', value: 0 })
-          response[1].splice(0, 0, { name: '---select---', value: 0 })
-          response[2].splice(0, 0, { name: '---select---', value: 0 })
+          // response[1].splice(0, 0, { name: '---select---', value: 0 })
+          // response[2].splice(0, 0, { name: '---select---', value: 0 })
           if (this.$route.params.id !== undefined) {
             this.bpmnXML = flowz.get(this.$route.params.id).then(async (result) => {
               this.bpmnXML = result.data.xml
@@ -568,10 +629,10 @@
                 cdata: result.data,
                 id: this.$route.params.id,
                 schema: response[0],
-                approval: response[1],
-                emailtemplate: response[2],
-                schemamapping: response[3],
-                createTemplate: [],
+                // approval: response[1],
+                // emailtemplate: response[2],
+                // schemamapping: response[3],
+                // createTemplate: [],
                 AddEntity: () => {
                   this.storeXMLtolocalStorage()
                   this.$router.push('/schema/new')
@@ -579,19 +640,20 @@
                 openTemplate: () => {
                   this.storeXMLtolocalStorage()
                   this.$router.push('/schema/edit/717fde77-032f-4ac0-bebe-7f5b16a658e5')
-                },
-                openApprovalClass: () => {
-                  this.storeXMLtolocalStorage()
-                  this.$router.push('/approval')
                 }
+                // ,
+                // openApprovalClass: () => {
+                //   this.storeXMLtolocalStorage()
+                //   this.$router.push('/approval')
+                // }
               }) // Create bpmn
             })
           } else {
             await this.initBPMN({
               schema: response[0],
-              approval: response[1],
-              emailtemplate: response[2],
-              schemamapping: response[3],
+              // approval: response[1],
+              // emailtemplate: response[2],
+              // schemamapping: response[3],
               AddEntity: () => {
                 this.storeXMLtolocalStorage()
                 this.$router.push('/schema/new')
@@ -599,11 +661,12 @@
               openTemplate: (selectedEntity) => {
                 this.storeXMLtolocalStorage()
                 this.$router.push('/schema/edit/' + selectedEntity)
-              },
-              openApprovalClass: () => {
-                this.storeXMLtolocalStorage()
-                this.$router.push('/approval')
               }
+              // ,
+              // openApprovalClass: () => {
+              //   this.storeXMLtolocalStorage()
+              //   this.$router.push('/approval')
+              // }
             }) // Create bpmn
           }
           let self = this

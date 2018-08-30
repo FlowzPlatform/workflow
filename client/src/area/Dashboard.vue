@@ -2,226 +2,141 @@
   <div class="dashboard">
     Dashboard {{$store.state.role}}
     <div v-if="$store.state.role === 1">
-      <h3>Analytics</h3><Button type="primary" @click="isModel = !isModel">Configuaraion</Button>
-      <Modal
-          v-model="isModel"
-          title="Set Configurations"
-          @on-ok="ok"
-          @on-cancel="cancel">
-          <p>
-            <Table :columns="configCols" :data="configdata"></Table>
-          </p>
-      </Modal>
-      <hr>
-      <CellRender></CellRender>
-      <Table height="690" border :columns="mainColumns()" :data="tableData"></Table>
+
+      <div class="row">
+        <div class="col-md-3">
+          <div class="card-counter primary">
+            <i class="fa fa-code-fork"></i>
+            <span class="count-numbers">{{countFlowz}}</span>
+            <span class="count-name">Flowz</span>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card-counter danger">
+            <i class="fa fa-ticket"></i>
+            <span class="count-numbers">{{countInstances}}</span>
+            <span class="count-name">Instances</span>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card-counter success">
+            <i class="fa fa-database"></i>
+            <span class="count-numbers">{{countData}}</span>
+            <span class="count-name">Data</span>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card-counter info">
+            <i class="fa fa-users"></i>
+            <span class="count-numbers">{{countUsers}}</span>
+            <span class="count-name">Users</span>
+          </div>
+        </div>
+      </div>
     </div>
-    <!-- <pre>{{configuration}}</pre>
-    <hr>
-    <pre>{{anotherBinding}}</pre> -->
   </div>
 </template>
 
 <script>
-  /* eslint-disable*/
-  import flowzModal from '@/api/flowz'
-  import finstanceModal from '@/api/finstance'
-  import flowzdataModal from '@/api/flowzdata'
-  import CellRender from '@/components/cellRender'
-  import ConfigExpand from '@/components/configExpand'
-  import _ from 'lodash'
-  // console.log('CellRender: ', CellRender)
+
+import flowzModel from '../api/flowz'
+import finstanceModel from '../api/finstance'
+import flowzDataModel from '../api/flowzdata'
+
 export default {
   name: 'dashboard',
   data () {
     return {
-      tableData: [],
-      isModel: false,
-      anotherBinding: [],
-      configCols: [
-        {
-          type: 'expand',
-          key: 'columnConfigurations',
-          width: 50,
-          render: (h, params) => {
-            return h(ConfigExpand, {
-              props: {
-                  row: params.row
-              }
-            })
-          }
-        },
-        {
-          title: 'Fields',
-          key: 'title'
-        },
-        {
-          title: 'Show',
-          key: 'show',
-          render: (h, params) => {
-            return h('div', [
-              h('Checkbox', {
-                props: {
-                  value: params.row.show
-                },
-                on: {
-                  'on-change': (value) => {
-                    // console.log('show', value)
-                    this.anotherBinding[params.index].show = value
-                  }
-                }
-              })
-            ])
-          }
-        },
-        {
-          title: 'First Column',
-          key: 'firstColumn',
-          render: (h, params) => {
-            return h('div', [
-              h('Radio', {
-                props: {
-                  value: params.row.firstColumn
-                },
-                on: {
-                  'on-change': (value) => {
-                    // console.log('show', value)
-                    this.configuration.fields[params.index].firstColumn = value
-                    this.anotherBinding[params.index].firstColumn = value
-                    for (let i = 0; i < this.anotherBinding.length; i++) {
-                      if (i !== params.index) {
-                        this.configuration.fields[i].firstColumn = false
-                        this.anotherBinding[i].firstColumn = false
-                      }
-                    }
-                    console.log('this.anotherBinding: ', this.anotherBinding)
-                  }
-                }
-              })
-            ])
-          }
-        },
-        {
-          title: 'Width',
-          key: 'width',
-          render: (h, params) => {
-            return h('div', [
-              h('input', {
-                props: {
-                },
-                attrs: {
-                  class: 'form-control',
-                  type: 'number',
-                  value: params.row.width
-                },
-                on: {
-                  'keyup': (event) => {
-                    // console.log('value', event.target.value, event.keyCode)
-                    if (event.target.value && event.target.value !== null && event.keyCode === 13) {
-                      if (event.target.value <= 0) {
-                        this.anotherBinding[params.index].width = 150
-                      } else {
-                        this.anotherBinding[params.index].width = parseInt(event.target.value)
-                      }
-                    }
-                  }
-                }
-              })
-            ])
-          }
-        }
-      ],
-      configData: [],
-      configuration: {
-        dateFormate: '',
-        fields: []
-      },
-      fid: '39c53741-ec14-4ceb-a9db-97d7066cd424'
-   }
-  },
-  components: {
-    CellRender
+      countFlowz: null,
+      countInstances: null,
+      countData: null,
+      countUsers: null
+    }
   },
   methods: {
-      ok() {
-        this.$Message.success('Saved')
-        this.configuration.fields = _.cloneDeep(this.anotherBinding)
-      },
-      cancel() {
-        this.anotherBinding = _.cloneDeep(this.configuration.fields)
-      },
-      mainColumns () {
-        // console.log('mainColumns')
-        let tableCols = _.filter(this.configuration.fields, {show: true})
-        for (let item of tableCols) {
-          item.render = function (h, params) {
-            // console.log('params.column: ')
-            return h(CellRender, {
-              props: {
-                item: params
-              }
-            })
-          }
-        }
-        tableCols.splice(0, 0, {
-          title: 'instanceId',
-          key: 'id',
-          firstColumn: true,
-          width: 287,
-          fixed: 'left'
-        })
+    init () {
+      flowzModel.get(null, {})
+      .then((res) => { 
+        this.countFlowz = res.data.total 
+      })
+      
+      finstanceModel.get(null, {})
+      .then((res) => { 
+        this.countInstances = res.data.total 
+      })
 
-        // console.log('table cols: ', tableCols)
-        return tableCols
-      }
-  },
-  computed: {
-    configdata () {
-      return this.configuration.fields
+      flowzDataModel.get(null, {})
+      .then((res) => { 
+        console.log('resp data:', res)
+        this.countData = res.total 
+      })
     }
   },
   mounted () {
-    flowzModal.get(this.fid, {
-      $select: ['json']
-    }).then(res => {
-      console.log('res: ', res)
-      let cols = []
-      for (let col of res.data.json.processList) {
-        if (col.type !== 'start' && col.type !== 'endevent') {
-          cols.push({
-            title: col.name || col.id,
-            key: col.id,
-            firstColumn: false,
-            show: true,
-            width: 150
-          })
-        }
-      }
-      this.anotherBinding = _.cloneDeep(cols)
-      this.configuration.fields = _.cloneDeep(cols)
-
-      finstanceModal.get(null, {
-        fid: this.fid,
-        $paginate: false
-      }).then(resp => {
-        console.log('resp: ', resp)
-        // for (let i = 0; i < resp.data.length; i++) {
-        //   for(let j = 0; j < resp.data[i].stageReference; j++) {
-        //     let value = {
-        //       id: resp.data[i].stageReference[j].id
-        //     }
-        //     this.tableData.push(value)
-        //   }
-        // }
-        this.tableData = resp.data
-      })
-    })
+    this.init()
   }
 }
 </script>
-<style>
-  .ivu-modal-body{
-    max-height: 550px !important;
-    overflow-y: auto !important;
+<style scoped>
+  .card-counter{
+    box-shadow: 2px 2px 10px #DADADA;
+    margin: 5px;
+    padding: 20px 10px;
+    background-color: #fff;
+    height: 100px;
+    border-radius: 5px;
+    transition: .3s linear all;
   }
-</style>  
+
+  .card-counter:hover{
+    box-shadow: 4px 4px 20px #DADADA;
+    transition: .3s linear all;
+  }
+
+  .card-counter.primary{
+    background-color: #007bff;
+    color: #FFF;
+  }
+
+  .card-counter.danger{
+    background-color: #ef5350;
+    color: #FFF;
+  }  
+
+  .card-counter.success{
+    background-color: #66bb6a;
+    color: #FFF;
+  }  
+
+  .card-counter.info{
+    background-color: #26c6da;
+    color: #FFF;
+  }  
+
+  .card-counter i{
+    font-size: 5em;
+    opacity: 0.2;
+  }
+
+  .card-counter .count-numbers{
+    position: absolute;
+    right: 35px;
+    top: 20px;
+    font-size: 32px;
+    display: block;
+  }
+
+  .card-counter .count-name{
+    position: absolute;
+    right: 35px;
+    top: 65px;
+    font-style: italic;
+    text-transform: capitalize;
+    opacity: 0.5;
+    display: block;
+    font-size: 18px;
+  }
+</style> 

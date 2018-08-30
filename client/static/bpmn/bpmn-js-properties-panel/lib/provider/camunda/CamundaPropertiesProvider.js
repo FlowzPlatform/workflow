@@ -23,6 +23,7 @@ var serviceTaskDelegateProps = require('./parts/ServiceTaskDelegateProps'),
   formProps = require('./parts/FormProps'),
   myInputProps = require('./parts/MyInputProps'),
   myPropertiesIOProps = require('./parts/myPropertiesIOProps'),
+  schemaProps = require('./parts/schemaProps'),
   myOutputProps = require('./parts/myOutputProps'),
   myConfigProps = require('./parts/MyConfigProps'),
   mySMTPProps = require('./parts/MySMTPProps'),
@@ -104,7 +105,7 @@ var getListenerLabel = function (param, translate) {
   return '';
 };
 
-function createGeneralTabGroups(element, bpmnFactory, elementRegistry, elementTemplates, translate) {
+function createGeneralTabGroups(element, bpmnFactory, elementRegistry, elementTemplates, translate, options) {
   var generalGroup = {
     id: 'general',
     label: translate('General'),
@@ -112,6 +113,7 @@ function createGeneralTabGroups(element, bpmnFactory, elementRegistry, elementTe
   };
   idProps(generalGroup, element, translate);
   nameProps(generalGroup, element, translate);
+  schemaProps(generalGroup, element, bpmnFactory, translate, options);
   capacityProps(generalGroup, element, translate);
   processProps(generalGroup, element, translate);
   versionTag(generalGroup, element, translate);
@@ -441,12 +443,18 @@ function CamundaPropertiesProvider(eventBus, bpmnFactory, elementRegistry, eleme
   };
   PropertiesActivator.call(this, eventBus);
   this.getTabs = function (element, data) {
+    // console.log('CamundaPropertiesProvider-------', data)
     var generalTab = {
       id: 'general',
       label: translate('General'),
       groups: createGeneralTabGroups(
-        element, bpmnFactory,
-        elementRegistry, elementTemplates, translate)
+        element,
+        bpmnFactory,
+        elementRegistry,
+        elementTemplates,
+        translate,
+        data
+      )
     };
     // var roles = {
     //   id: 'Roles',

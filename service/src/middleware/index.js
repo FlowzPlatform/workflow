@@ -15,7 +15,7 @@ module.exports = function () {
     'flowz': ['create','update', 'patch'],
     'finstance': ['create','update'],
     'flowzdata': ['update', 'patch'],
-    'schema': ['create','update', 'patch', 'find', 'get', 'remove']
+    'schema': ['create','update', 'patch', 'remove']
   };
 
   subscription.moduleResource.registerAppModule = registerAppModule;

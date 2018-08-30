@@ -63,6 +63,9 @@
                       <span style="float:right;">
                         <Badge :count="subItem.count"  class-name="demo-badge-alone"></Badge>
                       </span>
+                      <span v-if="subItem.isfirst" style="float:right;padding-right:5px;" title="Create Instance" @click.prevent="createInstance(item, subItem.id)">
+                        <i class="fa fa-plus"></i>
+                      </span>
                     <!-- </a> -->
                   </div>
                 </Menu-item>
@@ -96,16 +99,27 @@ export default {
     // console.log('this.$store.state.activeFlow', this.$store.state.activeFlow)
   },
   methods: {
-    createInstance (item) {
+    createInstance (item, subItemID) {
       // console.log('item', item)
       this.$Loading.start()
-      finstanceModal.post({fid: item.id}).then(res => {
+      let fheaders = null
+      if (subItemID !== undefined) {
+        fheaders = {
+          workflowid: 'workflow_' + item.id,
+          stateid: subItemID
+        }
+      }
+      finstanceModal.post({fid: item.id}, null, fheaders).then(res => {
         this.$Notice.success({title: 'Instance Generated'})
         this.$Loading.finish()
       }).catch(e => {
         this.$Loading.error()
-        console.log('error', e)
-        this.$Notice.error({title: 'Error', desc: 'Instace Not Generated'})
+        console.log('error', e.response)
+        if (e.response.data.message) {
+          this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+        } else {
+          this.$Notice.error({title: 'Error', desc: 'Instace Not Generated'})
+        }
       })
     },
     viewProgress (item) {
@@ -253,7 +267,16 @@ export default {
                   }
                 }
               }
-            } else {
+            }
+            let firstTarget = _.find(item.json.processList, {type: 'start'})
+            if (firstTarget !== null && firstTarget !== undefined && Object.keys(firstTarget).length > 0) {
+              let nextTId = firstTarget.target[0].id
+              _.map(item.json.processList, (m) => {
+                if (m.id === nextTId) {
+                  m.isfirst = true
+                }
+                return m
+              })
             }
             _.remove(item.json.processList, (m) => {
               if (!m.hasOwnProperty('permission')) {

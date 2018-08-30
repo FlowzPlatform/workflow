@@ -239,8 +239,12 @@
 			</div>
 
 		</template> -->
+    <!-- <Spin v-if="loadingEmail"></Spin> -->
+    <div v-if="schemabinding">
+      <schemasubformview ref="schemasubformview" :schemainstance="formSchemaInstance" id="schemasubformview"></schemasubformview>
+    </div>
     <div v-if="email">
-      <email :btnArr="btnArr" :iid="item.id" v-on:on-done="emailService"></email>
+      <email :btnArr="btnArr" :sendDataEmail="sendDataEmail" :iid="item.id" v-on:on-done="emailService"></email>
     </div>
   </div>
 </template>
@@ -252,6 +256,7 @@ import axios from 'axios'
 
 import ListInstances from './ListInstances'
 import SchemaSubForm from './SchemaSubForm'
+import SchemaSubFormView from './SchemaSubFormView'
 import email from './email'
 
 import flowzdataModal from '@/api/flowzdata'
@@ -284,6 +289,8 @@ export default {
   },
   data () {
     return {
+      htmlcontent: false,
+      schemabinding: false,
       flowzData: null,
       email: false,
       loading: false,
@@ -319,14 +326,17 @@ export default {
       dynamicData: true,
       instanceEntries: null,
       isEmailDone: false,
-      itsFirstState: false
+      itsFirstState: false,
+      sendDataEmail: null,
+      loadingEmail: true
     }
   },
   components: {
     'list-instances': ListInstances,
     'schemasubform': SchemaSubForm,
     'schemalist': schemalist,
-    'email' : email
+    'email' : email,
+    'schemasubformview': SchemaSubFormView
   },
   methods: {
     async emailService (item) {
@@ -403,7 +413,10 @@ export default {
       // alert('entity')
       var self = this
       var res = []
-      var _res = await axios.get('https://api.flowzcluster.tk/eng/schema/' + id).catch(function (error) { console.log(error) })
+      // var _res = await axios.get('https://api.flowzcluster.tk/eng/schema/' + id).catch(function (error) { console.log(error) })
+      let _res = await schemaModel.get(id).catch(err => {
+        console.log('err', err)
+      })
       for (let [index, entity] of _res.data.entity.entries()) {
         if (entity.customtype) {
           _res.data.entity[index]['entity'] = await self.getChildEntity(entity.type)
@@ -417,7 +430,12 @@ export default {
       this.$Loading.start()
       const self = this
       // const result = await Schema.getAll(id)
-      var response = await axios.get('https://api.flowzcluster.tk/eng/schema/' + id).catch(function (error) { console.log(error) })
+      // var response = await axios.get('https://api.flowzcluster.tk/eng/schema/' + id).catch(function (error) { console.log(error) })
+      // console.log('...........', id)
+      let response = await schemaModel.get(id).catch(error => {
+        console.log(error)
+      })
+      // console.log('response', response)
       // this.formTitle = response.data.title
       // if (this.lastLog === undefined) {
       this.formSchemaInstance.data = []
@@ -635,12 +653,16 @@ export default {
         }
         if (nextTargetId.type === 'sendproofmail') {
           this.id = null
-          this.email = true
+          this.schemabinding = true
+          setTimeout(() => {
+            this.sendDataEmail = '<link rel="stylesheet" href="https://unpkg.com/iview@3.0.1/dist/styles/iview.css">' + ' <style> .ui-card{background-color: #fff; box-shadow: 0px 0px 25px #dadada; border-radius: 10px; padding: 10px 20px;}.card-title{text-transform: capitalize; color: #FFF; font-size: 18px; background-color: #292929; padding: 10px 30px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; margin-left: -20px; margin-bottom: 10px;}.btnAdd{background-color: #53CAE8; border-radius: 50px; font-size: 14px; text-transform: uppercase; color: #fff; border: none; font-style: italic;}.btnAdd:hover{background-color: #83d5ea; color: #fff;}.btnDelete{font-size: 14px; border-radius: 50px; color: #fff !important; position: absolute; bottom: 10px; right: 10px; background-color: #FF0000; width: 20px; height: 20px;}.btnDelete i{position: absolute; top: 4px; left: 5px;}.field-label{text-transform: capitalize;}.formTitle{text-transform: capitalize;}.jumper-links{list-style: none; font-size: 14px;}.jumper-links a{text-decoration: none; /*color: #53cae8;*/ text-align: left; font-weight: bold; text-transform: capitalize;}.fixed-div{position: fixed; right: 0;}.ivu-form-item-content{/*line-height: 15px !important;*/} </style>' + this.$refs.schemasubformview.$el.outerHTML
+            this.email = true
+          }, 1000)
           if (nextTargetId.target.length > 1) {
             let arr = {}
             for (let index = 0; index < nextTargetId.target.length; index++) {
               let target = _.find(this.flowData.json.processList, {'id': nextTargetId.target[index].id})
-              arr[target.name] = target.id
+              arr[target.emailbutton.buttonLabel] = target.id
             }
             this.btnArr = arr
           } else {
@@ -877,6 +899,8 @@ export default {
     },
 
     async init () {
+      this.email = false
+      this.htmlcontent = false
       this.id = null
       this.$Spin.show()
 
@@ -887,7 +911,7 @@ export default {
       }
 
       await flowzModel.get(this.$route.params.id, {
-        $select: ['json']
+        $select: ['json', 'schema']
       }).then(async res => {
         this.flowzData = res.data
         // if (this.$route.params.stateid) {
@@ -933,15 +957,13 @@ export default {
     }
   },
   mounted () {
-    // console.log('DeepRecord: ', DeepRecord)
-    // console.log('ROuter params: ', this.$route.params)
     flowzModel.get(null, {
       id: this.$route.params.id
     })
     .then( (res) => {
-      // console.log('res flowz get call: ', res.data.data[0].json.processList)
+      // console.log('res flowz get call: ', res.data.data[0])
       let taskData = _.find(res.data.data[0].json.processList, (o) => { return o.id == this.$route.params.stateid})
-      let inputschemaId = taskData.inputProperty[0].entityschema.id
+      let inputschemaId = res.data.data[0].schema
       schemaModel.getAll(inputschemaId).then(res => {
         this.dataSchema = res
         // console.log('Res:: ', res)
@@ -1105,5 +1127,9 @@ export default {
   .ivu-modal-body{
     max-height: 550px !important;
     overflow-y: auto !important;
+  }
+
+  #schemasubformview{
+    display: none;
   }
 </style>
