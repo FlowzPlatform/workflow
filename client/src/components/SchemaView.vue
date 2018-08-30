@@ -244,7 +244,6 @@
       <schemasubformview ref="schemasubformview" :schemainstance="formSchemaInstance" id="schemasubformview"></schemasubformview>
     </div>
     <div v-if="email">
-      <h3>Data: </h3>
       <email :btnArr="btnArr" :sendDataEmail="sendDataEmail" :iid="item.id" v-on:on-done="emailService"></email>
     </div>
   </div>
@@ -663,7 +662,7 @@ export default {
             let arr = {}
             for (let index = 0; index < nextTargetId.target.length; index++) {
               let target = _.find(this.flowData.json.processList, {'id': nextTargetId.target[index].id})
-              arr[target.name] = target.id
+              arr[target.emailbutton.buttonLabel] = target.id
             }
             this.btnArr = arr
           } else {

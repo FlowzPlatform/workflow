@@ -751,10 +751,10 @@ export default {
       this.permissionsModal = true
     },
     ok () {
-      this.$Message.info('Clicked ok')
+      // this.$Message.info('Clicked ok')
     },
     cancel () {
-      this.$Message.info('Clicked cancel')
+      // this.$Message.info('Clicked cancel')
     },
     handleAssign (value) {
       this.value2 = value
