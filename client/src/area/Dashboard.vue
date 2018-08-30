@@ -45,11 +45,10 @@
 </template>
 
 <script>
-
+/*eslint-disable*/
 import flowzModel from '../api/flowz'
 import finstanceModel from '../api/finstance'
 import flowzDataModel from '../api/flowzdata'
-
 export default {
   name: 'dashboard',
   data () {
