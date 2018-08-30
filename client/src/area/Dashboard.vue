@@ -2,6 +2,7 @@
   <div class="dashboard">
     Dashboard {{$store.state.role}}
     <div v-if="$store.state.role === 1">
+
       <div class="row">
         <div class="col-md-3">
           <div class="card-counter primary">
@@ -44,11 +45,10 @@
 </template>
 
 <script>
-/* eslint-disable */
+/*eslint-disable*/
 import flowzModel from '../api/flowz'
 import finstanceModel from '../api/finstance'
 import flowzDataModel from '../api/flowzdata'
-// import CanvasJS from 'canvasjs'
 export default {
   name: 'dashboard',
   data () {
