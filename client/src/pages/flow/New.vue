@@ -363,7 +363,6 @@
         }).value())
       },
       getTargetId (event, process) {
-        let buttonLabel = null
         if (!_.isArray(event.outgoing)) {
           event.outgoing = [event.outgoing]
         }
@@ -373,8 +372,7 @@
           }).map((m) => {
             return {
               id: m._targetRef,
-              outputid: m.extensionElements !== undefined ? m.extensionElements.myIOMapping.mapping._producer : '',
-              buttonLabel: buttonLabel
+              outputid: m.extensionElements !== undefined ? m.extensionElements.myIOMapping.mapping._producer : ''
             }
           }).value()[0]
           // return { id: targetMap.__text }
