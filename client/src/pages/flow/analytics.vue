@@ -183,7 +183,7 @@ export default {
         }
       }
       tableCols.splice(0, 0, {
-        title: 'instanceId',
+        title: 'Instance Id',
         key: 'id',
         firstColumn: true,
         width: 270,

@@ -65,6 +65,7 @@
         v-model="dataModal"
         title="Data"
         @on-ok="ok"
+        width="1000"
         @on-cancel="cancel">
         <!-- <small>{{loadingText}}</small> -->
         <div v-if="currentPopTipData != null">
@@ -235,6 +236,7 @@ export default {
   min-height: 3px;
   background-color: #00FF00;
   margin-top: 2px;
+  margin-left: 11px;
 }
 
 .pendingTask{
@@ -242,7 +244,7 @@ export default {
   position: relative;
   min-width: 100%;
   min-height: 3px;
-  background-color: #EEEEEE;
+  background-color: #DADADA;
   margin-top: 2px; 
 }
 
