@@ -662,7 +662,9 @@ export default {
             let arr = {}
             for (let index = 0; index < nextTargetId.target.length; index++) {
               let target = _.find(this.flowData.json.processList, {'id': nextTargetId.target[index].id})
-              arr[target.emailbutton.buttonLabel] = target.id
+              if (target.hasOwnProperty('emailbutton')) {
+                arr[target.emailbutton.buttonLabel] = target.id
+              }
             }
             this.btnArr = arr
           } else {
