@@ -48,23 +48,49 @@
                             </div>
                         <!-- </div>
                     </div> -->
-                    <div :span="24" style="padding:0px 20px 0px 2px" v-else>
-                        <div :key="inx" style="margin-bottom:10px;">
+                    <div v-else style="display: block; width: 49%; margin-top: 5px;">
+                        <div :key="inx">
                             <div>
-                                <div :span="2">
-                                    <!-- <b>{{field.name}}</b> -->
+                                <div style="display: block; width: 49%;">
+                                    <b>{{field.name}}</b>
                                 </div>
-                                <div :span="22">
-                                    <label class="form-control" type="file" v-if="field.type == 'file'" @change="handleFileChange($event, index, field.name)" :multiple="(field.property.isMultiple)? field.property.isMultiple: false" />
-                                    <div v-if="schemainstance.data[index][field.name + 'List']">
-                                        <div class="list-group" v-for="val in schemainstance.data[index][field.name + 'List']" style="margin-bottom:0px;">
-                                            <a :href="val" class="list-group-item" target="_blank" style="color:blue;padding:2px 15px;">{{val}}</a>
+                                <div style="display: block; width: 49%;">
+                                    <label type="file" v-if="field.type == 'file'"/>
+                                    <!-- <div v-if="schemainstance.data[index][field.name]"> -->
+                                      <div v-for="val in schemainstance.data[index][field.name]">
+                                          <ul>
+                                            <li>
+                                              <a :href="val" target="_blank" style="color:black;padding:2px">{{val}}</a>
+                                            </li>
+                                          </ul>
+                                      </div>
+                                    <!-- </div> -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- <div v-else >
+                        <div :key="inx">
+                            <div>
+                                <div >
+                                    <b>{{field.name}}</b>
+                                </div>
+                                <div>
+                                    <label type="file" v-if="field.type == 'file'"/>
+                                    <div v-if="schemainstance.data[index][field.name]">
+                                      {{schemainstance.data[index][field.name]}}
+                                      <div v-for="val in schemainstance.data[index][field.name]">
+                                            <ul>
+                                              <li>
+                                                <a :href="val" target="_blank" style="color:blue;padding:2px 15px;">{{val}}</a>
+                                              </li>
+                                            </ul>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                 </template>
             </div>
         </div>
@@ -78,7 +104,7 @@
 // import $ from 'jquery'
 import SchemaSubFormView from './SchemaSubFormView'
 import axios from 'axios'
-import moment from 'moment'
+// import moment from 'moment'
 
 var AWS = require('aws-sdk')
 AWS.config.update({
@@ -101,35 +127,37 @@ export default {
     getStyle (field) {
       if (field.customtype) {
         return 'display: inline-block; width: 97%; margin-top: 20px; background-color: rgba(0,0,0,0.2)'
+      } else if (field.type === 'file') {
+        return 'display: block; width: 97%; margin-top: 20px;'
       } else {
         return 'display: inline-block; width: 49%; margin-top: 20px;'
       }
     },
-    handleFileChange (e, index, fieldName) {
-      let self = this
-      var files = e.target.files || e.dataTransfer.files
-      let allFiles = []
-      if (files.length > 0) {
-        // console.log('files', files[0])
-        for (let i = 0; i < files.length; i++) {
-          let bucket = new AWS.S3({ params: { Bucket: 'airflowbucket1/obexpense/expenses' } })
-          var params = {
-            Key: moment().valueOf().toString() + i + files[i].name,
-            ContentType: files[i].type,
-            Body: files[i]
-          }
-          bucket.upload(params).on('httpUploadProgress', function (evt) {
-          }).send(function (err, data) {
-            if (err) {
-              alert(err)
-            } else {
-              allFiles.push(data.Location)
-            }
-          })
-        }
-      }
-      self.schemainstance.data[index][fieldName] = allFiles
-    },
+    // handleFileChange (e, index, fieldName) {
+    //   let self = this
+    //   var files = e.target.files || e.dataTransfer.files
+    //   let allFiles = []
+    //   if (files.length > 0) {
+    //     // console.log('files', files[0])
+    //     for (let i = 0; i < files.length; i++) {
+    //       let bucket = new AWS.S3({ params: { Bucket: 'airflowbucket1/obexpense/expenses' } })
+    //       var params = {
+    //         Key: moment().valueOf().toString() + i + files[i].name,
+    //         ContentType: files[i].type,
+    //         Body: files[i]
+    //       }
+    //       bucket.upload(params).on('httpUploadProgress', function (evt) {
+    //       }).send(function (err, data) {
+    //         if (err) {
+    //           alert(err)
+    //         } else {
+    //           allFiles.push(data.Location)
+    //         }
+    //       })
+    //     }
+    //   }
+    //   self.schemainstance.data[index][fieldName] = allFiles
+    // },
     async getChildData (id) {
       // alert(id)
       var arrObj = []
