@@ -8,222 +8,279 @@
         <div class="legend card">
           <!-- <strong>Legend</strong> -->
           <ul>
-              <li><strong>Legend:</strong></li>
-              <li><span style="background-color:#00FF00"></span>Completed</li>
-              <li><span style="background-color:#FF0000"></span>Current</li>
-              <li><span style="background-color:#EEEEEE"></span>Pending</li>
-              <!-- <li><span style="background-color:#1F6980"></span>Zone 4 - Thursday</li> -->
-              <!-- <li><span style="background-color:#AB156A"></span>Zone 5 - Friday</li> -->
-              </ul>
+            <li><strong>Legend:</strong></li>
+            <li><span style="background-color:#00FF00"></span>Completed</li>
+            <li><span style="background-color:#FF0000"></span>Current</li>
+            <li><span style="background-color:#EEEEEE"></span>Pending</li>
+            <!-- <li><span style="background-color:#1F6980"></span>Zone 4 - Thursday</li> -->
+            <!-- <li><span style="background-color:#AB156A"></span>Zone 5 - Friday</li> -->
+          </ul>
+
+          <!-- <Button class="settingsBtn" icon="ios-settings"></Button> -->
+          <Tooltip class="settingsBtn" content="Settings">
+            <Button @click="isModel = !isModel"><i class="fa fa-cog"></i></Button>
+          </Tooltip>
+
        </div>
       </div>
     </div>
 
-    <div>
-      <table class="table table-bordered table-hover">
-        <thead>
-          <tr>
-            <th>Instance</th>
-            <th v-for="(items, index) in tableHeaders" v-if="items.type != 'start' && items.type != 'endevent' && items.type != 'intermediatethrowevent'">
-              <span>{{items.name}}</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(items, index) in tableData">
-            <td>
-              {{items.id}}
-              <span class="label label-info" style="float: right;" v-if="items.mainStatus == 'inprocess'">{{titleCase(items.mainStatus)}}</span>
-              <span class="label label-success" style="float: right;" v-if="items.mainStatus == 'completed'">{{titleCase(items.mainStatus)}}</span>
-            </td>
-            <!-- <td v-for="(headerItem, headerIndex) in tableHeaders" v-if="headerItem.type != 'start' && headerItem.type != 'endevent' && headerItem.type != 'intermediatethrowevent'" :class="{ redCell : (items.currentStatus == headerItem.id) }"> -->
-              <!-- <span v-if="items.currentStatus == headerItem.id"><span class="currentTask"></span></span> -->
-              <!-- <span>{{headerItem.id}}</span> -->
-              <td v-for="(headerItem, headerIndex) in tableHeaders" v-if="headerItem.type != 'start' && headerItem.type != 'endevent' && headerItem.type != 'intermediatethrowevent'">
-                <span :class="classObject(items, headerItem.id)"></span>    
-                <!-- <span v-if="items.currentStatus == headerItem.id" class="currentTask"></span> -->
-                <!-- <span v-else class="pendingTask"></span> -->
-                <!-- <span v-for="(task, index) in items.stageReference"> -->
-                  <!-- <span v-if="task.StageName == headerItem.id" class="completedTask"></span> -->
-                <!-- </span> -->
-                <!-- <span v-if="items.stageReference.length == 0 && items.currentStatus != headerItem.id" class="pendingTask"></span> -->
-              </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <!-- Configurations Modal -->
+    <Modal
+        v-model="isModel"
+        title="Set Configurations"
+        @on-ok="ok"
+        @on-cancel="cancel">
+        <p>
+          <Table :columns="configCols" :data="configdata"></Table>
+        </p>
+    </Modal>
+
+    <!-- Main Table -->
+    <Table height="690" border :columns="mainColumns()" :data="tableData"></Table>
+
   </div>
 </template>
 
 <script>
-// import axios from 'axios'
-import flowzModel from '@/api/flowz'
-import finstanceModel from '@/api/finstance'
-// import $ from 'jquery'
+import flowzModal from '@/api/flowz'
+import finstanceModal from '@/api/finstance'
+import CellRender from '@/components/cellRender'
+import ConfigExpand from '@/components/configExpand'
 import _ from 'lodash'
 
 export default {
-  name: 'Analytics',
-  props: {
-    options: {
-      type: Object
-    }
-  },
+  name: 'dashboard',
   data () {
     return {
-      id: null,
       flowName: null,
       tableData: [],
-      tableHeaders: [],
-      currentFlowzJson: null
+      isModel: false,
+      anotherBinding: [],
+      configCols: [
+        {
+          type: 'expand',
+          key: 'columnConfigurations',
+          width: 50,
+          render: (h, params) => {
+            return h(ConfigExpand, {
+              props: {
+                row: params.row
+              }
+            })
+          }
+        },
+        {
+          title: 'Fields',
+          key: 'title'
+        },
+        {
+          title: 'Show',
+          key: 'show',
+          render: (h, params) => {
+            return h('div', [
+              h('Checkbox', {
+                props: {
+                  value: params.row.show
+                },
+                on: {
+                  'on-change': (value) => {
+                    // console.log('show', value)
+                    this.anotherBinding[params.index].show = value
+                  }
+                }
+              })
+            ])
+          }
+        },
+        {
+          title: 'First Column',
+          key: 'firstColumn',
+          render: (h, params) => {
+            return h('div', [
+              h('Radio', {
+                props: {
+                  value: params.row.firstColumn
+                },
+                on: {
+                  'on-change': (value) => {
+                    // console.log('show', value)
+                    this.configuration.fields[params.index].firstColumn = value
+                    this.anotherBinding[params.index].firstColumn = value
+                    for (let i = 0; i < this.anotherBinding.length; i++) {
+                      if (i !== params.index) {
+                        this.configuration.fields[i].firstColumn = false
+                        this.anotherBinding[i].firstColumn = false
+                      }
+                    }
+                    console.log('this.anotherBinding: ', this.anotherBinding)
+                  }
+                }
+              })
+            ])
+          }
+        },
+        {
+          title: 'Width',
+          key: 'width',
+          render: (h, params) => {
+            return h('div', [
+              h('input', {
+                props: {
+                },
+                attrs: {
+                  class: 'form-control',
+                  type: 'number',
+                  value: params.row.width
+                },
+                on: {
+                  'keyup': (event) => {
+                    // console.log('value', event.target.value, event.keyCode)
+                    if (event.target.value && event.target.value !== null && event.keyCode === 13) {
+                      if (event.target.value <= 0) {
+                        this.anotherBinding[params.index].width = 150
+                      } else {
+                        this.anotherBinding[params.index].width = parseInt(event.target.value)
+                      }
+                    }
+                  }
+                }
+              })
+            ])
+          }
+        }
+      ],
+      configData: [],
+      configuration: {
+        dateFormate: '',
+        fields: []
+      },
+      fid: '39c53741-ec14-4ceb-a9db-97d7066cd424'
     }
   },
-  component: {
+  components: {
+    CellRender
   },
   methods: {
-    titleCase: function (str) {
-      return str.replace(/\w+/g, function (txt) {
-        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
-      })
+    ok () {
+      this.$Message.success('Saved')
+      this.configuration.fields = _.cloneDeep(this.anotherBinding)
     },
-    classObject (items, type) {
-      if (type === items.currentStatus) {
-        return { 'currentTask': true }
-      } else if (_.findIndex(items.stageReference, {StageName: type}) !== -1) {
-        return { 'completedTask': true }
-      } else {
-        return { 'pendingTask': true }
+    cancel () {
+      this.anotherBinding = _.cloneDeep(this.configuration.fields)
+    },
+    mainColumns () {
+        // console.log('mainColumns')
+      let tableCols = _.filter(this.configuration.fields, {show: true})
+      for (let item of tableCols) {
+        item.render = function (h, params) {
+            // console.log('params.column: ')
+          return h(CellRender, {
+            props: {
+              item: params
+            }
+          })
+        }
       }
-    },
-    async init () {
-      // this.$Spin.show({
-      //   render: (h) => {
-      //     return h('div', [
-      //       h('Icon', {
-      //         'class': 'demo-spin-icon-load',
-      //         props: {
-      //           type: 'ios-loading',
-      //           size: 18
-      //         }
-      //       }),
-      //       h('div', 'Loading')
-      //     ])
-      //   }
-      // })
-      this.$Spin.show()
-      this.id = this.$route.params.id
-      await flowzModel.get(null, {
-        id: this.id,
-        $paginate: false
-      }).then(res => {
-        this.flowName = res.data[0].ProcessName
-        this.currentFlowzJson = res.data[0].json
-        this.tableHeaders = this.currentFlowzJson.processList
-      }).catch(err => {
-        console.error('Error: ', err)
+      tableCols.splice(0, 0, {
+        title: 'Instance Id',
+        key: 'id',
+        firstColumn: true,
+        width: 270,
+        fixed: 'left',
+        render: (h, params) => {
+          if (params.row.mainStatus === 'inprocess') {
+            return h('div', [
+              h('span', params.row.id),
+              h('span', {
+                props: {
+                },
+                attrs: {
+                  class: 'inprocessTask',
+                  title: 'In Process'
+                }
+              })
+            ])
+          } else if (params.row.mainStatus === 'completed') {
+            return h('div', [
+              h('span', params.row.id),
+              h('span', {
+                props: {
+                },
+                attrs: {
+                  class: 'completedTask',
+                  title: 'Completed'
+                }
+              })
+            ])
+          } else {
+            return h('div', [
+              h('span', params.row.id),
+              h('span', {
+                props: {
+                },
+                attrs: {
+                  class: 'otherTask',
+                  title: 'Other'
+                }
+              })
+            ])
+          }
+        }
       })
 
-      // get all instances of selected flow
-      await finstanceModel.get(null, {
-        fid: this.id,
-        $paginate: false
-      }).then(response => {
-        this.tableData = response.data
-        // for (let i = 0; i < response.data.data.length; i++) {
-        //   let instances = {
-        //     instance: response.data.data[i].fid
-        //   }
-        //   this.tableData.push(instances)
-
-        //   this.tableHeaders = response.data.data[i].processList
-        // }
-        // console.log('tableData: ', this.tableData)
-      }).catch(err => {
-        this.$Notice({duration: '3', title: 'Network Error', desc: ''})
-        console.error(err)
-      })
-      this.$Spin.hide()
-      // console.log('table data: ', JSON.stringify(this.tableData))
-      // console.log('table headers: ', JSON.stringify(this.tableHeaders))
-      // $('.redCell').prevUntil('tr').addClass('greenCell')
-      // $('.redCell').nextUntil('tr').addClass('grayCell')
+        // console.log('table cols: ', tableCols)
+      return tableCols
+    }
+  },
+  computed: {
+    configdata () {
+      return this.configuration.fields
     }
   },
   mounted () {
-    this.init()
-  },
-  watch: {
-    '$route.params.id': function (newValue, oldValue) {
-      this.init()
-    }
+    this.$Spin.show()
+    this.fid = this.$route.params.id
+    flowzModal.get(this.fid, {
+      $select: ['json'],
+      $paginate: false
+    }).then(res => {
+      console.log('res: ', res)
+      this.flowName = res.data.json.name
+      let cols = []
+      for (let col of res.data.json.processList) {
+        if (col.type !== 'start' && col.type !== 'endevent') {
+          cols.push({
+            title: col.name || col.id,
+            key: col.id,
+            firstColumn: false,
+            show: true,
+            width: 150
+          })
+        }
+      }
+      this.anotherBinding = _.cloneDeep(cols)
+      this.configuration.fields = _.cloneDeep(cols)
+
+      finstanceModal.get(null, {
+        fid: this.fid,
+        $paginate: false
+      }).then(resp => {
+        // console.log('resp: ', resp)
+        this.tableData = resp.data
+        this.$Spin.hide()
+      }).catch(err => {
+        console.log('Error: ', err)
+        this.$Spin.hide()
+      })
+    }).catch(err => {
+      console.log('Error: ', err)
+      this.$Spin.hide()
+    })
   }
 }
-
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-  .currentTask{
-    display: block;
-    position: relative;
-    min-width: 100%;
-    min-height: 3px;
-    background-color: #FF0000;
-    margin-top: 2px;
-  }
-
-  .completedTask{
-    display: block;
-    position: relative;
-    min-width: 100%;
-    min-height: 3px;
-    background-color: #00FF00;
-    margin-top: 2px;
-  }
-
-  .pendingTask{
-    display: block;
-    position: relative;
-    min-width: 100%;
-    min-height: 3px;
-    background-color: #EEEEEE;
-    margin-top: 2px; 
-  }
-
-  .grayCell {
-    background-color: #eee;
-  }
-
-  .redCell {
-    background-color: #FF8791
-  }
-
-  .greenCell {
-    background-color: #93DE87;
-  }
-
-  tbody tr td:first-child {
-    background-color: transparent;
-    width: 350px;
-  }
-
-  .label{
-    font-size: 12px;
-  }
-  thead tr{
-    background-color: #292929;
-    color: #FFF;
-  }
-
-  table{
-    box-shadow: 2px 2px 10px #dadada;
-    background-color: #fff;
-    max-height: 80vh;
-    overflow-y: auto;
-    /*margin: 10px 0;*/
-    /*padding: 20px;*/
-  }
-
   .card{
     box-shadow: 2px 2px 10px #dadada;
     background-color: #fff;
@@ -263,9 +320,47 @@ export default {
     /*margin-top: -3px;*/
     padding-top: 10px; 
   }
+  .settingsBtn {
+    position: absolute;
+    right: 20px;
+    top: 14px;
+  }
+
+  
 </style>
 <style>
-  .demo-spin-icon-load{
-    animation: ani-demo-spin 1s linear infinite;
+  .ivu-modal-body{
+    max-height: 550px !important;
+    overflow-y: auto !important;
   }
-</style>
+
+  .inprocessTask{
+    position: absolute;
+    right: 10px;
+    margin-top: 5px;
+    min-width: 10px;
+    min-height: 10px;
+    background-color: #0000FF;
+    border-radius: 10px; 
+  }
+
+  .completedTask{
+    position: absolute;
+    right: 10px;
+    margin-top: 5px;
+    min-width: 10px;
+    min-height: 10px;
+    background-color: #00FF00;
+    border-radius: 10px; 
+  }
+
+  .otherTask{
+    position: absolute;
+    right: 10px;
+    margin-top: 5px;
+    min-width: 10px;
+    min-height: 10px;
+    background-color: #FF0000;
+    border-radius: 10px; 
+  }
+</style>  

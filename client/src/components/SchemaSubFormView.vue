@@ -1,70 +1,74 @@
 <template>
-  <div class="SchemaSubFormView">
-  	<div v-for="(item, index) in schemainstance.data" :key="index">
-      <Form ref="formSchema" :model="schemainstance" style="padding: 5px 0">
-        <Row class="ui-card">
-            <div v-for="(field,inx) in schemainstance.entity">
+  <div>
+  	<div style="display: block; width: 97%; box-shadow: 2px 2px 15px #DADADA; padding: 20px 10px; margin: 0px 0px; background-color: #FFF; border: 1px solid #CCC; border-radius: 5px;" v-for="(item, index) in schemainstance.data" :key="index">
+      <div ref="formSchema" :model="schemainstance">
+        <div >
+            <div v-for="(field,inx) in schemainstance.entity" :style="getStyle(field)">
                 <template v-if="field.customtype">
-                    <Col :span="24" style="margin-bottom: 20px;" :id="field.name">
-                        <FormItem :key="inx" style="margin-bottom:10px;">
-                            <Row style="font-size:16px">
-                                <span class="card-title">{{field.name}}</span>
-                            </Row>
-                            <Row v-if="field.property.IsArray">
+                    <div :id="field.name" style="display: block; width: 97%; margin-top: 20px;">
+                        <div :key="inx">
+                            <div>
+                                <span style="text-transform: capitalize;color: #FFF;font-size: 18px;background-color: #292929;padding: 10px 30px;border-top-right-radius: 5px;border-bottom-right-radius: 5px;margin-left: -20px;margin-bottom: 10px;">{{field.name}}</span>
+                            </div>
+                            <div v-if="field.property.IsArray">
+                              <table>
                                 <schemasubformView :schemainstance="getObject(inx, index, field.name, field.type)"></schemasubformView>
-                            </Row>
-                            <Row v-else>
+                              </table>
+                            </div>
+                            <div v-else>
+                              <table>
                                 <schemasubformView :schemainstance="getObject(inx, index, field.name, field.type)"></schemasubformView>
-                            </Row>
-                        </FormItem>
-                    </Col>
+                              </table>
+                            </div>
+                        </div>
+                    </div>
                 </template>
                 <template v-else>
-                    <Col :span="12" style="padding:0px 20px 0px 2px" v-if="field.type !== 'file'">
-                        <FormItem :key="inx" style="margin-bottom:10px;">
-                            <Row>
-                                <Col :span="4">
-                                    <b class="field-label">{{field.name}}</b>
-                                </Col>
-                                <Col :span="20">
-                                    
-                                    <label>{{schemainstance.data[index][field.name]}}</label>
-                                    
-                                    <!-- <InputNumber v-if="field.type == 'number'" :min="(field.property.min > 0)?field.property.min : -Infinity" :max="(field.property.max > 0)?field.property.max : Infinity" v-model="schemainstance.data[index][field.name]" :type="field.type" :placeholder="field.name"></InputNumber>
-                                    
-                                    <DatePicker v-if="field.type == 'date'" type="date" v-model="schemainstance.data[index][field.name]" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name"></DatePicker>
-                                    
-                                    <Select v-if="field.type == 'dropdown'" v-model="schemainstance.data[index][field.name]" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name">
-                                        <Option v-for="dpd in field.property.options" :value="dpd" :key="dpd">{{ dpd }}</Option>
-                                    </Select>
-                                    <Checkbox v-if="field.type == 'boolean'" v-model="schemainstance.data[index][field.name]">{{field.name}}</Checkbox> -->
+                    <div v-if="field.type !== 'file'" style="display: block; width: 49%; margin-top: 5px;">
+                        <div :key="inx">
+                              <div style="display: inline-block; width: 49%;">
+                                <b>{{field.name}}</b>
+                              </div>
+                                <div style="display: inline-block; width: 49%;">
+                                  <label>{{schemainstance.data[index][field.name]}}</label>
+                                </div>
+                                
+                                
+                                <!-- <InputNumber v-if="field.type == 'number'" :min="(field.property.min > 0)?field.property.min : -Infinity" :max="(field.property.max > 0)?field.property.max : Infinity" v-model="schemainstance.data[index][field.name]" :type="field.type" :placeholder="field.name"></InputNumber>
+                                
+                                <DatePicker v-if="field.type == 'date'" type="date" v-model="schemainstance.data[index][field.name]" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name"></DatePicker>
+                                
+                                <Select v-if="field.type == 'dropdown'" v-model="schemainstance.data[index][field.name]" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name">
+                                    <Option v-for="dpd in field.property.options" :value="dpd" :key="dpd">{{ dpd }}</Option>
+                                </Select>
+                                <Checkbox v-if="field.type == 'boolean'" v-model="schemainstance.data[index][field.name]">{{field.name}}</Checkbox> -->
 
-                                    <!-- <dynamicinput :type="(field.type) ? field.type : null" :bindmodel="(schemainstance.data[index][field.name]) ? schemainstance.data[index][field.name] : null " :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name" :min="(field.property.min > 0) ? field.property.min : -Infinity" :max="(field.property.max > 0) ? field.property.max : Infinity" :options="(field.property.options) ? field.property.options : null" :field="field"></dynamicinput> -->
-                                </Col>
-                            </Row>
-                        </FormItem>
-                    </Col>
-                    <Col :span="24" style="padding:0px 20px 0px 2px" v-else>
-                        <FormItem :key="inx" style="margin-bottom:10px;">
-                            <Row>
-                                <Col :span="2">
+                                <!-- <dynamicinput :type="(field.type) ? field.type : null" :bindmodel="(schemainstance.data[index][field.name]) ? schemainstance.data[index][field.name] : null " :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name" :min="(field.property.min > 0) ? field.property.min : -Infinity" :max="(field.property.max > 0) ? field.property.max : Infinity" :options="(field.property.options) ? field.property.options : null" :field="field"></dynamicinput> -->
+                                </div>
+                            </div>
+                        <!-- </div>
+                    </div> -->
+                    <div :span="24" style="padding:0px 20px 0px 2px" v-else>
+                        <div :key="inx" style="margin-bottom:10px;">
+                            <div>
+                                <div :span="2">
                                     <!-- <b>{{field.name}}</b> -->
-                                </Col>
-                                <Col :span="22">
+                                </div>
+                                <div :span="22">
                                     <label class="form-control" type="file" v-if="field.type == 'file'" @change="handleFileChange($event, index, field.name)" :multiple="(field.property.isMultiple)? field.property.isMultiple: false" />
                                     <div v-if="schemainstance.data[index][field.name + 'List']">
                                         <div class="list-group" v-for="val in schemainstance.data[index][field.name + 'List']" style="margin-bottom:0px;">
                                             <a :href="val" class="list-group-item" target="_blank" style="color:blue;padding:2px 15px;">{{val}}</a>
                                         </div>
                                     </div>
-                                </Col>
-                            </Row>
-                        </FormItem>
-                    </Col>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </template>
             </div>
-        </Row>
-      </Form>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -94,6 +98,13 @@ export default {
     'schemasubformView': SchemaSubFormView
   },
   methods: {
+    getStyle (field) {
+      if (field.customtype) {
+        return 'display: inline-block; width: 97%; margin-top: 20px; background-color: rgba(0,0,0,0.2)'
+      } else {
+        return 'display: inline-block; width: 49%; margin-top: 20px;'
+      }
+    },
     handleFileChange (e, index, fieldName) {
       let self = this
       var files = e.target.files || e.dataTransfer.files

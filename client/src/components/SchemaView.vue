@@ -161,9 +161,9 @@
         <TabPane v-if="itsFirstState === false" label="Data" icon="ios-albums">
           <schemalist :schema="dataSchema" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData"></schemalist>
 
-          <div style="padding-left: 10px">
+          <div style="padding: 10px">
             <div class="row" v-if="id != null">
-              <div class="col-md-10" id="top">
+              <div class="col-md-11" id="top">
                 <div class="row" style="margin-top: 15px;">
                   <div class="col-md-12">
                     <div class="ui-card">
@@ -174,7 +174,7 @@
 
                 <div class="row">
                   <div class="col-md-12">
-                    <schemasubform :schemainstance="formSchemaInstance"></schemasubform>
+                    <schemasubform v-on:updateJumperList="updateJumperList" :schemainstance="formSchemaInstance"></schemasubform>
                     <div v-if="isMultiple">
                     <div class="row" style="margin-top: 15px;">
                       <div class="col-md-12">
@@ -244,7 +244,6 @@
       <schemasubformview ref="schemasubformview" :schemainstance="formSchemaInstance" id="schemasubformview"></schemasubformview>
     </div>
     <div v-if="email">
-      <h3>Data: </h3>
       <email :btnArr="btnArr" :sendDataEmail="sendDataEmail" :iid="item.id" v-on:on-done="emailService"></email>
     </div>
   </div>
@@ -315,7 +314,7 @@ export default {
       processid: null,
       lastLog: null,
       formTitle: null,
-      jumperLinks: SchemaSubForm.jumperLinks,
+      jumperLinks: [],
       flowData: null,
       bLoading: false,
       isMultiple: false,
@@ -663,7 +662,7 @@ export default {
             let arr = {}
             for (let index = 0; index < nextTargetId.target.length; index++) {
               let target = _.find(this.flowData.json.processList, {'id': nextTargetId.target[index].id})
-              arr[target.name] = target.id
+              arr[target.emailbutton.buttonLabel] = target.id
             }
             this.btnArr = arr
           } else {
@@ -951,6 +950,10 @@ export default {
         console.log('....', err)
         this.$Spin.hide()
       })
+    },
+
+    updateJumperList (objectArr) {
+      this.jumperLinks = objectArr
     }
   },
   mounted () {
@@ -1110,6 +1113,7 @@ export default {
 	.fixed-div{
 		position: fixed;
 		right: 0;
+    /*top: 250px;*/
 	}
 
 	.ivu-form-item-content{
