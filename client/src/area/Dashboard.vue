@@ -5,7 +5,7 @@
       <h3>Analytics</h3><Button type="primary" @click="isModel = !isModel">Configuaraion</Button>
       <Modal
           v-model="isModel"
-          title="Common Modal dialog box title"
+          title="Set Configurations"
           @on-ok="ok"
           @on-cancel="cancel">
           <p>
@@ -167,9 +167,10 @@ export default {
           title: 'instanceId',
           key: 'id',
           firstColumn: true,
-          width: 200,
+          width: 287,
           fixed: 'left'
         })
+
         // console.log('table cols: ', tableCols)
         return tableCols
       }

@@ -2,12 +2,35 @@
   <div class="CellRender stageTuple">
   	<span :class="classObject(item.row, item.column.key)"></span>
 
-    <span :title="getAgoActualStatus(item.row, item.column.key)">
+    <!-- <div class="row">
+      <div class="col-md-9">
+        <span :title="getAgoActualStatus(item.row, item.column.key)" style="display: block;">
+          <i class="fa fa-calendar fa-fw"></i>
+          <small>{{ getAgoStatus(item.row, item.column.key) }}</small>
+        </span>
+        <span title="Duration" style="display: block;">
+          <i class="fa fa-clock-o fa-fw"></i>
+          <small>{{ getDuration(item.row, item.column.key) }} Hours</small>
+        </span>
+      </div>
+      <div class="col-md-3">
+        <img src="http://placehold.it/20x20" style="margin-top: 20px;">
+      </div>
+    </div> -->
+        
+    <span :title="getAgoActualStatus(item.row, item.column.key)" style="display: block;">
       <i class="fa fa-calendar fa-fw"></i>
       <small>{{ getAgoStatus(item.row, item.column.key) }}</small>
       <!-- <small>{{ items.createdAt | momentDate }}</small> -->
     </span>
+    <span title="Duration" style="display: block;">
+      <i class="fa fa-clock-o fa-fw"></i>
+      <small>{{ getDuration(item.row, item.column.key) }} Hours</small>
+    </span>
 
+    <!-- <Tooltip :content="getUserHoverDetails(item.row, item.column.key)"> -->
+      <img :title="getUserHoverDetails(item.row, item.column.key)" :src="getUserAvatar(item.row, item.column.key)" style="position: absolute; right: 0; top: 17px; border-radius: 50px; width: 20px;">
+    <!-- </Tooltip> -->
     <!-- <span :title="getCompletedActualStatus(item.row, item.column.key)">
       <i class="fa fa-calendar fa-fw"></i>
       <small>{{ getCompletedStatus(item.row, item.column.key) }}</small>
@@ -100,7 +123,7 @@ export default {
     getAgoActualStatus (items, type) {
       let obj = _.find(items.stageReference, {StageName: type})
       if (obj) {
-        return moment(obj.createdAt).format('MMMM Do YYYY, h:mm:ss a')
+        return ('Started at: ' + moment(obj.createdAt).format('MMMM Do YYYY, h:mm:ss a'))
       } else {
         return ('NA')
       }
@@ -111,6 +134,33 @@ export default {
         return moment(obj.createdAt).fromNow()
       } else {
         return ('NA')
+      }
+    },
+    getDuration (items, type) {
+      let obj = _.find(items.stageReference, {StageName: type})
+      // console.log('Object created at : ', obj)
+      if (obj) {
+        let x = moment(obj.createdAt)
+        let y = moment(obj.completedAt)
+        return y.diff(x, 'hours')
+      } else {
+        return ('NA')
+      }
+    },
+    getUserAvatar (items, type) {
+      let obj = _.find(items.stageReference, {StageName: type})
+      if (obj) {
+        return obj.user.avatar
+      } else {
+        return 'https://forums.roku.com/styles/canvas/theme/images/no_avatar.jpg'
+      }
+    },
+    getUserHoverDetails (items, type) {
+      let obj = _.find(items.stageReference, {StageName: type})
+      if (obj) {
+        return ('Name: ' + obj.user.name + '\nEmail: ' + obj.user.email + '\nRole: ' + obj.user.role)
+      } else {
+        return 'NA'
       }
     },
     async showData (items, type) {
@@ -198,7 +248,7 @@ export default {
 
 .showData {
   position: absolute;
-  right: 0px;
+  right: 4px;
   top: 5px;
 }
 
