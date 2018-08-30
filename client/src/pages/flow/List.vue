@@ -382,13 +382,17 @@ export default {
           key: 'ProcessName'
         },
         {
+          title: 'Id',
+          key: 'id'
+        },
+        {
           title: 'Notes',
           key: 'notes'
         },
         {
           title: 'Action',
           key: 'action',
-          width: 400,
+          width: 300,
           align: 'center',
           render: (h, params) => {
             return h('div', [
