@@ -313,12 +313,14 @@
                 executeAny: m['_camunda:executeIfAny'] !== undefined ? ((m['_camunda:executeIfAny']) ? m['_camunda:countany'] : false) : false,
                 // isProcessTask: m.workerType.toLowerCase() === 'tweet' ? 'true' : false,
                 target: m.outgoing ? self.getTargetId(m, jsonXML) : [],
+
                 // mapping: (_.union(..._mapping)),
                 // configurations: self.getConfigurationsProperties(m),
                 smtp: self.getSMTPProperties(m),
                 emailbutton: self.emailButton(m, jsonXML)
                 // inputProperty: await self.getInputProperties(m),
                 // outputProperty: await self.getOutputProperties(m)
+
 
               }
             } else {
@@ -331,6 +333,7 @@
                 executeAny: m['_camunda:executeIfAny'] !== undefined ? ((m['_camunda:executeIfAny']) ? m['_camunda:countany'] : false) : false,
                 // isProcessTask: m.workerType.toLowerCase() === 'tweet' ? 'true' : false,
                 target: m.outgoing ? self.getTargetId(m, jsonXML) : [],
+
                 // mapping: (_.union(..._mapping)),
                 emailbutton: self.emailButton(m, jsonXML)
                 // configurations: self.getConfigurationsProperties(m),
