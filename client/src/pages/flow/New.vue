@@ -67,8 +67,6 @@
         permissions: ['read', 'write'],
         loading: true,
         processData: [],
-        buttonArray: [],
-        buttonArrayTemp: [],
         btnLoading: false,
         processVar: null,
         bpmnModeler: null,
