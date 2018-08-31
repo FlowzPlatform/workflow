@@ -60,7 +60,7 @@
                                       <div v-for="val in schemainstance.data[index][field.name]">
                                           <ul>
                                             <li>
-                                              <a :href="val" target="_blank" style="color:black;padding:2px">{{val}}</a>
+                                              <a :href="val" target="_blank" style="color:black;padding:2px">Attachment - {{inx}}</a>
                                             </li>
                                           </ul>
                                       </div>
