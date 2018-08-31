@@ -67,6 +67,8 @@
         permissions: ['read', 'write'],
         loading: true,
         processData: [],
+        buttonArray: [],
+        buttonArrayTemp: [],
         btnLoading: false,
         processVar: null,
         bpmnModeler: null,
@@ -315,8 +317,8 @@
                 target: m.outgoing ? self.getTargetId(m, jsonXML) : [],
                 // mapping: (_.union(..._mapping)),
                 // configurations: self.getConfigurationsProperties(m),
-                smtp: self.getSMTPProperties(m),
-                emailbutton: self.emailButton(m, jsonXML)
+                smtp: self.getSMTPProperties(m)
+                // emailbutton: self.emailButton(m, jsonXML)
                 // inputProperty: await self.getInputProperties(m),
                 // outputProperty: await self.getOutputProperties(m)
               }
@@ -329,9 +331,9 @@
                 type: m.workerType.toLowerCase(),
                 executeAny: m['_camunda:executeIfAny'] !== undefined ? ((m['_camunda:executeIfAny']) ? m['_camunda:countany'] : false) : false,
                 // isProcessTask: m.workerType.toLowerCase() === 'tweet' ? 'true' : false,
-                target: m.outgoing ? self.getTargetId(m, jsonXML) : [],
+                target: m.outgoing ? self.getTargetId(m, jsonXML) : []
                 // mapping: (_.union(..._mapping)),
-                emailbutton: self.emailButton(m, jsonXML)
+                // emailbutton: self.emailButton(m, jsonXML)
                 // configurations: self.getConfigurationsProperties(m),
                 // inputProperty: await self.getInputProperties(m),
                 // outputProperty: await self.getOutputProperties(m)
@@ -368,11 +370,20 @@
         }
         return _.map(event.outgoing, (targetMap) => {
           return _.chain(process.sequenceFlow).filter((ftr) => {
+            // console.log('ftr._id', ftr._id)
             return ftr._id === targetMap.__text
           }).map((m) => {
-            return {
-              id: m._targetRef,
-              outputid: m.extensionElements !== undefined ? m.extensionElements.myIOMapping.mapping._producer : ''
+            if (m._name !== undefined && m._name !== '') {
+              return {
+                label: m._name,
+                id: m._targetRef,
+                outputid: m.extensionElements !== undefined ? m.extensionElements.myIOMapping.mapping._producer : ''
+              }
+            } else {
+              return {
+                id: m._targetRef,
+                outputid: m.extensionElements !== undefined ? m.extensionElements.myIOMapping.mapping._producer : ''
+              }
             }
           }).value()[0]
           // return { id: targetMap.__text }
@@ -404,54 +415,6 @@
           }
         } else {
           return null
-        }
-      },
-      emailButton (process, xml) {
-        this.processData.push({'process': process})
-        if (process['_camunda:buttonLabel'] !== undefined && process['_camunda:buttonLabel'] !== null && process['_camunda:isButton'] === 'true') {
-          return {
-            buttonLabel: process['_camunda:buttonLabel']
-          }
-        } else {
-          let flag = false
-          if ((process['_camunda:buttonLabel'] === undefined || process['_camunda:buttonLabel'] === null) && process['_camunda:isButton'] === 'true') {
-            let dummyVar = []
-            for (let i = 0; i < process.incoming.length; i++) {
-              dummyVar.push({'name': process.incoming[i].__text})
-            }
-            for (let i = 0; i < this.processData.length; i++) {
-              for (let j = 0; j < dummyVar.length; j++) {
-                if (this.processData[i].process.outgoing !== undefined) {
-                  for (let k = 0; k < this.processData[i].process.outgoing.length; k++) {
-                    if (dummyVar[j].name === this.processData[i].process.outgoing[k].__text && this.processData[i].process.workerType === 'sendproofmail') {
-                      for (let index = 0; index < xml.sequenceFlow.length; index++) {
-                        if (xml.sequenceFlow[index]._id === dummyVar[j].name) {
-                          if (xml.sequenceFlow[index]._name.length > 0) {
-                            flag = true
-                            return {
-                              buttonLabel: xml.sequenceFlow[index]._name
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-            if (flag === false) {
-              if (process._name !== undefined && process._name !== null) {
-                return {
-                  buttonLabel: process._name
-                }
-              } else {
-                return {
-                  buttonLabel: process._id
-                }
-              }
-            }
-            flag = false
-          }
         }
       },
       async getInputProperties (proccess) {
