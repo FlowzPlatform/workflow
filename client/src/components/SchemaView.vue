@@ -959,6 +959,8 @@ export default {
     }
   },
   mounted () {
+    this.schemabinding = false
+    this.email = false
     flowzModel.get(null, {
       id: this.$route.params.id
     })
