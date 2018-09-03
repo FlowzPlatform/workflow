@@ -1018,6 +1018,9 @@ export default {
   watch: {
     '$route.params': function (value) {
       this.init()
+    },
+    '$store.state.updateView': function (value) {
+      this.init()
     }
   },
   feathers: {
