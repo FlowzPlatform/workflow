@@ -100,7 +100,7 @@
               </table>
             </div>
             <div v-else>
-              <p align="center"><small>No Data</small></p>
+              <p align="center"><small>{{waitingText}}</small></p>
             </div>
 
         </div>
@@ -574,6 +574,7 @@ export default {
       roleValue1: '',
       input: '',
       // loading :false,
+      waitingText: '',
       data2: [],
       data3: [],
       data4: [],
@@ -1277,6 +1278,7 @@ export default {
     getRoles: async function (newValue) {
       // this.tableData = {}
       var self = this
+      self.waitingText = 'Loading...'
       await axios.get(config.subscriptionUrl + 'register-roles?module=' + newValue, {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded;'
@@ -1297,6 +1299,7 @@ export default {
           self.callTaskList(newValue)
         } else {
           self.loadingPermisions = false
+          self.waitingText = 'No Data'
         }
         return response.data.data
       })
@@ -1314,6 +1317,7 @@ export default {
           } else {
             self.loadingPermisions = false
           }
+          self.waitingText = 'No Data'
         })
     },
     callTaskList: async function (newValue) {
