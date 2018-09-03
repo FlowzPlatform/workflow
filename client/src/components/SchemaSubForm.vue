@@ -392,15 +392,13 @@ export default {
     right: 0;
   }
 
-
-
 </style>
 <style>
   .ivu-form-item-content{
     line-height: 15px !important;
   }
 
-  .ivu-table td:nth-child(2){
+  /*.ivu-table td:nth-child(2){
     padding-left: 10px;
-  }
+  }*/
 </style>

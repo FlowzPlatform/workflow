@@ -25,6 +25,45 @@
       </div>
     </div>
 
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="row">
+            <div class="col-md-4">
+              <Input search enter-button placeholder="Search..." v-model="searchQuery"/>
+            </div>
+            <div class="col-md-6">
+              <div class="row">
+                <div class="col-md-6">
+                  <Select style="width: 100%" v-model="selectedFilterBy" clearable placeholder="Filter By">
+                    <Option v-for="item in filterBy" :value="item.value" :key="item.value">{{ item.label }}</Option>
+                  </Select>
+                  <br>
+                  <DatePicker v-if="selectedFilterBy === 'customRange'" type="daterange" split-panels placeholder="Select date" style="width: 100%; margin: 5px 0;" v-model="enteredDateRange"></DatePicker>
+                </div>
+                <div class="col-md-6">
+                  <Select style="width: 100%" v-model="selectedSortBy" clearable placeholder="Sort By">
+                    <Option v-for="item in sortBy" :value="item.value" :key="item.value">{{ item.label }}</Option>
+                  </Select>    
+                </div>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <Button icon="search" type="primary" long>Search</Button>
+            </div>
+          </div>
+
+          <!-- <div class="searchQueries">
+            <Tag @on-close="searchQuery = null" closable color="blue" v-if="searchQuery != null && searchQuery != ''">{{searchQuery}}</Tag>
+            <Tag @on-close="selectedFilterBy = null, enteredDateRange= []" closable color="blue" v-if="selectedFilterBy != null && selectedFilterBy != '' && selectedFilterBy == 'customRange'">{{selectedFilterBy}} : {{enteredDateRange}}</Tag>
+            <Tag @on-close="selectedFilterBy = null" closable color="blue" v-if="selectedFilterBy != null && selectedFilterBy != '' && selectedFilterBy != 'customRange'">{{selectedFilterBy}}</Tag>
+            <Tag closable color="blue" v-if="selectedSortBy != null && selectedSortBy != ''">{{selectedSortBy}}</Tag>
+          </div> -->
+        </div>
+      </div>
+      
+    </div>
+
     <!-- Configurations Modal -->
     <Modal
         v-model="isModel"
@@ -48,6 +87,7 @@ import finstanceModal from '@/api/finstance'
 import CellRender from '@/components/cellRender'
 import ConfigExpand from '@/components/configExpand'
 import _ from 'lodash'
+import moment from 'moment'
 
 export default {
   name: 'dashboard',
@@ -156,13 +196,59 @@ export default {
         fields: []
       },
       fid: null,
-      schemaId: ''
+      schemaId: '',
+      searchQuery: null,
+      filterBy: [
+        {
+          'label': 'Last 12 Hours',
+          'value': '12hours'
+        }, {
+          'label': 'Last 24 Hours',
+          'value': '24hours'
+        }, {
+          'label': 'Last 7 Days',
+          'value': '7days'
+        }, {
+          'label': 'Last 30 Days',
+          'value': '30days'
+        }, {
+          'label': 'Last 3 months',
+          'value': '3months'
+        }, {
+          'label': 'This Year',
+          'value': 'thisYear'
+        }, {
+          'label': 'Custom Range',
+          'value': 'customRange'
+        }
+      ],
+      selectedFilterBy: null,
+      sortBy: [
+        {
+          'label': 'Ascending',
+          'value': 'asc'
+        }, {
+          'label': 'Descending',
+          'value': 'desc'
+        }
+      ],
+      selectedSortBy: null,
+      enteredDateRange: null
     }
   },
   components: {
     CellRender
   },
+  filters: {
+    momentDate (date) {
+      return moment(date).format('MMM Do YY')
+    }
+  },
   methods: {
+    searchInTable () {
+      console.log('this. searchQuery: ', this.searchQuery)
+      // this.tableData = _.filter(this.tableData, (o) => { return o.id === this.searchQuery })
+    },
     ok () {
       this.$Message.success('Saved')
       this.configuration.fields = _.cloneDeep(this.anotherBinding)
@@ -409,5 +495,9 @@ export default {
   .ivu-table-cell{
     padding-left: 0;
     padding-right: 0;
+  }
+
+  .searchQueries{
+    margin: 5px 0;
   }
 </style>  
