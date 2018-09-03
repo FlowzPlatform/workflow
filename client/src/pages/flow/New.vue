@@ -136,32 +136,35 @@
             let registerAppModuleNew = actionsObj
             subscriptionNew.moduleResource.registerAppModule = registerAppModuleNew
             subscriptionNew.moduleResource.appRoles = userRolesArr
-            subscriptionNew.registeredAppModulesRole()
-
-            flowObject.svg = svgData
-            // console.log('xmlData', flowObject.json)
-            // flowObject.allowedusers = _.union(...(_.chain(_.union(...(_.map(flowObject.json.processList, m => {
-            //   return _.filter(m.configurations, f => {
-            //     return f.key === 'allowedusers'
-            //   })
-            // })))).map(m => {
-            //   return m.value.split(',')
-            // }).value()))
-            let result = null
-            if (this.$route.params.id !== undefined) {
-              result = flowz.put(this.$route.params.id, flowObject)
-            } else {
-              result = flowz.post(flowObject)
-            }
-            result.then(response => {
-              this.$Notice.success({title: 'Success..!', desc: 'Flow Saved..'})
-              this.$router.push({name: 'flow/list'})
-              localStorage.removeItem('BPMNXml')
-              this.btnLoading = false
-            }).catch(error => {
-              console.log(error)
-              this.$Notice.error({title: 'Error..!', desc: 'Flow Not Saved...'})
-              this.btnLoading = false
+            subscriptionNew.registeredAppModulesRole().then(resp => {
+              flowObject.svg = svgData
+              // console.log('xmlData', flowObject.json)
+              // flowObject.allowedusers = _.union(...(_.chain(_.union(...(_.map(flowObject.json.processList, m => {
+              //   return _.filter(m.configurations, f => {
+              //     return f.key === 'allowedusers'
+              //   })
+              // })))).map(m => {
+              //   return m.value.split(',')
+              // }).value()))
+              let result = null
+              if (this.$route.params.id !== undefined) {
+                result = flowz.put(this.$route.params.id, flowObject)
+              } else {
+                result = flowz.post(flowObject)
+              }
+              result.then(response => {
+                this.$Notice.success({title: 'Success..!', desc: 'Flow Saved..'})
+                this.$router.push({name: 'flow/list'})
+                localStorage.removeItem('BPMNXml')
+                this.btnLoading = false
+              }).catch(error => {
+                console.log(error)
+                this.$Notice.error({title: 'Error..!', desc: 'Flow Not Saved...'})
+                this.btnLoading = false
+              })
+            }).catch(err => {
+              this.$Notice.error({title: 'Error..!', desc: 'Flow Not Saved. Try again.'})
+              console.log('Error: ', err)
             })
           } else {
             this.$Message.error('Please Add Schema for Flow !')
