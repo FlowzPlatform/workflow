@@ -467,6 +467,50 @@ export default {
           this.setCounters(this.flowzList[finx])
         }
       }
+    },
+    'flowz': {
+      created (data) {
+        // console.log('Created Data: ', data)
+        this.$Notice.success({
+          title: 'Flowz Updated.',
+          duration: 0,
+          render: h => {
+            return h('Button', {
+              props: {
+                type: 'ghost'
+              },
+              on: {
+                'click': (value) => {
+                  window.location.reload()
+                }
+              }
+            }, 'Update View')
+          }
+        })
+      },
+      updated (data) {
+        // console.log('Updated Data: ', data)
+        this.$Notice.success({
+          title: 'Flowz Updated.',
+          duration: 0,
+          render: h => {
+            return h('Button', {
+              props: {
+                type: 'ghost'
+              },
+              on: {
+                'click': (value) => {
+                  window.location.reload()
+                }
+              }
+            }, 'Update View')
+          }
+        })
+        // this.init()
+      },
+      removed (data) {
+        console.log('Removed Data: ', data)
+      }
     }
   }
 }
