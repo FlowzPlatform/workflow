@@ -265,7 +265,6 @@ export default {
         $select: ['json', 'schema'],
         $paginate: false
       }).then(res => {
-        console.log('res.data: ', res.data.schema)
         this.schemaId = res.data.schema
         this.flowName = res.data.json.name
         let cols = []
