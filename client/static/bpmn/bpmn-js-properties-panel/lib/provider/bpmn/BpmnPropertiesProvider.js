@@ -33,13 +33,13 @@ function createGeneralTabGroups(element, bpmnFactory, elementRegistry, translate
   linkProps(detailsGroup, element, translate);
   eventProps(detailsGroup, element, bpmnFactory, elementRegistry, translate);
 
-  var documentationGroup = {
-    id: 'documentation',
-    label: translate('Documentation'),
-    entries: []
-  };
+  // var documentationGroup = {
+  //   id: 'documentation',
+  //   label: translate('Documentation'),
+  //   entries: []
+  // };
 
-  documentationProps(documentationGroup, element, bpmnFactory, translate);
+  // documentationProps(documentationGroup, element, bpmnFactory, translate);
 
   return [
     generalGroup,
