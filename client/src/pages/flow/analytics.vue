@@ -200,11 +200,11 @@ export default {
       searchQuery: null,
       filterBy: [
         {
-          'label': 'Today',
-          'value': 'today'
+          'label': 'Last 12 Hours',
+          'value': '12hours'
         }, {
-          'label': 'Yesterday',
-          'value': 'yesterday'
+          'label': 'Last 24 Hours',
+          'value': '24hours'
         }, {
           'label': 'Last 7 Days',
           'value': '7days'
