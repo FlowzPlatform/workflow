@@ -32,7 +32,7 @@
   <div class="schema">
     <!-- {{types}} -->
     <Row>
-      <Button type="primary" size="small" @click="back()" icon="chevron-left" style="float:right;">Back</Button>
+      <Button type="primary" size="small" @click="back()" icon="chevron-left">Back</Button>
     </Row>
     <Row v-if="isGridManager">
       <grid-manager></grid-manager>
@@ -46,6 +46,19 @@
     <Row v-if="!isGridManager && !isGrapesComponent && !isMjmlEditor">
       <Col>
         <Form ref="formSchema" :model="formSchema">
+          <div align="right" style="margin-top: 10px;">
+            <Form-item>
+              <Button type="ghost" @click="handleReset('formSchema')" style="margin-left: 8px">Reset</Button>
+
+              <Button type="primary" :loading="loading" @click="handleSubmit('formSchema')">
+                  <span v-if="!loading && !formSchema.id">Save</span>
+                  <span v-else-if="!loading && formSchema.id">Update</span>
+                  <span v-else>Loading...</span>
+              </Button>
+              
+            </Form-item>  
+          </div>
+          
           <Form-item
             v-if="!formSchema.id"
             label="Schema Title"
@@ -503,14 +516,7 @@
               </Panel>
           </Collapse>
           </Form-item>
-          <Form-item>
-            <Button type="primary" :loading="loading" @click="handleSubmit('formSchema')">
-                <span v-if="!loading && !formSchema.id">Save</span>
-                <span v-else-if="!loading && formSchema.id">Update</span>
-                <span v-else>Loading...</span>
-            </Button>
-            <Button type="ghost" @click="handleReset('formSchema')" style="margin-left: 8px">Reset</Button>
-          </Form-item>
+          
         </Form>
       </Col>
     </Row>
