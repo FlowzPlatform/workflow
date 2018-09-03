@@ -150,6 +150,10 @@ export default {
     }
   },
   mounted () {
+    // setTimeout(() => {
+    //   console.log('HTML CONTENT', this.$el.outerHTML)
+    // }, 5000)
+    // console.log('Data: ', this.schemainstance)
   },
   created () {
   }
