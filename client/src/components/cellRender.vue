@@ -1,6 +1,7 @@
 <template>
-  <div class="CellRender stageTuple">
-  	<span :class="classObject(item.row, item.column.key)"></span>
+  <div class="CellRender stageTuple" :class="classObject(item)">
+    <!-- <div class="CellRender stageTuple" :class="classObject(item.row, item.column.key)"> -->
+  	<!-- <span :class="classObject(item.row, item.column.key)"></span> -->
 
     <!-- <div class="row">
       <div class="col-md-9">
@@ -17,49 +18,26 @@
         <img src="http://placehold.it/20x20" style="margin-top: 20px;">
       </div>
     </div> -->
-        
-    <span :title="getAgoActualStatus(item.row, item.column.key)" style="display: block;">
+    <span v-if="item.obj != null" :title="getAgoActualStatus(item.obj.createdAt)" style="display: block;">
       <i class="fa fa-calendar fa-fw"></i>
-      <small>{{ getAgoStatus(item.row, item.column.key) }}</small>
-      <!-- <small>{{ items.createdAt | momentDate }}</small> -->
+      <small>{{getAgoStatus(item.obj.createdAt)}}</small>
     </span>
-    <span title="Duration" style="display: block;">
+    <span v-if="item.obj != null" title="Duration" style="display: block;">
       <i class="fa fa-clock-o fa-fw"></i>
-      <small>{{ getDuration(item.row, item.column.key) }} Hours</small>
+      <small>{{ getDuration(item.obj.createdAt, item.obj.completedAt) }} Hours</small>
     </span>
 
-    <!-- <Tooltip :content="getUserHoverDetails(item.row, item.column.key)"> -->
-      <img :title="getUserHoverDetails(item.row, item.column.key)" :src="getUserAvatar(item.row, item.column.key)" style="position: absolute; right: 0; top: 17px; border-radius: 50px; width: 20px;">
-    <!-- </Tooltip> -->
+    <img v-if="item.obj != null" :title="getUserHoverDetails(item)" :src="getUserAvatar(item)" class="avatarImg" alt="User Avatar">
+    
     <!-- <span :title="getCompletedActualStatus(item.row, item.column.key)">
       <i class="fa fa-calendar fa-fw"></i>
       <small>{{ getCompletedStatus(item.row, item.column.key) }}</small>
-      <!-- <small>{{ items.createdAt | momentDate }}</small> ->
+      <!- <small>{{ items.createdAt | momentDate }}</small> ->
     </span> -->
 
-    <span class="showData" title="View Data">
-      <i class="fa fa-info-circle" @click="showData(item.row, item.column.key)"></i>
+    <span v-if="item.obj != null" class="showData" title="View Data">
+      <i class="fa fa-info-circle" @click="showData(item)"></i>
     </span>
-    <!-- <span class="showData" title="View Data">
-      <Poptip title="Data Entered">
-        <i class="fa fa-info-circle" @click="getPopTipData(item.row, item.column.key)"></i>
-        <div class="api" slot="content">
-          <div v-if="currentPopTipData != null">
-            <span v-for="(dataitems, key, index) in currentPopTipData">
-              <div v-if="index < 5">
-                {{key}} : {{dataitems}} <br>
-              </div>
-              <div v-if="index == 6">
-                <Button style="margin: 5px 0" @click="goToDetailView(item.row, item.column.key)">View More</Button>
-              </div>
-            </span>
-          </div> 
-          <div v-else>
-            <small>{{loadingText}}</small>
-          </div>
-        </div>
-      </Poptip>
-    </span> -->
 
     <Modal
         v-model="dataModal"
@@ -67,127 +45,134 @@
         @on-ok="ok"
         width="1000"
         @on-cancel="cancel">
-        <!-- <small>{{loadingText}}</small> -->
         <div v-if="currentPopTipData != null">
-          <span v-for="(dataitems, key, index) in currentPopTipData">
-            <div v-if="index < 10">
-              {{key}} : {{dataitems}} <br>
-            </div>
-            <!-- <div v-if="index == 10">
-              <Button style="margin: 5px 0" @click="goToDetailView(item.row, item.column.key)">View More</Button>
-            </div> -->
-          </span>
+          <schemasubformview ref="schemasubformview" :schemainstance="schemainstance" id="schemasubformview"></schemasubformview>
         </div> 
         <div v-else>
           <small>{{loadingText}}</small>
+        </div>
+        <div slot="footer">
+            <Button @click="ok">Close</Button>
         </div>
     </Modal>
   </div>
 </template>
 
 <script>
-import _ from 'lodash'
+// import _ from 'lodash'
 import moment from 'moment'
 import flowzdataModal from '@/api/flowzdata'
+import schemaModel from '@/api/schema'
+import SchemaSubFormView from './SchemaSubFormView'
 
 export default {
   name: 'CellRender',
-  props: {
-    item: {
-      type: Object
-    }
-  },
+  props: ['item', 'schemaId'],
   data () {
     return {
       dataModal: false,
       currentPopTipObj: null,
       currentPopTipData: null,
-      loadingText: 'Loading...'
+      loadingText: 'Loading...',
+      schemainstance: {
+        data: [],
+        entity: []
+      }
     }
   },
-  component: {
+  components: {
+    'schemasubformview': SchemaSubFormView
+  },
+  filters: {
+    getAgoStatus (item) {
+      console.log('item: ', item)
+      return moment(item).fromNow()
+    }
   },
   methods: {
     ok () {
+      this.dataModal = false
     },
     cancel () {
     },
-    classObject (items, type) {
-      if (type === items.currentStatus) {
+    classObject (item) {
+      if (item.isCurrentTask === true && item.isCompletedTask === false) {
         return { 'currentTask': true }
-      } else if (_.findIndex(items.stageReference, {StageName: type}) !== -1) {
+      } else if (item.isCurrentTask === false && item.isCompletedTask === true) {
         return { 'completedTask': true }
       } else {
-        return { 'pendingTask': true }
+        return { 'pendingTaskk': true }
       }
     },
-    getAgoActualStatus (items, type) {
-      let obj = _.find(items.stageReference, {StageName: type})
-      if (obj) {
-        return ('Started at: ' + moment(obj.createdAt).format('MMMM Do YYYY, h:mm:ss a'))
-      } else {
-        return ('NA')
-      }
+    getAgoActualStatus (item) {
+      return ('Started at: ' + moment(item).format('MMMM Do YYYY, h:mm:ss a'))
     },
-    getAgoStatus (items, type) {
-      let obj = _.find(items.stageReference, {StageName: type})
-      if (obj) {
-        return moment(obj.createdAt).fromNow()
-      } else {
-        return ('NA')
-      }
+    getAgoStatus (item) {
+      return moment(item).fromNow()
     },
-    getDuration (items, type) {
-      let obj = _.find(items.stageReference, {StageName: type})
-      // console.log('Object created at : ', obj)
-      if (obj) {
-        let x = moment(obj.createdAt)
-        let y = moment(obj.completedAt)
-        return y.diff(x, 'hours')
-      } else {
-        return ('NA')
-      }
+    getDuration (x, y) {
+      let x1 = moment(x)
+      let y1 = moment(y)
+      return y1.diff(x1, 'hours')
     },
-    getUserAvatar (items, type) {
-      let obj = _.find(items.stageReference, {StageName: type})
-      if (obj) {
-        return obj.user.avatar
-      } else {
-        return 'https://forums.roku.com/styles/canvas/theme/images/no_avatar.jpg'
-      }
+    getUserAvatar (item) {
+      return item.obj.user.avatar
     },
-    getUserHoverDetails (items, type) {
-      let obj = _.find(items.stageReference, {StageName: type})
-      if (obj) {
-        return ('Name: ' + obj.user.name + '\nEmail: ' + obj.user.email + '\nRole: ' + obj.user.role)
-      } else {
-        return 'NA'
-      }
+    getUserHoverDetails (item) {
+      return ('Name: ' + item.obj.user.name + '\nEmail: ' + item.obj.user.email + '\nRole: ' + item.obj.user.role)
     },
-    async showData (items, type) {
+    async showData (item) {
       this.$Spin.show()
       this.currentPopTipData = null
       this.loadingText = 'Loading...'
-      let obj = await _.find(items.stageReference, {StageName: type})
+      let obj = item.obj
       if (obj) {
         this.currentPopTipObj = obj
         await flowzdataModal.get(null, {
           id: this.currentPopTipObj.stageRecordId
-        }).then((resData) => {
+        }).then(async (resData) => {
           this.currentPopTipData = resData.data[0].data
-          this.dataModal = true
-          this.$Spin.hide()
+          await schemaModel.get(this.schemaId).then(async schemaRes => {
+            this.schemainstance.entity = schemaRes.data.entity
+            for (let [index, entity] of this.schemainstance.entity.entries()) {
+              if (entity.customtype) {
+                this.schemainstance.entity[index]['entity'] = await this.getChildEntity(entity.type)
+              }
+            }
+            this.schemainstance.data.push(this.currentPopTipData)
+            this.dataModal = true
+            this.$Spin.hide()
+          }).catch(err => {
+            console.log('Error: ', err)
+            this.$Spin.hide()
+          })
         }).catch((err) => {
           console.log('err: ', err)
+          this.$Spin.hide()
         })
       } else {
-        // this.dataModal = true
         this.$Spin.hide()
         this.currentPopTipData = null
         this.loadingText = 'No Data...'
         this.$Message.error('No Data...')
       }
     },
+    async getChildEntity (id) {
+      // alert('entity')
+      var self = this
+      var res = []
+      // var _res = await axios.get('https://api.flowzcluster.tk/eng/schema/' + id).catch(function (error) { console.log(error) })
+      let _res = await schemaModel.get(id).catch(err => {
+        console.log('err', err)
+      })
+      for (let [index, entity] of _res.data.entity.entries()) {
+        if (entity.customtype) {
+          _res.data.entity[index]['entity'] = await self.getChildEntity(entity.type)
+        }
+      }
+      res.push(_res.data)
+      return res
+    }
     // async getPopTipData (items, type) {
     //   this.currentPopTipData = null
     //   this.loadingText = 'Loading...'
@@ -206,12 +191,9 @@ export default {
     //     this.loadingText = 'No Data'
     //   }
     // },
-    goToDetailView (instance, task) {
-      // this.$router.push('/admin/schemaview/' + instance.id + '/' + task.id)
-    }
   },
   mounted () {
-    // console.log('Data: ', this.item)
+    // console.log('this.item: ', this.item)
   }
 }
 
@@ -224,28 +206,30 @@ export default {
   display: block;
   position: relative;
   min-width: 100%;
-  min-height: 3px;
-  background-color: #FF0000;
-  margin-top: 2px;
+  min-height: 40px;
+  background-color: #FFC5CF;
+  /*margin-top: 2px;*/
 }
 
 .completedTask{
   display: block;
   position: relative;
   min-width: 100%;
-  min-height: 3px;
-  background-color: #00FF00;
-  margin-top: 2px;
-  margin-left: 11px;
+  min-height: 40px;
+  background-color: #BCEDC7;
+  /*margin-top: 2px;*/
+  /*margin-left: 11px;*/
+  border-radius: 0;
+  padding: 0 5px;
 }
 
 .pendingTask{
   display: block;
   position: relative;
   min-width: 100%;
-  min-height: 3px;
-  background-color: #DADADA;
-  margin-top: 2px; 
+  min-height: 40px;
+  background-color: #B7D9FD;
+  /*margin-top: 2px; */
 }
 
 .showData {
@@ -255,7 +239,7 @@ export default {
 }
 
 .showData i {
-  color: #00d8ff;
+  color: #000000;
   cursor: pointer;
   display: none;
 }
@@ -266,5 +250,13 @@ export default {
 
 .stageTuple:hover > .showData i{
   display: table-cell;
+}
+
+.avatarImg {
+  position: absolute; 
+  right: 5px; 
+  top: 17px; 
+  border-radius: 50px; 
+  width: 20px;
 }
 </style>

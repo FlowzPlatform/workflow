@@ -193,6 +193,7 @@ export default {
     // setTimeout(() => {
     //   console.log('HTML CONTENT', this.$el.outerHTML)
     // }, 5000)
+    console.log('Data: ', this.schemainstance)
   },
   created () {
   }

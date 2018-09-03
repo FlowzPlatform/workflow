@@ -9,9 +9,9 @@
           <!-- <strong>Legend</strong> -->
           <ul>
             <li><strong>Legend:</strong></li>
-            <li><span style="background-color:#00FF00"></span>Completed</li>
-            <li><span style="background-color:#FF0000"></span>Current</li>
-            <li><span style="background-color:#EEEEEE"></span>Pending</li>
+            <li><span style="background-color:#BCEDC7"></span>Completed</li>
+            <li><span style="background-color:#FFC5CF"></span>Current</li>
+            <!-- <li><span style="background-color:#EEEEEE"></span>Pending</li> -->
             <!-- <li><span style="background-color:#1F6980"></span>Zone 4 - Thursday</li> -->
             <!-- <li><span style="background-color:#AB156A"></span>Zone 5 - Friday</li> -->
           </ul>
@@ -37,7 +37,7 @@
     </Modal>
 
     <!-- Main Table -->
-    <Table height="690" border :columns="mainColumns()" :data="tableData"></Table>
+    <Table v-if="schemaId !== null" height="690" border :columns="mainColumns()" :data="tableData"></Table>
 
   </div>
 </template>
@@ -155,7 +155,8 @@ export default {
         dateFormate: '',
         fields: []
       },
-      fid: '39c53741-ec14-4ceb-a9db-97d7066cd424'
+      fid: null,
+      schemaId: ''
     }
   },
   components: {
@@ -170,14 +171,39 @@ export default {
       this.anotherBinding = _.cloneDeep(this.configuration.fields)
     },
     mainColumns () {
-        // console.log('mainColumns')
+      // console.log('mainColumns')
       let tableCols = _.filter(this.configuration.fields, {show: true})
       for (let item of tableCols) {
-        item.render = function (h, params) {
-            // console.log('params.column: ')
+        item.render = (h, params) => {
+          // console.log('params.column: ')
+          // console.log('Item: ', item)
+          // console.log('Params: ', params)
+          let obj = _.find(params.row.stageReference, {StageName: item.key})
+          // console.log('obj: ', obj)
+          let finalValue = {
+            obj: obj,
+            isCurrentTask: false,
+            isCompletedTask: true
+          }
+          if (obj) {
+            finalValue.isCurrentTask = false
+            finalValue.isCompletedTask = true
+          } else {
+            if (item.key === params.row.currentStatus) {
+              finalValue.obj = null
+              finalValue.isCurrentTask = true
+              finalValue.isCompletedTask = false
+            } else {
+              finalValue.obj = null
+              finalValue.isCurrentTask = false
+              finalValue.isCompletedTask = false
+            }
+          }
+          // console.log('finalValue: ', finalValue)
           return h(CellRender, {
             props: {
-              item: params
+              item: finalValue,
+              schemaId: this.schemaId
             }
           })
         }
@@ -196,7 +222,7 @@ export default {
                 props: {
                 },
                 attrs: {
-                  class: 'inprocessTask',
+                  class: 'inprocessTaskDot',
                   title: 'In Process'
                 }
               })
@@ -208,7 +234,7 @@ export default {
                 props: {
                 },
                 attrs: {
-                  class: 'completedTask',
+                  class: 'completedTaskDot',
                   title: 'Completed'
                 }
               })
@@ -220,7 +246,7 @@ export default {
                 props: {
                 },
                 attrs: {
-                  class: 'otherTask',
+                  class: 'otherTaskDot',
                   title: 'Other'
                 }
               })
@@ -231,6 +257,47 @@ export default {
 
         // console.log('table cols: ', tableCols)
       return tableCols
+    },
+    async init () {
+      this.$Spin.show()
+      this.fid = this.$route.params.id
+      await flowzModal.get(this.fid, {
+        $select: ['json', 'schema'],
+        $paginate: false
+      }).then(res => {
+        console.log('res.data: ', res.data.schema)
+        this.schemaId = res.data.schema
+        this.flowName = res.data.json.name
+        let cols = []
+        for (let col of res.data.json.processList) {
+          if (col.type !== 'start' && col.type !== 'endevent') {
+            cols.push({
+              title: col.name || col.id,
+              key: col.id,
+              firstColumn: false,
+              show: true,
+              width: 150
+            })
+          }
+        }
+        this.anotherBinding = _.cloneDeep(cols)
+        this.configuration.fields = _.cloneDeep(cols)
+
+        finstanceModal.get(null, {
+          fid: this.fid,
+          $paginate: false
+        }).then(resp => {
+          // console.log('resp: ', resp)
+          this.tableData = resp.data
+          this.$Spin.hide()
+        }).catch(err => {
+          console.log('Error: ', err)
+          this.$Spin.hide()
+        })
+      }).catch(err => {
+        console.log('Error: ', err)
+        this.$Spin.hide()
+      })
     }
   },
   computed: {
@@ -239,44 +306,12 @@ export default {
     }
   },
   mounted () {
-    this.$Spin.show()
-    this.fid = this.$route.params.id
-    flowzModal.get(this.fid, {
-      $select: ['json'],
-      $paginate: false
-    }).then(res => {
-      console.log('res: ', res)
-      this.flowName = res.data.json.name
-      let cols = []
-      for (let col of res.data.json.processList) {
-        if (col.type !== 'start' && col.type !== 'endevent') {
-          cols.push({
-            title: col.name || col.id,
-            key: col.id,
-            firstColumn: false,
-            show: true,
-            width: 150
-          })
-        }
-      }
-      this.anotherBinding = _.cloneDeep(cols)
-      this.configuration.fields = _.cloneDeep(cols)
-
-      finstanceModal.get(null, {
-        fid: this.fid,
-        $paginate: false
-      }).then(resp => {
-        // console.log('resp: ', resp)
-        this.tableData = resp.data
-        this.$Spin.hide()
-      }).catch(err => {
-        console.log('Error: ', err)
-        this.$Spin.hide()
-      })
-    }).catch(err => {
-      console.log('Error: ', err)
-      this.$Spin.hide()
-    })
+    this.init()
+  },
+  watch: {
+    '$route.params.id': function (newValue, oldValue) {
+      this.init()
+    }
   }
 }
 </script>
@@ -334,7 +369,7 @@ export default {
     overflow-y: auto !important;
   }
 
-  .inprocessTask{
+  .inprocessTaskDot{
     position: absolute;
     right: 10px;
     margin-top: 5px;
@@ -344,17 +379,17 @@ export default {
     border-radius: 10px; 
   }
 
-  .completedTask{
+  .completedTaskDot{
     position: absolute;
     right: 10px;
-    margin-top: 5px;
+    margin-top: 0px;
     min-width: 10px;
     min-height: 10px;
     background-color: #00FF00;
     border-radius: 10px; 
   }
 
-  .otherTask{
+  .otherTaskDot{
     position: absolute;
     right: 10px;
     margin-top: 5px;
@@ -362,5 +397,18 @@ export default {
     min-height: 10px;
     background-color: #FF0000;
     border-radius: 10px; 
+  }
+
+  .ivu-table td{
+    height: 40px;
+  }
+
+  .ivu-table td:first-child{
+    padding-left: 10px;
+  }
+
+  .ivu-table-cell{
+    padding-left: 0;
+    padding-right: 0;
   }
 </style>  

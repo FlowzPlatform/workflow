@@ -7,7 +7,7 @@
           <list-instances v-on:setValues="setValues"></list-instances>
           <div>
             <div class="row" v-if="id != null">
-              <div class="col-md-10" id="top">
+              <div class="col-md-12" id="top">
                 <div class="row" style="margin-top: 15px;">
                   <div class="col-md-12">
                     <div class="ui-card">
@@ -54,14 +54,13 @@
                   </div>
                 </div>
               </div>
-              <div class="col-md-1 fixed-div">
+              <!-- <div class="col-md-1 fixed-div">
                 <strong>Jump To:</strong>
                 <ul class="jumper-links">
                   <a href="#top" class="btn btn-info btn-block btnJumperLink"><li>Top</li></a>
                   <a :href="'#' + item" v-for="item in jumperLinks" class="btn btn-info btn-block btnJumperLink"><li>{{item}}</li></a>
                 </ul>
-                <!-- <pre>{{formSchemaInstance}}</pre> -->
-              </div>
+              </div> -->
             </div>
           </div>
         </TabPane>
@@ -163,7 +162,7 @@
 
           <div style="padding: 10px">
             <div class="row" v-if="id != null">
-              <div class="col-md-11" id="top">
+              <div class="col-md-12" id="top">
                 <div class="row" style="margin-top: 15px;">
                   <div class="col-md-12">
                     <div class="ui-card">
@@ -206,13 +205,13 @@
                   </div>
                 </div>
               </div>
-              <div class="col-md-1 fixed-div">
+              <!-- <div class="col-md-1 fixed-div">
                 <strong>Jump To:</strong>
                 <ul class="jumper-links">
                   <a href="#top" class="btn btn-info btn-block btnJumperLink"><li>Top</li></a>
                   <a :href="'#' + item" v-for="item in jumperLinks" class="btn btn-info btn-block btnJumperLink"><li>{{item}}</li></a>
                 </ul>
-              </div>
+              </div> -->
             </div>
           </div>
         </TabPane>
