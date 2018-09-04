@@ -137,6 +137,15 @@
                                         <a><Icon type="edit"></Icon></a>
                                         <div slot="title"><h3>Property</h3></div>
                                         <div slot="content">
+                                          <Form-item v-if="activatedProperty(index,'format')" label="Format" :label-width="80" class="no-margin">
+                                            <Input size="small" v-model="item.property.format"></Input>
+                                          </Form-item>
+                                          <Form-item v-if="activatedProperty(index,'lengthofdigits')" label="Length" :label-width="80" class="no-margin">
+                                            <Input-number size="small" v-model="item.property.lengthofdigits"></Input-number>
+                                          </Form-item>
+                                          <Form-item v-if="activatedProperty(index,'startfrom')" label="Start From" :label-width="80" class="no-margin">
+                                            <Input-number size="small" v-model="item.property.startfrom"></Input-number>
+                                          </Form-item>
                                           <Form-item v-if="activatedProperty(index,'min')" label="Min" :label-width="80" class="no-margin">
                                             <Input-number size="small" v-model="item.property.min"></Input-number>
                                           </Form-item>
@@ -517,6 +526,18 @@
           </Collapse>
           </Form-item>
           
+          <div align="right" style="margin-top: 10px;">
+            <Form-item>
+              <Button type="ghost" @click="handleReset('formSchema')" style="margin-left: 8px">Reset</Button>
+
+              <Button type="primary" :loading="loading" @click="handleSubmit('formSchema')">
+                  <span v-if="!loading && !formSchema.id">Save</span>
+                  <span v-else-if="!loading && formSchema.id">Update</span>
+                  <span v-else>Loading...</span>
+              </Button>
+              
+            </Form-item>  
+          </div>
         </Form>
       </Col>
     </Row>
@@ -631,6 +652,9 @@ export default {
       }, {
         value: 'file',
         label: 'File'
+      }, {
+        value: 'autogenerate',
+        label: 'Auto Generate'
       }],
       types: [],
       // CascaderData: [],
@@ -1112,7 +1136,8 @@ export default {
         'boolean': ['defaultValue', 'placeholder', 'optional'],
         'date': ['defaultValue', 'mindate', 'maxdate', 'placeholder', 'optional'],
         'dropdown': ['options', 'defaultValue', 'placeholder', 'optional'],
-        'file': ['optional', 'isMultiple']
+        'file': ['optional', 'isMultiple'],
+        'autogenerate': ['format', 'lengthofdigits', 'startfrom']
       }
       if (typePropertys[this.formSchema.entity[index].type] === undefined) {
         return ['IsArray'].indexOf(property) >= 0

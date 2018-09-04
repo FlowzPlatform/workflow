@@ -360,7 +360,7 @@ export default {
       // alert(id)
       var arrObj = []
       var self = this
-      await axios.get('https://api.flowzcluster.tk/eng/schema/' + id)
+      await schemaModel.get(id)
       .then(async (response) => {
         var _res = response.data
         var obj = {}

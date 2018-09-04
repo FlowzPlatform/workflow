@@ -738,7 +738,7 @@ export default {
     showSecurityDialog (query) {
       this.selectedFlowObject = null
       this.selectedFlowObject = query.row
-      axios.post('https://api.flowzcluster.tk/authldap/init', {
+      axios.post(config.ldapURL, {
         'app': 'workflow_' + this.selectedFlowObject.id
       })
       .then(function (response) {

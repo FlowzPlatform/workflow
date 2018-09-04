@@ -49,7 +49,7 @@
               </div>
             </div>
             <div class="col-md-2">
-              <Button icon="search" type="primary" long>Search</Button>
+              <Button icon="search" type="primary" @click="searchInstances" long>Search</Button>
             </div>
           </div>
 
@@ -245,8 +245,7 @@ export default {
     }
   },
   methods: {
-    searchInTable () {
-      console.log('this. searchQuery: ', this.searchQuery)
+    searchInstances () {
       // this.tableData = _.filter(this.tableData, (o) => { return o.id === this.searchQuery })
     },
     ok () {
@@ -499,5 +498,9 @@ export default {
 
   .searchQueries{
     margin: 5px 0;
+  }
+
+  th .ivu-table-cell > span, td .ivu-table-cell > span, td .ivu-table-cell > .ivu-poptip {
+    padding-left: 10px;
   }
 </style>  
