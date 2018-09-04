@@ -82,8 +82,9 @@
 
 import $ from 'jquery'
 import SchemaSubForm from './SchemaSubForm'
-import axios from 'axios'
+// import axios from 'axios'
 import moment from 'moment'
+import schemaModel from '@/api/schema'
 // let jumperLinks = [];
 
 var AWS = require('aws-sdk')
@@ -137,7 +138,7 @@ export default {
       // alert(id)
       var arrObj = []
       var self = this
-      await axios.get('https://api.flowzcluster.tk/eng/schema/' + id)
+      await schemaModel.get(id)
         .then(async (response) => {
           var _res = response.data
           var obj = {}
