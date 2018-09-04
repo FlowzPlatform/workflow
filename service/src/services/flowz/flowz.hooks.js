@@ -40,7 +40,7 @@ let beforeFind = function(hook) {
 }
 
 let beforeGet = function (hook) {
-  console.log('-------------------------------------------------------------------')
-  console.log('hook.params.headers', hook.params)
-  console.log('-------------------------------------------------------------------')
+  // console.log('-------------------------------------------------------------------')
+  // console.log('hook.params.headers', hook.params)
+  // console.log('-------------------------------------------------------------------')
 }

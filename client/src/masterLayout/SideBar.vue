@@ -129,11 +129,25 @@ export default {
     handleopenChange (node) {
       node = node.split('/')
       if (this.$store.state.role === 1) {
-        this.$router.push({name: 'schemaview', params: {id: node[0], stateid: node[1]}})
+        if (this.$route.params.stateid === node[1]) {
+          let randomStr = this.makeid()
+          this.$store.state.updateView = randomStr
+        } else {
+          this.$router.push({name: 'schemaview', params: {id: node[0], stateid: node[1]}})
+        }
         // this.$router.push('/admin/schemaview/' + node[0] + '/' + node[1])
       } else {
         this.$router.push('/schemaview/' + node[0] + '/' + node[1])
       }
+    },
+
+    makeid () {
+      var text = ''
+      var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+
+      for (var i = 0; i < 8; i++) { text += possible.charAt(Math.floor(Math.random() * possible.length)) }
+
+      return text
     },
     // handleSubmenu (item, subitem) {
     //   // console.log(item, subitem)
@@ -452,6 +466,54 @@ export default {
           // this.flowzList[finx].count += 1
           this.setCounters(this.flowzList[finx])
         }
+      }
+    },
+    'flowz': {
+      created (data) {
+        // console.log('Created Data: ', data)
+        this.$Notice.success({
+          title: 'Flowz Updated.',
+          duration: 10,
+          render: h => {
+            return h('Button', {
+              props: {
+                type: 'ghost'
+              },
+              on: {
+                'click': (value) => {
+                  this.$store.state.flowz = []
+                  this.init()
+                  // window.location.reload()
+                }
+              }
+            }, 'Update View')
+          }
+        })
+      },
+      updated (data) {
+        // console.log('Updated Data: ', data)
+        this.$Notice.success({
+          title: 'Flowz Updated.',
+          duration: 10,
+          render: h => {
+            return h('Button', {
+              props: {
+                type: 'ghost'
+              },
+              on: {
+                'click': (value) => {
+                  // window.location.reload()
+                  this.$store.state.flowz = []
+                  this.init()
+                }
+              }
+            }, 'Update View')
+          }
+        })
+        // this.init()
+      },
+      removed (data) {
+        console.log('Removed Data: ', data)
       }
     }
   }

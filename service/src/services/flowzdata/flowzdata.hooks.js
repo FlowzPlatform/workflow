@@ -51,6 +51,9 @@ function afterCreate (hook) {
     hook.params.query = {};
     hook.params.query.$select = ['json'];
     const query = Object.assign({}, hook.params.query);
+    // console.log('++++++++++++++++++++++++++++++++++++++++++++++++++++++')
+    // console.log('hook.params', hook.params)
+    // console.log('++++++++++++++++++++++++++++++++++++++++++++++++++++++')
     return hook.app.service('flowz').get(hook.data.fid, {query}).then(res => {
       let cuurentObj = _.find(res.json.processList, {id: hook.data.state});
       let nextTargetObj = getNextTarget(res.json.processList, cuurentObj.target[0].id);
@@ -62,12 +65,32 @@ function afterCreate (hook) {
         if (hook.params.hasOwnProperty('nextTarget')) {
           mdata.currentStatus = hook.params.nextTarget;
         }
-        mdata.stageReference.push({
+        if (mdata.stageReference.length > 0) {
+          console.log(cuurentObj.id, mdata.stageReference[mdata.stageReference.length - 1].StageName)
+          // if (mdata.stageReference[mdata.stageReference.length - 1].StageName === cuurentObj.id) {
+          mdata.stageReference[mdata.stageReference.length - 1].completedAt = new Date().toISOString()
+          // }
+        }
+        let referenceObj = {
           StageName: finstRes.currentStatus,
           stageRecordId: hook.result.id,
           createdAt: new Date().toISOString(),
-          userId: (hook.params.userPackageDetails !== undefined ? hook.params.userPackageDetails.id:null)
-        });
+          user: {
+            id: (hook.params.userPackageDetails !== undefined ? hook.params.userPackageDetails._id: null),
+            name: (hook.params.userPackageDetails !== undefined ? hook.params.userPackageDetails.fullname: null),
+            email: (hook.params.userPackageDetails !== undefined ? hook.params.userPackageDetails.email: null),
+            role: null,
+            avatar: (hook.params.userPackageDetails !== undefined ? hook.params.userPackageDetails.picture: null)
+          }
+        }
+        if (hook.params.userPackageDetails !== undefined && hook.params.userPackageDetails.package[hook.params.headers.subscriptionid].role !== undefined) {
+          if (typeof hook.params.userPackageDetails.package[hook.params.headers.subscriptionid].role === 'string') {
+            referenceObj.user.role = hook.params.userPackageDetails.package[hook.params.headers.subscriptionid].role
+          } else {
+            referenceObj.user.role = hook.params.userPackageDetails.package[hook.params.headers.subscriptionid].role['workflow_' + hook.data.fid]
+          }
+        }
+        mdata.stageReference.push(referenceObj);
         if (nextTargetObj.type === 'endevent') {
           mdata.mainStatus = 'completed';
         }
@@ -94,11 +117,11 @@ function afterCreate (hook) {
 
 function getNextTarget (processList, targetId) {
   let targetObj = _.find(processList,{'id': targetId});
-  if (targetObj.type === 'start' || targetObj.type === 'endevent' || targetObj.type === 'intermediatethrowevent') {
-    return targetObj;
-  }
-  if(targetObj.inputProperty.length === 0) {
-    targetObj = getNextTarget(processList, targetObj.target[0].id);
-  }
+  // if (targetObj.type === 'start' || targetObj.type === 'endevent' || targetObj.type === 'intermediatethrowevent') {
+  //   return targetObj;
+  // }
+  // // if(targetObj.inputProperty.length === 0) {
+  // targetObj = getNextTarget(processList, targetObj.target[0].id);
+  // // }
   return targetObj;
 }
