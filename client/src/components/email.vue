@@ -133,3 +133,8 @@ import config from '@/config'
     }
   }
 </script>
+<style>
+.mce-edit-area.mce-container.mce-panel.mce-stack-layout-item > iframe {
+  height: 500px !important;
+}
+</style>

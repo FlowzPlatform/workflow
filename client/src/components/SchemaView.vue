@@ -859,6 +859,8 @@ export default {
     },
 
     setValues (values) {
+      this.email = false
+      this.schemabinding = false
       this.nextTarget.value = ''
       this.nextTarget.options = []
       this.isMultiple = false
