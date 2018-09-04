@@ -763,22 +763,50 @@ export default {
     handleAssign (value) {
       this.value2 = value
     },
-    showInviteDialog (query) {
-      if (query.row.roles !== undefined) {
-        this.flowId = 'workflow_' + query.row.id
-        let temp1 = query.row.roles.split(',')
-        let roles = []
-        for (let index = 0; index < temp1.length; index++) {
-          roles.push({
-            value1: temp1[index],
-            label1: temp1[index]
-          })
-          this.options = roles
+    async showInviteDialog (query) {
+      // if (query.row.roles !== undefined) {
+      //   this.flowId = 'workflow_' + query.row.id
+      //   let temp1 = query.row.roles.split(',')
+      //   let roles = []
+      //   for (let index = 0; index < temp1.length; index++) {
+      //     roles.push({
+      //       value1: temp1[index],
+      //       label1: temp1[index]
+      //     })
+      //     this.options = roles
+      //   }
+      //   this.modal1 = true
+      // } else {
+      //   alert('First add roles')
+      // }
+      console.log(query)
+      var self = this
+      let newValue = 'workflow_' + query.row.id
+      await axios.get(config.subscriptionUrl + 'register-roles?module=' + newValue, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;'
         }
-        this.modal1 = true
-      } else {
-        alert('First add roles')
-      }
+      }).then(function (response) {
+        console.log(response)
+        if (response.data.data.length > 0) {
+          let roles = []
+          for (let i = 0; i < response.data.data.length; i++) {
+            roles.push({
+              value1: response.data.data[i].role,
+              label1: response.data.data[i].role
+            })
+          }
+          console.log('roles', roles)
+          self.options = roles
+        } else {
+          self.loadingPermisions = false
+        }
+        return response.data.data
+      })
+        .catch(function (error) {
+          console.log(error)
+        })
+      this.modal1 = true
     },
     capitalize (str) {
       str = str[0].toUpperCase() + str.slice(1)
