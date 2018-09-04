@@ -652,6 +652,7 @@ export default {
         } else {
           nextTargetId = _.find(this.flowData.json.processList, {'id': currentStageObject.target[0].id})
         }
+        console.log('nextTargetId', nextTargetId)
         if (nextTargetId.type === 'sendproofmail') {
           this.id = null
           this.schemabinding = true
@@ -687,7 +688,7 @@ export default {
         let allcheck = []
         for (let dobj of obj.data) {
           let flag = this.checkValidation(dobj, this.entity)
-          allcheck.push(flag)
+         await allcheck.push(flag)
         }
         let check = _.indexOf(allcheck, false)
         // var check = this.checkValidation(obj.data[0], this.entity)
@@ -752,6 +753,7 @@ export default {
           }
         } else {
           if (!v.property.optional) {
+            console.log('data[v.name]',data[v.name] )
             if (data[v.name] === '') {
               self.validErr.push({name: v.name, errmsg: 'Field is required.'})
               self.validFlag = false

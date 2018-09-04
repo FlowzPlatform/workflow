@@ -39,6 +39,7 @@
                 <!-- <div style=""> -->
                   <Row v-if="field.property.IsArray">
                     <schema-form  :schemainstance="getObject(inx, index, field.name, field.type)"></schema-form>
+                    <!-- {{val}} -->
                     <Button type="dashed" long @click="handleAdd(inx, index, schemainstance.entity[inx].entity[0], schemainstance.data[index][field.name], field.name)" icon="plus-round" style="float:right">Add ({{field.name}})</Button>
                   </Row>
                   <Row v-else>
@@ -91,7 +92,13 @@
                       <div v-if="schemainstance.data[index][field.name + 'List']">
                         <div class="list-group" v-for="val in schemainstance.data[index][field.name + 'List']" style="margin-bottom:0px;">
                             <a :href="val" class="list-group-item" target="_blank" style="color:blue;padding:2px 15px;">{{val}}</a>
+                           <div class="list-group" v-for="val in schemainstance.data[index][field.name]" style="margin-bottom:0px;">
+                                            <a :href="val" class="list-group-item" target="_blank" style="color:blue;padding:2px 12px;" >{{val}}</a>
+                                            <a href="#" style="color:red">&#10005;</a>
+                                            <!-- {{val}} -->
+                                        </div>                      
                         </div>
+
                       </div>
                       <!-- <div>{{schemainstance.data[index][field.name + 'List']}}</div> -->
                     </Col>

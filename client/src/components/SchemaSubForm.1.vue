@@ -16,7 +16,6 @@
                             </Row>
                             <Row v-else>
                                 <schemasubform :schemainstance="getObject(inx, index, field.name, field.type)"></schemasubform>
-                                
                             </Row>
                         </FormItem>
                     </Col>
@@ -50,23 +49,13 @@
                         <FormItem :key="inx" :rules="createRules(field)" style="margin-bottom:10px;">
                             <Row>
                                 <Col :span="2">
-                                    <b>{{field.name}}</b>
+                                    <!-- <b>{{field.name}}</b> -->
                                 </Col>
-                                <!-- <Col :span="20">
-                                <Input v-model="schemainstance.data[index][field.name]" type="text"></Input> -->
-                                <!-- <Input v-model="schemainstance.data[index][field.name]" type="text" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name"></Input> -->
-                                     <!-- <b>{{field}}</b> -->
-                                     <!-- <a> {{ schemainstance.data[index][field.name] }}</a> -->
-                                <!-- </Col> --> 
                                 <Col :span="22">
                                     <input class="form-control" type="file" v-if="field.type == 'file'" @change="handleFileChange($event, index, field.name)" :multiple="(field.property.isMultiple)? field.property.isMultiple: false" />
-                                    <!-- <input class="form-control" type="file" v-if="field.type == 'file'" @change="uploadToAWS($event, field.name)" :multiple="(field.property.isMultiple)? field.property.isMultiple: false" /> -->
-                                    <Progress v-if="stratProgress" v-bind:percent="fileUploadProgress" :success-percent="30" />
-                                    <div v-if="schemainstance.data[index][field.name]" >
-                                        <div class="list-group" v-for="val in schemainstance.data[index][field.name]" style="margin-bottom:0px;">
-                                            <a :href="val" class="list-group-item" target="_blank" style="color:blue;padding:2px 12px;" >{{val}}</a>
-                                            <a href="#" style="color:red">&#10005;</a>
-                                            <!-- {{val}} -->
+                                    <div v-if="schemainstance.data[index][field.name + 'List']">
+                                        <div class="list-group" v-for="val in schemainstance.data[index][field.name + 'List']" style="margin-bottom:0px;">
+                                            <a :href="val" class="list-group-item" target="_blank" style="color:blue;padding:2px 15px;">{{val}}</a>
                                         </div>
                                     </div>
                                 </Col>
@@ -87,13 +76,13 @@
     </div>
   </div>
 </template>
+
 <script>
-/* eslint-disable */
+
 import $ from 'jquery'
 import SchemaSubForm from './SchemaSubForm'
 import axios from 'axios'
 import moment from 'moment'
-// import _ from 'lodash'
 // let jumperLinks = [];
 
 var AWS = require('aws-sdk')
@@ -108,8 +97,6 @@ export default {
   props: ['schemainstance'],
   data () {
     return {
-      fileUploadProgress: 0,
-      stratProgress: false,
       jumperLinks: []
     }
   },
@@ -117,111 +104,30 @@ export default {
     'schemasubform': SchemaSubForm
   },
   methods: {
-   async handleFileChange (e, index, fieldName) {
-      // return new Promise((resolve, reject) => {
-        console.log('fuunction caliing')
-        let self = this
-        var files = e.target.files || e.dataTransfer.files
-        let allFiles = []
-      // let allFiles
-        if (files.length > 0) {
-        console.log('files', files[0])
-        self.stratProgress = true
-          for (let i = 0; i < files.length; i++) {
-          console.log('for loop')
-          let abc = await this.uploadToAWS(files[i],i)
-          allFiles.push(abc)
-          // let bucket = new AWS.S3({ params: { Bucket: 'airflowbucket1/obexpense/expenses' } })
-          // var params = {
-          //   Key: moment().valueOf().toString() + i + files[i].name,
-          //   ContentType: files[i].type,
-          //   Body: files[i]
-          // }
-          //       bucket.upload(params).on('httpUploadProgress', function (evt) {
-          //       self.fileUploadProgress = parseInt((evt.loaded * 100) / evt.total)
-          //   // console.log('Uploaded:: ' + parseInt((evt.loaded * 100) / evt.total) + '%')
-          //       }).send(async function (err, data) {
-          //       if (err) {
-          //         alert(err)
-          //       } else {
-          //         console.log('done')
-          //         await allFiles.push(data.Location)
-          //         console.log(data.Location)
-          //         // console.log(allFiles.push(data.Location))
-          //         self.fileUploadProgress = 0
-          //         self.stratProgress = false
-          //       }
-          //       })
-          }
-        }
-      //  self.schemainstance.data[index][fieldName] = _.concat(a, b)
-      // console.log(self.schemainstance.data[index][fieldName])
-        // self.schemainstance.data[index][fieldName] = allFiles
-      self.schemainstance.data[index][fieldName] = _.concat(self.schemainstance.data[index][fieldName], allFiles)
-        console.log(allFiles)
-      console.log(self.schemainstance.data[index][fieldName])
-      // .then(() => resolve())
-      // .catch(() => reject())
-      // })
-    },
-    // uploadToAWS (file, i) {
-    //   return new Promise((resolve, reject) => {
-    //       let bucket = new AWS.S3({ params: { Bucket: 'airflowbucket1/obexpense/expenses' } })
-    //       var params = {
-    //         Key: moment().valueOf().toString() + i + file.name,
-    //         ContentType: file.type,
-    //         Body: file
-    //       }
-    //           bucket.upload(params).on('httpUploadProgress', function (evt) {
-    //         // self.fileUploadProgress = parseInt((evt.loaded * 100) / evt.total)
-    //         // console.log('Uploaded:: ' + parseInt((evt.loaded * 100) / evt.total) + '%')
-    //             }).send(function (err, data) {
-    //             if (err) {
-    //               alert(err)
-    //               reject(err)
-    //             } else {
-    //               console.log('done')
-    //               // await allFiles.push(data.Location)
-    //               console.log(data.Location)
-    //               resolve(data.Location)
-    //               // console.log(allFiles.push(data.Location))
-    //               // self.fileUploadProgress = 0
-    //               // self.stratProgress = false
-    //             }
-    //           })
-    //       })
-    //   // })
-    // },
-       uploadToAWS (file, i) {
-        //  console.log(file);
-        //  console.log(i);        
-      return new Promise((resolve, reject) => {
+    handleFileChange (e, index, fieldName) {
+      let self = this
+      var files = e.target.files || e.dataTransfer.files
+      let allFiles = []
+      if (files.length > 0) {
+        // console.log('files', files[0])
+        for (let i = 0; i < files.length; i++) {
           let bucket = new AWS.S3({ params: { Bucket: 'airflowbucket1/obexpense/expenses' } })
-          // console.log(bucket)
           var params = {
-            Key: moment().valueOf().toString() + i + file.name,
-            ContentType: file.type,
-            Body: file
+            Key: moment().valueOf().toString() + i + files[i].name,
+            ContentType: files[i].type,
+            Body: files[i]
           }
-              bucket.upload(params).on('httpUploadProgress', function (evt) {
-            // self.fileUploadProgress = parseInt((evt.loaded * 100) / evt.total)
-            // console.log('Uploaded:: ' + parseInt((evt.loaded * 100) / evt.total) + '%')
-                }).send(function (err, data) {
-                if (err) {
-                  alert(err)
-                  reject(err)
-                } else {
-                  console.log('done')
-                  // await allFiles.push(data.Location)
-                  console.log(data.Location)
-                  resolve(data.Location)
-                  // console.log(allFiles.push(data.Location))
-                  // self.fileUploadProgress = 0
-                  // self.stratProgress = false
-                }
-              })
+          bucket.upload(params).on('httpUploadProgress', function (evt) {
+          }).send(function (err, data) {
+            if (err) {
+              alert(err)
+            } else {
+              allFiles.push(data.Location)
+            }
           })
-      // })
+        }
+      }
+      self.schemainstance.data[index][fieldName] = allFiles
     },
     getValidationProps (index, fieldName) {
       return 'data[' + index + '][' + fieldName + ']'
@@ -484,10 +390,4 @@ export default {
   .ivu-form-item-content{
     /*line-height: 15px !important;*/
   }
-  .badge {
-  background-color:green;
-  border: 1px solid black;
-  padding: 2px;
-  transition: 1s;
-}
 </style>

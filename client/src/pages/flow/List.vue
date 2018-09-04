@@ -855,7 +855,7 @@ export default {
           subscriptionId: this.value2,
           name: obj.label2,
           role: {
-           [this.flowId]: this.value1.toLowerCase()
+            [this.flowId]: this.value1.toLowerCase()
           },
           fromEmail: this.$store.state.user.email
         }
