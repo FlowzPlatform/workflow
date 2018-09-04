@@ -473,7 +473,7 @@ export default {
         // console.log('Created Data: ', data)
         this.$Notice.success({
           title: 'Flowz Updated.',
-          duration: 0,
+          duration: 10,
           render: h => {
             return h('Button', {
               props: {
@@ -481,7 +481,9 @@ export default {
               },
               on: {
                 'click': (value) => {
-                  window.location.reload()
+                  this.$store.state.flowz = []
+                  this.init()
+                  // window.location.reload()
                 }
               }
             }, 'Update View')
@@ -492,7 +494,7 @@ export default {
         // console.log('Updated Data: ', data)
         this.$Notice.success({
           title: 'Flowz Updated.',
-          duration: 0,
+          duration: 10,
           render: h => {
             return h('Button', {
               props: {
@@ -500,7 +502,9 @@ export default {
               },
               on: {
                 'click': (value) => {
-                  window.location.reload()
+                  // window.location.reload()
+                  this.$store.state.flowz = []
+                  this.init()
                 }
               }
             }, 'Update View')
