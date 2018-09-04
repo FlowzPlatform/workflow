@@ -100,7 +100,7 @@
               </table>
             </div>
             <div v-else>
-              <p align="center"><small>No Data</small></p>
+              <p align="center"><small>{{waitingText}}</small></p>
             </div>
 
         </div>
@@ -312,9 +312,11 @@ const X2JS = require('x2js')
 import schemamappingModel from '@/api/schemamapping'
 import schemaModel from '@/api/schema'
 import approvalModel from '@/api/approval'
-import instanceModel from '@/api/flowzinstance'
+// import instanceModel from '@/api/flowzinstance'
+import finstanceModal from '@/api/finstance'
 import expandRow from './table-expand.vue'
 import axios from 'axios'
+import viewSVG from './viewSVG'
 import psl from 'psl'
 import subscription from '@/components/subscription'
 
@@ -324,9 +326,7 @@ import subscription from '@/components/subscription'
 import config from '../../config/index'
 import expandRow2 from './assigned_invite_table-expand.vue'
 let subscriptionUrl = config.subscriptionUrl
-
 // Vue.use(VueWidgets)
-
 // import Permissions from './permissions'
 const deepRecord = require('../../assets/js/deepstream/deepRecord.js')
 import expandInviteRow from './own_assign.vue'
@@ -336,6 +336,7 @@ import Cookies from 'js-cookie'
 export default {
   name: 'Flowz',
   components: {
+    'viewSVG': viewSVG,
     expandRow,
     expandRow2,
     subscription
@@ -367,19 +368,66 @@ export default {
       flowzList: [],
       columns10: [
         {
-          type: 'expand',
+          // title: '#',
+          key: 'ProcessName',
           width: 50,
+          align: 'center',
+          type: 'expand',
+          // width: 50,
           render: (h, params) => {
-            return h(expandRow, {
-              props: {
-                row: params.row
-              }
-            })
+            // return h(expandRow, {
+            //   props: {
+            //     row: params.row
+            //   }
+            // })
+            if (params.row.svg) {
+              return h(viewSVG, {
+                props: {
+                  align: 'center',
+                  svgStr: params.row.svg
+                }
+              })
+              // return h('Poptip', {
+              //   props: {
+              //     // trigger: 'hover',
+              //     placement: 'right',
+              //     align: 'center'
+              //   }
+              // }, [
+              //   h(viewSVG, {
+              //     props: {
+              //       align: 'center',
+              //       svgStr: params.row.svg
+              //     }
+              //   }),
+              //   h('div', {
+              //     slot: 'title'
+              //   }, [
+              //     h('b', params.row.ProcessName)
+              //   ]),
+              //   h('div', {
+              //     slot: 'content'
+              //   }, [
+              //     h(viewSVG, {
+              //       props: {
+              //         // align: 'center',
+              //         svgStr: params.row.svg
+              //       }
+              //     })
+              //   ])
+              // ])
+            } else {
+              return h('div', 'No SVG')
+            }
           }
         },
         {
           title: 'Name',
           key: 'ProcessName'
+        },
+        {
+          title: 'Id',
+          key: 'id'
         },
         {
           title: 'Notes',
@@ -388,7 +436,7 @@ export default {
         {
           title: 'Action',
           key: 'action',
-          width: 400,
+          width: 300,
           align: 'center',
           render: (h, params) => {
             return h('div', [
@@ -409,7 +457,9 @@ export default {
                 },
                 on: {
                   click: () => {
-                    this.createNewInstance(params.index, this.flowzList[params.index].id)
+                    // console.log('action', params.row.id)
+                    this.createNewInstance(params.row.id)
+                    // console.log('item');
                   }
                 }
               }, ''),
@@ -524,6 +574,7 @@ export default {
       roleValue1: '',
       input: '',
       // loading :false,
+      waitingText: '',
       data2: [],
       data3: [],
       data4: [],
@@ -687,7 +738,7 @@ export default {
     showSecurityDialog (query) {
       this.selectedFlowObject = null
       this.selectedFlowObject = query.row
-      axios.post('https://api.flowzcluster.tk/authldap/init', {
+      axios.post(config.ldapURL, {
         'app': 'workflow_' + this.selectedFlowObject.id
       })
       .then(function (response) {
@@ -705,30 +756,40 @@ export default {
       this.permissionsModal = true
     },
     ok () {
-      this.$Message.info('Clicked ok')
+      // this.$Message.info('Clicked ok')
     },
     cancel () {
-      this.$Message.info('Clicked cancel')
+      // this.$Message.info('Clicked cancel')
     },
     handleAssign (value) {
       this.value2 = value
     },
-    showInviteDialog (query) {
-      if (query.row.roles !== undefined) {
-        this.flowId = 'workflow_' + query.row.id
-        let temp1 = query.row.roles.split(',')
-        let roles = []
-        for (let index = 0; index < temp1.length; index++) {
-          roles.push({
-            value1: temp1[index],
-            label1: temp1[index]
-          })
-          this.options = roles
+    async showInviteDialog (query) {
+      var self = this
+      let newValue = 'workflow_' + query.row.id
+      await axios.get(config.subscriptionUrl + 'register-roles?module=' + newValue, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;'
         }
-        this.modal1 = true
-      } else {
-        alert('First add roles')
-      }
+      }).then(function (response) {
+        if (response.data.data.length > 0) {
+          let roles = []
+          for (let i = 0; i < response.data.data.length; i++) {
+            roles.push({
+              value1: response.data.data[i].role,
+              label1: response.data.data[i].role
+            })
+          }
+          self.options = roles
+        } else {
+          self.loadingPermisions = false
+        }
+        return response.data.data
+      })
+        .catch(function (error) {
+          console.log(error)
+        })
+      this.modal1 = true
     },
     capitalize (str) {
       str = str[0].toUpperCase() + str.slice(1)
@@ -878,22 +939,38 @@ export default {
         console.log(error)
       })
     },
-    async createNewInstance (index, id) {
-      // let generatedJson = await this.generateJson(this.flowzList[index].xml)
-      let generatedJson = this.flowzList[index].json
-      generatedJson.allowedusers = this.flowzList[index].allowedusers ? this.flowzList[index].allowedusers : []
-      // console.log('generatedJson', JSON.stringify(generatedJson))
-      // console.log('generatedJson', generatedJson)
-      generatedJson.fid = id
-      generatedJson.createdOn = Date()
-      // console.log('instanceModel', instanceModel)
-      instanceModel.post(generatedJson)
-      .then(response => {
-        // console.log('response.data', response.data)
-        this.$router.push('/admin/flow/instance/' + response.data.id)
-      })
-      .catch(error => {
-        console.log(error)
+    createNewInstance (item) {
+      // // let generatedJson = await this.generateJson(this.flowzList[index].xml)
+      // let generatedJson = this.flowzList[index].json
+      // generatedJson.allowedusers = this.flowzList[index].allowedusers ? this.flowzList[index].allowedusers : []
+      // // console.log('generatedJson', JSON.stringify(generatedJson))
+      // // console.log('generatedJson', generatedJson)
+      // generatedJson.fid = id
+      // generatedJson.createdOn = Date()
+      // // console.log('instanceModel', instanceModel)
+      // instanceModel.post(generatedJson)
+      // .then(response => {
+      //   // console.log('response.data', response.data)
+      //   this.$router.push('/admin/flow/instance/' + response.data.id)
+      // })
+      // .catch(error => {
+      //   console.log(error)
+      // })
+      // console.log('item', item)
+      // this.item = item
+      this.$Loading.start()
+      let fheaders = null
+      finstanceModal.post({fid: item.id}, null, fheaders).then(res => {
+        this.$Notice.success({title: 'Instance Generated'})
+        this.$Loading.finish()
+      }).catch(e => {
+        this.$Loading.error()
+        console.log('error', e.response)
+        if (e.response.data.message) {
+          this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+        } else {
+          this.$Notice.error({title: 'Error', desc: 'Instace Not Generated'})
+        }
       })
     },
     addNewFlow () {
@@ -1211,6 +1288,7 @@ export default {
     getRoles: async function (newValue) {
       // this.tableData = {}
       var self = this
+      self.waitingText = 'Loading...'
       await axios.get(config.subscriptionUrl + 'register-roles?module=' + newValue, {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded;'
@@ -1231,6 +1309,7 @@ export default {
           self.callTaskList(newValue)
         } else {
           self.loadingPermisions = false
+          self.waitingText = 'No Data'
         }
         return response.data.data
       })
@@ -1248,6 +1327,7 @@ export default {
           } else {
             self.loadingPermisions = false
           }
+          self.waitingText = 'No Data'
         })
     },
     callTaskList: async function (newValue) {

@@ -231,6 +231,11 @@
           "type": "String"
         },
         {
+          "name": "schema",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
           "name": "versionTag",
           "isAttr": true,
           "type": "String"
@@ -968,6 +973,11 @@
         "type": "Boolean"
       }, {
         "name": "capacity",
+        "type": "String",
+        "isAttr": true
+      },
+      {
+        "name": "buttonLabel",
         "type": "String",
         "isAttr": true
       }, {
