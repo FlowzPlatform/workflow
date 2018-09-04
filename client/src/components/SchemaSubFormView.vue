@@ -62,9 +62,9 @@
 </template>
 
 <script>
-
+import schemaModel from '@/api/schema'
 import SchemaSubFormView from './SchemaSubFormView'
-import axios from 'axios'
+// import axios from 'axios'
 
 var AWS = require('aws-sdk')
 AWS.config.update({
@@ -97,7 +97,7 @@ export default {
       // alert(id)
       var arrObj = []
       var self = this
-      await axios.get('https://api.flowzcluster.tk/eng/schema/' + id)
+      await schemaModel.get(id)
         .then(async (response) => {
           var _res = response.data
           var obj = {}

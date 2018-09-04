@@ -28,7 +28,8 @@ var temp = {
   grapesDomain: process.env.domainKey,
   subscriptionUrl: 'https://api.' + process.env.domainKey + '/subscription/',
   getAllPermissionsUrl: 'https://api.' + process.env.domainKey + '/authldap/getallpermission/',
-  setPermissionUrl: 'https://api.' + process.env.domainKey + '/authldap/setpermission'
+  setPermissionUrl: 'https://api.' + process.env.domainKey + '/authldap/setpermission',
+  ldapURL: 'https://api.' + process.env.domainKey + '/authldap/init'
 }
 if (process.env.NODE_ENV !== 'development') {
   temp = {
@@ -54,7 +55,8 @@ if (process.env.NODE_ENV !== 'development') {
     grapesDomain: process.env.domainKey,
     subscriptionUrl: 'https://api.' + process.env.domainKey + '/subscription/',
     getAllPermissionsUrl: 'https://api.' + process.env.domainKey + '/authldap/getallpermission/',
-    setPermissionUrl: 'https://api.' + process.env.domainKey + '/authldap/setpermission'
+    setPermissionUrl: 'https://api.' + process.env.domainKey + '/authldap/setpermission',
+    ldapURL: 'https://api.' + process.env.domainKey + '/authldap/init'
   }
 }
 export default temp
