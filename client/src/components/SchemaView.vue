@@ -243,7 +243,7 @@
       <schemasubformview ref="schemasubformview" :schemainstance="formSchemaInstance" id="schemasubformview"></schemasubformview>
     </div>
     <div v-if="email">
-      <email :btnArr="btnArr" :sendDataEmail="sendDataEmail" :iid="item.id" v-on:on-done="emailService"></email>
+      <email :btnArr="btnArr" :flag="flag" :emailSchemaId="emailSchemaId" :sendDataEmail="sendDataEmail" :iid="item.id" v-on:on-done="emailService"></email>
     </div>
   </div>
 </template>
@@ -297,6 +297,8 @@ export default {
         data: [],
         entity: []
       },
+      flag: true,
+      emailSchemaId: '',
       btnArr: {},
       schema: {},
       dataSchema: {},
@@ -642,6 +644,12 @@ export default {
 
     async handleSubmit (name) {
       let currentStateId = this.$route.params.stateid
+      if (this.schema.hasOwnProperty('emailSchema')) {
+        if (this.schema.emailSchema.action == true) {
+          this.emailSchemaId = this.schema.emailSchema.schemaId
+          this.flag = false
+        }
+      }
       if(!this.isEmailDone){
         let currentStageObject = _.find(this.flowData.json.processList, {'id': currentStateId})
         let nextTargetId
@@ -654,7 +662,8 @@ export default {
           this.id = null
           this.schemabinding = true
           setTimeout(() => {
-            this.sendDataEmail = '<link rel="stylesheet" href="https://unpkg.com/iview@3.0.1/dist/styles/iview.css">' + ' <style> .ui-card{background-color: #fff; box-shadow: 0px 0px 25px #dadada; border-radius: 10px; padding: 10px 20px;}.card-title{text-transform: capitalize; color: #FFF; font-size: 18px; background-color: #292929; padding: 10px 30px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; margin-left: -20px; margin-bottom: 10px;}.btnAdd{background-color: #53CAE8; border-radius: 50px; font-size: 14px; text-transform: uppercase; color: #fff; border: none; font-style: italic;}.btnAdd:hover{background-color: #83d5ea; color: #fff;}.btnDelete{font-size: 14px; border-radius: 50px; color: #fff !important; position: absolute; bottom: 10px; right: 10px; background-color: #FF0000; width: 20px; height: 20px;}.btnDelete i{position: absolute; top: 4px; left: 5px;}.field-label{text-transform: capitalize;}.formTitle{text-transform: capitalize;}.jumper-links{list-style: none; font-size: 14px;}.jumper-links a{text-decoration: none; /*color: #53cae8;*/ text-align: left; font-weight: bold; text-transform: capitalize;}.fixed-div{position: fixed; right: 0;}.ivu-form-item-content{/*line-height: 15px !important;*/} </style>' + this.$refs.schemasubformview.$el.outerHTML
+            this.sendDataEmail = this.$refs.schemasubformview.$el.outerHTML
+            console.log(this.sendDataEmail)
             this.email = true
           }, 1000)
           let flag = false
