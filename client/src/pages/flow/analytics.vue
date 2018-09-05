@@ -99,6 +99,7 @@
 <script>
 import flowzModal from '@/api/flowz'
 import finstanceModal from '@/api/finstance'
+import dataQueryModel from '@/api/dataquery'
 import schemaModal from '@/api/schema'
 import CellRender from '@/components/cellRender'
 import ConfigExpand from '@/components/configExpand'
@@ -386,6 +387,21 @@ export default {
     },
     async init () {
       this.$Spin.show()
+      // this.colviewCols = []
+      this.colviewCols = [
+        {
+          title: 'ID',
+          key: 'id',
+          fixed: 'left',
+          width: 280
+        },
+        {
+          title: 'Task',
+          key: 'task',
+          width: 150
+        }
+      ]
+      this.colviewData = []
       this.fid = this.$route.params.id
       let colviewData = []
 
@@ -457,6 +473,16 @@ export default {
       }).catch(err => {
         console.log('Error: ', err)
         this.$Spin.hide()
+      })
+
+      dataQueryModel.get(null, {
+        $all: true,
+        fid: this.fid,
+        $paginate: false
+      }).then(res => {
+        console.log('Res: ', res)
+      }).catch(err => {
+        console.log('Erro: ', err)
       })
     }
   },
