@@ -29,7 +29,9 @@
                                 </Col>
                                 <Col :span="16">
                                     
-                                    <Input v-if="field.type == 'text' || field.type == 'email' || field.type == 'phone'" v-model="schemainstance.data[index][field.name]" type="text" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name" :min="(field.property.min > 0)?field.property.min : -Infinity"></Input>
+                                    <Input v-if="field.type == 'textarea'" v-model="schemainstance.data[index][field.name]" type="textarea" :rows="schemainstance.data[index][field.numberoflines]" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name" :max="(field.property.max > 0)?field.property.max : Infinity"/>
+
+                                    <Input v-if="field.type == 'text' || field.type == 'email' || field.type == 'phone'" v-model="schemainstance.data[index][field.name]" type="text" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name" :max="(field.property.max > 0)?field.property.max : Infinity"></Input>
                                     
                                     <InputNumber v-if="field.type == 'number'" :min="(field.property.min > 0)?field.property.min : -Infinity" :max="(field.property.max > 0)?field.property.max : Infinity" v-model="schemainstance.data[index][field.name]" :type="field.type" :placeholder="field.name"></InputNumber>
                                     
@@ -184,7 +186,7 @@ export default {
       return arrObj
     },
     getObject (eIndex, dataIndex, fname, ftype) {
-      console.log('get obj called: ', dataIndex)
+      // console.log('get obj called: ', dataIndex)
       var obj = {}
       obj.data = this.schemainstance.data[dataIndex][fname]
       obj.entity = this.schemainstance.entity[eIndex].entity[0].entity

@@ -137,14 +137,17 @@
                                         <a><Icon type="edit"></Icon></a>
                                         <div slot="title"><h3>Property</h3></div>
                                         <div slot="content">
+                                          <Form-item v-if="activatedProperty(index,'numberoflines')" label="Lines" :label-width="80" class="no-margin">
+                                            <Input-number size="small" v-model="item.property.numberoflines" min="1"></Input-number>
+                                          </Form-item>
                                           <Form-item v-if="activatedProperty(index,'format')" label="Format" :label-width="80" class="no-margin">
                                             <Input size="small" v-model="item.property.format"></Input>
                                           </Form-item>
                                           <Form-item v-if="activatedProperty(index,'lengthofdigits')" label="Length" :label-width="80" class="no-margin">
-                                            <Input-number size="small" v-model="item.property.lengthofdigits"></Input-number>
+                                            <Input-number size="small" v-model="item.property.lengthofdigits" min="1"></Input-number>
                                           </Form-item>
                                           <Form-item v-if="activatedProperty(index,'startfrom')" label="Start From" :label-width="80" class="no-margin">
-                                            <Input-number size="small" v-model="item.property.startfrom"></Input-number>
+                                            <Input-number size="small" v-model="item.property.startfrom" min="1"></Input-number>
                                           </Form-item>
                                           <Form-item v-if="activatedProperty(index,'min')" label="Min" :label-width="80" class="no-margin">
                                             <Input-number size="small" v-model="item.property.min"></Input-number>
@@ -631,6 +634,9 @@ export default {
       defaultType: [{
         value: 'text',
         label: 'Text'
+      }, {
+        value: 'textarea',
+        label: 'Textarea'
       }, {
         value: 'email',
         label: 'Email'
@@ -1130,6 +1136,7 @@ export default {
     activatedProperty (index, property) {
       let typePropertys = {
         'text': ['max', 'allowedValue', 'defaultValue', 'placeholder', 'regEx', 'optional'],
+        'textarea': ['max', 'allowedValue', 'defaultValue', 'placeholder', 'optional', 'numberoflines'],
         'email': ['allowedValue', 'defaultValue', 'placeholder', 'optional'],
         'number': ['min', 'max', 'allowedValue', 'defaultValue', 'placeholder', 'regEx', 'optional'],
         'phone': ['allowedValue', 'defaultValue', 'placeholder', 'regEx', 'optional'],

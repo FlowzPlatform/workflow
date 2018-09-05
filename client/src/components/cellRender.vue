@@ -116,10 +116,18 @@ export default {
       return y1.diff(x1, 'hours')
     },
     getUserAvatar (item) {
-      return item.obj.user.avatar
+      if (item.obj.user.avatar) {
+        return item.obj.user.avatar
+      } else {
+        return ('https://www.sigmanest.com/wp-content/uploads/2017/11/Dummy.jpg')
+      }
     },
     getUserHoverDetails (item) {
-      return ('Name: ' + item.obj.user.name + '\nEmail: ' + item.obj.user.email + '\nRole: ' + item.obj.user.role)
+      if (item.obj.user.name && item.obj.user.email && item.obj.user.role) {
+        return ('Name: ' + item.obj.user.name + '\nEmail: ' + item.obj.user.email + '\nRole: ' + item.obj.user.role)
+      } else {
+        return ('User details not available.')
+      }
     },
     async showData (item) {
       this.$Spin.show()
