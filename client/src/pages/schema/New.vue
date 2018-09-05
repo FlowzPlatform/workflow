@@ -528,7 +528,53 @@
               </Panel>
           </Collapse>
           </Form-item>
-          
+          <Collapse>
+          <Panel name="2">
+            Email Schema
+            <p slot="content">
+              <!-- <Select size="small" v-model="valueEmailSchema" class="schema-form-input" style="width:50%">
+                  <Option v-for="t in typeForEmail" :value="t.value" :key="t.value">{{ t.label }}</Option>
+              </Select>
+              <Checkbox style="margin-left: 50px" v-model="typeForEmailSelect">EmailSchema?</Checkbox> -->
+              <table cellspacing="0" cellpadding="0" border="0" style="width: 100%; border:1px solid #eee">
+                <colgroup>
+                  <col width="50">
+                      <col width="50">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th class="">
+                            <div class="ivu-table-cell">
+                                <span>Email Schema</span>
+                            </div>
+                        </th>
+                        <th class="">
+                            <div class="ivu-table-cell">
+                                <span>Action</span>
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="ivu-table-tbody">
+                    <tr class="ivu-table-row" >
+                        <td class="">
+                            <div class="ivu-table-cell">
+                                  <Select size="small" v-model="valueEmailSchema" class="schema-form-input">
+                                      <Option v-for="t in typeForEmail" :value="t.value" :key="t.value">{{ t.label }}</Option>
+                                  </Select>
+                            </div>
+                        </td>
+                        <td class="">
+                            <div class="ivu-table-cell">
+                                <Checkbox v-model="typeForEmailSelect"></Checkbox>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+              </table>
+            </p>
+          </Panel>
+          </Collapse>
           <div align="right" style="margin-top: 10px;">
             <Form-item>
               <Button type="ghost" @click="handleReset('formSchema')" style="margin-left: 8px">Reset</Button>
@@ -538,7 +584,6 @@
                   <span v-else-if="!loading && formSchema.id">Update</span>
                   <span v-else>Loading...</span>
               </Button>
-              
             </Form-item>  
           </div>
         </Form>
@@ -663,6 +708,9 @@ export default {
         label: 'Auto Generate'
       }],
       types: [],
+      typeForEmail: [],
+      typeForEmailSelect: false,
+      valueEmailSchema: '',
       // CascaderData: [],
       scdata: [],
       createtemplate: [],
@@ -1003,6 +1051,11 @@ export default {
         api.request('get', '/schema/' + id)
         .then(response => {
           this.formSchema = response.data
+          // console.log(response.data)
+          if (response.data.hasOwnProperty('emailSchema')) {
+            this.valueEmailSchema = response.data.emailSchema.schemaId
+            this.typeForEmailSelect = response.data.emailSchema.action
+          }
           if (this.formSchema.createTemplate && this.formSchema.createTemplate.length > 0) {
             this.etemplate.createtemplate = this.formSchema.createTemplate
           }
@@ -1021,6 +1074,7 @@ export default {
      setTypes (id) {
       this.$store.dispatch('getSchema')
       let type = []
+      let typeForEmail = []
      _.forEach(this.defaultType,async function (t) {
        type.push(t)
       })
@@ -1031,9 +1085,14 @@ export default {
             value: schema.id,
             label: schema.title
           })
+       typeForEmail.push({
+            value: schema.id,
+            label: schema.title
+          })
         }
       })
      this.types = type
+     this.typeForEmail = typeForEmail
       // this.
     },
     handleSubmit (name) {
@@ -1048,6 +1107,10 @@ export default {
             this.formSchema['emailTemplate'] = this.mjmlUpload
             this.formSchema['createdAt'] = new Date()
             this.formSchema['isdeleted'] = false
+            this.formSchema['emailSchema'] = {
+              "schemaId": this.valueEmailSchema,
+              "action": this.typeForEmailSelect
+            }
             api.request('post', '/schema', this.formSchema)
             .then(response => {
               // console.log('response', response)
@@ -1072,6 +1135,10 @@ export default {
             this.formSchema['viewTemplate'] = this.vtemplate.viewtemplate
             this.formSchema['createTemplate'] = this.etemplate.createtemplate
             this.formSchema['emailTemplate'] = this.mjmlUpload
+            this.formSchema['emailSchema'] = {
+              "schemaId": this.valueEmailSchema,
+              "action": this.typeForEmailSelect
+            }
             // alert(this.formSchema._id)
             // this.formSchema['viewTemplate'] = this.viewtemplate
             // this.formSchema['createTemplate'] = this.createtemplate
@@ -1279,6 +1346,10 @@ export default {
       this.$store.getters.allSchema.forEach((schema) => {
         if (this.$route.params.id !== schema.id) {
          this.types.push({
+            value: schema.id,
+            label: schema.title
+          })
+         this.typeForEmail.push({
             value: schema.id,
             label: schema.title
           })
