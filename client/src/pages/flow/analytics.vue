@@ -17,9 +17,17 @@
           </ul>
 
           <!-- <Button class="settingsBtn" icon="ios-settings"></Button> -->
-          <Tooltip class="settingsBtn" content="Settings">
-            <Button @click="isModel = !isModel"><i class="fa fa-cog"></i></Button>
-          </Tooltip>
+          <div class="settingsBtn">
+            <Tooltip content="Settings">
+              <Button shape="circle" type="info" @click="isModel = !isModel"><i class="fa fa-cog"></i></Button>
+            </Tooltip>
+              <div style="float:right; margin-left:5px;">
+                <ButtonGroup shape="circle">
+                  <Button title="Overview" icon="ios-keypad" type="primary" @click="viewChange(1)"></Button>
+                  <Button title="Data View" icon="navicon-round" type="primary" @click="viewChange(2)"></Button>
+                </ButtonGroup>
+              </div>
+          </div>
 
        </div>
       </div>
@@ -76,7 +84,14 @@
     </Modal>
 
     <!-- Main Table -->
-    <Table v-if="schemaId !== null" height="690" border :columns="mainColumns()" :data="tableData"></Table>
+    <div v-show="rowview">
+      <!-- <Table height="690" border :columns="mainColumns()" :data="tableData"></Table> -->
+      <Table v-if="schemaId !== null" height="590" border :columns="mainColumns()" :data="tableData"></Table>
+    </div>
+    <div v-show="columnview">
+      <Table :columns="colviewCols" height="590" :data="colviewData"></Table>
+    </div>
+    <!-- <Table v-if="schemaId !== null" height="690" border :columns="mainColumns()" :data="tableData"></Table> -->
 
   </div>
 </template>
@@ -84,6 +99,7 @@
 <script>
 import flowzModal from '@/api/flowz'
 import finstanceModal from '@/api/finstance'
+import schemaModal from '@/api/schema'
 import CellRender from '@/components/cellRender'
 import ConfigExpand from '@/components/configExpand'
 import _ from 'lodash'
@@ -93,10 +109,26 @@ export default {
   name: 'dashboard',
   data () {
     return {
+      rowview: true,
+      columnview: false,
       flowName: null,
       tableData: [],
       isModel: false,
       anotherBinding: [],
+      colviewCols: [
+        {
+          title: 'ID',
+          key: 'id',
+          fixed: 'left',
+          width: 280
+        },
+        {
+          title: 'Task',
+          key: 'task',
+          width: 150
+        }
+      ],
+      colviewData: [],
       configCols: [
         {
           type: 'expand',
@@ -245,6 +277,15 @@ export default {
     }
   },
   methods: {
+    viewChange (item) {
+      if (item === 1) {
+        this.rowview = true
+        this.columnview = false
+      } else {
+        this.rowview = false
+        this.columnview = true
+      }
+    },
     searchInstances () {
       // this.tableData = _.filter(this.tableData, (o) => { return o.id === this.searchQuery })
     },
@@ -346,6 +387,8 @@ export default {
     async init () {
       this.$Spin.show()
       this.fid = this.$route.params.id
+      let colviewData = []
+
       await flowzModal.get(this.fid, {
         $select: ['json', 'schema'],
         $paginate: false
@@ -373,10 +416,43 @@ export default {
         }).then(resp => {
           // console.log('resp: ', resp)
           this.tableData = resp.data
+          colviewData = resp.data
+          for (let item of colviewData) {
+            for (let task of res.data.json.processList) {
+              if (task.type !== 'start' && task.type !== 'endevent') {
+              // flowzdataModal.get().then(res => {
+
+              // }).catch(e => {
+              //   console.log('e', e)
+              // })
+                this.colviewData.push({
+                  id: item.id,
+                  task: task.name || task.id
+                })
+              }
+            }
+          }
           this.$Spin.hide()
         }).catch(err => {
           console.log('Error: ', err)
           this.$Spin.hide()
+        })
+
+        schemaModal.get(res.data.schema).then(result => {
+          // let anyCustom = false
+          for (let item of result.data.entity) {
+            if (!item.customtype) {
+              this.colviewCols.push({
+                title: item.name,
+                key: item.name,
+                width: 150
+              })
+            } else {
+              // anyCustom = true
+            }
+          }
+        }).catch(e => {
+          console.log('e', e)
         })
       }).catch(err => {
         console.log('Error: ', err)
@@ -502,5 +578,11 @@ export default {
 
   th .ivu-table-cell > span, td .ivu-table-cell > span, td .ivu-table-cell > .ivu-poptip {
     padding-left: 10px;
+  }
+
+  .ivu-btn-circle, .ivu-btn-circle-outline{
+    padding: 0;
+    width: 32px;
+    height: 32px;
   }
 </style>  
