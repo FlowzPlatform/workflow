@@ -663,7 +663,6 @@ export default {
           this.schemabinding = true
           setTimeout(() => {
             this.sendDataEmail = this.$refs.schemasubformview.$el.outerHTML
-            console.log(this.sendDataEmail)
             this.email = true
           }, 1000)
           let flag = false
