@@ -192,9 +192,9 @@ export default {
   },
   mounted () {
     this.init()
-    this.chart = new CanvasJS.Chart("chartContainer", this.newVSReturningVisitorsOptions);
-    this.chart.options.data = this.visitorsData["New vs Returning Visitors"];
-    this.chart.render();
+    // this.chart = new CanvasJS.Chart("chartContainer", this.newVSReturningVisitorsOptions);
+    // this.chart.options.data = this.visitorsData["New vs Returning Visitors"];
+    // this.chart.render();
   }
 }
 </script>
