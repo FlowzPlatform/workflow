@@ -1045,7 +1045,7 @@ export default {
         api.request('get', '/schema/' + id)
         .then(response => {
           this.formSchema = response.data
-          console.log(response.data)
+          // console.log(response.data)
           if (response.data.hasOwnProperty('emailSchema')) {
             this.valueEmailSchema = response.data.emailSchema.schemaId
             this.typeForEmailSelect = response.data.emailSchema.action
