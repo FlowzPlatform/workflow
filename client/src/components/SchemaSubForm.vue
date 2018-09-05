@@ -58,18 +58,24 @@
                                      <!-- <b>{{field}}</b> -->
                                      <!-- <a> {{ schemainstance.data[index][field.name] }}</a> -->
                                 <!-- </Col> --> 
-                                <Col :span="22">
-                                    <input class="form-control" type="file" v-if="field.type == 'file'" @change="handleFileChange($event, index, field.name)" :multiple="(field.property.isMultiple)? field.property.isMultiple: false" />
-                                    <!-- <input class="form-control" type="file" v-if="field.type == 'file'" @change="uploadToAWS($event, field.name)" :multiple="(field.property.isMultiple)? field.property.isMultiple: false" /> -->
-                                    <Progress v-if="stratProgress" v-bind:percent="fileUploadProgress" :success-percent="30" />
+                                <Col :span="21" >
+                                    <input class="form-control" type="file" v-if="field.type == 'file'" @change="handleFileChange($event, index, field.name)" :multiple="(field.property.isMultiple)? field.property.isMultiple: false"/>
+                                   <!-- {{fileSize}}  -->
                                     <div v-if="schemainstance.data[index][field.name]" >
-                                        <div class="list-group" v-for="val in schemainstance.data[index][field.name]" style="margin-bottom:0px;">
-                                            <a :href="val" class="list-group-item" target="_blank" style="color:blue;padding:2px 12px;" >{{val}}</a>
-                                            <a href="#" style="color:red">&#10005;</a>
+                                      <!-- <p v-for=" val1 in fileSize"> -->
+                                      <Progress v-if="stratProgress"  v-bind:percent="fileUploadProgress" :success-percent="30" />
+                                      <!-- {{fileUploadProgress}}  -->
+                                      <!-- </p> --> 
+                                        <div class="" v-for="val in schemainstance.data[index][field.name]" style="margin-top:10px;">
+                                            <Row>
+                                                <Col :span="23"> <a :href="val" class="list-group-item" target="_blank" style="color:blue;padding:2px 2px;" >{{val}}</a></Col>
+                                                <Col :span="1"><a href="#" style="color:red;float:right">&#10005;&nbsp;</a></Col>
+                                            </Row>          
                                             <!-- {{val}} -->
                                         </div>
                                     </div>
                                 </Col>
+                                <Col :span="1">&nbsp;&nbsp;{{fileNumber}} / {{fileSize}}</Col>
                             </Row>
                         </FormItem>
                     </Col>
@@ -89,204 +95,173 @@
 </template>
 <script>
 /* eslint-disable */
-import $ from 'jquery'
-import SchemaSubForm from './SchemaSubForm'
-import axios from 'axios'
-import moment from 'moment'
+import $ from "jquery";
+import SchemaSubForm from "./SchemaSubForm";
+import axios from "axios";
+import moment from "moment";
 // import _ from 'lodash'
 // let jumperLinks = [];
-
-var AWS = require('aws-sdk')
+var AWS = require("aws-sdk");
 AWS.config.update({
   accessKeyId: process.env.accesskey,
   secretAccessKey: process.env.secretkey
-})
-AWS.config.region = 'us-west-2'
+});
+AWS.config.region = "us-west-2";
 
 export default {
-  name: 'schemasubform',
-  props: ['schemainstance'],
-  data () {
+  name: "schemasubform",
+  props: ["schemainstance"],
+  data() {
     return {
+      fileNumber:0,
+      fileSize: 0,
       fileUploadProgress: 0,
       stratProgress: false,
       jumperLinks: []
-    }
+    };
   },
   components: {
-    'schemasubform': SchemaSubForm
+    schemasubform: SchemaSubForm
   },
   methods: {
-   async handleFileChange (e, index, fieldName) {
+    async handleFileChange(e, index, fieldName) {
       // return new Promise((resolve, reject) => {
-        console.log('fuunction caliing')
-        let self = this
-        var files = e.target.files || e.dataTransfer.files
-        let allFiles = []
+      // console.log("fuunction caliing");
+      let self = this;
+      var files = e.target.files || e.dataTransfer.files;
+      let allFiles = [];                                                                                                                                                      
       // let allFiles
-        if (files.length > 0) {
-        console.log('files', files[0])
-        self.stratProgress = true
-          for (let i = 0; i < files.length; i++) {
-          console.log('for loop')
-          let abc = await this.uploadToAWS(files[i],i)
-          allFiles.push(abc)
-          // let bucket = new AWS.S3({ params: { Bucket: 'airflowbucket1/obexpense/expenses' } })
-          // var params = {
-          //   Key: moment().valueOf().toString() + i + files[i].name,
-          //   ContentType: files[i].type,
-          //   Body: files[i]
-          // }
-          //       bucket.upload(params).on('httpUploadProgress', function (evt) {
-          //       self.fileUploadProgress = parseInt((evt.loaded * 100) / evt.total)
-          //   // console.log('Uploaded:: ' + parseInt((evt.loaded * 100) / evt.total) + '%')
-          //       }).send(async function (err, data) {
-          //       if (err) {
-          //         alert(err)
-          //       } else {
-          //         console.log('done')
-          //         await allFiles.push(data.Location)
-          //         console.log(data.Location)
-          //         // console.log(allFiles.push(data.Location))
-          //         self.fileUploadProgress = 0
-          //         self.stratProgress = false
-          //       }
-          //       })
-          }
+      if (files.length > 0) {
+        // console.log("files", files[0]);                                                                                                                                                                     
+        for (let i = 0; i < files.length; i++) {
+          self.stratProgress = true;
+          // console.log(files.name)                                                                                                                            );
+          // console.log("for loop");
+          self.fileSize = files.length
+          // console.log(fileSize);
+          // console.log("file");
+          // console.log(files[i]);
+          // console.log("for loop");
+          let abc = await this.uploadToAWS(files[i], i);
+          allFiles.push(abc);
         }
-      //  self.schemainstance.data[index][fieldName] = _.concat(a, b)
-      // console.log(self.schemainstance.data[index][fieldName])
-        // self.schemainstance.data[index][fieldName] = allFiles
-      self.schemainstance.data[index][fieldName] = _.concat(self.schemainstance.data[index][fieldName], allFiles)
-        console.log(allFiles)
-      console.log(self.schemainstance.data[index][fieldName])
-      // .then(() => resolve())
-      // .catch(() => reject())
-      // })
+      }
+      // self.schemainstance.data[index][fieldName] = allFiles
+      self.schemainstance.data[index][fieldName] = _.concat(self.schemainstance.data[index][fieldName],allFiles);
+      // console.log(allFiles);
+      // console.log(self.schemainstance.data[index][fieldName]);
     },
-    // uploadToAWS (file, i) {
-    //   return new Promise((resolve, reject) => {
-    //       let bucket = new AWS.S3({ params: { Bucket: 'airflowbucket1/obexpense/expenses' } })
-    //       var params = {
-    //         Key: moment().valueOf().toString() + i + file.name,
-    //         ContentType: file.type,
-    //         Body: file
-    //       }
-    //           bucket.upload(params).on('httpUploadProgress', function (evt) {
-    //         // self.fileUploadProgress = parseInt((evt.loaded * 100) / evt.total)
-    //         // console.log('Uploaded:: ' + parseInt((evt.loaded * 100) / evt.total) + '%')
-    //             }).send(function (err, data) {
-    //             if (err) {
-    //               alert(err)
-    //               reject(err)
-    //             } else {
-    //               console.log('done')
-    //               // await allFiles.push(data.Location)
-    //               console.log(data.Location)
-    //               resolve(data.Location)
-    //               // console.log(allFiles.push(data.Location))
-    //               // self.fileUploadProgress = 0
-    //               // self.stratProgress = false
-    //             }
-    //           })
-    //       })
-    //   // })
-    // },
-       uploadToAWS (file, i) {
-        //  console.log(file);
-        //  console.log(i);        
+    uploadToAWS(file, i) {
+      let self = this;
+      
+      // console.log(fileSize);
       return new Promise((resolve, reject) => {
-          let bucket = new AWS.S3({ params: { Bucket: 'airflowbucket1/obexpense/expenses' } })
-          // console.log(bucket)
-          var params = {
-            Key: moment().valueOf().toString() + i + file.name,
-            ContentType: file.type,
-            Body: file
-          }
-              bucket.upload(params).on('httpUploadProgress', function (evt) {
-            // self.fileUploadProgress = parseInt((evt.loaded * 100) / evt.total)
-            // console.log('Uploaded:: ' + parseInt((evt.loaded * 100) / evt.total) + '%')
-                }).send(function (err, data) {
-                if (err) {
-                  alert(err)
-                  reject(err)
-                } else {
-                  console.log('done')
-                  // await allFiles.push(data.Location)
-                  console.log(data.Location)
-                  resolve(data.Location)
-                  // console.log(allFiles.push(data.Location))
-                  // self.fileUploadProgress = 0
-                  // self.stratProgress = false
-                }
-              })
+        let bucket = new AWS.S3({
+          params: { Bucket: "airflowbucket1/obexpense/expenses" }
+        });
+        var params = {
+          Key:
+            moment()
+              .valueOf()
+              .toString() +
+            i +
+            file.name,
+          ContentType: file.type,
+          Body: file
+        };
+        bucket
+          .upload(params)
+          .on("httpUploadProgress", function(evt) {
+            // console.log(i);
+            self.fileUploadProgress = parseInt(evt.loaded * 100 / evt.total);
           })
+          .send(function(err, data) {
+            if (err) {
+              alert(err);
+              reject(err);
+            } else {
+              // console.log("done");
+              // await allFiles.push(data.Location)
+              // console.log(data.Location);
+              self.fileNumber = i+1;
+              self.fileUploadProgress = 0;
+              self.stratProgress = false;
+              resolve(data.Location);
+              // console.log(allFiles.push(data.Location))
+            }
+          });
+        //  }
+      });
       // })
     },
-    getValidationProps (index, fieldName) {
-      return 'data[' + index + '][' + fieldName + ']'
+    getValidationProps(index, fieldName) {
+      return "data[" + index + "][" + fieldName + "]";
     },
-    async getChildData (id) {
+    async getChildData(id) {
       // alert(id)
-      var arrObj = []
-      var self = this
-      await axios.get('https://api.flowzcluster.tk/eng/schema/' + id)
-        .then(async (response) => {
-          var _res = response.data
-          var obj = {}
+      var arrObj = [];
+      var self = this;
+      await axios
+        .get("https://api.flowzcluster.tk/eng/schema/" + id)
+        .then(async response => {
+          var _res = response.data;
+          var obj = {};
           // obj.id = self.getGuid();  // for guid for perticular row
           // obj.database = _res.database
           // obj.Schemaid = _res._id
           for (let v of _res.entity) {
             if (v.customtype) {
-              obj[v.name] = await self.getChildData(v.type)
+              obj[v.name] = await self.getChildData(v.type);
             } else {
-              if (v.type === 'number') {
-                if (v.property.defaultValue !== '') {
-                  obj[v.name] = v.property.defaultValue
+              if (v.type === "number") {
+                if (v.property.defaultValue !== "") {
+                  obj[v.name] = v.property.defaultValue;
                 } else {
-                  if (v.property.min !== 0 && v.property.min !== '') {
-                    obj[v.name] = v.property.min
+                  if (v.property.min !== 0 && v.property.min !== "") {
+                    obj[v.name] = v.property.min;
                   } else {
-                    obj[v.name] = 1
+                    obj[v.name] = 1;
                   }
                 }
-              } else if (v.type === 'boolean') {
-                if (v.property.defaultValue !== '' || v.property.defaultValue === 'true') {
-                  obj[v.name] = true
+              } else if (v.type === "boolean") {
+                if (
+                  v.property.defaultValue !== "" ||
+                  v.property.defaultValue === "true"
+                ) {
+                  obj[v.name] = true;
                 } else {
-                  obj[v.name] = false
+                  obj[v.name] = false;
                 }
-              } else if (v.type === 'file') {
-                obj[v.name] = []
+              } else if (v.type === "file") {
+                obj[v.name] = [];
               } else {
-                if (v.property.defaultValue !== '') {
-                  obj[v.name] = v.property.defaultValue
+                if (v.property.defaultValue !== "") {
+                  obj[v.name] = v.property.defaultValue;
                 } else {
-                  obj[v.name] = ''
+                  obj[v.name] = "";
                 }
               }
             }
           }
-          arrObj.push(obj)
+          arrObj.push(obj);
         })
         .catch(error => {
-          console.log('Error: ', error)
-        })
-      return arrObj
+          console.log("Error: ", error);
+        });
+      return arrObj;
     },
-    getObject (eIndex, dataIndex, fname, ftype) {
-      var obj = {}
-      obj.data = this.schemainstance.data[dataIndex][fname]
-      obj.entity = this.schemainstance.entity[eIndex].entity[0].entity
-      let indexx = $.inArray(fname, this.jumperLinks)
+    getObject(eIndex, dataIndex, fname, ftype) {
+      var obj = {};
+      obj.data = this.schemainstance.data[dataIndex][fname];
+      obj.entity = this.schemainstance.entity[eIndex].entity[0].entity;
+      let indexx = $.inArray(fname, this.jumperLinks);
       if (indexx === -1) {
-        this.jumperLinks.push(fname)
+        this.jumperLinks.push(fname);
       }
-      return obj
+      return obj;
     },
-    async handleAdd (eIndex, dataIndex, ent, data, fname) {
-      var self = this
+    async handleAdd(eIndex, dataIndex, ent, data, fname) {
+      var self = this;
       // var self.$refs['formSchema'][0].validate()
       // self.$refs['formSchema'][0].validate((valid) => {
       //   alert(1)
@@ -296,43 +271,46 @@ export default {
       //     this.$Message.error('Error!')
       //   }
       // })
-      var obj = {}
+      var obj = {};
       // obj.id = this.getGuid();
       // alert(ent.database)
       // obj.database = ent.database
       // obj.Schemaid = ent._id
       for (let v of ent.entity) {
         if (v.customtype) {
-          obj[v.name] = await self.getChildData(v.type)
+          obj[v.name] = await self.getChildData(v.type);
         } else {
-          if (v.type === 'number') {
-            if (v.property.defaultValue !== '') {
-              obj[v.name] = v.property.defaultValue
+          if (v.type === "number") {
+            if (v.property.defaultValue !== "") {
+              obj[v.name] = v.property.defaultValue;
             } else {
-              if (v.property.min !== 0 && v.property.min !== '') {
-                obj[v.name] = v.property.min
+              if (v.property.min !== 0 && v.property.min !== "") {
+                obj[v.name] = v.property.min;
               } else {
-                obj[v.name] = 1
+                obj[v.name] = 1;
               }
             }
-          } else if (v.type === 'boolean') {
-            if (v.property.defaultValue !== '' || v.property.defaultValue === 'true') {
-              obj[v.name] = true
+          } else if (v.type === "boolean") {
+            if (
+              v.property.defaultValue !== "" ||
+              v.property.defaultValue === "true"
+            ) {
+              obj[v.name] = true;
             } else {
-              obj[v.name] = false
+              obj[v.name] = false;
             }
-          } else if (v.type === 'file') {
-            obj[v.name] = []
+          } else if (v.type === "file") {
+            obj[v.name] = [];
           } else {
-            if (v.property.defaultValue !== '') {
-              obj[v.name] = v.property.defaultValue
+            if (v.property.defaultValue !== "") {
+              obj[v.name] = v.property.defaultValue;
             } else {
-              obj[v.name] = ''
+              obj[v.name] = "";
             }
           }
         }
       }
-      this.schemainstance.data[dataIndex][fname].push(obj)
+      this.schemainstance.data[dataIndex][fname].push(obj);
       // console.log('schemainstance: ', this.schemainstance.data)
     },
     // getGuid () {
@@ -341,151 +319,170 @@ export default {
     // S4() {
     //     return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
     // },
-    getObjectType (type) {
-      return ['text', 'email', 'number', 'phone', 'boolean', 'date', 'dropdown', 'file'].indexOf(type) === -1
+    getObjectType(type) {
+      return (
+        [
+          "text",
+          "email",
+          "number",
+          "phone",
+          "boolean",
+          "date",
+          "dropdown",
+          "file"
+        ].indexOf(type) === -1
+      );
     },
-    createRules (row) {
-      let rules = []
-      if (row.type === 'email') {
-        rules.push({ type: 'email', message: 'This field is email type.' })
+    createRules(row) {
+      let rules = [];
+      if (row.type === "email") {
+        rules.push({ type: "email", message: "This field is email type." });
       }
-      if (row.type === 'phone') {
+      if (row.type === "phone") {
         rules.push({
-          type: 'number',
+          type: "number",
           validator: (rule, value, callback) => {
             if (!value) {
-              return callback(new Error('Please input the value'))
+              return callback(new Error("Please input the value"));
             }
-            if (value.match(/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/)) {
-              callback()
+            if (
+              value.match(/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/)
+            ) {
+              callback();
             } else {
-              callback(new Error('Please input phone no'))
+              callback(new Error("Please input phone no"));
             }
           }
-        })
+        });
       }
       if (row.property.optional === false) {
-        rules.push({required: true, message: 'This field is required.', trigger: 'blur'})
+        rules.push({
+          required: true,
+          message: "This field is required.",
+          trigger: "blur"
+        });
       }
-      if (row.property.min > 0 && row.type === 'text') {
-        rules.push({ type: 'string', min: row.property.min, message: 'min' + row.property.min + ' length req' })
+      if (row.property.min > 0 && row.type === "text") {
+        rules.push({
+          type: "string",
+          min: row.property.min,
+          message: "min" + row.property.min + " length req"
+        });
       }
-      if (row.property.max > 0 && row.type === 'text') {
-        rules.push({ type: 'string', max: row.property.max, message: 'max length ' + row.property.max + ' required.' })
+      if (row.property.max > 0 && row.type === "text") {
+        rules.push({
+          type: "string",
+          max: row.property.max,
+          message: "max length " + row.property.max + " required."
+        });
       }
       if (row.property.allowedValue.length > 0) {
-        rules.push({type: 'enum', enum: row.property.allowedValue})
+        rules.push({ type: "enum", enum: row.property.allowedValue });
       }
-      return rules
+      return rules;
     },
-    handleEdit (row) {
-    },
-    handleRemove (index) {
+    handleEdit(row) {},
+    handleRemove(index) {
       this.$Modal.confirm({
-        title: 'Confirm',
-        content: '<p>Are you sure you want to delete?</p>',
+        title: "Confirm",
+        content: "<p>Are you sure you want to delete?</p>",
         onOk: () => {
-          this.schemainstance.data.splice(index, 1)
+          this.schemainstance.data.splice(index, 1);
         },
-        onCancel: () => {
-        }
-      })
+        onCancel: () => {}
+      });
     }
   },
-  mounted () {
-  },
-  created () {
-  }
-}
-
+  mounted() {},
+  created() {}
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.ui-card {
+  background-color: #fff;
+  box-shadow: 0px 0px 25px #dadada;
+  border-radius: 10px;
+  padding: 10px 20px;
+}
 
-  .ui-card{
-    background-color: #fff;
-    box-shadow: 0px 0px 25px #dadada;
-    border-radius: 10px;
-    padding: 10px 20px;
-  }
+.card-title {
+  text-transform: capitalize;
+  color: #fff;
+  font-size: 18px;
+  background-color: #292929;
+  padding: 10px 30px;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+  margin-left: -20px;
+  margin-bottom: 10px;
+}
 
-  .card-title{
-    text-transform: capitalize;
-    color: #FFF;
-    font-size: 18px;
-    background-color: #292929;
-    padding: 10px 30px;
-    border-top-right-radius: 5px;
-    border-bottom-right-radius: 5px;
-    margin-left: -20px;
-    margin-bottom: 10px;
-  }
+.btnAdd {
+  background-color: #53cae8;
+  border-radius: 50px;
+  font-size: 14px;
+  text-transform: uppercase;
+  color: #fff;
+  border: none;
+  font-style: italic;
+}
 
-  .btnAdd{
-    background-color: #53CAE8;
-    border-radius: 50px;
-    font-size: 14px;
-    text-transform: uppercase;
-    color: #fff;
-    border: none;
-    font-style: italic;
-  }
+.btnAdd:hover {
+  background-color: #83d5ea;
+  color: #fff;
+}
 
-  .btnAdd:hover{
-    background-color: #83d5ea;
-    color: #fff;
-  }
+.btnDelete {
+  font-size: 14px;
+  border-radius: 50px;
+  color: #fff !important;
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background-color: #ff0000;
+  width: 20px;
+  height: 20px;
+}
 
-  .btnDelete{
-    font-size: 14px;
-    border-radius: 50px;
-    color: #fff !important;
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    background-color: #FF0000;
-    width: 20px;
-    height: 20px;
-  }
-
-  .btnDelete i{
-    position: absolute;
+.btnDelete i {
+  position: absolute;
   top: 4px;
   left: 5px;
-  }
+}
 
-  .field-label{
-    text-transform: capitalize;
-  }
+.field-label {
+  text-transform: capitalize;
+}
 
-  .formTitle{
-    text-transform: capitalize;
-  }
+.formTitle {
+  text-transform: capitalize;
+}
 
-  .jumper-links{
-    list-style: none;
-    font-size: 14px;
-  }
+.jumper-links {
+  list-style: none;
+  font-size: 14px;
+}
 
-  .jumper-links a{
-    text-decoration: none;
-    /*color: #53cae8;*/
-    text-align: left;
-    font-weight: bold;
-    text-transform: capitalize;
-  }
+.jumper-links a {
+  text-decoration: none;
+  /*color: #53cae8;*/
+  text-align: left;
+  font-weight: bold;
+  text-transform: capitalize;
+}
 
-  .fixed-div{
-    position: fixed;
-    right: 0;
-  }
+.fixed-div {
+  position: fixed;
+  right: 0;
+}
 
-  .ivu-form-item-content{
-    /*line-height: 15px !important;*/
-  }
-  .badge {
-  background-color:green;
+.ivu-form-item-content {
+  /*line-height: 15px !important;*/
+}
+.badge {
+  background-color: green;
   border: 1px solid black;
   padding: 2px;
   transition: 1s;
