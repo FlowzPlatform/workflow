@@ -470,50 +470,67 @@ export default {
     },
     'flowz': {
       created (data) {
+        if (this.$store.state.role === 1) {
+          // this.$store.state.flowz = []
+          // this.init()
+          this.flowzList.push(data)
+        }
         // console.log('Created Data: ', data)
-        this.$Notice.success({
-          title: 'Flowz Updated.',
-          duration: 10,
-          render: h => {
-            return h('Button', {
-              props: {
-                type: 'ghost'
-              },
-              on: {
-                'click': (value) => {
-                  this.$store.state.flowz = []
-                  this.init()
-                  // window.location.reload()
-                }
-              }
-            }, 'Update View')
-          }
-        })
+        // this.$Notice.success({
+        //   title: 'Flowz Updated.',
+        //   duration: 10,
+        //   render: h => {
+        //     return h('Button', {
+        //       props: {
+        //         type: 'ghost'
+        //       },
+        //       on: {
+        //         'click': (value) => {
+        //           this.$store.state.flowz = []
+        //           this.init()
+        //           // window.location.reload()
+        //         }
+        //       }
+        //     }, 'Update View')
+        //   }
+        // })
       },
       updated (data) {
+        if (this.$store.state.role === 1) {
+          this.$store.state.flowz = []
+          this.init()
+          // let i = _.findIndex(this.flowzList, (o) => { return o.id === data.id })
+          // this.flowzList[i] = data
+        }
         // console.log('Updated Data: ', data)
-        this.$Notice.success({
-          title: 'Flowz Updated.',
-          duration: 10,
-          render: h => {
-            return h('Button', {
-              props: {
-                type: 'ghost'
-              },
-              on: {
-                'click': (value) => {
-                  // window.location.reload()
-                  this.$store.state.flowz = []
-                  this.init()
-                }
-              }
-            }, 'Update View')
-          }
-        })
+        // this.$Notice.success({
+        //   title: 'Flowz Updated.',
+        //   duration: 10,
+        //   render: h => {
+        //     return h('Button', {
+        //       props: {
+        //         type: 'ghost'
+        //       },
+        //       on: {
+        //         'click': (value) => {
+        //           // window.location.reload()
+        //           this.$store.state.flowz = []
+        //           this.init()
+        //         }
+        //       }
+        //     }, 'Update View')
+        //   }
+        // })
         // this.init()
       },
       removed (data) {
         console.log('Removed Data: ', data)
+        if (this.$store.state.role === 1) {
+          // this.$store.state.flowz = []
+          // this.init()
+          let i = _.findIndex(this.flowzList, (o) => { return o.id === data.id })
+          this.flowzList.splice(i, 1)
+        }
       }
     }
   }
