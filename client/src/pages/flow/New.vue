@@ -506,7 +506,6 @@
                 name: m._name,
                 type: m.workerType.toLowerCase(),
                 executeAny: m['_camunda:executeIfAny'] !== undefined ? ((m['_camunda:executeIfAny']) ? m['_camunda:countany'] : false) : false,
-                // isProcessTask: m.workerType.toLowerCase() === 'tweet' ? 'true' : false,
                 target: m.outgoing ? self.getTargetId(m, jsonXML) : []
                 // mapping: (_.union(..._mapping)),
                 // emailbutton: self.emailButton(m, jsonXML)
