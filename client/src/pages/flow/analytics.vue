@@ -98,7 +98,7 @@
 
 <script>
 import flowzModal from '@/api/flowz'
-import finstanceModal from '@/api/finstance'
+// import finstanceModal from '@/api/finstance'
 import dataQueryModel from '@/api/dataquery'
 import schemaModal from '@/api/schema'
 import CellRender from '@/components/cellRender'
@@ -386,7 +386,7 @@ export default {
       return tableCols
     },
     async init () {
-      this.$Spin.show()
+      // this.$Spin.show()
       // this.colviewCols = []
       this.colviewCols = [
         {
@@ -406,53 +406,97 @@ export default {
       let colviewData = []
 
       await flowzModal.get(this.fid, {
-        $select: ['json', 'schema'],
         $paginate: false
       }).then(res => {
         this.schemaId = res.data.schema
-        this.flowName = res.data.json.name
+        this.flowName = res.data.name
         let cols = []
-        for (let col of res.data.json.processList) {
-          if (col.type !== 'start' && col.type !== 'endevent') {
+        // console.log('res.data.processList: ', res.data.processList)
+        for (let col in res.data.processList) {
+          if (res.data.processList[col].type !== 'startevent' && res.data.processList[col].type !== 'endevent') {
             cols.push({
-              title: col.name || col.id,
-              key: col.id,
+              title: res.data.processList[col].name || res.data.processList[col].id,
+              key: res.data.processList[col].id,
               firstColumn: false,
               show: true,
               width: 150
             })
           }
         }
+        // console.log('cols: ', cols)
         this.anotherBinding = _.cloneDeep(cols)
         this.configuration.fields = _.cloneDeep(cols)
 
-        finstanceModal.get(null, {
+        dataQueryModel.get(null, {
+          $all: true,
           fid: this.fid,
           $paginate: false
-        }).then(resp => {
-          // console.log('resp: ', resp)
-          this.tableData = resp.data
-          colviewData = resp.data
-          for (let item of colviewData) {
-            for (let task of res.data.json.processList) {
-              if (task.type !== 'start' && task.type !== 'endevent') {
-              // flowzdataModal.get().then(res => {
+        }).then(queryresp => {
+          // this.$Spin.hide()
+          // console.log('Res: ', queryresp)
+          this.tableData = queryresp.data
+          colviewData = queryresp.data
 
-              // }).catch(e => {
-              //   console.log('e', e)
-              // })
-                this.colviewData.push({
-                  id: item.id,
-                  task: task.name || task.id
-                })
+          for (let item of colviewData) {
+            for (let task in res.data.processList) {
+              if (res.data.processList[task].type !== 'startevent' && res.data.processList[task].type !== 'endevent') {
+                // flowzdataModal.get().then(res => {
+
+                // }).catch(e => {
+                //   console.log('e', e)
+                // })
+                // console.log('colviewData.stageReference ', item, task)
+                let dataExist = _.find(item.stageReference, {StageName: task})
+                // console.log('dataExist: ', dataExist)
+                if (dataExist !== null && dataExist !== undefined && dataExist.hasOwnProperty('data')) {
+                  let m = {
+                    id: item.id,
+                    task: res.data.processList[task].name || res.data.processList[task].id
+                  }
+                  for (let k in dataExist.data) {
+                    m[k] = dataExist.data[k]
+                  }
+                  this.colviewData.push(m)
+                } else {
+                  this.colviewData.push({
+                    id: item.id,
+                    task: res.data.processList[task].name || res.data.processList[task].id
+                  })
+                }
               }
             }
           }
-          this.$Spin.hide()
         }).catch(err => {
-          console.log('Error: ', err)
-          this.$Spin.hide()
+          console.log('Erro: ', err)
         })
+
+        // finstanceModal.get(null, {
+        //   fid: this.fid,
+        //   $paginate: false
+        // }).then(resp => {
+        //   // console.log('resp: ', resp)
+        //   this.tableData = resp.data
+        //   colviewData = resp.data
+        //   for (let item of colviewData) {
+        //     for (let task in res.data.processList) {
+        //       if (res.data.processList[task].type !== 'startevent' && res.data.processList[task].type !== 'endevent') {
+        //       // flowzdataModal.get().then(res => {
+
+        //       // }).catch(e => {
+        //       //   console.log('e', e)
+        //       // })
+        //         this.colviewData.push({
+        //           id: item.id,
+        //           task: res.data.processList[task].name || res.data.processList[task].id
+        //         })
+        //       }
+        //     }
+        //   }
+        //   this.$Spin.hide()
+        // }).catch(err => {
+        //   console.log('Error: ', err)
+        //   this.$Spin.hide()
+        // })
 
         schemaModal.get(res.data.schema).then(result => {
           // let anyCustom = false
@@ -473,16 +517,6 @@ export default {
       }).catch(err => {
         console.log('Error: ', err)
         this.$Spin.hide()
-      })
-
-      dataQueryModel.get(null, {
-        $all: true,
-        fid: this.fid,
-        $paginate: false
-      }).then(res => {
-        console.log('Res: ', res)
-      }).catch(err => {
-        console.log('Erro: ', err)
       })
     }
   },
