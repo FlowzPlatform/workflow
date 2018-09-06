@@ -151,7 +151,7 @@
       <schemasubformview ref="schemasubformview" :schemainstance="formSchemaInstance" id="schemasubformview"></schemasubformview>
     </div>
     <div v-if="email">
-      <email :btnArr="btnArr" :sendDataEmail="sendDataEmail" :iid="item.id" v-on:on-done="emailService"></email>
+      <email :btnArr="btnArr" :flag="flag" :emailSchemaId="emailSchemaId" :sendDataEmail="sendDataEmail" :iid="item.id" v-on:on-done="emailService"></email>
     </div>
   </div>
 </template>
@@ -206,6 +206,8 @@ export default {
         data: [],
         entity: []
       },
+      flag: true,
+      emailSchemaId: '',
       btnArr: {},
       schema: {},
       dataSchema: {},
@@ -454,40 +456,7 @@ export default {
     async handleAdd () {
       var self = this
       var obj = {}
-      // if (this.lastLog !== undefined && this.lastLog.input.length !== 0) {
-      //   for (let mdata of self.lastLog.input) {
-      //     for (let ent of self.schema.entity) {
-      //       if (ent.type === 'file') {
-      //         mdata[ent.name + 'List'] = mdata[ent.name]
-      //         mdata[ent.name] = []
-      //       } else if (ent.customtype) {
-      //         mdata[ent.name] = self.setFileList(mdata[ent.name], ent.entity[0])
-      //       }
-      //     }
-      //   }
-      //   self.formSchemaInstance.data = _.map(self.lastLog.input, (entry) => {
-      //     entry.Schemaid = self.schema.id
-      //     return _.chain(entry).omit(['id', '_id']).reduce((result, value, key) => {
-      //       // if (_.isArray(value)) {
-      //       //   result[key] = self.deleteId(value)
-      //       // } else {
-      //       result[key] = value
-      //       // }
-      //       return result
-      //     }, {}).value()
-      //   })
-      //   // _.forEach(self.lastLog.input, (obj) => {
-      //   //   // obj = this.lastLog.input[0]
-      //   //   // obj.database = this.schema.database
-      //   //   obj.Schemaid = self.schema.id
-      //   //   delete obj.id
-      //   //   delete obj._id
-      //   //   self.formSchemaInstance.data.push(obj)
-      //   // })
-      // } else {
-        // obj.database = this.schema.database
       obj.Schemaid = this.schema.id
-      // _.forEach(self.entity, async function (v) {
       for (let v of self.entity) {
         if (v.customtype) {
           obj[v.name] = await self.getChildData(v.type)
@@ -520,8 +489,6 @@ export default {
         }
       }
       this.formSchemaInstance.data.push(obj)
-
-      // }
     },
 
     makeObj () {
@@ -551,6 +518,12 @@ export default {
 
     async handleSubmit (name) {
       let currentStateId = this.$route.params.stateid
+      if (this.schema.hasOwnProperty('emailSchema')) {
+        if (this.schema.emailSchema.action == true) {
+          this.emailSchemaId = this.schema.emailSchema.schemaId
+          this.flag = false
+        }
+      }
       if(!this.isEmailDone){
         let currentStageObject = _.find(this.flowData.json.processList, {'id': currentStateId})
         let nextTargetId
@@ -563,7 +536,7 @@ export default {
           this.id = null
           this.schemabinding = true
           setTimeout(() => {
-            this.sendDataEmail = '<link rel="stylesheet" href="https://unpkg.com/iview@3.0.1/dist/styles/iview.css">' + ' <style> .ui-card{background-color: #fff; box-shadow: 0px 0px 25px #dadada; border-radius: 10px; padding: 10px 20px;}.card-title{text-transform: capitalize; color: #FFF; font-size: 18px; background-color: #292929; padding: 10px 30px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; margin-left: -20px; margin-bottom: 10px;}.btnAdd{background-color: #53CAE8; border-radius: 50px; font-size: 14px; text-transform: uppercase; color: #fff; border: none; font-style: italic;}.btnAdd:hover{background-color: #83d5ea; color: #fff;}.btnDelete{font-size: 14px; border-radius: 50px; color: #fff !important; position: absolute; bottom: 10px; right: 10px; background-color: #FF0000; width: 20px; height: 20px;}.btnDelete i{position: absolute; top: 4px; left: 5px;}.field-label{text-transform: capitalize;}.formTitle{text-transform: capitalize;}.jumper-links{list-style: none; font-size: 14px;}.jumper-links a{text-decoration: none; /*color: #53cae8;*/ text-align: left; font-weight: bold; text-transform: capitalize;}.fixed-div{position: fixed; right: 0;}.ivu-form-item-content{/*line-height: 15px !important;*/} </style>' + this.$refs.schemasubformview.$el.outerHTML
+            this.sendDataEmail = this.$refs.schemasubformview.$el.outerHTML
             this.email = true
           }, 1000)
           let flag = false
@@ -605,18 +578,15 @@ export default {
       }
     },
     async saveDataMethod () {
-        // this.bLoading = true
         var obj = this.makeObj()
         this.validFlag = true
         this.validErr = []
-        // var check = this.checkValidation(obj.data[0], this.entity)
         let allcheck = []
         for (let dobj of obj.data) {
           let flag = this.checkValidation(dobj, this.entity)
-          allcheck.push(flag)
+         await allcheck.push(flag)
         }
         let check = _.indexOf(allcheck, false)
-        // var check = this.checkValidation(obj.data[0], this.entity)
         this.$Loading.start()
         if (check === -1) {
           let mergeData = this.mergeFileList(obj.data, obj)
@@ -802,13 +772,11 @@ export default {
       }
       // let arr = [values.formData]
       // this.formSchemaInstance.data = arr[0]
-      // console.log('form instance data: ', this.formSchemaInstance.data)
       // this.nextState = values.nextState
       // this.currentState = values.currentState
     },
 
     async getFData (item) {
-      // console.log('item: ', item)
       let returnData = null
       if (item) {
         let lastItem = _.last(item)
@@ -817,7 +785,6 @@ export default {
           await flowzdataModal.get(null, {
             id: stageRecordId
           }).then( (resData) => {
-            // console.log('resultDatadadadaadd: ', resData.data[0].data)
             returnData = resData.data[0].data
           }).catch( (err) => {
             console.log('err: ', err)
@@ -992,12 +959,6 @@ export default {
   feathers: {
       'finstance': {
         created (data) {
-          // console.log('created called from parent: ', data)
-          // this.init()
-          // let findIndex = _.findIndex(this.data, (o) => { return o.id })
-          // if (findIndex !== -1) {
-          //   this.data.push(data)
-          // }
         },
         async updated (data) {
           console.log('called on parent: ', data)

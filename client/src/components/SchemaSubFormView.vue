@@ -94,7 +94,6 @@ export default {
       }
     },
     async getChildData (id) {
-      // alert(id)
       var arrObj = []
       var self = this
       await schemaModel.get(id)
