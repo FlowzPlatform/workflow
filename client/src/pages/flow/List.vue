@@ -1309,7 +1309,7 @@ export default {
           self.callTaskList(newValue)
         } else {
           self.loadingPermisions = false
-          self.waitingText = 'No Data'
+          self.waitingText = 'No Roles Found'
         }
         return response.data.data
       })

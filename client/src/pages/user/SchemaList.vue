@@ -64,7 +64,7 @@
 <script>
   // import finstanceModal from '@/api/finstance'
   // import flowzModal from '@/api/flowz'
-  import flowzdataModal from '@/api/flowzdata'
+  // import flowzdataModal from '@/api/flowzdata'
   import _ from 'lodash'
   export default {
     name: 'schemalist',
@@ -234,8 +234,9 @@
                   },
                   on: {
                     'click': async () => {
+                      // console.log('Params: ', params.row)
                       this.$Spin.show()
-                      let indexFind = _.findIndex(this.instanceEntries, (o) => { return o.id === params.row.id })
+                      let indexFind = _.findIndex(this.instanceEntries, (o) => { return o.id === params.row.iid })
                       // console.log('indexfind: ', indexFind)
                       // this.$emit('setValues', this.instanceEntries[indexFind])
                       // console.log('Click: ', params.row, params.index)
@@ -247,24 +248,25 @@
                         formName: currentObj.name,
                         currentState: currentObj.id,
                         flowzData: this.flowzData,
-                        formData: {}
+                        formData: params.row
                         // nextState: resp[currentState].next,
                         // currentState: currentState
                       }
                       // console.log('_____________values', item)
                       // console.log('this.instanceEntries[indexFind].stageReference.length: ', this.instanceEntries[indexFind].stageReference.length)
-                      if (this.instanceEntries[indexFind].stageReference.length > 0) {
-                        let lastObj = this.instanceEntries[indexFind].stageReference[this.instanceEntries[indexFind].stageReference.length - 1]
-                        // console.log('last obj: ', lastObj)
-                        await flowzdataModal.get(lastObj.stageRecordId).then(res => {
-                          values.formData = res.data.data
-                          this.$Spin.hide()
-                        }).catch(err => {
-                          this.$Spin.hide()
-                          console.log(err)
-                        })
-                      }
+                      // if (this.instanceEntries[indexFind].stageReference.length > 0) {
+                      //   let lastObj = this.instanceEntries[indexFind].stageReference[this.instanceEntries[indexFind].stageReference.length - 1]
+                      //   // console.log('last obj: ', lastObj)
+                      //   await flowzdataModal.get(lastObj.stageRecordId).then(res => {
+                      //     values.formData = res.data.data
+                      //     this.$Spin.hide()
+                      //   }).catch(err => {
+                      //     this.$Spin.hide()
+                      //     console.log(err)
+                      //   })
+                      // }
                       // console.log('Values emitted: ', values)
+                      this.$Spin.hide()
                       await this.$emit('setValues', values)
                     }
                   }
@@ -274,7 +276,7 @@
           })
           cols.push({
             title: 'ID',
-            key: 'id',
+            key: 'iid',
             width: 260
           })
         }
