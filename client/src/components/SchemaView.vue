@@ -748,12 +748,12 @@ export default {
         this.item = values.item
         this.formTitle = values.formName
         this.flowData = values.flowzData
-        let targetObj = _.find(values.flowzData.json.processList, {id: values.currentState})
+        let targetObj = values.flowzData.processList[values.currentState]
         if (Object.keys(targetObj).length > 0) {
           if (targetObj.target.length > 1) {
             let opts = []
             for (let m of targetObj.target) {
-              let label = _.find(values.flowzData.json.processList, {id: m.id}).name
+              let label = values.flowzData.processList[m.id].name
               opts.push({
                 label: label,
                 value: m.id
@@ -801,8 +801,8 @@ export default {
         id: this.$route.params.id
       })
       .then( (res) => {
-        // console.log('res flowz get call: ', res.data.data[0])
-        let taskData = _.find(res.data.data[0].json.processList, (o) => { return o.id == this.$route.params.stateid})
+        console.log('res flowz get call: ', res.data.data[0])
+        // let taskData = _.find(res.data.data[0].json.processList, (o) => { return o.id == this.$route.params.stateid})
         let inputschemaId = res.data.data[0].schema
         schemaModel.getAll(inputschemaId).then(async res => {
           this.dataSchema = res
@@ -827,9 +827,7 @@ export default {
           //   console.error('Error: ', err)
           // })
 
-          await flowzModel.get(this.$route.params.id, {
-            $select: ['json', 'schema']
-          }).then(async res => {
+          await flowzModel.get(this.$route.params.id).then(async res => {
             this.flowzData = res.data
             // if (this.$route.params.stateid) {
             //   let m = _.find(this.flowzData.json.processList, {id: this.$route.params.stateid})

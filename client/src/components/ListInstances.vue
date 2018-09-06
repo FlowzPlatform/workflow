@@ -106,10 +106,10 @@ export default {
   component: {
   },
   methods: {
-    valueStatus (value) {
-      if (!value) return ''
-      return _.find(this.flowzData.json.processList, {id: value}).name
-    },
+    // valueStatus (value) {
+    //   if (!value) return ''
+    //   return _.find(this.flowzData.json.processList, {id: value}).name
+    // },
     async getRecord (item) {
       // DeepRecord.deepRecord.getRecord(client, item, async (err, resp) => {
       //   let stageRecordId = resp.stageReference[(resp.stageReference.length) - 1].stageRecordId
@@ -120,7 +120,7 @@ export default {
       //   let result = await DeepRecord.deepRecord.getCurrentTraget(instanceId, resp.currentStatus)
       //   // let currentState = resp.currentStatus.toLowerCase()
       //   // let schemaId = resp[currentState].schemaId
-      let currentObj = _.find(this.flowzData.json.processList, {id: item.currentStatus})
+      let currentObj = this.flowzData.processList[item.currentStatus]
       // console.log('this.flowzData.schema', this.flowzData)
       let values = {
         id: this.flowzData.schema,
@@ -158,13 +158,12 @@ export default {
       if (stateid) {
         query.currentStatus = stateid
       }
-      await flowzModal.get(id, {
-        $select: ['json', 'schema']
-      }).then(async res => {
+      await flowzModal.get(id).then(async res => {
         this.flowzData = res.data
-        this.breadItem.name = this.flowzData.json.name
+        this.breadItem.name = this.flowzData.name
         if (stateid) {
-          let m = _.find(this.flowzData.json.processList, {id: stateid})
+          // let m = _.find(this.flowzData.json.processList, {id: stateid})
+          let m = this.flowzData.processList[stateid]
           if (m && m !== null && Object.keys(m).length > 0) {
             this.breadItem.state = m.name
           }
