@@ -547,40 +547,7 @@ export default {
     async handleAdd () {
       var self = this
       var obj = {}
-      // if (this.lastLog !== undefined && this.lastLog.input.length !== 0) {
-      //   for (let mdata of self.lastLog.input) {
-      //     for (let ent of self.schema.entity) {
-      //       if (ent.type === 'file') {
-      //         mdata[ent.name + 'List'] = mdata[ent.name]
-      //         mdata[ent.name] = []
-      //       } else if (ent.customtype) {
-      //         mdata[ent.name] = self.setFileList(mdata[ent.name], ent.entity[0])
-      //       }
-      //     }
-      //   }
-      //   self.formSchemaInstance.data = _.map(self.lastLog.input, (entry) => {
-      //     entry.Schemaid = self.schema.id
-      //     return _.chain(entry).omit(['id', '_id']).reduce((result, value, key) => {
-      //       // if (_.isArray(value)) {
-      //       //   result[key] = self.deleteId(value)
-      //       // } else {
-      //       result[key] = value
-      //       // }
-      //       return result
-      //     }, {}).value()
-      //   })
-      //   // _.forEach(self.lastLog.input, (obj) => {
-      //   //   // obj = this.lastLog.input[0]
-      //   //   // obj.database = this.schema.database
-      //   //   obj.Schemaid = self.schema.id
-      //   //   delete obj.id
-      //   //   delete obj._id
-      //   //   self.formSchemaInstance.data.push(obj)
-      //   // })
-      // } else {
-        // obj.database = this.schema.database
       obj.Schemaid = this.schema.id
-      // _.forEach(self.entity, async function (v) {
       for (let v of self.entity) {
         if (v.customtype) {
           obj[v.name] = await self.getChildData(v.type)
@@ -613,8 +580,6 @@ export default {
         }
       }
       this.formSchemaInstance.data.push(obj)
-
-      // }
     },
 
     makeObj () {
@@ -643,7 +608,6 @@ export default {
     },
 
     async handleSubmit (name) {
-      // console.log(fileSize);
       let currentStateId = this.$route.params.stateid
       if(!this.isEmailDone){
         let currentStageObject = _.find(this.flowData.json.processList, {'id': currentStateId})
@@ -653,7 +617,6 @@ export default {
         } else {
           nextTargetId = _.find(this.flowData.json.processList, {'id': currentStageObject.target[0].id})
         }
-        console.log('nextTargetId', nextTargetId)
         if (nextTargetId.type === 'sendproofmail') {
           this.id = null
           this.schemabinding = true
@@ -681,18 +644,15 @@ export default {
       }
     },
     async saveDataMethod () {
-        // this.bLoading = true
         var obj = this.makeObj()
         this.validFlag = true
         this.validErr = []
-        // var check = this.checkValidation(obj.data[0], this.entity)
         let allcheck = []
         for (let dobj of obj.data) {
           let flag = this.checkValidation(dobj, this.entity)
          await allcheck.push(flag)
         }
         let check = _.indexOf(allcheck, false)
-        // var check = this.checkValidation(obj.data[0], this.entity)
         this.$Loading.start()
         if (check === -1) {
           let mergeData = this.mergeFileList(obj.data, obj)
@@ -754,7 +714,6 @@ export default {
           }
         } else {
           if (!v.property.optional) {
-            console.log('data[v.name]',data[v.name] )
             if (data[v.name] === '') {
               self.validErr.push({name: v.name, errmsg: 'Field is required.'})
               self.validFlag = false
@@ -877,13 +836,11 @@ export default {
       }
       // let arr = [values.formData]
       // this.formSchemaInstance.data = arr[0]
-      // console.log('form instance data: ', this.formSchemaInstance.data)
       // this.nextState = values.nextState
       // this.currentState = values.currentState
     },
 
     async getFData (item) {
-      // console.log('item: ', item)
       let returnData = null
       if (item) {
         let lastItem = _.last(item)
@@ -892,7 +849,6 @@ export default {
           await flowzdataModal.get(null, {
             id: stageRecordId
           }).then( (resData) => {
-            // console.log('resultDatadadadaadd: ', resData.data[0].data)
             returnData = resData.data[0].data
           }).catch( (err) => {
             console.log('err: ', err)
@@ -929,7 +885,6 @@ export default {
             this.itsFirstState = true
             this.$Spin.hide()
           } else {
-            // console.log('resp data: ', resp.data)
             this.itsFirstState = false
             this.instanceEntries = resp.data
             for ( let i = 0; i < this.instanceEntries.length; i++) {
@@ -961,37 +916,24 @@ export default {
       id: this.$route.params.id
     })
     .then( (res) => {
-      // console.log('res flowz get call: ', res.data.data[0])
       let taskData = _.find(res.data.data[0].json.processList, (o) => { return o.id == this.$route.params.stateid})
       let inputschemaId = res.data.data[0].schema
       schemaModel.getAll(inputschemaId).then(res => {
         this.dataSchema = res
-        // console.log('Res:: ', res)
         // get flowz data
         // flowzdataModal.get(null, {
         //   fid: this.$route.params.id,
         //   state: this.$route.params.stateid,
         //   $paginate: false
         // }).then( (resultData) => {
-        //   // console.log('FData: ', resultData)
         //   let finalData = _.map(resultData, (o) => { return o.data })
-        //   console.log('Final Data: ', finalData)
         //   this.dataData = finalData
         // })
         this.init()
       }).catch(err => {
         console.error('Error: ', err)
       })
-      // console.log('Task Data: ', inputschemaId)
     })
-    // await finstanceModal.get(null, query).then(resp => {
-    //   console.log('Instance response Data: ', resp)
-    //   this.instanceEntries = resp.data
-    // }).catch(err => {
-    //   this.tableLoading = false
-    //   this.instanceEntries = null
-    //   console.log('err', err)
-    // })
   },
   computed: {
   },
@@ -1003,12 +945,6 @@ export default {
   feathers: {
       'finstance': {
         created (data) {
-          // console.log('created called from parent: ', data)
-          // this.init()
-          // let findIndex = _.findIndex(this.data, (o) => { return o.id })
-          // if (findIndex !== -1) {
-          //   this.data.push(data)
-          // }
         },
         async updated (data) {
           // console.log('called on parent: ', data)

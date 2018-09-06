@@ -99,7 +99,6 @@ export default {
       var files = e.target.files || e.dataTransfer.files
       let allFiles = []
       if (files.length > 0) {
-        // console.log('files', files[0])
         for (let i = 0; i < files.length; i++) {
           let bucket = new AWS.S3({ params: { Bucket: 'airflowbucket1/obexpense/expenses' } })
           var params = {
@@ -120,7 +119,6 @@ export default {
       self.schemainstance.data[index][fieldName] = allFiles
     },
     async getChildData (id) {
-      // alert(id)
       var arrObj = []
       var self = this
       await axios.get('https://api.flowzcluster.tk/eng/schema/' + id)
