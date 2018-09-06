@@ -66,10 +66,10 @@
                                       <Progress v-if="stratProgress"  v-bind:percent="fileUploadProgress" :success-percent="30" />
                                       <!-- {{fileUploadProgress}}  -->
                                       <!-- </p> --> 
-                                        <div class="" v-for="val in schemainstance.data[index][field.name]" style="margin-top:10px;">
+                                        <div class="" v-for="(val, i) in schemainstance.data[index][field.name]" style="margin-top:10px;">
                                             <Row>
                                                 <Col :span="23"> <a :href="val" class="list-group-item" target="_blank" style="color:blue;padding:2px 2px;" >{{val}}</a></Col>
-                                                <Col :span="1"><a href="#" style="color:red;float:right">&#10005;&nbsp;</a></Col>
+                                                <Col :span="1"><a href="#" style="color:red;float:right"  @click="removeSection(i, schemainstance.data[index][field.name])">&#10005;&nbsp;</a></Col>
                                             </Row>          
                                             <!-- {{val}} -->
                                         </div>
@@ -79,7 +79,7 @@
                             </Row>
                         </FormItem>
                     </Col>
-                </template>
+                </template> 
             </div>
 
             <div v-if="index != 0" style="float:right">
@@ -193,6 +193,10 @@ export default {
         //  }
       });
       // })
+    },
+    removeSection: function(index, imgarray) {
+    	console.log(index);
+			imgarray.splice(index, 1)
     },
     getValidationProps(index, fieldName) {
       return "data[" + index + "][" + fieldName + "]";

@@ -643,6 +643,7 @@ export default {
     },
 
     async handleSubmit (name) {
+      // console.log(fileSize);
       let currentStateId = this.$route.params.stateid
       if(!this.isEmailDone){
         let currentStageObject = _.find(this.flowData.json.processList, {'id': currentStateId})
