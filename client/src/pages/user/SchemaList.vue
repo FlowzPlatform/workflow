@@ -240,7 +240,7 @@
                       // console.log('indexfind: ', indexFind)
                       // this.$emit('setValues', this.instanceEntries[indexFind])
                       // console.log('Click: ', params.row, params.index)
-                      let currentObj = _.find(this.flowzData.json.processList, {id: this.instanceEntries[indexFind].currentStatus})
+                      let currentObj = this.flowzData.processList[this.instanceEntries[indexFind].currentStatus]
                       // console.log('this.flowzData.schema SchemaList', this.flowzData.schema)
                       let values = {
                         id: this.flowzData.schema,
