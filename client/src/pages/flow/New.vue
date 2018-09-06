@@ -220,32 +220,32 @@
                     actionsObj[actions[i]] = this.permissions
                   }
                   console.log(this.flowObject)
-                  // subscriptionNew.moduleResource.moduleName = 'workflow_' + this.$route.params.id
-                  // let registerAppModuleNew = actionsObj
-                  // subscriptionNew.moduleResource.registerAppModule = registerAppModuleNew
-                  // subscriptionNew.moduleResource.appRoles = userRolesArr
-                  // subscriptionNew.registeredAppModulesRole().then(resp => {
-                  //   let result = null
-                  //   if (this.$route.params.id !== undefined) {
-                  //     result = flowz.put(this.$route.params.id, this.flowObject)
-                  //   } else {
-                  //     result = flowz.post(this.flowObject)
-                  //   }
-                  //   result.then(response => {
-                  //     this.$Notice.success({title: 'Success..!', desc: 'Flow Saved..'})
-                  //     this.$router.push({name: 'flow/list'})
-                  //     localStorage.removeItem('BPMNXml')
-                  //     this.btnLoading = false
-                  //   }).catch(error => {
-                  //     console.log(error)
-                  //     this.$Notice.error({title: 'Error..!', desc: 'Flow Not Saved...'})
-                  //     this.btnLoading = false
-                  //   })
-                  // }).catch(err => {
-                  //   this.$Notice.error({title: 'Error..!', desc: 'Flow Not Saved. Try again.'})
-                  //   console.log('Error: ', err)
-                  //   this.btnLoading = false
-                  // })
+                  subscriptionNew.moduleResource.moduleName = 'workflow_' + this.$route.params.id
+                  let registerAppModuleNew = actionsObj
+                  subscriptionNew.moduleResource.registerAppModule = registerAppModuleNew
+                  subscriptionNew.moduleResource.appRoles = userRolesArr
+                  subscriptionNew.registeredAppModulesRole().then(resp => {
+                    let result = null
+                    if (this.$route.params.id !== undefined) {
+                      result = flowz.put(this.$route.params.id, this.flowObject)
+                    } else {
+                      result = flowz.post(this.flowObject)
+                    }
+                    result.then(response => {
+                      this.$Notice.success({title: 'Success..!', desc: 'Flow Saved..'})
+                      this.$router.push({name: 'flow/list'})
+                      localStorage.removeItem('BPMNXml')
+                      this.btnLoading = false
+                    }).catch(error => {
+                      console.log(error)
+                      this.$Notice.error({title: 'Error..!', desc: 'Flow Not Saved...'})
+                      this.btnLoading = false
+                    })
+                  }).catch(err => {
+                    this.$Notice.error({title: 'Error..!', desc: 'Flow Not Saved. Try again.'})
+                    console.log('Error: ', err)
+                    this.btnLoading = false
+                  })
                 } else {
                   this.$Message.error('Nothing to Save !')
                   this.btnLoading = false
