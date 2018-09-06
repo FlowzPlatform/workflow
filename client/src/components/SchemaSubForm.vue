@@ -12,7 +12,7 @@
                             </Row>
                             <Row v-if="field.property.IsArray">
                                 <schemasubform :schemainstance="getObject(inx, index, field.name, field.type)"></schemasubform>
-                                <Button class="btnAdd" @click="handleAdd(inx, index, schemainstance.entity[inx].entity[0], schemainstance.data[index][field.name], field.name)" icon="plus-round"> <i class="fa fa-plus"></i> Add ({{field.name}})</Button>
+                                <Button class="btnAdd" @click="handleAdd(inx, index, schemainstance.entity[inx].entity[0], schemainstance.data[index][field.name], field.name)" icon="plus"> Add ({{field.name}})</Button>
                             </Row>
                             <Row v-else>
                                 <schemasubform :schemainstance="getObject(inx, index, field.name, field.type)"></schemasubform>
@@ -25,12 +25,14 @@
                     <Col :span="12" style="padding:0px 20px 0px 2px" v-if="field.type !== 'file'">
                         <FormItem :key="inx" :rules="createRules(field)" style="margin-bottom:10px;">
                             <Row>
-                                <Col :span="4">
+                                <Col :span="8" style="text-align: right; padding-right: 10px; padding-top: 10px;">
                                     <b class="field-label">{{field.name}}</b>
                                 </Col>
-                                <Col :span="20">
+                                <Col :span="16">
                                     
-                                    <Input v-if="field.type == 'text' || field.type == 'email' || field.type == 'phone'" v-model="schemainstance.data[index][field.name]" type="text" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name" :min="(field.property.min > 0)?field.property.min : -Infinity"></Input>
+                                    <Input v-if="field.type == 'textarea'" v-model="schemainstance.data[index][field.name]" type="textarea" :rows="schemainstance.data[index][field.numberoflines]" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name" :max="(field.property.max > 0)?field.property.max : Infinity"/>
+
+                                    <Input v-if="field.type == 'text' || field.type == 'email' || field.type == 'phone'" v-model="schemainstance.data[index][field.name]" type="text" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name" :max="(field.property.max > 0)?field.property.max : Infinity"></Input>
                                     
                                     <InputNumber v-if="field.type == 'number'" :min="(field.property.min > 0)?field.property.min : -Infinity" :max="(field.property.max > 0)?field.property.max : Infinity" v-model="schemainstance.data[index][field.name]" :type="field.type" :placeholder="field.name"></InputNumber>
                                     
@@ -39,7 +41,9 @@
                                     <Select v-if="field.type == 'dropdown'" v-model="schemainstance.data[index][field.name]" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name">
                                         <Option v-for="dpd in field.property.options" :value="dpd" :key="dpd">{{ dpd }}</Option>
                                     </Select>
-                                    <Checkbox v-if="field.type == 'boolean'" v-model="schemainstance.data[index][field.name]">{{field.name}}</Checkbox>
+
+                                    <Checkbox v-if="field.type == 'boolean'" v-model="schemainstance.data[index][field.name]" style="margin-top: 10px;"></Checkbox>
+
                                     <!-- <dynamicinput :type="(field.type) ? field.type : null" :bindmodel="(schemainstance.data[index][field.name]) ? schemainstance.data[index][field.name] : null " :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name" :min="(field.property.min > 0) ? field.property.min : -Infinity" :max="(field.property.max > 0) ? field.property.max : Infinity" :options="(field.property.options) ? field.property.options : null" :field="field"></dynamicinput> -->
                                 </Col>
                             </Row>
@@ -84,9 +88,10 @@
 <script>
 import $ from 'jquery'
 import SchemaSubForm from './SchemaSubForm'
-import axios from 'axios'
+// import axios from 'axios'
 import moment from 'moment'
 import _ from 'lodash'
+import schemaModel from '@/api/schema'
 // let jumperLinks = [];
 var AWS = require('aws-sdk')
 AWS.config.update({
@@ -167,9 +172,8 @@ export default {
     async getChildData (id) {
       var arrObj = []
       var self = this
-      await axios
-        .get('https://api.flowzcluster.tk/eng/schema/' + id)
-        .then(async response => {
+      await schemaModel.get(id)
+        .then(async (response) => {
           var _res = response.data
           var obj = {}
           // obj.id = self.getGuid()  // for guid for perticular row
@@ -217,12 +221,14 @@ export default {
       return arrObj
     },
     getObject (eIndex, dataIndex, fname, ftype) {
+      // console.log('get obj called: ', dataIndex)
       var obj = {}
       obj.data = this.schemainstance.data[dataIndex][fname]
       obj.entity = this.schemainstance.entity[eIndex].entity[0].entity
       let indexx = $.inArray(fname, this.jumperLinks)
       if (indexx === -1) {
         this.jumperLinks.push(fname)
+        this.$emit('updateJumperList', this.jumperLinks)
       }
       return obj
     },
@@ -371,9 +377,16 @@ export default {
   padding: 10px 20px;
 }
 
-.card-title {
+.ui-card{
+  background-color: #fff;
+  box-shadow: 0px 0px 25px #dadada;
+  border-radius: 10px;
+  padding: 10px 20px;
+}
+
+.card-title{
   text-transform: capitalize;
-  color: #fff;
+  color: #FFF;
   font-size: 18px;
   background-color: #292929;
   padding: 10px 30px;
@@ -381,6 +394,8 @@ export default {
   border-bottom-right-radius: 5px;
   margin-left: -20px;
   margin-bottom: 10px;
+  position: relative;
+  z-index: 999;
 }
 
 .btnAdd {
@@ -442,13 +457,19 @@ export default {
   right: 0;
 }
 
-.ivu-form-item-content {
-  /*line-height: 15px !important;*/
-}
 .badge {
   background-color: green;
   border: 1px solid black;
   padding: 2px;
   transition: 1s;
 }
+
+<style>
+  .ivu-form-item-content{
+    line-height: 15px !important;
+  }
+
+  /*.ivu-table td:nth-child(2){
+    padding-left: 10px;
+  }*/
 </style>

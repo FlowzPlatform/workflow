@@ -8,145 +8,487 @@
         <div class="legend card">
           <!-- <strong>Legend</strong> -->
           <ul>
-              <li><strong>Legend:</strong></li>
-              <li><span style="background-color:#00FF00"></span>Completed</li>
-              <li><span style="background-color:#FF0000"></span>Current</li>
-              <li><span style="background-color:#EEEEEE"></span>Pending</li>
-              <!-- <li><span style="background-color:#1F6980"></span>Zone 4 - Thursday</li> -->
-              <!-- <li><span style="background-color:#AB156A"></span>Zone 5 - Friday</li> -->
-              </ul>
+            <li><strong>Legend:</strong></li>
+            <li><span style="background-color:#BCEDC7"></span>Completed</li>
+            <li><span style="background-color:#FFC5CF"></span>Current</li>
+            <!-- <li><span style="background-color:#EEEEEE"></span>Pending</li> -->
+            <!-- <li><span style="background-color:#1F6980"></span>Zone 4 - Thursday</li> -->
+            <!-- <li><span style="background-color:#AB156A"></span>Zone 5 - Friday</li> -->
+          </ul>
+
+          <!-- <Button class="settingsBtn" icon="ios-settings"></Button> -->
+          <div class="settingsBtn">
+            <Tooltip content="Settings">
+              <Button shape="circle" type="info" @click="isModel = !isModel"><i class="fa fa-cog"></i></Button>
+            </Tooltip>
+              <div style="float:right; margin-left:5px;">
+                <ButtonGroup shape="circle">
+                  <Button title="Overview" icon="ios-keypad" type="primary" @click="viewChange(1)"></Button>
+                  <Button title="Data View" icon="navicon-round" type="primary" @click="viewChange(2)"></Button>
+                </ButtonGroup>
+              </div>
+          </div>
+
        </div>
       </div>
     </div>
 
-    <div>
-      <table class="table table-bordered table-hover">
-        <thead>
-          <tr>
-            <th>Instance</th>
-            <th v-for="(items, index) in tableHeaders" v-if="items.type != 'start' && items.type != 'endevent' && items.type != 'intermediatethrowevent'">
-              <span>{{items.name}}</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(items, index) in tableData">
-            <td>
-              {{items.id}}
-              <span class="label label-info" style="float: right;" v-if="items.mainStatus == 'inprocess'">{{titleCase(items.mainStatus)}}</span>
-              <span class="label label-success" style="float: right;" v-if="items.mainStatus == 'completed'">{{titleCase(items.mainStatus)}}</span>
-            </td>
-            <!-- <td v-for="(headerItem, headerIndex) in tableHeaders" v-if="headerItem.type != 'start' && headerItem.type != 'endevent' && headerItem.type != 'intermediatethrowevent'" :class="{ redCell : (items.currentStatus == headerItem.id) }"> -->
-              <!-- <span v-if="items.currentStatus == headerItem.id"><span class="currentTask"></span></span> -->
-              <!-- <span>{{headerItem.id}}</span> -->
-              <td v-for="(headerItem, headerIndex) in tableHeaders" v-if="headerItem.type != 'start' && headerItem.type != 'endevent' && headerItem.type != 'intermediatethrowevent'">
-                <span :class="classObject(items, headerItem.id)"></span>    
-                <!-- <span v-if="items.currentStatus == headerItem.id" class="currentTask"></span> -->
-                <!-- <span v-else class="pendingTask"></span> -->
-                <!-- <span v-for="(task, index) in items.stageReference"> -->
-                  <!-- <span v-if="task.StageName == headerItem.id" class="completedTask"></span> -->
-                <!-- </span> -->
-                <!-- <span v-if="items.stageReference.length == 0 && items.currentStatus != headerItem.id" class="pendingTask"></span> -->
-              </td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="row">
+            <div class="col-md-4">
+              <Input search enter-button placeholder="Search..." v-model="searchQuery"/>
+            </div>
+            <div class="col-md-6">
+              <div class="row">
+                <div class="col-md-6">
+                  <Select style="width: 100%" v-model="selectedFilterBy" clearable placeholder="Filter By">
+                    <Option v-for="item in filterBy" :value="item.value" :key="item.value">{{ item.label }}</Option>
+                  </Select>
+                  <br>
+                  <DatePicker v-if="selectedFilterBy === 'customRange'" type="daterange" split-panels placeholder="Select date" style="width: 100%; margin: 5px 0;" v-model="enteredDateRange"></DatePicker>
+                </div>
+                <div class="col-md-6">
+                  <Select style="width: 100%" v-model="selectedSortBy" clearable placeholder="Sort By">
+                    <Option v-for="item in sortBy" :value="item.value" :key="item.value">{{ item.label }}</Option>
+                  </Select>    
+                </div>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <Button icon="search" type="primary" @click="searchInstances" long>Search</Button>
+            </div>
+          </div>
+
+          <!-- <div class="searchQueries">
+            <Tag @on-close="searchQuery = null" closable color="blue" v-if="searchQuery != null && searchQuery != ''">{{searchQuery}}</Tag>
+            <Tag @on-close="selectedFilterBy = null, enteredDateRange= []" closable color="blue" v-if="selectedFilterBy != null && selectedFilterBy != '' && selectedFilterBy == 'customRange'">{{selectedFilterBy}} : {{enteredDateRange}}</Tag>
+            <Tag @on-close="selectedFilterBy = null" closable color="blue" v-if="selectedFilterBy != null && selectedFilterBy != '' && selectedFilterBy != 'customRange'">{{selectedFilterBy}}</Tag>
+            <Tag closable color="blue" v-if="selectedSortBy != null && selectedSortBy != ''">{{selectedSortBy}}</Tag>
+          </div> -->
+        </div>
+      </div>
+      
     </div>
+
+    <!-- Configurations Modal -->
+    <Modal
+        v-model="isModel"
+        title="Set Configurations"
+        @on-ok="ok"
+        @on-cancel="cancel">
+        <p>
+          <Table :columns="configCols" :data="configdata"></Table>
+        </p>
+    </Modal>
+
+    <!-- Main Table -->
+    <div v-show="rowview">
+      <!-- <Table height="690" border :columns="mainColumns()" :data="tableData"></Table> -->
+      <Table v-if="schemaId !== null" height="590" border :columns="mainColumns()" :data="tableData"></Table>
+    </div>
+    <div v-show="columnview">
+      <Table :columns="colviewCols" height="590" :data="colviewData"></Table>
+    </div>
+    <!-- <Table v-if="schemaId !== null" height="690" border :columns="mainColumns()" :data="tableData"></Table> -->
+
   </div>
 </template>
 
 <script>
-// import axios from 'axios'
-import flowzModel from '@/api/flowz'
-import finstanceModel from '@/api/finstance'
-// import $ from 'jquery'
+import flowzModal from '@/api/flowz'
+import finstanceModal from '@/api/finstance'
+import dataQueryModel from '@/api/dataquery'
+import schemaModal from '@/api/schema'
+import CellRender from '@/components/cellRender'
+import ConfigExpand from '@/components/configExpand'
 import _ from 'lodash'
+import moment from 'moment'
 
 export default {
-  name: 'Analytics',
-  props: {
-    options: {
-      type: Object
-    }
-  },
+  name: 'dashboard',
   data () {
     return {
-      id: null,
+      rowview: true,
+      columnview: false,
       flowName: null,
       tableData: [],
-      tableHeaders: [],
-      currentFlowzJson: null
+      isModel: false,
+      anotherBinding: [],
+      colviewCols: [
+        {
+          title: 'ID',
+          key: 'id',
+          fixed: 'left',
+          width: 280
+        },
+        {
+          title: 'Task',
+          key: 'task',
+          width: 150
+        }
+      ],
+      colviewData: [],
+      configCols: [
+        {
+          type: 'expand',
+          key: 'columnConfigurations',
+          width: 50,
+          render: (h, params) => {
+            return h(ConfigExpand, {
+              props: {
+                row: params.row
+              }
+            })
+          }
+        },
+        {
+          title: 'Fields',
+          key: 'title'
+        },
+        {
+          title: 'Show',
+          key: 'show',
+          render: (h, params) => {
+            return h('div', [
+              h('Checkbox', {
+                props: {
+                  value: params.row.show
+                },
+                on: {
+                  'on-change': (value) => {
+                    // console.log('show', value)
+                    this.anotherBinding[params.index].show = value
+                  }
+                }
+              })
+            ])
+          }
+        },
+        {
+          title: 'First Column',
+          key: 'firstColumn',
+          render: (h, params) => {
+            return h('div', [
+              h('Radio', {
+                props: {
+                  value: params.row.firstColumn
+                },
+                on: {
+                  'on-change': (value) => {
+                    // console.log('show', value)
+                    this.configuration.fields[params.index].firstColumn = value
+                    this.anotherBinding[params.index].firstColumn = value
+                    for (let i = 0; i < this.anotherBinding.length; i++) {
+                      if (i !== params.index) {
+                        this.configuration.fields[i].firstColumn = false
+                        this.anotherBinding[i].firstColumn = false
+                      }
+                    }
+                    console.log('this.anotherBinding: ', this.anotherBinding)
+                  }
+                }
+              })
+            ])
+          }
+        },
+        {
+          title: 'Width',
+          key: 'width',
+          render: (h, params) => {
+            return h('div', [
+              h('input', {
+                props: {
+                },
+                attrs: {
+                  class: 'form-control',
+                  type: 'number',
+                  value: params.row.width
+                },
+                on: {
+                  'keyup': (event) => {
+                    // console.log('value', event.target.value, event.keyCode)
+                    if (event.target.value && event.target.value !== null && event.keyCode === 13) {
+                      if (event.target.value <= 0) {
+                        this.anotherBinding[params.index].width = 150
+                      } else {
+                        this.anotherBinding[params.index].width = parseInt(event.target.value)
+                      }
+                    }
+                  }
+                }
+              })
+            ])
+          }
+        }
+      ],
+      configData: [],
+      configuration: {
+        dateFormate: '',
+        fields: []
+      },
+      fid: null,
+      schemaId: '',
+      searchQuery: null,
+      filterBy: [
+        {
+          'label': 'Last 12 Hours',
+          'value': '12hours'
+        }, {
+          'label': 'Last 24 Hours',
+          'value': '24hours'
+        }, {
+          'label': 'Last 7 Days',
+          'value': '7days'
+        }, {
+          'label': 'Last 30 Days',
+          'value': '30days'
+        }, {
+          'label': 'Last 3 months',
+          'value': '3months'
+        }, {
+          'label': 'This Year',
+          'value': 'thisYear'
+        }, {
+          'label': 'Custom Range',
+          'value': 'customRange'
+        }
+      ],
+      selectedFilterBy: null,
+      sortBy: [
+        {
+          'label': 'Ascending',
+          'value': 'asc'
+        }, {
+          'label': 'Descending',
+          'value': 'desc'
+        }
+      ],
+      selectedSortBy: null,
+      enteredDateRange: null
     }
   },
-  component: {
+  components: {
+    CellRender
+  },
+  filters: {
+    momentDate (date) {
+      return moment(date).format('MMM Do YY')
+    }
   },
   methods: {
-    titleCase: function (str) {
-      return str.replace(/\w+/g, function (txt) {
-        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
-      })
-    },
-    classObject (items, type) {
-      if (type === items.currentStatus) {
-        return { 'currentTask': true }
-      } else if (_.findIndex(items.stageReference, {StageName: type}) !== -1) {
-        return { 'completedTask': true }
+    viewChange (item) {
+      if (item === 1) {
+        this.rowview = true
+        this.columnview = false
       } else {
-        return { 'pendingTask': true }
+        this.rowview = false
+        this.columnview = true
       }
     },
+    searchInstances () {
+      // this.tableData = _.filter(this.tableData, (o) => { return o.id === this.searchQuery })
+    },
+    ok () {
+      this.$Message.success('Saved')
+      this.configuration.fields = _.cloneDeep(this.anotherBinding)
+    },
+    cancel () {
+      this.anotherBinding = _.cloneDeep(this.configuration.fields)
+    },
+    mainColumns () {
+      // console.log('mainColumns')
+      let tableCols = _.filter(this.configuration.fields, {show: true})
+      for (let item of tableCols) {
+        item.render = (h, params) => {
+          // console.log('params.column: ')
+          // console.log('Item: ', item)
+          // console.log('Params: ', params)
+          let obj = _.find(params.row.stageReference, {StageName: item.key})
+          // console.log('obj: ', obj)
+          let finalValue = {
+            obj: obj,
+            isCurrentTask: false,
+            isCompletedTask: true
+          }
+          if (obj) {
+            finalValue.isCurrentTask = false
+            finalValue.isCompletedTask = true
+          } else {
+            if (item.key === params.row.currentStatus) {
+              finalValue.obj = null
+              finalValue.isCurrentTask = true
+              finalValue.isCompletedTask = false
+            } else {
+              finalValue.obj = null
+              finalValue.isCurrentTask = false
+              finalValue.isCompletedTask = false
+            }
+          }
+          // console.log('finalValue: ', finalValue)
+          return h(CellRender, {
+            props: {
+              item: finalValue,
+              schemaId: this.schemaId
+            }
+          })
+        }
+      }
+      tableCols.splice(0, 0, {
+        title: 'Instance Id',
+        key: 'id',
+        firstColumn: true,
+        width: 270,
+        fixed: 'left',
+        render: (h, params) => {
+          if (params.row.mainStatus === 'inprocess') {
+            return h('div', [
+              h('span', params.row.id),
+              h('span', {
+                props: {
+                },
+                attrs: {
+                  class: 'inprocessTaskDot',
+                  title: 'In Process'
+                }
+              })
+            ])
+          } else if (params.row.mainStatus === 'completed') {
+            return h('div', [
+              h('span', params.row.id),
+              h('span', {
+                props: {
+                },
+                attrs: {
+                  class: 'completedTaskDot',
+                  title: 'Completed'
+                }
+              })
+            ])
+          } else {
+            return h('div', [
+              h('span', params.row.id),
+              h('span', {
+                props: {
+                },
+                attrs: {
+                  class: 'otherTaskDot',
+                  title: 'Other'
+                }
+              })
+            ])
+          }
+        }
+      })
+
+        // console.log('table cols: ', tableCols)
+      return tableCols
+    },
     async init () {
-      // this.$Spin.show({
-      //   render: (h) => {
-      //     return h('div', [
-      //       h('Icon', {
-      //         'class': 'demo-spin-icon-load',
-      //         props: {
-      //           type: 'ios-loading',
-      //           size: 18
-      //         }
-      //       }),
-      //       h('div', 'Loading')
-      //     ])
-      //   }
-      // })
       this.$Spin.show()
-      this.id = this.$route.params.id
-      await flowzModel.get(null, {
-        id: this.id,
+      // this.colviewCols = []
+      this.colviewCols = [
+        {
+          title: 'ID',
+          key: 'id',
+          fixed: 'left',
+          width: 280
+        },
+        {
+          title: 'Task',
+          key: 'task',
+          width: 150
+        }
+      ]
+      this.colviewData = []
+      this.fid = this.$route.params.id
+      let colviewData = []
+
+      await flowzModal.get(this.fid, {
+        $select: ['json', 'schema'],
         $paginate: false
       }).then(res => {
-        this.flowName = res.data[0].ProcessName
-        this.currentFlowzJson = res.data[0].json
-        this.tableHeaders = this.currentFlowzJson.processList
+        this.schemaId = res.data.schema
+        this.flowName = res.data.json.name
+        let cols = []
+        for (let col of res.data.json.processList) {
+          if (col.type !== 'start' && col.type !== 'endevent') {
+            cols.push({
+              title: col.name || col.id,
+              key: col.id,
+              firstColumn: false,
+              show: true,
+              width: 150
+            })
+          }
+        }
+        this.anotherBinding = _.cloneDeep(cols)
+        this.configuration.fields = _.cloneDeep(cols)
+
+        finstanceModal.get(null, {
+          fid: this.fid,
+          $paginate: false
+        }).then(resp => {
+          // console.log('resp: ', resp)
+          this.tableData = resp.data
+          colviewData = resp.data
+          for (let item of colviewData) {
+            for (let task of res.data.json.processList) {
+              if (task.type !== 'start' && task.type !== 'endevent') {
+              // flowzdataModal.get().then(res => {
+
+              // }).catch(e => {
+              //   console.log('e', e)
+              // })
+                this.colviewData.push({
+                  id: item.id,
+                  task: task.name || task.id
+                })
+              }
+            }
+          }
+          this.$Spin.hide()
+        }).catch(err => {
+          console.log('Error: ', err)
+          this.$Spin.hide()
+        })
+
+        schemaModal.get(res.data.schema).then(result => {
+          // let anyCustom = false
+          for (let item of result.data.entity) {
+            if (!item.customtype) {
+              this.colviewCols.push({
+                title: item.name,
+                key: item.name,
+                width: 150
+              })
+            } else {
+              // anyCustom = true
+            }
+          }
+        }).catch(e => {
+          console.log('e', e)
+        })
       }).catch(err => {
-        console.error('Error: ', err)
+        console.log('Error: ', err)
+        this.$Spin.hide()
       })
 
-      // get all instances of selected flow
-      await finstanceModel.get(null, {
-        fid: this.id,
+      dataQueryModel.get(null, {
+        $all: true,
+        fid: this.fid,
         $paginate: false
-      }).then(response => {
-        this.tableData = response.data
-        // for (let i = 0; i < response.data.data.length; i++) {
-        //   let instances = {
-        //     instance: response.data.data[i].fid
-        //   }
-        //   this.tableData.push(instances)
-
-        //   this.tableHeaders = response.data.data[i].processList
-        // }
-        // console.log('tableData: ', this.tableData)
+      }).then(res => {
+        console.log('Res: ', res)
       }).catch(err => {
-        this.$Notice({duration: '3', title: 'Network Error', desc: ''})
-        console.error(err)
+        console.log('Erro: ', err)
       })
-      this.$Spin.hide()
-      // console.log('table data: ', JSON.stringify(this.tableData))
-      // console.log('table headers: ', JSON.stringify(this.tableHeaders))
-      // $('.redCell').prevUntil('tr').addClass('greenCell')
-      // $('.redCell').nextUntil('tr').addClass('grayCell')
+    }
+  },
+  computed: {
+    configdata () {
+      return this.configuration.fields
     }
   },
   mounted () {
@@ -158,72 +500,8 @@ export default {
     }
   }
 }
-
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-  .currentTask{
-    display: block;
-    position: relative;
-    min-width: 100%;
-    min-height: 3px;
-    background-color: #FF0000;
-    margin-top: 2px;
-  }
-
-  .completedTask{
-    display: block;
-    position: relative;
-    min-width: 100%;
-    min-height: 3px;
-    background-color: #00FF00;
-    margin-top: 2px;
-  }
-
-  .pendingTask{
-    display: block;
-    position: relative;
-    min-width: 100%;
-    min-height: 3px;
-    background-color: #EEEEEE;
-    margin-top: 2px; 
-  }
-
-  .grayCell {
-    background-color: #eee;
-  }
-
-  .redCell {
-    background-color: #FF8791
-  }
-
-  .greenCell {
-    background-color: #93DE87;
-  }
-
-  tbody tr td:first-child {
-    background-color: transparent;
-    width: 350px;
-  }
-
-  .label{
-    font-size: 12px;
-  }
-  thead tr{
-    background-color: #292929;
-    color: #FFF;
-  }
-
-  table{
-    box-shadow: 2px 2px 10px #dadada;
-    background-color: #fff;
-    max-height: 80vh;
-    overflow-y: auto;
-    /*margin: 10px 0;*/
-    /*padding: 20px;*/
-  }
-
   .card{
     box-shadow: 2px 2px 10px #dadada;
     background-color: #fff;
@@ -263,9 +541,74 @@ export default {
     /*margin-top: -3px;*/
     padding-top: 10px; 
   }
+  .settingsBtn {
+    position: absolute;
+    right: 20px;
+    top: 14px;
+  }
+
+  
 </style>
 <style>
-  .demo-spin-icon-load{
-    animation: ani-demo-spin 1s linear infinite;
+  .ivu-modal-body{
+    max-height: 550px !important;
+    overflow-y: auto !important;
   }
-</style>
+
+  .inprocessTaskDot{
+    position: absolute;
+    right: 10px;
+    margin-top: 5px;
+    min-width: 10px;
+    min-height: 10px;
+    background-color: #0000FF;
+    border-radius: 10px; 
+  }
+
+  .completedTaskDot{
+    position: absolute;
+    right: 10px;
+    margin-top: 0px;
+    min-width: 10px;
+    min-height: 10px;
+    background-color: #00FF00;
+    border-radius: 10px; 
+  }
+
+  .otherTaskDot{
+    position: absolute;
+    right: 10px;
+    margin-top: 5px;
+    min-width: 10px;
+    min-height: 10px;
+    background-color: #FF0000;
+    border-radius: 10px; 
+  }
+
+  .ivu-table td{
+    height: 40px;
+  }
+
+  .ivu-table td:first-child{
+    padding-left: 10px;
+  }
+
+  .ivu-table-cell{
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .searchQueries{
+    margin: 5px 0;
+  }
+
+  th .ivu-table-cell > span, td .ivu-table-cell > span, td .ivu-table-cell > .ivu-poptip {
+    padding-left: 10px;
+  }
+
+  .ivu-btn-circle, .ivu-btn-circle-outline{
+    padding: 0;
+    width: 32px;
+    height: 32px;
+  }
+</style>  

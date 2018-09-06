@@ -7,7 +7,7 @@
           <list-instances v-on:setValues="setValues"></list-instances>
           <div>
             <div class="row" v-if="id != null">
-              <div class="col-md-10" id="top">
+              <div class="col-md-12" id="top">
                 <div class="row" style="margin-top: 15px;">
                   <div class="col-md-12">
                     <div class="ui-card">
@@ -54,14 +54,13 @@
                   </div>
                 </div>
               </div>
-              <div class="col-md-1 fixed-div">
+              <!-- <div class="col-md-1 fixed-div">
                 <strong>Jump To:</strong>
                 <ul class="jumper-links">
                   <a href="#top" class="btn btn-info btn-block btnJumperLink"><li>Top</li></a>
                   <a :href="'#' + item" v-for="item in jumperLinks" class="btn btn-info btn-block btnJumperLink"><li>{{item}}</li></a>
                 </ul>
-                <!-- <pre>{{formSchemaInstance}}</pre> -->
-              </div>
+              </div> -->
             </div>
           </div>
         </TabPane>
@@ -161,9 +160,9 @@
         <TabPane v-if="itsFirstState === false" label="Data" icon="ios-albums">
           <schemalist :schema="dataSchema" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData"></schemalist>
 
-          <div style="padding-left: 10px">
+          <div style="padding: 10px">
             <div class="row" v-if="id != null">
-              <div class="col-md-10" id="top">
+              <div class="col-md-12" id="top">
                 <div class="row" style="margin-top: 15px;">
                   <div class="col-md-12">
                     <div class="ui-card">
@@ -174,7 +173,7 @@
 
                 <div class="row">
                   <div class="col-md-12">
-                    <schemasubform :schemainstance="formSchemaInstance"></schemasubform>
+                    <schemasubform v-on:updateJumperList="updateJumperList" :schemainstance="formSchemaInstance"></schemasubform>
                     <div v-if="isMultiple">
                     <div class="row" style="margin-top: 15px;">
                       <div class="col-md-12">
@@ -206,13 +205,13 @@
                   </div>
                 </div>
               </div>
-              <div class="col-md-1 fixed-div">
+              <!-- <div class="col-md-1 fixed-div">
                 <strong>Jump To:</strong>
                 <ul class="jumper-links">
                   <a href="#top" class="btn btn-info btn-block btnJumperLink"><li>Top</li></a>
                   <a :href="'#' + item" v-for="item in jumperLinks" class="btn btn-info btn-block btnJumperLink"><li>{{item}}</li></a>
                 </ul>
-              </div>
+              </div> -->
             </div>
           </div>
         </TabPane>
@@ -244,8 +243,7 @@
       <schemasubformview ref="schemasubformview" :schemainstance="formSchemaInstance" id="schemasubformview"></schemasubformview>
     </div>
     <div v-if="email">
-      <h3>Data: </h3>
-      <email :btnArr="btnArr" :sendDataEmail="sendDataEmail" :iid="item.id" v-on:on-done="emailService"></email>
+      <email :btnArr="btnArr" :flag="flag" :emailSchemaId="emailSchemaId" :sendDataEmail="sendDataEmail" :iid="item.id" v-on:on-done="emailService"></email>
     </div>
   </div>
 </template>
@@ -299,6 +297,8 @@ export default {
         data: [],
         entity: []
       },
+      flag: true,
+      emailSchemaId: '',
       btnArr: {},
       schema: {},
       dataSchema: {},
@@ -315,7 +315,7 @@ export default {
       processid: null,
       lastLog: null,
       formTitle: null,
-      jumperLinks: SchemaSubForm.jumperLinks,
+      jumperLinks: [],
       flowData: null,
       bLoading: false,
       isMultiple: false,
@@ -362,7 +362,7 @@ export default {
       // alert(id)
       var arrObj = []
       var self = this
-      await axios.get('https://api.flowzcluster.tk/eng/schema/' + id)
+      await schemaModel.get(id)
       .then(async (response) => {
         var _res = response.data
         var obj = {}
@@ -609,6 +609,12 @@ export default {
 
     async handleSubmit (name) {
       let currentStateId = this.$route.params.stateid
+      if (this.schema.hasOwnProperty('emailSchema')) {
+        if (this.schema.emailSchema.action == true) {
+          this.emailSchemaId = this.schema.emailSchema.schemaId
+          this.flag = false
+        }
+      }
       if(!this.isEmailDone){
         let currentStageObject = _.find(this.flowData.json.processList, {'id': currentStateId})
         let nextTargetId
@@ -621,20 +627,39 @@ export default {
           this.id = null
           this.schemabinding = true
           setTimeout(() => {
-            this.sendDataEmail = '<link rel="stylesheet" href="https://unpkg.com/iview@3.0.1/dist/styles/iview.css">' + ' <style> .ui-card{background-color: #fff; box-shadow: 0px 0px 25px #dadada; border-radius: 10px; padding: 10px 20px;}.card-title{text-transform: capitalize; color: #FFF; font-size: 18px; background-color: #292929; padding: 10px 30px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; margin-left: -20px; margin-bottom: 10px;}.btnAdd{background-color: #53CAE8; border-radius: 50px; font-size: 14px; text-transform: uppercase; color: #fff; border: none; font-style: italic;}.btnAdd:hover{background-color: #83d5ea; color: #fff;}.btnDelete{font-size: 14px; border-radius: 50px; color: #fff !important; position: absolute; bottom: 10px; right: 10px; background-color: #FF0000; width: 20px; height: 20px;}.btnDelete i{position: absolute; top: 4px; left: 5px;}.field-label{text-transform: capitalize;}.formTitle{text-transform: capitalize;}.jumper-links{list-style: none; font-size: 14px;}.jumper-links a{text-decoration: none; /*color: #53cae8;*/ text-align: left; font-weight: bold; text-transform: capitalize;}.fixed-div{position: fixed; right: 0;}.ivu-form-item-content{/*line-height: 15px !important;*/} </style>' + this.$refs.schemasubformview.$el.outerHTML
+            this.sendDataEmail = this.$refs.schemasubformview.$el.outerHTML
             this.email = true
           }, 1000)
+          let flag = false
           if (nextTargetId.target.length > 1) {
             let arr = {}
             for (let index = 0; index < nextTargetId.target.length; index++) {
               let target = _.find(this.flowData.json.processList, {'id': nextTargetId.target[index].id})
-              arr[target.name] = target.id
+              if (nextTargetId.target[index].hasOwnProperty('label')) {
+                arr[nextTargetId.target[index].label] = target.id
+                flag = true
+              }
             }
             this.btnArr = arr
           } else {
             let arr = {}
             arr['approve'] = nextTargetId.target[0].id
             this.btnArr = arr
+          }
+          if (flag == false) {
+            if (nextTargetId.target.length > 1) {
+              let arr = {}
+              for (let index = 0; index < nextTargetId.target.length; index++) {
+                let target = _.find(this.flowData.json.processList, {'id': nextTargetId.target[index].id})
+                console.log('target', target)
+                arr[target.name] = target.id
+              }
+              this.btnArr = arr
+            } else {
+              let arr = {}
+              arr['approve'] = nextTargetId.target[0].id
+              this.btnArr = arr
+            }
           }
         } else {
           this.saveDataMethod()
@@ -804,6 +829,8 @@ export default {
     },
 
     setValues (values) {
+      this.email = false
+      this.schemabinding = false
       this.nextTarget.value = ''
       this.nextTarget.options = []
       this.isMultiple = false
@@ -909,9 +936,15 @@ export default {
         console.log('....', err)
         this.$Spin.hide()
       })
+    },
+
+    updateJumperList (objectArr) {
+      this.jumperLinks = objectArr
     }
   },
   mounted () {
+    this.schemabinding = false
+    this.email = false
     flowzModel.get(null, {
       id: this.$route.params.id
     })
@@ -939,6 +972,9 @@ export default {
   },
   watch: {
     '$route.params': function (value) {
+      this.init()
+    },
+    '$store.state.updateView': function (value) {
       this.init()
     }
   },
@@ -1049,6 +1085,7 @@ export default {
 	.fixed-div{
 		position: fixed;
 		right: 0;
+    /*top: 250px;*/
 	}
 
 	.ivu-form-item-content{

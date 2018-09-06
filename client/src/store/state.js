@@ -23,5 +23,6 @@ export default {
   limitPage: 5,
   activeFlow: null,
   activeList: null,
-  subscription: ''
+  subscription: '',
+  updateView: ''
 }

@@ -1,9 +1,10 @@
 <template>
   <div class="email">
-      <div class="container">
-      <editor :plugins="plugins" api-key="ppzi01crrfo3pvd43s3do89pguwkhowrwajpjdqdkginzj7k" v-model="GetHtmlOfEditor" :initial-value="sendDataEmail"></editor>
-          <h2>Proof:</h2>
-          <div class="row">
+    <div class="container">
+          <p style="text-align: center;margin-bottom: 10px; font-size: 40px; text-decoration: underline"><b> Customer Proof</b></p>
+          <!-- {{formSchemaInstance.data}} -->
+          <schemasubform v-if="!flag" :schemainstance="formSchemaInstance"></schemasubform>
+          <div class="row" v-if="flag">
             <div class="col-md-6">
               <div class="form-group">
                 <label for="from">From</label>
@@ -30,8 +31,8 @@
             </div>
             <div class="col-md-6">
               <div class="form-group">
-                <label for="type">Type:</label>
-                <input type="text" v-model="emailForm.type" class="form-control" id="type"  placeholder="Enter Type">
+                <label for="type">Subject:</label>
+                <input type="text" v-model="emailForm.subject" class="form-control" id="type"  placeholder="Enter Type">
               </div>
             </div>
             <div class="col-md-6">
@@ -41,7 +42,11 @@
               </div>
             </div>
           </div>
-          <div class="form-group">
+          <!-- <div v-if="!flag"> -->
+            
+          <!-- </div> -->
+          <editor :plugins="plugins" api-key="ppzi01crrfo3pvd43s3do89pguwkhowrwajpjdqdkginzj7k" v-model="GetHtmlOfEditor" :initial-value="tinyMCEcontent"></editor>
+          <div v-if="flag" class="form-group">
             <label for="exampleTextarea">Comment</label>
             <textarea class="form-control" v-model="emailForm.Comment" id="exampleTextarea" rows="3"></textarea>
           </div>
@@ -58,20 +63,53 @@
 import Editor from '@tinymce/tinymce-vue'
 import sendmailModal from '@/api/sendmail'
 import config from '@/config'
+import schemaModel from '@/api/schema'
+import SchemaSubForm from './SchemaSubForm'
   /*eslint-disable*/
   export default {
     name: 'email',
     computed: {
     },
     components: {
-      'editor': Editor
+      'editor': Editor,
+      'schemasubform': SchemaSubForm
     },
     props: {
     'btnArr': Object,
     'iid': String,
-    'sendDataEmail': String
+    'sendDataEmail': String,
+    'emailSchemaId': String,
+    'flag': Boolean
     },
-    mounted () {
+    async mounted () {
+      console.log('this.sendDataEmail', this.sendDataEmail)
+      let config11 = config
+      for(let idx in this.btnArr) {
+          let targetId = (new Buffer(this.btnArr[idx])).toString('base64')
+          this.btn = this.btn + `
+          <a href="${config11.serverURI}/email-receive/${this.iid}/${targetId}">
+          <button type=\"submit\" style=\"width: 140px; height: 45px; font-family: 'Roboto', sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 2.5px; font-weight: 500; color: #000; background-color: #eee; border: none; border-radius: 45px; box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2); transition: all 0.3s ease 0s; cursor: pointer\">
+          <span class=\"glyphicon glyphicon-ok\" style=\"color:black; margin-right:8px\"></span> ${idx.toUpperCase()}</button><br><br>
+          </a>
+          `
+      }
+      this.tinyMCEcontent = this.sendDataEmail + this.btn
+      if (this.flag == false) {
+        let response = await schemaModel.get(this.emailSchemaId).catch(error => {
+          console.log(error)
+        })
+        this.formSchemaInstance.data = []
+        this.schema = response.data
+        this.entity = response.data.entity
+        this.formSchemaInstance.entity = this.schema.entity
+        for (let [index, entity] of this.formSchemaInstance.entity.entries()) {
+          if (entity.customtype) {
+            this.formSchemaInstance.entity[index]['entity'] = await this.getChildEntity(entity.type)
+          }
+        }
+
+        await this.handleAdd()
+      }
     },
     data () {
       return {
@@ -80,55 +118,185 @@ import config from '@/config'
           bcc: '',
           from: 'testnewpo@officebrain.com',
           to: 'abc@officebrain.com',
-          type: '',
           subject: '',
           Comment: '',
           body: 'Hello',
           html : ''
         },
-        plugins: 'print preview fullpage powerpaste searchreplace autolink directionality advcode visualblocks visualchars fullscreen image link media template codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists textcolor wordcount tinymcespellchecker a11ychecker imagetools mediaembed  linkchecker contextmenu colorpicker textpattern help',
+        formSchemaInstance: {
+          data: [],
+          entity: []
+        },
+        btn:'',
+        plugins: 'print preview fullpage powerpaste searchreplace autolink directionality advcode visualblocks visualchars fullscreen image link media template codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists textcolor wordcount tinymcespellchecker a11ychecker imagetools mediaembed linkchecker contextmenu colorpicker textpattern help',
         GetHtmlOfEditor: '',
-        sendDataEmail2: '<html><div><p style="color:red">hello</p></div></html>',
-        loading: false
+        loading: false,
+        tinyMCEcontent: ''
       }
     },
     methods: {
+      async handleAdd () {
+        var self = this
+        var obj = {}
+        
+          // obj.database = this.schema.database
+        obj.Schemaid = this.emailSchemaId
+        // _.forEach(self.entity, async function (v) {
+        for (let v of self.formSchemaInstance.entity) {
+          if (v.customtype) {
+            obj[v.name] = await self.getChildData(v.type)
+          } else {
+            if (v.type === 'number') {
+              if (v.property.defaultValue !== '') {
+                obj[v.name] = v.property.defaultValue
+              } else {
+                if (v.property.min !== 0 && v.property.min !== '') {
+                  obj[v.name] = v.property.min
+                } else {
+                  obj[v.name] = 1
+                }
+              }
+            } else if (v.type === 'boolean') {
+              if (v.property.defaultValue !== '' || v.property.defaultValue === 'true') {
+                obj[v.name] = true
+              } else {
+                obj[v.name] = false
+              }
+            } else if (v.type === 'file') {
+              obj[v.name] = []
+            } else {
+              if (v.property.defaultValue !== '') {
+                obj[v.name] = v.property.defaultValue
+              } else {
+                obj[v.name] = ''
+              }
+            }
+          }
+        }
+        this.formSchemaInstance.data.push(obj)
+
+        // }
+      },
+
+      async getChildData (id) {
+        // alert(id)
+        var arrObj = []
+        var self = this
+        await schemaModel.get(id)
+        .then(async (response) => {
+          var _res = response.data
+          var obj = {}
+
+          // console.log("res.entity: ", _res.entity)
+          // obj.id = self.getGuid();
+          // obj.database = _res.database
+          // obj.Schemaid = _res._id
+          for (let v of _res.entity) {
+            if (v.customtype) {
+              obj[v.name] = await self.getChildData(v.type)
+            } else {
+              if (v.type === 'number') {
+                if (v.property.defaultValue !== '') {
+                  obj[v.name] = v.property.defaultValue
+                } else {
+                  if (v.property.min !== 0 && v.property.min !== '') {
+                    obj[v.name] = v.property.min
+                  } else {
+                    obj[v.name] = 1
+                  }
+                }
+              } else if (v.type === 'boolean') {
+                if (v.property.defaultValue !== '' || v.property.defaultValue === 'true') {
+                  obj[v.name] = true
+                } else {
+                  obj[v.name] = false
+                }
+              } else if (v.type === 'file') {
+                obj[v.name] = []
+              } else {
+                if (v.property.defaultValue !== '') {
+                  obj[v.name] = v.property.defaultValue
+                } else {
+                  obj[v.name] = ''
+                }
+              }
+            }
+          }
+          arrObj.push(obj)
+        })
+        .catch(error => {
+          console.log('Error', error)
+        })
+        return arrObj
+      },
+      async getChildEntity (id) {
+        // alert('entity')
+        var self = this
+        var res = []
+        // var _res = await axios.get('https://api.flowzcluster.tk/eng/schema/' + id).catch(function (error) { console.log(error) })
+        let _res = await schemaModel.get(id).catch(err => {
+          console.log('err', err)
+        })
+        for (let [index, entity] of _res.data.entity.entries()) {
+          if (entity.customtype) {
+            _res.data.entity[index]['entity'] = await self.getChildEntity(entity.type)
+          }
+        }
+        res.push(_res.data)
+        return res
+      },
       sendEmail() {
-        this.emailForm.subject = this.emailForm.type
-        let config11 = config
-        let btn = ''
         let htmlContent;
         if(this.GetHtmlOfEditor === ''){
           htmlContent = this.sendDataEmail
         } else {
-          htmlContent =  '<link rel="stylesheet" href="https://unpkg.com/iview@3.0.1/dist/styles/iview.css"> <style> .ui-card{background-color: #fff; box-shadow: 0px 0px 25px #dadada; border-radius: 10px; padding: 10px 20px;}.card-title{text-transform: capitalize; color: #FFF; font-size: 18px; background-color: #292929; padding: 10px 30px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; margin-left: -20px; margin-bottom: 10px;}.btnAdd{background-color: #53CAE8; border-radius: 50px; font-size: 14px; text-transform: uppercase; color: #fff; border: none; font-style: italic;}.btnAdd:hover{background-color: #83d5ea; color: #fff;}.btnDelete{font-size: 14px; border-radius: 50px; color: #fff !important; position: absolute; bottom: 10px; right: 10px; background-color: #FF0000; width: 20px; height: 20px;}.btnDelete i{position: absolute; top: 4px; left: 5px;}.field-label{text-transform: capitalize;}.formTitle{text-transform: capitalize;}.jumper-links{list-style: none; font-size: 14px;}.jumper-links a{text-decoration: none; /*color: #53cae8;*/ text-align: left; font-weight: bold; text-transform: capitalize;}.fixed-div{position: fixed; right: 0;}.ivu-form-item-content{/*line-height: 15px !important;*/} </style>' + this.GetHtmlOfEditor
+          htmlContent = this.GetHtmlOfEditor
         }
-        for(let idx in this.btnArr) {
-          let targetId = (new Buffer(this.btnArr[idx])).toString('base64')
-          btn = btn + `
-          <a href="${config11.serverURI}/email-receive/${this.iid}/${targetId}">
-          <button type=\"submit\" class=\"btn btn-success\">
-          <span class=\"glyphicon glyphicon-ok\" style=\"color:black; margin-right:8px\"></span> ${idx.toUpperCase()} : Move To ${idx.toUpperCase()}</button><br><br>
-          </a>
-          `
-        }
-        this.emailForm.html = `<!DOCTYPE html><html lang=\"en\" ><head> <meta charset=\"UTF-8\"><title>Email Proof</title>
+        this.formSchemaInstance.data[0].html = []
+        if (this.flag == true) {
+          this.emailForm.html = `<!DOCTYPE html><html lang=\"en\" ><head> <meta charset=\"UTF-8\"><title>Email Proof</title>
           <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css'> </head>
           <body><div class=\"container\">
           ` + htmlContent +`
           <h2>Customer Proof:</h2>
-          ${btn}
+          ${this.btn}
+          <br> <h4>Comment: ${this.emailForm.Comment}</h4><br>
           <h4>While we strongly you to take advantage of this time saving option,
               your proof may still be fixed back to company name at: <strong>Toll Free Fax:</strong> 800-238-0082
               <strong>Local Fax:<strong> 716-773-2332</h4></div></body></html>`
-        sendmailModal.post(this.emailForm)
-        .then((res)=>{
-          this.$emit('on-done', true)
-        })
-        .catch((err)=>{
-          console.log(err)
-        })
+          sendmailModal.post(this.emailForm)
+          .then((res)=>{
+            this.$emit('on-done', true)
+          })
+          .catch((err)=>{
+            console.log(err)
+          })
+        } else {
+          this.formSchemaInstance.data[0].html = `<!DOCTYPE html><html lang=\"en\" ><head> <meta charset=\"UTF-8\"><title>Email Proof</title>
+          <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css'> </head>
+          <body><div class=\"container\">
+          ` + htmlContent +`
+          <h2>Customer Proof:</h2>
+          ${this.btn}
+          <br> <h4>Comment: ${this.formSchemaInstance.data.comment}</h4><br>
+          <h4>While we strongly you to take advantage of this time saving option,
+              your proof may still be fixed back to company name at: <strong>Toll Free Fax:</strong> 800-238-0082
+              <strong>Local Fax:<strong> 716-773-2332</h4></div></body></html>`
+              console.log('this.formSchemaInstance.data', this.formSchemaInstance.data)
+          sendmailModal.post(this.formSchemaInstance.data[0])
+          .then((res)=>{
+            this.$emit('on-done', true)
+          })
+          .catch((err)=>{
+            console.log(err)
+          })
+        }
       }
     }
   }
 </script>
+<style>
+.mce-edit-area.mce-container.mce-panel.mce-stack-layout-item > iframe {
+  height: 500px !important;
+}
+</style>

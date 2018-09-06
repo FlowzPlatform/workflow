@@ -7,7 +7,9 @@ let _ = require('lodash');
 module.exports = {
   before: {
     all: [],
-    find: [],
+    find: [
+      hook => beforeFind(hook)
+    ],
     get: [],
     create: [
       hook => beforeCreate(hook)
@@ -42,6 +44,40 @@ module.exports = {
   }
 };
 
+function beforeFind (hook) {
+  console.log('hook.params', hook.params)
+  const query = hook.service.createQuery(hook.params.query);
+      
+  // const searchString = "my search string";
+  // console.log('__________________________________________________')
+  // console.log('hook.service', hook.app.services.flowzdata.table)
+  console.log('__________________________________________________')
+  // ----------------------------- || Get Last Record Data || --------------------------
+  // hook.params.rethinkdb = query.outerJoin(hook.app.services.flowzdata.table ,function(instance,data){
+  //   return instance.hasFields('stageReference').and(
+  //     instance('stageReference').count().gt(0).and(
+  //     data('id').eq(instance('stageReference').nth(-1).getField('stageRecordId'))
+  //   ))
+  // }).without({"right": {"id": true}})
+  // .zip()
+
+  // ----------------------------- || Get Last Record Data || --------------------------
+  // hook.params.rethinkdb = query.hasFields('stageReference').filter(function(mdoc) {
+  //   return mdoc("stageReference").count().gt(0)
+  // }).map(function(item) {
+  //   return item.merge({
+  //     'stageReference': item('stageReference').map(function(doc1) {
+  //       return doc1.merge(function(doc) {
+  //         // return {data: doc1.getField('stageRecordId')}
+  //         // return {data: r.db('FlowzEngine').table('flowzdata').get(doc1.getField('stageRecordId')).getField('data')}
+  //         return {data: hook.app.services.flowzdata.table.get(doc1.getField('stageRecordId')).getField('data')}
+  //       })
+  //     })   
+  //   })
+  // })
+  console.log('__________________________________________________')
+  // console.log('hook.params.rethinkdb', hook.params.rethinkdb)
+}
 
 function beforeUpdate (hook) {
   hook.data.modifiedAt = new Date().toISOString();

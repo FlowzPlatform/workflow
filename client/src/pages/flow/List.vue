@@ -100,7 +100,7 @@
               </table>
             </div>
             <div v-else>
-              <p align="center"><small>No Data</small></p>
+              <p align="center"><small>{{waitingText}}</small></p>
             </div>
 
         </div>
@@ -426,13 +426,17 @@ export default {
           key: 'ProcessName'
         },
         {
+          title: 'Id',
+          key: 'id'
+        },
+        {
           title: 'Notes',
           key: 'notes'
         },
         {
           title: 'Action',
           key: 'action',
-          width: 400,
+          width: 300,
           align: 'center',
           render: (h, params) => {
             return h('div', [
@@ -570,6 +574,7 @@ export default {
       roleValue1: '',
       input: '',
       // loading :false,
+      waitingText: '',
       data2: [],
       data3: [],
       data4: [],
@@ -733,7 +738,7 @@ export default {
     showSecurityDialog (query) {
       this.selectedFlowObject = null
       this.selectedFlowObject = query.row
-      axios.post('https://api.flowzcluster.tk/authldap/init', {
+      axios.post(config.ldapURL, {
         'app': 'workflow_' + this.selectedFlowObject.id
       })
       .then(function (response) {
@@ -751,30 +756,40 @@ export default {
       this.permissionsModal = true
     },
     ok () {
-      this.$Message.info('Clicked ok')
+      // this.$Message.info('Clicked ok')
     },
     cancel () {
-      this.$Message.info('Clicked cancel')
+      // this.$Message.info('Clicked cancel')
     },
     handleAssign (value) {
       this.value2 = value
     },
-    showInviteDialog (query) {
-      if (query.row.roles !== undefined) {
-        this.flowId = 'workflow_' + query.row.id
-        let temp1 = query.row.roles.split(',')
-        let roles = []
-        for (let index = 0; index < temp1.length; index++) {
-          roles.push({
-            value1: temp1[index],
-            label1: temp1[index]
-          })
-          this.options = roles
+    async showInviteDialog (query) {
+      var self = this
+      let newValue = 'workflow_' + query.row.id
+      await axios.get(config.subscriptionUrl + 'register-roles?module=' + newValue, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;'
         }
-        this.modal1 = true
-      } else {
-        alert('First add roles')
-      }
+      }).then(function (response) {
+        if (response.data.data.length > 0) {
+          let roles = []
+          for (let i = 0; i < response.data.data.length; i++) {
+            roles.push({
+              value1: response.data.data[i].role,
+              label1: response.data.data[i].role
+            })
+          }
+          self.options = roles
+        } else {
+          self.loadingPermisions = false
+        }
+        return response.data.data
+      })
+        .catch(function (error) {
+          console.log(error)
+        })
+      this.modal1 = true
     },
     capitalize (str) {
       str = str[0].toUpperCase() + str.slice(1)
@@ -1273,6 +1288,7 @@ export default {
     getRoles: async function (newValue) {
       // this.tableData = {}
       var self = this
+      self.waitingText = 'Loading...'
       await axios.get(config.subscriptionUrl + 'register-roles?module=' + newValue, {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded;'
@@ -1293,6 +1309,7 @@ export default {
           self.callTaskList(newValue)
         } else {
           self.loadingPermisions = false
+          self.waitingText = 'No Data'
         }
         return response.data.data
       })
@@ -1310,6 +1327,7 @@ export default {
           } else {
             self.loadingPermisions = false
           }
+          self.waitingText = 'No Data'
         })
     },
     callTaskList: async function (newValue) {
