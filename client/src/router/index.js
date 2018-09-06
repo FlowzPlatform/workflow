@@ -68,6 +68,7 @@ import FlowOverview from '@/pages/flow/FlowOverview'
 import ManageBPMNPlugin from '@/pages/BPMNPlugins/Manage'
 
 import SchemaView from '@/components/SchemaView'
+import emailtemplate from '@/components/emailtemplate'
 
 Vue.use(VueRouter)
 
@@ -166,6 +167,12 @@ const mroutes = [
             ]
           }
         ]
+      },
+      { // Schema
+        path: 'emailtemplate',
+        component: emailtemplate,
+        name: 'emailtemplate',
+        meta: { description: 'emailtemplate' }
       },
       { // Flow
         path: 'flow',
