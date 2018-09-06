@@ -37,8 +37,7 @@
           <template v-else>
             <Submenu :name="index" v-for="(item, index) in flowzList" :key="index">
               <template slot="title">
-                  <!-- <Icon type="ios-people" /> -->
-                  {{item.json.name}}&nbsp;&nbsp;
+                  {{item.name}}&nbsp;&nbsp;
                   <span>
                     <Badge :count="item.count"  class-name="demo-badge-alone"></Badge>
                   </span>
@@ -50,15 +49,14 @@
                   </span>
               </template>
               <template
-                v-for="(subItem, inx) in item.json.processList" 
-                v-if="subItem.type !== 'start' && subItem.type !== 'endevent' && subItem.type !== 'intermediatethrowevent'"
+                v-for="(subItem, key) in item.processList" 
+                v-if="subItem.type !== 'startevent' && subItem.type !== 'endevent' && subItem.type !== 'intermediatethrowevent'"
               >
                 <Menu-item 
                   :name="item.id + '/' + subItem.id" 
-                  :key="inx" 
+                  :key="key" 
                 >
                   <div :title="subItem.id" class="submentItem">
-                    <!-- <a @click="handleSubmenu(item, subItem)"> -->
                       {{subItem.name}}
                       <span style="float:right;">
                         <Badge :count="subItem.count"  class-name="demo-badge-alone"></Badge>
@@ -66,7 +64,6 @@
                       <span v-if="subItem.isfirst" style="float:right;padding-right:5px;" title="Create Instance" @click.prevent="createInstance(item, subItem.id)">
                         <i class="fa fa-plus"></i>
                       </span>
-                    <!-- </a> -->
                   </div>
                 </Menu-item>
               </template>
@@ -140,7 +137,6 @@ export default {
         this.$router.push('/schemaview/' + node[0] + '/' + node[1])
       }
     },
-
     makeid () {
       var text = ''
       var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
@@ -149,10 +145,6 @@ export default {
 
       return text
     },
-    // handleSubmenu (item, subitem) {
-    //   // console.log(item, subitem)
-    //   this.$router.push('/schemaview/' + item.id + '/' + subitem.id)
-    // },
     async getModuleRoles (moduleId) {
       if (this.roles[moduleId]) {
         return this.roles[moduleId]
@@ -181,22 +173,19 @@ export default {
       if (this.$store.state.role === 1) {
         this.loading = true
         if (this.$store.state.flowz.length > 0) {
-          // console.log('......', this.$store.state.flowz)
-          // this.loading = false
           let flowZData = _.cloneDeep(this.$store.state.flowz)
           this.flowzList = _.map(flowZData, (m) => {
             m.count = 0
-            _.map(m.json.processList, (p) => {
+            _.map(m.processList, (p) => {
               p.count = 0
               return p
             })
             return m
           })
           this.loading = false
-          this.setCounters()
+          // this.setCounters()
         } else {
           await flowzModal.get(null, {
-            $select: ['json', 'id'],
             $paginate: false
           })
           .then(async (response) => {
@@ -204,14 +193,14 @@ export default {
             this.$store.state.flowz = _.cloneDeep(response.data)
             this.flowzList = _.map(response.data, (m) => {
               m.count = 0
-              _.map(m.json.processList, (p) => {
+              _.map(m.processList, (p) => {
                 p.count = 0
                 return p
               })
               return m
             })
             this.loading = false
-            this.setCounters()
+            // this.setCounters()
             // console.log('flowzlist: ', this.flowzList)
           })
           .catch(error => {
@@ -372,10 +361,10 @@ export default {
               fid: item.id
             }).then(res => {
               if (res.data.length > 0) {
-                for (let pitem of item.json.processList) {
-                  pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
-                  item.count += pitem.count
-                }
+                // for (let pitem of item.processList) {
+                //   // pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
+                //   item.count += pitem.count
+                // }
               }
             }).catch(err => {
               console.log('error', err)
