@@ -13,7 +13,7 @@
           <tr>
             <th>Instance Id</th>
             <th>Current Status</th>
-            <th>Process State</th>
+            <!-- <th>Process State</th> -->
             <th width="150px">Action</th>
           </tr>
         </thead>
@@ -21,6 +21,16 @@
             <tr v-for="(item, inx) in instanceEntries">
               <td>{{item.id}}</td>
               <td>
+                <Tag color="blue" type="border" class="uppercase">{{item.mainStatus}}</Tag>
+              </td>
+              <td>
+                <a href="javascript:void(0)" @click="getRecord(item)">
+                  <Tooltip content="Start" placement="top">
+                    <Icon type="ios-play" />
+                  </Tooltip>
+                </a>
+              </td>
+              <!-- <td>
                 <Tag v-if="item.currentState == 'Complated'" color="blue" class="uppercase"><Icon type="ios-done-all" /> {{valueStatus(item.currentStatus)}}</Tag>
                 <Tag v-else color="blue" class="uppercase">{{valueStatus(item.currentStatus)}}</Tag>
               </td>
@@ -29,12 +39,11 @@
                 </td>
               <td>
                 <a href="javascript:void(0)" @click="getRecord(item)">
-                  <!-- <Button type="text" icon="ios-play"></Button> -->
                   <Tooltip content="Start" placement="top">
                     <Icon type="ios-play" />
                   </Tooltip>
                 </a>
-              </td>
+              </td> -->
             </tr>
           </tbody>
       </table>
@@ -65,9 +74,10 @@
 <script>
 
 // const deepstream = require('deepstream.io-client-js')
-import finstanceModal from '@/api/finstance'
+// import finstanceModal from '@/api/finstance'
 import flowzModal from '@/api/flowz'
 import flowzdataModal from '@/api/flowzdata'
+import dataQuerymodel from '@/api/dataquery'
 import _ from 'lodash'
 
 // const DeepRecord = require('@/assets/js/deepstream/deepRecord')
@@ -159,13 +169,25 @@ export default {
             this.breadItem.state = m.name
           }
         }
-        await finstanceModal.get(null, query).then(resp => {
+        // await finstanceModal.get(null, query).then(resp => {
+        //   this.tableLoading = false
+        //   this.instanceEntries = resp.data
+        // }).catch(err => {
+        //   this.tableLoading = false
+        //   this.instanceEntries = null
+        //   console.log('err', err)
+        // })
+        dataQuerymodel.get(null, {
+          $last: true,
+          fid: this.$route.params.id,
+          currentStatus: this.$route.params.stateid
+        }).then(queryresp => {
           this.tableLoading = false
-          this.instanceEntries = resp.data
+          this.instanceEntries = queryresp.data.data
         }).catch(err => {
           this.tableLoading = false
           this.instanceEntries = null
-          console.log('err', err)
+          console.log('Error: ', err)
         })
       }).catch(err => {
         this.tableLoading = false
