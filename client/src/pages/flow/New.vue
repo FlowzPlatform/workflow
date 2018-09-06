@@ -149,10 +149,6 @@
                         
                         m.type = type.toLowerCase()
                         allProcess.push(m)
-                        if (m.type === 'sendproofmail') {
-                          console.log('m', m)
-                          console.log('jsonXML[type]', jsonXML[type])
-                        }
                       }
                     }
                   }
