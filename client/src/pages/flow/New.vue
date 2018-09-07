@@ -181,7 +181,6 @@
                       let m = _.find(allProcess, {_id: item._bpmnElement})
                       if (m !== undefined && m !== null) {
                         if(m.type === 'sendproofmail') {
-                          console.log(m)
                           this.flowObject.processList[m._id] = {
                             id: m._id,
                             name: m._name || '',
