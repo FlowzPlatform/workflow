@@ -423,15 +423,11 @@ export default {
         },
         {
           title: 'Name',
-          key: 'ProcessName'
+          key: 'name'
         },
         {
           title: 'Id',
           key: 'id'
-        },
-        {
-          title: 'Notes',
-          key: 'notes'
         },
         {
           title: 'Action',

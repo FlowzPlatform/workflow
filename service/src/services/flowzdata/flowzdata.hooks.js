@@ -49,14 +49,16 @@ function beforeCreate (hook) {
 function afterCreate (hook) {
   if (hook.params.hasOwnProperty('isdone') && hook.params.isdone) {
     hook.params.query = {};
-    hook.params.query.$select = ['json'];
+    // hook.params.query.$select = ['json'];
     const query = Object.assign({}, hook.params.query);
     // console.log('++++++++++++++++++++++++++++++++++++++++++++++++++++++')
     // console.log('hook.params', hook.params)
     // console.log('++++++++++++++++++++++++++++++++++++++++++++++++++++++')
     return hook.app.service('flowz').get(hook.data.fid, {query}).then(res => {
-      let cuurentObj = _.find(res.json.processList, {id: hook.data.state});
-      let nextTargetObj = getNextTarget(res.json.processList, cuurentObj.target[0].id);
+      // let cuurentObj = _.find(res.json.processList, {id: hook.data.state});
+      let cuurentObj = res.processList[hook.data.state];
+      // let nextTargetObj = getNextTarget(res.json.processList, cuurentObj.target[0].id);
+      let nextTargetObj = res.processList[cuurentObj.target[0].id];
       return hook.app.service('finstance').get(hook.data.iid).then(finstRes => {
         let mdata = {
           currentStatus: nextTargetObj.id,
@@ -113,15 +115,4 @@ function afterCreate (hook) {
       });
     });
   }
-}
-
-function getNextTarget (processList, targetId) {
-  let targetObj = _.find(processList,{'id': targetId});
-  // if (targetObj.type === 'start' || targetObj.type === 'endevent' || targetObj.type === 'intermediatethrowevent') {
-  //   return targetObj;
-  // }
-  // // if(targetObj.inputProperty.length === 0) {
-  // targetObj = getNextTarget(processList, targetObj.target[0].id);
-  // // }
-  return targetObj;
 }

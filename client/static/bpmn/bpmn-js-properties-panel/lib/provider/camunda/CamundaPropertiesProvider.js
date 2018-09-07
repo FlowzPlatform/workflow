@@ -24,6 +24,7 @@ var serviceTaskDelegateProps = require('./parts/ServiceTaskDelegateProps'),
   // myInputProps = require('./parts/MyInputProps'),
   myPropertiesIOProps = require('./parts/myPropertiesIOProps'),
   schemaProps = require('./parts/schemaProps'),
+  emailProps = require('./parts/emailTemplate'),
   myOutputProps = require('./parts/myOutputProps'),
   // myConfigProps = require('./parts/MyConfigProps'),
   mySMTPProps = require('./parts/MySMTPProps'),
@@ -114,6 +115,7 @@ function createGeneralTabGroups(element, bpmnFactory, elementRegistry, elementTe
   idProps(generalGroup, element, translate);
   nameProps(generalGroup, element, translate);
   schemaProps(generalGroup, element, bpmnFactory, translate, options);
+  emailProps(generalGroup, element, bpmnFactory, translate, options);
   capacityProps(generalGroup, element, translate);
   processProps(generalGroup, element, translate);
   versionTag(generalGroup, element, translate);

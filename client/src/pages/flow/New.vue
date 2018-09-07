@@ -34,6 +34,7 @@
 </template>
 
 <script>
+/*eslint-disable */
   const subscriptionNew = require('flowz-subscription')
   import _ from 'lodash'
   import schemaModel from '@/api/schema'
@@ -42,6 +43,7 @@
   import schemamappingModel from '@/api/schemamapping'
   import modelBpmnplugin from '@/api/bpmnplugins'
   import flowz from '@/api/flowz'
+  import saveemailTemplate from '@/api/emailtemplate'
 
   import 'diagram-js/assets/diagram-js.css'
   import 'bpmn-js/assets/bpmn-font/css/bpmn-embedded.css'
@@ -145,6 +147,7 @@
                       }
                       for (let m of jsonXML[type]) {
                         // let obj = m
+                        
                         m.type = type.toLowerCase()
                         allProcess.push(m)
                       }
@@ -177,12 +180,28 @@
                     for (let [inx, item] of data.definitions.BPMNDiagram.BPMNPlane.BPMNShape.entries()) {
                       let m = _.find(allProcess, {_id: item._bpmnElement})
                       if (m !== undefined && m !== null) {
-                        this.flowObject.processList[m._id] = {
-                          id: m._id,
-                          name: m._name || '',
-                          type: m.type,
-                          order: inx,
-                          target: this.getTargetId(m, jsonXML)
+                        if(m.type === 'sendproofmail') {
+                          this.flowObject.processList[m._id] = {
+                            id: m._id,
+                            name: m._name || '',
+                            type: m.type,
+                            order: inx,
+                            smtp: {
+                              host: m._host || '',
+                              password: m._password || '',
+                              user: m._user || ''
+                            },
+                            emailtemplate: m._emailtemplate || '',
+                            target: this.getTargetId(m, jsonXML)
+                          }
+                        } else{
+                          this.flowObject.processList[m._id] = {
+                            id: m._id,
+                            name: m._name || '',
+                            type: m.type,
+                            order: inx,
+                            target: this.getTargetId(m, jsonXML)
+                          }
                         }
                       }
                     }
@@ -720,6 +739,17 @@
         }))
       },
       initFlow () {
+        let tempVar = []
+        saveemailTemplate.get(null, {
+          'user': this.$store.state.user._id
+        })
+        .then((res) => {
+          tempVar = res.data.data
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+
         this.processVar = [
           new Promise((resolve, reject) => {
             schemaModel.get(null, {
@@ -765,6 +795,8 @@
             this.bpmnXML = flowz.get(this.$route.params.id).then(async (result) => {
               this.bpmnXML = result.data.xml
               await this.initBPMN({
+                userId: this.$store.state.user._id,
+                emailTemplate: tempVar,
                 cdata: result.data,
                 id: this.$route.params.id,
                 schema: response[0],

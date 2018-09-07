@@ -84,23 +84,29 @@ function beforeUpdate (hook) {
 }
 
 function beforeCreate (hook) {
-  hook.params.query.$select = ['json'];
   hook.data.createdAt = new Date().toISOString();
-  // const query = Object.assign({}, hook.params.query);
-  // console.log('___________________________________________________________________________')
-  // console.log('hook.params.userPackageDetails', hook.params)
-  // console.log('___________________________________________________________________________')
   if (hook.data.fid) {
-    // hook.params.headers = hook.params.headers
     return hook.app.service('flowz').get(hook.data.fid, hook.params).then(res => {
-      // console.log('res++++++++++++++++++++++++++++++', res)
-      let startObj = _.find(res.json.processList, {"type": "start"});
-      let nextTargetObj = getNextTarget(res.json.processList, startObj.target[0].id);
-      // console.log('nextTargetObj', nextTargetObj)
-      hook.data.currentStatus = nextTargetObj.id;
-      hook.data.mainStatus = 'inprocess';
-      hook.data.stageReference = [];
-      return hook;
+      if (res.startId.length > 0) {
+        let startObj = getStartObject(res.startId, res.processList)
+        if (startObj !== 0) {
+          // let nextTargetObj = getNextTarget(res.processList, startObj.target[0].id);
+          let nextTargetObj = res.processList[startObj.target[0].id];
+          // console.log('nextTargetObj', nextTargetObj)
+          hook.data.currentStatus = nextTargetObj.id;
+          hook.data.mainStatus = 'inprocess';
+          hook.data.stageReference = [];
+          return hook;
+        } else {
+          throw new errors.BadRequest('Error', {
+            errors: { message: err.toString() }
+          });
+        }
+      } else {
+        throw new errors.BadRequest('Error', {
+          errors: { message: err.toString() }
+        });
+      }
     }).catch(err => {
       console.log('err', err)
       throw new errors.BadRequest('Error', {
@@ -110,13 +116,11 @@ function beforeCreate (hook) {
   }
 };
 
-function getNextTarget (processList, targetId) {
-  let targetObj = _.find(processList,{"id": targetId})
-  // if (targetObj.type === 'start' || targetObj.type === 'endevent' || targetObj.type === 'intermediatethrowevent') {
-  //   return targetObj;
-  // }
-  // if(targetObj.inputProperty.length === 0) {
-  // targetObj = getNextTarget(processList, targetObj.target[0].id)
-  // }
-  return targetObj;
-};
+function getStartObject (startStates, processList) {
+  for (let item of startStates) {
+    if (processList[item].target.length > 0) {
+      return processList[item]
+    }
+  }
+  return 0
+}

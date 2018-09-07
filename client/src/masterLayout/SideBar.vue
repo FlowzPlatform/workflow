@@ -49,7 +49,7 @@
                   </span>
               </template>
               <template
-                v-for="(subItem, key) in item.processList" 
+                v-for="(subItem, key) in getByOrder(item.processList)" 
                 v-if="subItem.type !== 'startevent' && subItem.type !== 'endevent' && subItem.type !== 'intermediatethrowevent'"
               >
                 <Menu-item 
@@ -96,6 +96,15 @@ export default {
     // console.log('this.$store.state.activeFlow', this.$store.state.activeFlow)
   },
   methods: {
+    getByOrder (array) {
+      let allProcess = []
+      for (let key in array) {
+        allProcess.push(array[key])
+      }
+      return allProcess.sort((a, b) => {
+        return a.order - b.order
+      })
+    },
     createInstance (item, subItemID) {
       // console.log('item', item)
       this.$Loading.start()
@@ -183,7 +192,8 @@ export default {
             return m
           })
           this.loading = false
-          // this.setCounters()
+          // console.log('flowzList', this.flowzList)
+          this.setCounters()
         } else {
           await flowzModal.get(null, {
             $paginate: false
@@ -200,7 +210,7 @@ export default {
               return m
             })
             this.loading = false
-            // this.setCounters()
+            this.setCounters()
             // console.log('flowzlist: ', this.flowzList)
           })
           .catch(error => {
@@ -314,10 +324,14 @@ export default {
           }).then(res => {
             // console.log('res count', res.data)
             sitem.count = 0
-            for (let pitem of sitem.json.processList) {
+            _.map(sitem.processList, (pitem) => {
               pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
               sitem.count += pitem.count
-            }
+            })
+            // for (let pitem of sitem.json.processList) {
+            //   pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
+            //   sitem.count += pitem.count
+            // }
           }).catch(err => {
             console.log('error', err)
           })
@@ -325,7 +339,7 @@ export default {
           let once = false
           let mdata = []
           sitem.count = 0
-          for (let pitem of sitem.json.processList) {
+          for (let pitem of sitem.processList) {
             if (!once) {
               finstanceModal.get(null, {
                 $paginate: false,
@@ -334,20 +348,20 @@ export default {
                 fid: sitem.id
               }, {
                 workflowid: 'workflow_' + sitem.id,
-                stateid: pitem.id
+                stateid: sitem.processList[pitem].id
               }).then(res => {
                 if (res.data.length > 0) {
                   once = true
                   mdata = res.data
-                  pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
-                  sitem.count += pitem.count
+                  sitem.processList[pitem].count = _.filter(res.data, {currentStatus: sitem.processList[pitem].id}).length
+                  sitem.count += sitem.processList[pitem].count
                 }
               }).catch(err => {
                 console.log('error', err)
               })
             } else {
-              pitem.count = _.filter(mdata, {currentStatus: pitem.id}).length
-              sitem.count += pitem.count
+              sitem.processList[pitem].count = _.filter(mdata, {currentStatus: sitem.processList[pitem].id}).length
+              sitem.count += sitem.processList[pitem].count
             }
           }
         }
@@ -361,10 +375,10 @@ export default {
               fid: item.id
             }).then(res => {
               if (res.data.length > 0) {
-                // for (let pitem of item.processList) {
-                //   // pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
-                //   item.count += pitem.count
-                // }
+                _.map(item.processList, (pitem) => {
+                  pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
+                  item.count += pitem.count
+                })
               }
             }).catch(err => {
               console.log('error', err)
@@ -372,7 +386,7 @@ export default {
           } else {
             let isonce = false
             let pdata = []
-            for (let element of item.json.processList) {
+            for (let key in item.processList) {
               if (!isonce) {
                 finstanceModal.get(null, {
                   $paginate: false,
@@ -381,16 +395,16 @@ export default {
                   fid: item.id
                 }, {
                   workflowid: 'workflow_' + item.id,
-                  stateid: element.id
+                  stateid: item.processList[key].id
                 }).then(res => {
                   if (res.data.length > 0) {
                     isonce = true
                     pdata = res.data
                     // console.log('res.data.length', res.data)
                     // for (let pitem of item.json.processList) {
-                    element.count = _.filter(res.data, {currentStatus: element.id}).length
+                    item.processList[key].count = _.filter(res.data, {currentStatus: item.processList[key].id}).length
                     // console.log('element.count', element.count)
-                    item.count += element.count
+                    item.count += item.processList[key]
                     // this.flowzList[inx].count = 5
                     // }
                   }
@@ -398,8 +412,8 @@ export default {
                   console.log('error', err)
                 })
               } else {
-                element.count = _.filter(pdata, {currentStatus: element.id}).length
-                item.count += element.count
+                item.processList[key].count = _.filter(pdata, {currentStatus: item.processList[key].id}).length
+                item.count += item.processList[key].count
               }
             }
           }

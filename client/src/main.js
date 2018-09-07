@@ -334,6 +334,7 @@ router.afterEach(route => {
 
 sync(store, router)
   // console.log('process.env.accesskey', process.env.accesskey)
+
 new Vue({
   el: '#app',
   router,
