@@ -8,7 +8,7 @@
         <BreadcrumbItem>{{setBreadcrumbs.state}}</BreadcrumbItem>
     </Breadcrumb>
     <div v-if="instanceEntries !== null && instanceEntries.length !== 0" >
-      <table class="table">
+      <table class="table" id="data">
         <thead>
           <tr>
             <th>Instance Id</th>
@@ -61,6 +61,7 @@
 // const deepstream = require('deepstream.io-client-js')
 // import finstanceModal from '@/api/finstance'
 // import flowzModal from '@/api/flowz'
+import $ from 'jquery'
 import flowzdataModal from '@/api/flowzdata'
 // import dataQuerymodel from '@/api/dataquery'
 import _ from 'lodash'
@@ -120,6 +121,16 @@ export default {
       }
       await this.$emit('setValues', values)
     }
+  },
+  mounted () {
+    $('#data tr').click(function () {
+      var selected = $(this).hasClass('highlight')
+      console.log(selected)
+      $('#data tr').removeClass('highlight')
+      if (!selected) {
+        $(this).addClass('highlight')
+      }
+    })
   },
   feathers: {
     'finstance': {
@@ -214,5 +225,9 @@ export default {
 
   .uppercase{
     text-transform: uppercase;
+  }
+
+  .highlight {
+    background-color:#ebf7fe;
   }
 </style>

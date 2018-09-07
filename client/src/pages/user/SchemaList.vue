@@ -57,7 +57,7 @@
     </div>
 
     <div>
-      <Table class="thisTable" :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
+      <Table highlight-row class="thisTable" :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
     </div>
   </div>
 </template>
