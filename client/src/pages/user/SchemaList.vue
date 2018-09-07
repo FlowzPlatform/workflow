@@ -234,12 +234,13 @@
                   },
                   on: {
                     'click': async () => {
-                      // console.log('Params: ', params.row)
-                      this.$Spin.show()
-                      let indexFind = _.findIndex(this.instanceEntries, (o) => { return o.id === params.row.iid })
+                      // console.log('Params: ', this.instanceEntries, params)
+                      this.$Loading.start()
+                      let indexFind = _.findIndex(this.instanceEntries, (o) => { return o.id === params.row.id })
                       // console.log('indexfind: ', indexFind)
                       // this.$emit('setValues', this.instanceEntries[indexFind])
                       // console.log('Click: ', params.row, params.index)
+                      // console.log('this.flowzData: ', this.flowzData)
                       let currentObj = this.flowzData.processList[this.instanceEntries[indexFind].currentStatus]
                       // console.log('this.flowzData.schema SchemaList', this.flowzData.schema)
                       let values = {
@@ -248,7 +249,7 @@
                         formName: currentObj.name,
                         currentState: currentObj.id,
                         flowzData: this.flowzData,
-                        formData: params.row
+                        formData: params.row.data
                         // nextState: resp[currentState].next,
                         // currentState: currentState
                       }
@@ -266,7 +267,7 @@
                       //   })
                       // }
                       // console.log('Values emitted: ', values)
-                      this.$Spin.hide()
+                      this.$Loading.finish()
                       await this.$emit('setValues', values)
                     }
                   }
@@ -294,7 +295,11 @@
                 title: item.title,
                 key: item.key,
                 sortable: item.sortable,
-                width: item.width
+                width: item.width,
+                render: (h, params) => {
+                  // console.log('params.row.data: ', params.row.data)
+                  return h('div', params.row.data[item.key])
+                }
               })
             }
           }
@@ -304,11 +309,16 @@
               cols.push({
                 title: item.name,
                 key: item.name,
-                width: 150
+                width: 150,
+                render: (h, params) => {
+                  // console.log('params.row.data: ', params.row.data)
+                  return h('div', params.row.data[item.name])
+                }
               })
             }
           }
         }
+        // console.log('cols: ', cols)
         return cols
       }
     },
