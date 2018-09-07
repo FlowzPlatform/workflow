@@ -297,6 +297,15 @@ export default {
     cancel () {
       this.anotherBinding = _.cloneDeep(this.configuration.fields)
     },
+    getByOrder (array) {
+      let allProcess = []
+      for (let key in array) {
+        allProcess.push(array[key])
+      }
+      return allProcess.sort((a, b) => {
+        return a.order - b.order
+      })
+    },
     mainColumns () {
       // console.log('mainColumns')
       let tableCols = _.filter(this.configuration.fields, {show: true})
@@ -412,11 +421,12 @@ export default {
         this.flowName = res.data.name
         let cols = []
         // console.log('res.data.processList: ', res.data.processList)
-        for (let col in res.data.processList) {
-          if (res.data.processList[col].type !== 'startevent' && res.data.processList[col].type !== 'endevent') {
+        let listing = this.getByOrder(res.data.processList)
+        for (let col of listing) {
+          if (col.type !== 'startevent' && col.type !== 'endevent') {
             cols.push({
-              title: res.data.processList[col].name || res.data.processList[col].id,
-              key: res.data.processList[col].id,
+              title: col.name || col.id,
+              key: col.id,
               firstColumn: false,
               show: true,
               width: 150
