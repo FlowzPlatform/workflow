@@ -526,12 +526,12 @@ export default {
         }
       }
       if(!this.isEmailDone){
-        let currentStageObject = _.find(this.flowData.processList, {'id': currentStateId})
+        let currentStageObject = this.flowData.processList[currentStateId]
         let nextTargetId
         if (this.isMultiple) {
-          nextTargetId = _.find(this.flowData.processList, {'id': this.nextTarget.value})
+          nextTargetId = this.flowData.processList[this.nextTarget.value]
         } else {
-          nextTargetId = _.find(this.flowData.processList, {'id': currentStageObject.target[0].id})
+          nextTargetId = this.flowData.processList[currentStageObject.target[0].id]
         }
         if (nextTargetId.type === 'sendproofmail') {
           this.id = null
@@ -557,7 +557,7 @@ export default {
           if (nextTargetId.target.length > 1) {
             let arr = {}
             for (let index = 0; index < nextTargetId.target.length; index++) {
-              let target = _.find(this.flowData.processList, {'id': nextTargetId.target[index].id})
+              let target = this.flowData.processList[nextTargetId.target[index].id]
               if (nextTargetId.target[index].hasOwnProperty('label')) {
                 arr[nextTargetId.target[index].label] = target.id
                 flag = true
@@ -573,7 +573,7 @@ export default {
             if (nextTargetId.target.length > 1) {
               let arr = {}
               for (let index = 0; index < nextTargetId.target.length; index++) {
-                let target = _.find(this.flowData.processList, {'id': nextTargetId.target[index].id})
+                let target = this.flowData.processList[nextTargetId.target[index].id]
                 arr[target.name] = target.id
               }
               this.btnArr = arr
