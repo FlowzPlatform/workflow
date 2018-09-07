@@ -856,7 +856,7 @@ export default {
             currentStatus: this.$route.params.stateid
           }).then(queryresp => {
             if (queryresp.data.data.length > 0) {
-              console.log('Response DataQuery: ', queryresp)
+              // console.log('Response DataQuery: ', queryresp)
               this.instanceEntries = queryresp.data.data
 
               // for (let i = 0; i < this.instanceEntries.length; i++) {
@@ -920,7 +920,7 @@ export default {
         created (data) {
         },
         async updated (data) {
-          console.log('called on parent: ', data)
+          // console.log('called on parent: ', data)
           if (data.currentStatus === this.$route.params.stateid) {
             data = data.data
             data.data['iid'] = data.id
