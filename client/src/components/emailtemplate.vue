@@ -178,7 +178,6 @@ export default {
       'user': this.$store.state.user._id
     })
     .then((res) => {
-      console.log(res.data.data)
       this.data6 = res.data.data
     })
     .catch((err) => {

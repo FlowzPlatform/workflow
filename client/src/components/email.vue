@@ -82,7 +82,6 @@ import SchemaSubForm from './SchemaSubForm'
     'flag': Boolean
     },
     async mounted () {
-      console.log('this.sendDataEmail', this.sendDataEmail)
       let config11 = config
       for(let idx in this.btnArr) {
           let targetId = (new Buffer(this.btnArr[idx])).toString('base64')
@@ -128,7 +127,7 @@ import SchemaSubForm from './SchemaSubForm'
           entity: []
         },
         btn:'',
-        plugins: 'print preview fullpage powerpaste searchreplace autolink directionality advcode visualblocks visualchars fullscreen image link media template codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists textcolor wordcount tinymcespellchecker a11ychecker imagetools mediaembed linkchecker contextmenu colorpicker textpattern help',
+        plugins: 'font print preview searchreplace fullscreen image link media template codesample table char6map hr pagebreak anchor toc insertdatetime lists textcolor imagetools mediaembed  linkchecker contextmenu colorpicker',
         GetHtmlOfEditor: '',
         loading: false,
         tinyMCEcontent: ''
@@ -252,7 +251,7 @@ import SchemaSubForm from './SchemaSubForm'
         } else {
           htmlContent = this.GetHtmlOfEditor
         }
-        this.formSchemaInstance.data[0].html = []
+        
         if (this.flag == true) {
           this.emailForm.html = `<!DOCTYPE html><html lang=\"en\" ><head> <meta charset=\"UTF-8\"><title>Email Proof</title>
           <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css'> </head>
@@ -272,6 +271,7 @@ import SchemaSubForm from './SchemaSubForm'
             console.log(err)
           })
         } else {
+          this.formSchemaInstance.data[0].html = []
           this.formSchemaInstance.data[0].html = `<!DOCTYPE html><html lang=\"en\" ><head> <meta charset=\"UTF-8\"><title>Email Proof</title>
           <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css'> </head>
           <body><div class=\"container\">

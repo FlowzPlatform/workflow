@@ -43,6 +43,7 @@
   import schemamappingModel from '@/api/schemamapping'
   import modelBpmnplugin from '@/api/bpmnplugins'
   import flowz from '@/api/flowz'
+  import saveemailTemplate from '@/api/emailtemplate'
 
   import 'diagram-js/assets/diagram-js.css'
   import 'bpmn-js/assets/bpmn-font/css/bpmn-embedded.css'
@@ -180,16 +181,18 @@
                       let m = _.find(allProcess, {_id: item._bpmnElement})
                       if (m !== undefined && m !== null) {
                         if(m.type === 'sendproofmail') {
+                          console.log(m)
                           this.flowObject.processList[m._id] = {
                             id: m._id,
                             name: m._name || '',
                             type: m.type,
                             order: inx,
                             smtp: {
-                              host: m._host,
-                              password: m._password,
-                              user: m._user
+                              host: m._host || '',
+                              password: m._password || '',
+                              user: m._user || ''
                             },
+                            emailtemplate: m._emailtemplate || '',
                             target: this.getTargetId(m, jsonXML)
                           }
                         } else{
@@ -219,7 +222,6 @@
                   for (let i = 0; i < actions.length; i++) {
                     actionsObj[actions[i]] = this.permissions
                   }
-                  console.log(this.flowObject)
                   subscriptionNew.moduleResource.moduleName = 'workflow_' + this.$route.params.id
                   let registerAppModuleNew = actionsObj
                   subscriptionNew.moduleResource.registerAppModule = registerAppModuleNew
@@ -738,6 +740,17 @@
         }))
       },
       initFlow () {
+        let tempVar = []
+        saveemailTemplate.get(null, {
+          'user': this.$store.state.user._id
+        })
+        .then((res) => {
+          tempVar = res.data.data
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+
         this.processVar = [
           new Promise((resolve, reject) => {
             schemaModel.get(null, {
@@ -783,6 +796,8 @@
             this.bpmnXML = flowz.get(this.$route.params.id).then(async (result) => {
               this.bpmnXML = result.data.xml
               await this.initBPMN({
+                userId: this.$store.state.user._id,
+                emailTemplate: tempVar,
                 cdata: result.data,
                 id: this.$route.params.id,
                 schema: response[0],

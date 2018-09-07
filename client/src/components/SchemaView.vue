@@ -174,6 +174,7 @@ import schemaModel from '@/api/schema'
 
 import finstanceModal from '@/api/finstance'
 import dataQuerymodel from '@/api/dataquery'
+import saveemailTemplate from '@/api/emailtemplate'
 // const deepstream = require('deepstream.io-client-js')
 
 // const DeepRecord = require('@/assets/js/deepstream/deepRecord')
@@ -525,25 +526,38 @@ export default {
         }
       }
       if(!this.isEmailDone){
-        let currentStageObject = _.find(this.flowData.json.processList, {'id': currentStateId})
+        let currentStageObject = _.find(this.flowData.processList, {'id': currentStateId})
         let nextTargetId
         if (this.isMultiple) {
-          nextTargetId = _.find(this.flowData.json.processList, {'id': this.nextTarget.value})
+          nextTargetId = _.find(this.flowData.processList, {'id': this.nextTarget.value})
         } else {
-          nextTargetId = _.find(this.flowData.json.processList, {'id': currentStageObject.target[0].id})
+          nextTargetId = _.find(this.flowData.processList, {'id': currentStageObject.target[0].id})
         }
         if (nextTargetId.type === 'sendproofmail') {
           this.id = null
           this.schemabinding = true
-          setTimeout(() => {
-            this.sendDataEmail = this.$refs.schemasubformview.$el.outerHTML
-            this.email = true
-          }, 1000)
+          if (nextTargetId.hasOwnProperty('emailtemplate')){
+            saveemailTemplate.get(nextTargetId.emailtemplate)
+            .then((res) => {
+              setTimeout(() => {
+                this.sendDataEmail = res.data.template
+                this.email = true
+              }, 1000)
+            })
+            .catch((err) => {
+              console.log(err)
+            })
+          } else {
+            setTimeout(() => {
+              this.sendDataEmail = this.$refs.schemasubformview.$el.outerHTML
+              this.email = true
+            }, 1000)
+          }
           let flag = false
           if (nextTargetId.target.length > 1) {
             let arr = {}
             for (let index = 0; index < nextTargetId.target.length; index++) {
-              let target = _.find(this.flowData.json.processList, {'id': nextTargetId.target[index].id})
+              let target = _.find(this.flowData.processList, {'id': nextTargetId.target[index].id})
               if (nextTargetId.target[index].hasOwnProperty('label')) {
                 arr[nextTargetId.target[index].label] = target.id
                 flag = true
@@ -559,8 +573,7 @@ export default {
             if (nextTargetId.target.length > 1) {
               let arr = {}
               for (let index = 0; index < nextTargetId.target.length; index++) {
-                let target = _.find(this.flowData.json.processList, {'id': nextTargetId.target[index].id})
-                console.log('target', target)
+                let target = _.find(this.flowData.processList, {'id': nextTargetId.target[index].id})
                 arr[target.name] = target.id
               }
               this.btnArr = arr
@@ -801,7 +814,6 @@ export default {
         id: this.$route.params.id
       })
       .then( (res) => {
-        console.log('res flowz get call: ', res.data.data[0])
         // let taskData = _.find(res.data.data[0].json.processList, (o) => { return o.id == this.$route.params.stateid})
         let inputschemaId = res.data.data[0].schema
         schemaModel.getAll(inputschemaId).then(async res => {
@@ -841,7 +853,6 @@ export default {
               currentStatus: this.$route.params.stateid
             }).then(queryresp => {
               if (queryresp.data.data.length > 0) {
-                console.log('Response DataQuery: ', queryresp)
                 this.instanceEntries = queryresp.data.data
                 for (let i = 0; i < this.instanceEntries.length; i++) {
                   // console.log('this.instanceEntries: ', this.instanceEntries)
