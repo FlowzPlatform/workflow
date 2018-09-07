@@ -4,16 +4,15 @@
       <a class="btn btn-info" href="javascript:void(0)" @click="getRecord(item)">{{item}}</a>
     </div> -->
     <Breadcrumb style="padding-bottom: 5px;">
-        <BreadcrumbItem>{{breadItem.name}}</BreadcrumbItem>
-        <BreadcrumbItem>{{breadItem.state}}</BreadcrumbItem>
+        <BreadcrumbItem>{{setBreadcrumbs.name}}</BreadcrumbItem>
+        <BreadcrumbItem>{{setBreadcrumbs.state}}</BreadcrumbItem>
     </Breadcrumb>
     <div v-if="instanceEntries !== null && instanceEntries.length !== 0" >
-      <table class="table" v-loading="tableLoading">
+      <table class="table">
         <thead>
           <tr>
             <th>Instance Id</th>
             <th>Current Status</th>
-            <!-- <th>Process State</th> -->
             <th width="150px">Action</th>
           </tr>
         </thead>
@@ -30,26 +29,12 @@
                   </Tooltip>
                 </a>
               </td>
-              <!-- <td>
-                <Tag v-if="item.currentState == 'Complated'" color="blue" class="uppercase"><Icon type="ios-done-all" /> {{valueStatus(item.currentStatus)}}</Tag>
-                <Tag v-else color="blue" class="uppercase">{{valueStatus(item.currentStatus)}}</Tag>
-              </td>
-              <td>
-                <Tag color="blue" type="border" class="uppercase">{{item.mainStatus}}</Tag>
-                </td>
-              <td>
-                <a href="javascript:void(0)" @click="getRecord(item)">
-                  <Tooltip content="Start" placement="top">
-                    <Icon type="ios-play" />
-                  </Tooltip>
-                </a>
-              </td> -->
             </tr>
           </tbody>
       </table>
     </div>
     <div v-else>
-      <table class="table" v-loading="tableLoading">
+      <table class="table">
         <thead>
           <tr>
             <th>Instance Id</th>
@@ -75,9 +60,9 @@
 
 // const deepstream = require('deepstream.io-client-js')
 // import finstanceModal from '@/api/finstance'
-import flowzModal from '@/api/flowz'
+// import flowzModal from '@/api/flowz'
 import flowzdataModal from '@/api/flowzdata'
-import dataQuerymodel from '@/api/dataquery'
+// import dataQuerymodel from '@/api/dataquery'
 import _ from 'lodash'
 
 // const DeepRecord = require('@/assets/js/deepstream/deepRecord')
@@ -91,37 +76,32 @@ import _ from 'lodash'
 
 export default {
   name: 'ListInstances',
+  props: ['instanceEntries', 'flowzData'],
   data () {
     return {
-      instanceEntries: null,
-      flowzData: null,
-      listEntries: null,
-      tableLoading: false,
       breadItem: {
         name: '',
         state: ''
       }
     }
   },
-  component: {
+  computed: {
+    setBreadcrumbs () {
+      let state = ''
+      let m = this.flowzData.processList[this.$route.params.stateid]
+      if (m && m !== null && Object.keys(m).length > 0) {
+        state = m.name
+      }
+      return {
+        name: this.flowzData.name,
+        state: state
+      }
+    }
   },
   methods: {
-    // valueStatus (value) {
-    //   if (!value) return ''
-    //   return _.find(this.flowzData.json.processList, {id: value}).name
-    // },
     async getRecord (item) {
-      // DeepRecord.deepRecord.getRecord(client, item, async (err, resp) => {
-      //   let stageRecordId = resp.stageReference[(resp.stageReference.length) - 1].stageRecordId
-      //   let previousObject = await DeepRecord.deepRecord.getRecordObject(client, stageRecordId)
-      //   if (err) {
-      //   }
-
-      //   let result = await DeepRecord.deepRecord.getCurrentTraget(instanceId, resp.currentStatus)
-      //   // let currentState = resp.currentStatus.toLowerCase()
-      //   // let schemaId = resp[currentState].schemaId
+      console.log('Item: ', this.flowzData)
       let currentObj = this.flowzData.processList[item.currentStatus]
-      // console.log('this.flowzData.schema', this.flowzData)
       let values = {
         id: this.flowzData.schema,
         item: item,
@@ -129,8 +109,6 @@ export default {
         currentState: currentObj.id,
         flowzData: this.flowzData,
         formData: {}
-        // nextState: resp[currentState].next,
-        // currentState: currentState
       }
       if (item.stageReference.length > 0) {
         let lastObj = item.stageReference[item.stageReference.length - 1]
@@ -141,97 +119,6 @@ export default {
         })
       }
       await this.$emit('setValues', values)
-      //   // app.id = schemaId;
-      //   // app.item = item;
-      //   // app.nextState = resp[currentState].next;
-      //   // app.currentState = currentState;
-      //   // app.fetch(schemaId);
-      // })
-    },
-    async init (id, stateid) {
-      this.tableLoading = true
-      this.$emit('setValues', {id: null})
-      let query = {
-        fid: id,
-        '$paginate': false
-      }
-      if (stateid) {
-        query.currentStatus = stateid
-      }
-      await flowzModal.get(id).then(async res => {
-        this.flowzData = res.data
-        this.breadItem.name = this.flowzData.name
-        if (stateid) {
-          // let m = _.find(this.flowzData.json.processList, {id: stateid})
-          let m = this.flowzData.processList[stateid]
-          if (m && m !== null && Object.keys(m).length > 0) {
-            this.breadItem.state = m.name
-          }
-        }
-        // await finstanceModal.get(null, query).then(resp => {
-        //   this.tableLoading = false
-        //   this.instanceEntries = resp.data
-        // }).catch(err => {
-        //   this.tableLoading = false
-        //   this.instanceEntries = null
-        //   console.log('err', err)
-        // })
-        dataQuerymodel.get(null, {
-          $last: true,
-          fid: this.$route.params.id,
-          currentStatus: this.$route.params.stateid
-        }).then(queryresp => {
-          this.tableLoading = false
-          this.instanceEntries = queryresp.data.data
-        }).catch(err => {
-          this.tableLoading = false
-          this.instanceEntries = null
-          console.log('Error: ', err)
-        })
-      }).catch(err => {
-        this.tableLoading = false
-        this.instanceEntries = null
-        console.log('....', err)
-      })
-    }
-    // listChanged (entries) {
-    //   this.listEntries = entries
-    // },
-    // updateList (entries) {
-    //   this.instanceEntries = []
-    //   this.listEntries = entries
-    //   for (let i = 0; i < this.listEntries.length; i++) {
-    //     DeepRecord.deepRecord.getRecord(client, this.listEntries[i], async (err, resp) => {
-    //       if (err) {
-    //         console.log('Error: ', err)
-    //       }
-
-    //       let result = await DeepRecord.deepRecord.getCurrentTraget(instanceId, resp.currentStatus)
-
-    //       let pushValue = {
-    //         instanceId: this.listEntries[i],
-    //         currentState: result.name,
-    //         mainStatus: resp.mainStatus
-    //       }
-
-    //       this.instanceEntries.push(pushValue)
-    //     })
-    //   }
-    // }
-  },
-  async mounted () {
-    // await instanceList.subscribe(this.updateList, false)
-    // this.updateList()
-    if (this.$route.params.id) {
-      this.init(this.$route.params.id, this.$route.params.stateid)
-    }
-  },
-  watch: {
-    '$route.params.id': function (oldValue, newValue) {
-      this.init(this.$route.params.id, this.$route.params.stateid)
-    },
-    '$route.params.stateid': function (oldValue, newValue) {
-      this.init(this.$route.params.id, this.$route.params.stateid)
     }
   },
   feathers: {
