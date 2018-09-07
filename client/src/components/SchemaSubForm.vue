@@ -28,7 +28,7 @@
                                 <Col :span="8" style="text-align: right; padding-right: 10px; padding-top: 10px;">
                                     <b class="field-label">{{field.name}}</b>
                                 </Col>
-                                <Col :span="16">
+                                <Col :span="16" style="padding-top: 10px;">
                                     
                                     <Input v-if="field.type == 'textarea'" v-model="schemainstance.data[index][field.name]" type="textarea" :rows="schemainstance.data[index][field.numberoflines]" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name" :max="(field.property.max > 0)?field.property.max : Infinity"/>
 
@@ -42,7 +42,7 @@
                                         <Option v-for="dpd in field.property.options" :value="dpd" :key="dpd">{{ dpd }}</Option>
                                     </Select>
 
-                                    <Checkbox v-if="field.type == 'boolean'" v-model="schemainstance.data[index][field.name]" style="margin-top: 10px;"></Checkbox>
+                                    <Checkbox v-if="field.type == 'boolean'" v-model="schemainstance.data[index][field.name]"></Checkbox>
 
                                     <!-- <dynamicinput :type="(field.type) ? field.type : null" :bindmodel="(schemainstance.data[index][field.name]) ? schemainstance.data[index][field.name] : null " :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name" :min="(field.property.min > 0) ? field.property.min : -Infinity" :max="(field.property.max > 0) ? field.property.max : Infinity" :options="(field.property.options) ? field.property.options : null" :field="field"></dynamicinput> -->
                                 </Col>
@@ -59,7 +59,7 @@
                                     <input class="form-control" type="file" v-if="field.type == 'file'" @change="handleFileChange($event, index, field.name)" :multiple="(field.property.isMultiple)? field.property.isMultiple: false"/>
                                     <div v-if="schemainstance.data[index][field.name]" >
                                       <Progress v-if="stratProgress"  v-bind:percent="fileUploadProgress" :success-percent="30" />
-                                      <div class="" v-for="(val, i) in schemainstance.data[index][field.name]" style="margin-top:10px;">
+                                      <div class="" v-for="(val, i) in schemainstance.data[index][field.name]">
                                             <Row>
                                                 <Col :span="23"> <a :href="val" class="list-group-item" target="_blank" style="color:blue;padding:2px 2px;" >{{val}}</a></Col>
                                                 <Col :span="1"><a href="#" style="color:red;float:right"  @click="removeSection(i, schemainstance.data[index][field.name])">&#10005;&nbsp;</a></Col>
