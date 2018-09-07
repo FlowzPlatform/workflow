@@ -14,35 +14,35 @@ branches:
 
 jobs:
   include:
-    - stage: Seneca-Jobqueue-Flowz
-      script:
-      - 'if [ ${TRAVIS_BRANCH} = "master" ]; then
-            docker login -u="$DOCKER_USERNAME_FLOWZ" -p="$DOCKER_PASSWORD_FLOWZ";
-            docker build -t seneca_jobqueue_flowz:latest ./JobQue/;
-            docker images;
-            docker tag seneca_jobqueue_flowz:latest $DOCKER_USERNAME_FLOWZ/seneca_jobqueue_flowz:latest;
-            docker push $DOCKER_USERNAME_FLOWZ/seneca_jobqueue_flowz:latest;
-        elif [ ${TRAVIS_BRANCH} = "develop" ]; then
-            docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-            docker build -t seneca_jobqueue_flowz:dev ./JobQue/;
-            docker images;
-            docker tag seneca_jobqueue_flowz:dev $DOCKER_USERNAME/seneca_jobqueue_flowz:dev;
-            docker push $DOCKER_USERNAME/seneca_jobqueue_flowz:dev;
-        elif [ ${TRAVIS_BRANCH} = "staging" ]; then
-            docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-            docker build -t seneca_jobqueue_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER ./JobQue/;
-            docker tag seneca_jobqueue_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER $DOCKER_USERNAME/seneca_jobqueue_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER;
-            docker tag seneca_jobqueue_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER $DOCKER_USERNAME/seneca_jobqueue_flowz:staging;
-            docker images;
-            docker push $DOCKER_USERNAME/seneca_jobqueue_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER;
-            docker push $DOCKER_USERNAME/seneca_jobqueue_flowz:staging;
-        else
-            docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-            docker build -t seneca_jobqueue_flowz:qa ./JobQue/;
-            docker images;
-            docker tag seneca_jobqueue_flowz:qa $DOCKER_USERNAME/seneca_jobqueue_flowz:qa;
-            docker push $DOCKER_USERNAME/seneca_jobqueue_flowz:qa;
-        fi'
+#    - stage: Seneca-Jobqueue-Flowz
+#      script:
+#      - 'if [ ${TRAVIS_BRANCH} = "master" ]; then
+#            docker login -u="$DOCKER_USERNAME_FLOWZ" -p="$DOCKER_PASSWORD_FLOWZ";
+#            docker build -t seneca_jobqueue_flowz:latest ./JobQue/;
+#            docker images;
+#            docker tag seneca_jobqueue_flowz:latest $DOCKER_USERNAME_FLOWZ/seneca_jobqueue_flowz:latest;
+#            docker push $DOCKER_USERNAME_FLOWZ/seneca_jobqueue_flowz:latest;
+#        elif [ ${TRAVIS_BRANCH} = "develop" ]; then
+#            docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+#            docker build -t seneca_jobqueue_flowz:dev ./JobQue/;
+#            docker images;
+#            docker tag seneca_jobqueue_flowz:dev $DOCKER_USERNAME/seneca_jobqueue_flowz:dev;
+#            docker push $DOCKER_USERNAME/seneca_jobqueue_flowz:dev;
+#        elif [ ${TRAVIS_BRANCH} = "staging" ]; then
+#            docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+#            docker build -t seneca_jobqueue_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER ./JobQue/;
+#            docker tag seneca_jobqueue_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER $DOCKER_USERNAME/seneca_jobqueue_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER;
+#            docker tag seneca_jobqueue_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER $DOCKER_USERNAME/seneca_jobqueue_flowz:staging;
+#            docker images;
+#            docker push $DOCKER_USERNAME/seneca_jobqueue_flowz:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER;
+#            docker push $DOCKER_USERNAME/seneca_jobqueue_flowz:staging;
+#        else
+#            docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+#            docker build -t seneca_jobqueue_flowz:qa ./JobQue/;
+#            docker images;
+#            docker tag seneca_jobqueue_flowz:qa $DOCKER_USERNAME/seneca_jobqueue_flowz:qa;
+#            docker push $DOCKER_USERNAME/seneca_jobqueue_flowz:qa;
+#        fi'
     - stage: Flowz-Frontend-Flowz
       script:
       - 'if [ ${TRAVIS_BRANCH} = "master" ]; then
