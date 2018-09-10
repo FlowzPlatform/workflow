@@ -161,19 +161,25 @@ export default {
   },
   methods: {
     init () {
-      flowzModel.get(null, {})
+      flowzModel.get(null, {
+        $limit: 0
+      })
       .then((res) => { 
         this.countFlowz = res.data.total 
       })
       
-      finstanceModel.get(null, {})
+      finstanceModel.get(null, {
+        $limit: 0
+      })
       .then((res) => { 
         this.countInstances = res.data.total 
       })
 
-      flowzDataModel.get(null, {})
+      flowzDataModel.get(null, {
+        $limit: 0
+      })
       .then((res) => { 
-        console.log('resp data:', res)
+        // console.log('resp data:', res)
         this.countData = res.total 
       })
     },

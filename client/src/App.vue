@@ -9,7 +9,7 @@
 export default {
   name: 'app',
   mounted () {
-    this.$store.state.flowz = []
+    // this.$store.state.flowz = []
   }
 }
 </script>
