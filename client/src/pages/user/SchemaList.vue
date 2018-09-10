@@ -333,7 +333,6 @@
       }
     },
     mounted () {
-      console.log('this.page1 ', this.pageno)
       this.total = this.dataTotal
       this.mdata = this.data
       // if (this.dynamicData) {
