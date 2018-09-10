@@ -66,7 +66,7 @@
         </TabPane>
         
         <TabPane v-if="isFlowzLoaded === true && itsFirstState === false" label="Data" icon="ios-albums">
-          <schemalist :schema="dataSchema" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData"></schemalist>
+          <schemalist :schema="dataSchema" :pageno="pageno" v-on:on-paginate="pagination" :dataTotal="dataTotal" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData"></schemalist>
 
           <div style="padding: 10px">
             <div class="row" v-if="id != null">
@@ -198,6 +198,10 @@ export default {
   },
   data () {
     return {
+      skip: 0,
+      limit: 10,
+      dataTotal: 0,
+      pageno: 1,
       isFlowzLoaded: false,
       htmlcontent: false,
       schemabinding: false,
@@ -254,6 +258,13 @@ export default {
     async emailService (item) {
       this.isEmailDone = true
       await this.handleSubmit('formSchemaInstance')
+    },
+    async pagination (skip, limit, page){
+      console.log(skip,limit,page)
+      this.skip = skip
+      this.limit = limit
+      this.pageno = page
+      this.init()
     },
     info (item, index, button) {
       this.modalInfo.title = `Row index: ${index}`
@@ -853,10 +864,12 @@ export default {
           await dataQuerymodel.get(null, {
             $last: true,
             fid: this.$route.params.id,
-            currentStatus: this.$route.params.stateid
+            currentStatus: this.$route.params.stateid,
+            $skip: this.skip,
+            $limit: this.limit 
           }).then(queryresp => {
+            this.dataTotal = queryresp.data.total
             if (queryresp.data.data.length > 0) {
-              console.log('Response DataQuery: ', queryresp)
               this.instanceEntries = queryresp.data.data
 
               // for (let i = 0; i < this.instanceEntries.length; i++) {

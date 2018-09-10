@@ -57,7 +57,12 @@
     </div>
 
     <div>
-      <Table highlight-row class="thisTable" :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
+      <Table highlight-row :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
+      <div style="margin: 10px;overflow: hidden">
+        <div style="float: right;">
+          <Page :total="total" :current="pageno" :page-size="limit" @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -74,10 +79,15 @@
       'configuration': Boolean,
       'dynamicData': Boolean,
       'flowzData': Object,
-      'instanceEntries': Array
+      'instanceEntries': Array,
+      'dataTotal': Number,
+      'pageno': Number
     },
     data () {
       return {
+        limit: 10,
+        skip: 0,
+        total: 0,
         searchQuery: null,
         filterBy: [
           {
@@ -323,6 +333,8 @@
       }
     },
     mounted () {
+      console.log('this.page1 ', this.pageno)
+      this.total = this.dataTotal
       this.mdata = this.data
       // if (this.dynamicData) {
       //   await flowzModal.get(id, {
@@ -344,6 +356,22 @@
     methods: {
       handleConfiguration () {
         this.isShow = !this.isShow
+      },
+      // mockTableData1 () {
+      //   console.log('this.data ', this.data)
+      //   let data = []
+      //   for (let i = 0; i < 10; i++) {
+      //     data.push(this.data[i])
+      //   }
+      //   return data
+      // },
+      handlePage (page) {
+        this.skip = (page * this.limit) - this.limit
+        this.$emit('on-paginate', this.skip, this.limit, page)
+      },
+      handlePagesize (size) {
+        this.limit = size
+        this.skip = 0
       }
     },
     feathers: {
