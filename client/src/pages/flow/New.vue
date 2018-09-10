@@ -81,7 +81,8 @@
           intermediateId: [],
           processList: {},
           xml: '',
-          svg: ''
+          svg: '',
+          first: ''
         }
       }
     },
@@ -204,6 +205,14 @@
                           }
                         }
                       }
+                    }
+                  }
+
+                  for (let startItems of this.flowObject.startId) {
+                    // console.log('startItems: ', startItems)
+                    if (this.flowObject.processList[startItems].target.length > 0) {
+                      this.flowObject.first = this.flowObject.processList[startItems].target[0].id
+                      break
                     }
                   }
                   let actions = []

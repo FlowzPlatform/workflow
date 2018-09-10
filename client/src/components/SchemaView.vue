@@ -66,7 +66,7 @@
         </TabPane>
         
         <TabPane v-if="isFlowzLoaded === true && itsFirstState === false" label="Data" icon="ios-albums">
-          <schemalist :schema="dataSchema" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData"></schemalist>
+          <schemalist :schema="dataSchema" :pageno="pageno" v-on:on-paginate="pagination" :dataTotal="dataTotal" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData"></schemalist>
 
           <div style="padding: 10px">
             <div class="row" v-if="id != null">
@@ -198,6 +198,10 @@ export default {
   },
   data () {
     return {
+      skip: 0,
+      limit: 10,
+      dataTotal: 0,
+      pageno: 1,
       isFlowzLoaded: false,
       htmlcontent: false,
       schemabinding: false,
@@ -254,6 +258,13 @@ export default {
     async emailService (item) {
       this.isEmailDone = true
       await this.handleSubmit('formSchemaInstance')
+    },
+    async pagination (skip, limit, page){
+      console.log(skip,limit,page)
+      this.skip = skip
+      this.limit = limit
+      this.pageno = page
+      this.init()
     },
     info (item, index, button) {
       this.modalInfo.title = `Row index: ${index}`
@@ -494,7 +505,7 @@ export default {
     },
 
     makeObj () {
-      var obj = this.schema
+      const obj = this.schema
       obj.Schemaid = this.schema.id
       obj.data = this.formSchemaInstance.data
       return obj
@@ -808,93 +819,191 @@ export default {
       return(returnData)
     },
 
+    async getFlowz () {
+      return await flowzModel.get(null, {
+        id: this.$route.params.id
+      })
+      .then((res) => {
+        return (res.data.data[0])
+      }).catch(err => {
+        console.log('Error: ', err)
+        return
+      })
+    },
+
+    async getSchema (id) {
+      return await schemaModel.getAll(id).then(res => {
+        return res
+      }).catch(err => {
+        console.log('Error: ', err)
+        return
+      })
+    },
+
+    async populateTables (schema) {
+
+      let firstState = this.flowzData.first
+      if (firstState === this.$route.params.stateid) {
+        this.itsFirstState = true
+      } else {
+        this.itsFirstState = false
+      }
+
+      this.dataSchema = schema
+      this.email = false
+      this.htmlcontent = false
+      this.id = null
+
+      let query = {
+        fid: this.$route.params.id,
+        currentStatus: this.$route.params.stateid,
+        '$paginate': false
+      }
+
+      await dataQuerymodel.get(null, {
+        $last: true,
+        fid: this.$route.params.id,
+        currentStatus: this.$route.params.stateid,
+        $skip: this.skip,
+        $limit: this.limit
+      }).then(queryresp => {
+        this.dataTotal = queryresp.data.total
+        if (queryresp.data.data.length > 0) {
+          this.instanceEntries = queryresp.data.data
+
+          this.dataData = this.instanceEntries
+          // this.$Spin.hide()
+          this.$Loading.finish()
+        } else {
+          this.instanceEntries = null
+          this.dataData = []
+          this.itsFirstState = true
+          // this.$Spin.hide()
+          this.$Loading.finish()
+        }
+      }).catch(err => {
+        console.error('Error: ', err)
+        // this.$Spin.hide()
+        this.$Loading.error()
+      })
+    },
+
     async init () {
       this.isFlowzLoaded = false
+      this.itsFirstState = true
       this.$Loading.start()
       this.schemabinding = false
       this.email = false
-      await flowzModel.get(null, {
-        id: this.$route.params.id
-      })
-      .then( async (res) => {
-        // console.log('res flowz get call: ', res.data.data[0])
-        this.flowzData = res.data.data[0]
 
-        let startId = this.flowzData.startId
-        let firstState = ''
-        for (let startItems of startId) {
-          // console.log('startItems: ', startItems)
-          if (this.flowzData.processList[startItems].target.length > 0) {
-            firstState = this.flowzData.processList[startItems].target[0].id
-            break
-          }
-        }
-        if (firstState === this.$route.params.stateid) {
-          this.itsFirstState = true
+      let cachedFlowz = _.find(this.$store.state.flowz, (o) => { return o.id === this.$route.params.id})
+      let cachedSchema = _.find(this.$store.state.schema, (o) => { return o.id === cachedFlowz.schema})
+
+      // this.flowzData = cachedFlowz ? cachedFlowz : await this.getFlowz()
+      // this.populateTables(cachedSchema ? cachedSchema : await this.getSchema(this.flowzData.schema))
+
+      if (cachedFlowz) {
+        this.flowzData = cachedFlowz
+        
+        // check cached schema
+        if (cachedSchema) {
+          await this.populateTables(cachedSchema)
         } else {
-          this.itsFirstState = false
+          let unCachedSchema = await this.getSchema(cachedFlowz.schema)
+          await this.populateTables(unCachedSchema)
         }
-        // console.log('target : ', firstState)
+      } else {
+        this.flowzData = await this.getFlowz()
+        if (cachedSchema) {
+          await this.populateTables()  
+        } else {
+          let unCachedSchema = await this.getSchema(this.flowzData.schema)
+          await this.populateTables(unCachedSchema)
+        }
+        
+      }
 
-        // let taskData = _.find(res.data.data[0].json.processList, (o) => { return o.id == this.$route.params.stateid})
-        let inputschemaId = res.data.data[0].schema
-        await schemaModel.getAll(inputschemaId).then(async res => {
-          this.dataSchema = res
-          this.email = false
-          this.htmlcontent = false
-          this.id = null
-          // this.$Spin.show()
+      // await flowzModel.get(null, {
+      //   id: this.$route.params.id
+      // })
+      // .then( async (res) => {
+      //   // console.log('res flowz get call: ', res.data.data[0])
+      //   this.flowzData = res.data.data[0]
 
-          let query = {
-            fid: this.$route.params.id,
-            currentStatus: this.$route.params.stateid,
-            '$paginate': false
-          }
-          await dataQuerymodel.get(null, {
-            $last: true,
-            fid: this.$route.params.id,
-            currentStatus: this.$route.params.stateid
-          }).then(queryresp => {
-            if (queryresp.data.data.length > 0) {
-              // console.log('Response DataQuery: ', queryresp)
-              this.instanceEntries = queryresp.data.data
+      //   let startId = this.flowzData.startId
+      //   let firstState = ''
+      //   for (let startItems of startId) {
+      //     // console.log('startItems: ', startItems)
+      //     if (this.flowzData.processList[startItems].target.length > 0) {
+      //       firstState = this.flowzData.processList[startItems].target[0].id
+      //       break
+      //     }
+      //   }
+      //   if (firstState === this.$route.params.stateid) {
+      //     this.itsFirstState = true
+      //   } else {
+      //     this.itsFirstState = false
+      //   }
+      //   // console.log('target : ', firstState)
 
-              // for (let i = 0; i < this.instanceEntries.length; i++) {
-              //   if (this.instanceEntries[i].data) {
-              //     this.itsFirstState = false
-              //     this.instanceEntries[i].data['iid'] = this.instanceEntries[i].id
-              //   } else {
-              //     this.itsFirstState = true
-              //   }
-              // }
-              // this.dataData = _.map(this.instanceEntries, (o) => { return o.data })
-              // this.dataData = _.map(this.instanceEntries, (o) => { 
-              //   for (let k in o.data) {
-              //     o[k] = o.data[k]
-              //   }
-              //   return o
-              // })
-              this.dataData = this.instanceEntries
-              // this.$Spin.hide()
-              this.$Loading.finish()
-            } else {
-              this.itsFirstState = true
-              // this.$Spin.hide()
-              this.$Loading.finish()
-            }
-          }).catch(err => {
-            console.error('Error: ', err)
-            // this.$Spin.hide()
-            this.$Loading.error()
-          })
-        }).catch(err => {
-          console.error('Error: ', err)
-          this.$Loading.error()
-        })
-      }).catch(err => {
-        console.error('Error: ', err)
-        this.$Loading.error()
-      })
+      //   // let taskData = _.find(res.data.data[0].json.processList, (o) => { return o.id == this.$route.params.stateid})
+      //   let inputschemaId = res.data.data[0].schema
+      //   await schemaModel.getAll(inputschemaId).then(async res => {
+      //     this.dataSchema = res
+      //     this.email = false
+      //     this.htmlcontent = false
+      //     this.id = null
+      //     // this.$Spin.show()
+
+      //     let query = {
+      //       fid: this.$route.params.id,
+      //       currentStatus: this.$route.params.stateid,
+      //       '$paginate': false
+      //     }
+      //     await dataQuerymodel.get(null, {
+      //       $last: true,
+      //       fid: this.$route.params.id,
+      //       currentStatus: this.$route.params.stateid
+      //     }).then(queryresp => {
+      //       if (queryresp.data.data.length > 0) {
+      //         // console.log('Response DataQuery: ', queryresp)
+      //         this.instanceEntries = queryresp.data.data
+
+      //         // for (let i = 0; i < this.instanceEntries.length; i++) {
+      //         //   if (this.instanceEntries[i].data) {
+      //         //     this.itsFirstState = false
+      //         //     this.instanceEntries[i].data['iid'] = this.instanceEntries[i].id
+      //         //   } else {
+      //         //     this.itsFirstState = true
+      //         //   }
+      //         // }
+      //         // this.dataData = _.map(this.instanceEntries, (o) => { return o.data })
+      //         // this.dataData = _.map(this.instanceEntries, (o) => { 
+      //         //   for (let k in o.data) {
+      //         //     o[k] = o.data[k]
+      //         //   }
+      //         //   return o
+      //         // })
+      //         this.dataData = this.instanceEntries
+      //         // this.$Spin.hide()
+      //         this.$Loading.finish()
+      //       } else {
+      //         this.itsFirstState = true
+      //         // this.$Spin.hide()
+      //         this.$Loading.finish()
+      //       }
+      //     }).catch(err => {
+      //       console.error('Error: ', err)
+      //       // this.$Spin.hide()
+      //       this.$Loading.error()
+      //     })
+      //   }).catch(err => {
+      //     console.error('Error: ', err)
+      //     this.$Loading.error()
+      //   })
+      // }).catch(err => {
+      //   console.error('Error: ', err)
+      //   this.$Loading.error()
+      // })
       this.isFlowzLoaded = true
     },
 
