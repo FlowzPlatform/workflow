@@ -89,7 +89,7 @@
       <Table v-if="schemaId !== null" height="590" border :columns="mainColumns()" :data="tableData"></Table>
     </div>
     <div v-show="columnview">
-      <Table :columns="colviewCols" height="590" :data="colviewData"></Table>
+      <Table :row-class-name="rowClassName" :columns="colviewCols" height="590" :data="colviewData"></Table>
     </div>
     <!-- <Table v-if="schemaId !== null" height="690" border :columns="mainColumns()" :data="tableData"></Table> -->
 
@@ -278,6 +278,9 @@ export default {
     }
   },
   methods: {
+    rowClassName (row, index) {
+      return row.className
+    },
     viewChange (item) {
       if (item === 1) {
         this.rowview = true
@@ -296,6 +299,15 @@ export default {
     },
     cancel () {
       this.anotherBinding = _.cloneDeep(this.configuration.fields)
+    },
+    getByOrder (array) {
+      let allProcess = []
+      for (let key in array) {
+        allProcess.push(array[key])
+      }
+      return allProcess.sort((a, b) => {
+        return a.order - b.order
+      })
     },
     mainColumns () {
       // console.log('mainColumns')
@@ -393,7 +405,74 @@ export default {
           title: 'ID',
           key: 'id',
           fixed: 'left',
-          width: 280
+          width: 280,
+          render: (h, params) => {
+            if (params.row.hasOwnProperty('first')) {
+              if (params.row.first) {
+                return h('div', [
+                  h('span', params.row.id),
+                  h('span', {
+                    attrs: {
+                      class: 'btn btn-default btn-sm showHideBtn'
+                    },
+                    on: {
+                      click: () => {
+                        for (let [inx, item] of this.colviewData.entries()) {
+                          if (item.id === params.row.id && params.index !== inx) {
+                            if (!params.row.first) {
+                              item.className = ''
+                            } else {
+                              item.className = 'notfirst'
+                            }
+                          }
+                          if (params.index === inx) {
+                            item.first = !item.first
+                          }
+                        }
+                      }
+                    }
+                  }, [
+                    h('i', {
+                      attrs: {
+                        class: 'fa fa-angle-up'
+                      }
+                    })
+                  ])
+                ])
+              } else {
+                return h('div', [
+                  h('span', params.row.id),
+                  h('span', {
+                    attrs: {
+                      class: 'btn btn-sm showHideBtn'
+                    },
+                    on: {
+                      click: () => {
+                        for (let [inx, item] of this.colviewData.entries()) {
+                          if (item.id === params.row.id && params.index !== inx) {
+                            if (!params.row.first) {
+                              item.className = ''
+                            } else {
+                              item.className = 'notfirst'
+                            }
+                          }
+                          if (params.index === inx) {
+                            item.first = !item.first
+                          }
+                        }
+                      }
+                    }
+                  }, [
+                    h('i', {
+                      attrs: {
+                        class: 'fa fa-angle-down'
+                      }
+                    })
+                  ])
+                ])
+              }
+            }
+          }
         },
         {
           title: 'Task',
@@ -412,11 +491,12 @@ export default {
         this.flowName = res.data.name
         let cols = []
         // console.log('res.data.processList: ', res.data.processList)
-        for (let col in res.data.processList) {
-          if (res.data.processList[col].type !== 'startevent' && res.data.processList[col].type !== 'endevent') {
+        let listing = this.getByOrder(res.data.processList)
+        for (let col of listing) {
+          if (col.type !== 'startevent' && col.type !== 'endevent') {
             cols.push({
-              title: res.data.processList[col].name || res.data.processList[col].id,
-              key: res.data.processList[col].id,
+              title: col.name || col.id,
+              key: col.id,
               firstColumn: false,
               show: true,
               width: 150
@@ -433,35 +513,44 @@ export default {
           $paginate: false
         }).then(queryresp => {
           // this.$Spin.hide()
-          // console.log('Res: ', queryresp)
+          console.log('Res: ', queryresp)
           this.tableData = queryresp.data
           colviewData = queryresp.data
-
+          let listing = this.getByOrder(res.data.processList)
           for (let item of colviewData) {
-            for (let task in res.data.processList) {
-              if (res.data.processList[task].type !== 'startevent' && res.data.processList[task].type !== 'endevent') {
+            let isfirst = false
+            for (let task of listing) {
+              if (task.type !== 'startevent' && task.type !== 'endevent') {
                 // flowzdataModal.get().then(res => {
 
                 // }).catch(e => {
                 //   console.log('e', e)
                 // })
                 // console.log('colviewData.stageReference ', item, task)
-                let dataExist = _.find(item.stageReference, {StageName: task})
+                let dataExist = _.find(item.stageReference, {StageName: task.id})
+                if (!isfirst) {
+                  task.first = false
+                  task.className = ''
+                  isfirst = true
+                } else {
+                  task.className = 'notfirst'
+                }
                 // console.log('dataExist: ', dataExist)
+                let m = {
+                  id: item.id,
+                  task: task.name || task.id,
+                  className: task.className
+                }
+                if (task.hasOwnProperty('first')) {
+                  m.first = task.first
+                }
                 if (dataExist !== null && dataExist !== undefined && dataExist.hasOwnProperty('data')) {
-                  let m = {
-                    id: item.id,
-                    task: res.data.processList[task].name || res.data.processList[task].id
-                  }
                   for (let k in dataExist.data) {
                     m[k] = dataExist.data[k]
                   }
                   this.colviewData.push(m)
                 } else {
-                  this.colviewData.push({
-                    id: item.id,
-                    task: res.data.processList[task].name || res.data.processList[task].id
-                  })
+                  this.colviewData.push(m)
                 }
               }
             }
@@ -581,7 +670,11 @@ export default {
     top: 14px;
   }
 
-  
+  .notfirst {
+    display: none
+  }
+
+
 </style>
 <style>
   .ivu-modal-body{
@@ -644,5 +737,13 @@ export default {
     padding: 0;
     width: 32px;
     height: 32px;
+  }
+
+  .notfirst {
+    display: none;
+  }
+
+  .showHideBtn{
+    float: right;
   }
 </style>  
