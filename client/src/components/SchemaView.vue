@@ -849,7 +849,6 @@ export default {
     },
 
     async schemaLogic (schema) {
-      console.log('Schema Logic called: ', schema)
       this.dataSchema = schema
       this.email = false
       this.htmlcontent = false
