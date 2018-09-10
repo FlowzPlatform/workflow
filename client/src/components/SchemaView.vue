@@ -874,8 +874,11 @@ export default {
       await dataQuerymodel.get(null, {
         $last: true,
         fid: this.$route.params.id,
-        currentStatus: this.$route.params.stateid
+        currentStatus: this.$route.params.stateid,
+        $skip: this.skip,
+        $limit: this.limit
       }).then(queryresp => {
+        this.dataTotal = queryresp.data.total
         if (queryresp.data.data.length > 0) {
           this.instanceEntries = queryresp.data.data
 
