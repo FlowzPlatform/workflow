@@ -494,7 +494,7 @@ export default {
     },
 
     makeObj () {
-      var obj = this.schema
+      const obj = this.schema
       obj.Schemaid = this.schema.id
       obj.data = this.formSchemaInstance.data
       return obj
@@ -829,26 +829,15 @@ export default {
       })
     },
 
-    flowzLogic () {
-      let startId = this.flowzData.startId
-      let firstState = ''
-      for (let startItems of startId) {
-        // console.log('startItems: ', startItems)
-        if (this.flowzData.processList[startItems].target.length > 0) {
-          firstState = this.flowzData.processList[startItems].target[0].id
-          break
-        }
-      }
+    async populateTables (schema) {
+
+      let firstState = this.flowzData.first
       if (firstState === this.$route.params.stateid) {
         this.itsFirstState = true
       } else {
         this.itsFirstState = false
       }
-      // let taskData = _.find(res.data.data[0].json.processList, (o) => { return o.id == this.$route.params.stateid})
-      let inputschemaId = this.flowzData.schema
-    },
 
-    async schemaLogic (schema) {
       this.dataSchema = schema
       this.email = false
       this.htmlcontent = false
@@ -887,31 +876,34 @@ export default {
 
     async init () {
       this.isFlowzLoaded = false
+      this.itsFirstState = true
       this.$Loading.start()
       this.schemabinding = false
       this.email = false
 
       let cachedFlowz = _.find(this.$store.state.flowz, (o) => { return o.id === this.$route.params.id})
       let cachedSchema = _.find(this.$store.state.schema, (o) => { return o.id === cachedFlowz.schema})
+
+      // this.flowzData = cachedFlowz ? cachedFlowz : await this.getFlowz()
+      // this.populateTables(cachedSchema ? cachedSchema : await this.getSchema(this.flowzData.schema))
+
       if (cachedFlowz) {
         this.flowzData = cachedFlowz
-        await this.flowzLogic()
         
         // check cached schema
         if (cachedSchema) {
-          await this.schemaLogic(cachedSchema)
+          await this.populateTables(cachedSchema)
         } else {
           let unCachedSchema = await this.getSchema(cachedFlowz.schema)
-          await this.schemaLogic(unCachedSchema)
+          await this.populateTables(unCachedSchema)
         }
       } else {
         this.flowzData = await this.getFlowz()
-        await this.flowzLogic()
         if (cachedSchema) {
-          await this.schemaLogic()  
+          await this.populateTables()  
         } else {
           let unCachedSchema = await this.getSchema(this.flowzData.schema)
-          await this.schemaLogic(unCachedSchema)
+          await this.populateTables(unCachedSchema)
         }
         
       }
