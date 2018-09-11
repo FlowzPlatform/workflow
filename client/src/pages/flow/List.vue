@@ -557,34 +557,25 @@ export default {
     async getDataOfSubscriptionUser () {
       this.$Loading.start()
       let subId = []
-      axios.get(config.loginURL + '/userdetails', {
-        headers: {
-          authorization: Cookies.get('auth_token')
-        }
-      })
-      .then(response => {
-        let newData = response.data.data.package
-        for (var key in newData) {
-          if (newData.hasOwnProperty(key)) {
-            if (newData[key].role === 'admin') {
-              subId.push({
-                value2: newData[key].subscriptionId,
-                label2: newData[key].name
-              })
-              this.assigned_Arr3.push(newData[key])
-            } else {
-              this.assigned_Arr2.push(newData[key])
-            }
+      let userData = this.$store.state.user.package
+      console.log(userData)
+      for (var key in userData) {
+        if (userData.hasOwnProperty(key)) {
+          if (userData[key].role === 'admin') {
+            subId.push({
+              value2: userData[key].subscriptionId,
+              label2: userData[key].name
+            })
+            this.assigned_Arr3.push(userData[key])
+          } else {
+            this.assigned_Arr2.push(userData[key])
           }
         }
-        this.data2 = this.assigned_Arr2
-        this.data3 = this.assigned_Arr3
-        this.options2 = subId
-        this.$Loading.finish()
-      })
-      .catch((err) => {
-        console.log('Error:', err)
-      })
+      }
+      this.data2 = this.assigned_Arr2
+      this.data3 = this.assigned_Arr3
+      this.options2 = subId
+      this.$Loading.finish()
     },
     async inviteNow () {
       if (this.value2 === undefined || this.value2 === '' || this.value1 === '') {
