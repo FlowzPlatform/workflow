@@ -1,6 +1,6 @@
 import api from '../../api'
 let model = 'flowz'
-import store from '@/store'
+// import store from '@/store'
 export default {
   get: (id = null, params = null, headers = null) => {
     if (id === null) {
