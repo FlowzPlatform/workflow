@@ -1,9 +1,8 @@
 <template>
   <div class="SchemaView">
-  	<div class="container-fluid">
-
+  	<div class="container-fluid" v-if="isFlowzLoaded === true">
       <Tabs>
-        <TabPane v-if="isFlowzLoaded === true && itsFirstState === true" label="Instances" icon="ios-list">
+        <TabPane  v-if="itsFirstState === true" label="Instances" icon="ios-list">
           <list-instances :flowzData="flowzData" :instanceEntries="instanceEntries" v-on:setValues="setValues"></list-instances>
           <div>
             <div class="row" v-if="id != null">
@@ -65,7 +64,7 @@
           </div>
         </TabPane>
         
-        <TabPane v-if="isFlowzLoaded === true && itsFirstState === false" label="Data" icon="ios-albums">
+        <TabPane v-if="itsFirstState === false" label="Data" icon="ios-albums">
           <schemalist :schema="dataSchema" :pageno="pageno" v-on:on-paginate="pagination" :dataTotal="dataTotal" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData"></schemalist>
 
           <div style="padding: 10px">
@@ -126,7 +125,7 @@
       </Tabs>
 
       <!-- <mycustom></mycustom> -->
-
+      <Spin size="large" fix v-if="dataLoading"></Spin>
 
 		</div>
 
@@ -244,7 +243,9 @@ export default {
       isEmailDone: false,
       itsFirstState: true,
       sendDataEmail: null,
-      loadingEmail: true
+      loadingEmail: true,
+      currentSchema: null,
+      dataLoading: true
     }
   },
   components: {
@@ -255,11 +256,11 @@ export default {
     'schemasubformview': SchemaSubFormView
   },
   methods: {
-    async emailService (item) {
+    emailService (item) {
       this.isEmailDone = true
-      await this.handleSubmit('formSchemaInstance')
+      this.handleSubmit('formSchemaInstance')
     },
-    async pagination (skip, limit, page){
+    pagination (skip, limit, page){
       console.log(skip,limit,page)
       this.skip = skip
       this.limit = limit
@@ -284,8 +285,9 @@ export default {
       // alert(id)
       var arrObj = []
       var self = this
-      await schemaModel.get(id)
+      schemaModel.get(id)
       .then(async (response) => {
+        // var _res = this.currentSchema
         var _res = response.data
         var obj = {}
 
@@ -355,9 +357,7 @@ export default {
       // const result = await Schema.getAll(id)
       // var response = await axios.get('https://api.flowzcluster.tk/eng/schema/' + id).catch(function (error) { console.log(error) })
       // console.log('...........', id)
-      let response = await schemaModel.get(id).catch(error => {
-        console.log(error)
-      })
+      // let response = currentSchema
       // console.log('response', response)
       // this.formTitle = response.data.title
       // if (this.lastLog === undefined) {
@@ -370,8 +370,8 @@ export default {
       //     this.formSchemaInstance.data = this.lastLog.input
       //   }
       // }
-      this.schema = response.data
-      this.entity = response.data.entity
+      this.schema = this.currentSchema
+      this.entity = this.currentSchema.entity
       this.formSchemaInstance.entity = this.schema.entity
       // this.formSchemaInstance.data[0] = {}
       for (let [index, entity] of self.formSchemaInstance.entity.entries()) {
@@ -392,7 +392,7 @@ export default {
         let m = [arr]
         this.formSchemaInstance.data = m
       } else {
-        await this.handleAdd()
+        this.handleAdd()
       }
       // if (self.formSchemaInstance.data[0].length === 0) {
       // if (this.lastLog !== undefined && this.lastLog.input.length !== 0) {
@@ -529,7 +529,7 @@ export default {
       return mdata
     },
 
-    async handleSubmit (name) {
+    handleSubmit (name) {
       let currentStateId = this.$route.params.stateid
       if (this.schema.hasOwnProperty('emailSchema')) {
         if (this.schema.emailSchema.action == true) {
@@ -609,7 +609,7 @@ export default {
         let allcheck = []
         for (let dobj of obj.data) {
           let flag = this.checkValidation(dobj, this.entity)
-         await allcheck.push(flag)
+         allcheck.push(flag)
         }
         let check = _.indexOf(allcheck, false)
         this.$Loading.start()
@@ -628,7 +628,7 @@ export default {
           }
           this.bLoading = true
           // this.bLoading = false
-          await flowzdataModal.post(saveObj).then(res => {
+          flowzdataModal.post(saveObj).then(res => {
             this.id = null
             this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
             this.$Loading.finish()
@@ -801,13 +801,13 @@ export default {
       // this.currentState = values.currentState
     },
 
-    async getFData (item) {
+    getFData (item) {
       let returnData = null
       if (item) {
         let lastItem = _.last(item)
         if (lastItem.stageRecordId) {
           let stageRecordId = lastItem.stageRecordId
-          await flowzdataModal.get(null, {
+          flowzdataModal.get(null, {
             id: stageRecordId
           }).then( (resData) => {
             returnData = resData.data[0].data
@@ -819,37 +819,32 @@ export default {
       return(returnData)
     },
 
-    async getFlowz () {
-      return await flowzModel.get(null, {
+    getFlowz () {
+      return flowzModel.get(null, {
         id: this.$route.params.id
       })
       .then((res) => {
         return (res.data.data[0])
       }).catch(err => {
         console.log('Error: ', err)
+        this.dataLoading = false
         return
       })
     },
 
-    async getSchema (id) {
-      return await schemaModel.getAll(id).then(res => {
+    getSchema () {
+      return schemaModel.getAll(this.flowzData.schema).then(res => {
         return res
       }).catch(err => {
         console.log('Error: ', err)
+        this.dataLoading = false
         return
       })
     },
 
-    async populateTables (schema) {
-
-      let firstState = this.flowzData.first
-      if (firstState === this.$route.params.stateid) {
-        this.itsFirstState = true
-      } else {
-        this.itsFirstState = false
-      }
-
-      this.dataSchema = schema
+    populateTables (schema) {
+      this.dataLoading = true
+      this.dataSchema = this.currentSchema
       this.email = false
       this.htmlcontent = false
       this.id = null
@@ -860,35 +855,82 @@ export default {
         '$paginate': false
       }
 
-      await dataQuerymodel.get(null, {
+      // var settings = {
+      //   'async': true,
+      //   'url': 'https://api.flowzcluster.tk/eng/dataquery?$last=true&fid=' + this.$route.params.id + '&currentStatus=' + this.$route.params.stateid + '&$skip=0&$limit=10',
+      //   'method': 'GET',
+      // }
+
+      // $.ajax(settings).done((queryresp) => {
+      //   console.log('query response: ', queryresp)
+      //   this.isFlowzLoaded = true
+      //   let firstState = this.flowzData.first
+      //   if (firstState === this.$route.params.stateid) {
+      //     this.itsFirstState = true
+      //   } else {
+      //     this.itsFirstState = false
+      //   }
+      //   this.dataTotal = queryresp.data.total
+      //   if (queryresp.data.length > 0) {
+      //     this.instanceEntries = queryresp.data
+
+      //     this.dataData = this.instanceEntries
+      //     // this.$Spin.hide()
+      //     this.$Loading.finish()
+      //     this.dataLoading = false
+      //   } else {
+      //     this.instanceEntries = null
+      //     this.dataData = []
+      //     this.itsFirstState = true
+      //     this.dataLoading = false
+      //     // this.$Spin.hide()
+      //     this.$Loading.finish()
+      //   }
+      // }).fail((err) => {
+      //   console.error('Error: ', err)
+      //   this.$Loading.error()
+      //   this.dataLoading = false
+      // });
+
+      dataQuerymodel.get(null, {
         $last: true,
         fid: this.$route.params.id,
         currentStatus: this.$route.params.stateid,
         $skip: this.skip,
         $limit: this.limit
       }).then(queryresp => {
+        this.isFlowzLoaded = true
+        let firstState = this.flowzData.first
+        if (firstState === this.$route.params.stateid) {
+          this.itsFirstState = true
+        } else {
+          this.itsFirstState = false
+        }
         this.dataTotal = queryresp.data.total
         if (queryresp.data.data.length > 0) {
           this.instanceEntries = queryresp.data.data
-
           this.dataData = this.instanceEntries
           // this.$Spin.hide()
           this.$Loading.finish()
+          this.dataLoading = false
         } else {
           this.instanceEntries = null
           this.dataData = []
           this.itsFirstState = true
+          this.dataLoading = false
           // this.$Spin.hide()
           this.$Loading.finish()
         }
       }).catch(err => {
         console.error('Error: ', err)
-        // this.$Spin.hide()
         this.$Loading.error()
+        this.dataLoading = false
       })
     },
 
     async init () {
+      this.dataLoading = true
+      this.instanceEntries = []
       this.isFlowzLoaded = false
       this.itsFirstState = true
       this.$Loading.start()
@@ -898,29 +940,30 @@ export default {
       let cachedFlowz = _.find(this.$store.state.flowz, (o) => { return o.id === this.$route.params.id})
       let cachedSchema = _.find(this.$store.state.schema, (o) => { return o.id === cachedFlowz.schema})
 
-      // this.flowzData = cachedFlowz ? cachedFlowz : await this.getFlowz()
-      // this.populateTables(cachedSchema ? cachedSchema : await this.getSchema(this.flowzData.schema))
+      this.flowzData = cachedFlowz || await this.getFlowz()
+      this.currentSchema = cachedSchema || await this.getSchema() 
+      this.populateTables()
 
-      if (cachedFlowz) {
-        this.flowzData = cachedFlowz
+      // if (cachedFlowz) {
+      //   this.flowzData = cachedFlowz
         
-        // check cached schema
-        if (cachedSchema) {
-          await this.populateTables(cachedSchema)
-        } else {
-          let unCachedSchema = await this.getSchema(cachedFlowz.schema)
-          await this.populateTables(unCachedSchema)
-        }
-      } else {
-        this.flowzData = await this.getFlowz()
-        if (cachedSchema) {
-          await this.populateTables()  
-        } else {
-          let unCachedSchema = await this.getSchema(this.flowzData.schema)
-          await this.populateTables(unCachedSchema)
-        }
+      //   // check cached schema
+      //   if (cachedSchema) {
+      //     await this.populateTables(cachedSchema)
+      //   } else {
+      //     let unCachedSchema = await this.getSchema(cachedFlowz.schema)
+      //     await this.populateTables(unCachedSchema)
+      //   }
+      // } else {
+      //   this.flowzData = await this.getFlowz()
+      //   if (cachedSchema) {
+      //     await this.populateTables()  
+      //   } else {
+      //     let unCachedSchema = await this.getSchema(this.flowzData.schema)
+      //     await this.populateTables(unCachedSchema)
+      //   }
         
-      }
+      // }
 
       // await flowzModel.get(null, {
       //   id: this.$route.params.id
@@ -1028,7 +1071,7 @@ export default {
       'finstance': {
         created (data) {
         },
-        async updated (data) {
+        updated (data) {
           // console.log('called on parent: ', data)
           if (data.currentStatus === this.$route.params.stateid) {
             data = data.data

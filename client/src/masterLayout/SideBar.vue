@@ -101,9 +101,7 @@ export default {
       for (let key in array) {
         allProcess.push(array[key])
       }
-      return allProcess.sort((a, b) => {
-        return a.order - b.order
-      })
+      return allProcess
     },
     createInstance (item, subItemID) {
       // console.log('item', item)
@@ -195,7 +193,7 @@ export default {
           // console.log('flowzList', this.flowzList)
           this.setCounters()
         } else {
-          await flowzModal.get(null, {
+          flowzModal.get(null, {
             $paginate: false
           })
           .then(async (response) => {
@@ -240,7 +238,7 @@ export default {
               mData.role = item.role
               fData.push(mData)
             } else {
-              await flowzModal.get(id, {
+              flowzModal.get(id, {
                 $select: ['id', 'json']
               }, {
                 workflowid: 'workflow_' + id

@@ -58,7 +58,7 @@
 
 <script>
 import modelAuthentication from '@/api/authentication'
-import modelUser from '@/api/user'
+// import modelUser from '@/api/user'
 export default {
   name: 'Register',
   data () {
@@ -93,13 +93,7 @@ export default {
           this.loading = true
           modelAuthentication.register(this.formRegister).then(response => {
             if (response) {
-              modelUser.post(this.formRegister).then(response => {
-                if (response) {
-                  this.loading = false
-                }
-              }).catch(e => {
-                this.loading = false
-              })
+              this.$router.push('/login')
             } else {
               this.loading = false
             }

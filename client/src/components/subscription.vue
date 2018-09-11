@@ -6,8 +6,6 @@
   </div>  
 </template>
 <script>
-  import config from '../config'
-  import axios from 'axios'
   export default {
     name: 'subscription',
     props: {
@@ -26,23 +24,9 @@
     },
     methods: {
       init () {
-        axios.get(config.loginURL + '/userdetails', {
-          headers: {
-            authorization: this.token
-          }
-        }).then(res => {
-          if (res.data.data.package) {
-            this.packages = res.data.data.package
-          } else {
-            this.$Notice.error({title: 'No Subscription', desc: 'Please Buy Subscription!! <a href="https://dashboard.' + process.env.domainKey + '/" target="_blank">Click Here</a>', duration: 0})
-          }
-        }).catch(err => {
-          // this.$Notice.error({title: 'Error'})
-          console.log('Err', err)
-        })
+        (this.$store.state.user !== null && this.$store.state.user !== undefined) ? (this.$store.state.user.package) ? this.packages = this.$store.state.user.package : this.$Notice.error({title: 'No Subscription', desc: 'Please Buy Subscription!! <a href="https://dashboard.' + process.env.domainKey + '/" target="_blank">Click Here</a>', duration: 0}) : this.$router.push('/login')
       },
       handleChange (value) {
-        // this.value = value
         this.subid = value
         this.$emit('on-change', value)
       }
