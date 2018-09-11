@@ -218,7 +218,7 @@ export default {
             this.flowzList = []
             this.loading = false
           })
-        // }
+        }
       } else {
         let modules = _.keysIn(this.$store.state.user.package[this.$store.state.subscription].role)
         let self = this
