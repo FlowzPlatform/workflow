@@ -191,7 +191,7 @@ import saveemailTemplate from '@/api/emailtemplate'
 
 export default {
   name: 'SchemaView',
-  props: {
+  props: {abc
     options: {
       type: Object
     }
@@ -551,7 +551,7 @@ export default {
         } else {
           nextTargetId = this.flowData.processList[currentStageObject.target[0].id]
         }
-        console.log('nextTargetId ', nextTargetId)
+        // console.log('nextTargetId ', nextTargetId)
         if (nextTargetId.type === 'sendproofmail') {
           this.id = null
           this.schemabinding = true
