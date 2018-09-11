@@ -264,6 +264,7 @@
             })
           }
           for (let item of this.dataConfig) {
+            console.log(item)
             if (item.show) {
               cols.push({
                 title: item.title,
@@ -299,6 +300,10 @@
       $('.ivu-table td:nth-child(2) div span').mouseover(function () {
         var valueOfTd = $(this).text()
         $('.ivu-table td:nth-child(2) div span').attr('title', valueOfTd)
+      })
+      $('.ivu-table-cell div').mouseover(function () {
+        var valueOfTd = $(this).text()
+        $('.ivu-table-cell div').attr('title', valueOfTd)
       })
     },
     methods: {
@@ -349,12 +354,24 @@
   .searchQueries{
     margin: 5px 0;
   }
+  .ivu-table-cell td div span{
+    width:200px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
 </style>
 
 <style>
 .ivu-table td:nth-child(2) div span{
+  width:200px !important;
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
 }
+.ivu-table-cell div{
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
 </style>
