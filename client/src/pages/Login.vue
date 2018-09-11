@@ -147,7 +147,7 @@ export default {
           var auth = await modelAuthentication.login(this.formLogin).catch(error => {
             if (error.response) {
               this.$Message.error(error.response.data)
-            } else 
+            } else
             {
               this.$Message.error("Fail login.")
             }
@@ -159,7 +159,23 @@ export default {
 						let location = psl.parse(window.location.hostname)    // get parent domain
 						location = location.domain === null ? location.input : location.domain
 						this.$cookie.set('auth_token', auth.logintoken, {expires: 1, domain: location})    // Store in cookie
-						this.$store.commit('SET_ROLE', null)
+            let userData = await this.$store.dispatch('authenticate', auth.logintoken)
+
+            this.$store.commit('SET_ROLE', 2)
+            if (userData.hasOwnProperty('package')) {
+              if (this.$store.state.subscription !== '' && this.$store.state.subscription !== undefined) {
+                if (userData.package[this.$store.state.subscription].role === 'admin') {
+                  this.$store.commit('SET_ROLE', 1)
+                }
+              } else {
+                if (userData.hasOwnProperty('defaultSubscriptionId')) {
+                  this.$store.state.subscription = userData.defaultSubscriptionId
+                  if (userData.package[this.$store.state.subscription].role === 'admin') {
+                    this.$store.commit('SET_ROLE', 1)
+                  }
+                }
+              }
+            }
             this.$router.push({path: '/'}) // Redirect to dashbord
           }
           this.loading = false

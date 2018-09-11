@@ -62,6 +62,10 @@ export default {
     commit('REMOVE_XML')
   },
   authenticate ({ commit }, authToken) {
+    let userData = commit('GET_USER')
+    if (!userData) {
+      return userData
+    }
     return axios({
       method: 'get',
       url: config.loginURL + '/userdetails',
@@ -71,10 +75,23 @@ export default {
     })
     .then(response => {
       if (response) {
+        commit('SET_USER', response.data.data)
         return response.data.data
       } else {
-        return
+        return null
       }
+    })
+  },
+  authenticateToken ({ commit }, authToken) {
+    return axios({
+      method: 'post',
+      url: config.loginURL + '/validatetoken',
+      headers: {
+        'authorization': authToken
+      }
+    })
+    .then(response => {
+      return response.data.status
     })
   },
   getUser ({ commit }, email) {
