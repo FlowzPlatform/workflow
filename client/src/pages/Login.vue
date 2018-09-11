@@ -103,10 +103,7 @@
 </template>
 
 <script>
-/*eslint-disable*/
-// import axios from 'axios'
 import modelAuthentication from '@/api/authentication'
-import modelUser from '@/api/user'
 import config from '@/config'
 import psl from 'psl'
 export default {
@@ -127,16 +124,16 @@ export default {
           { required: true, message: 'Please fill in the password.', trigger: 'blur' }
         ]
       },
-      facebookSuccessCallbackUrl : config.facebookSuccessCallbackUrl,
-      googleSuccessCallbackUrl : config.googleSuccessCallbackUrl,
-      loginWithFacebookUrl : config.loginWithFacebookUrl,
-      loginWithGoogleUrl : config.loginWithGoogleUrl,
-      twitterSuccessCallbackUrl : config.twitterSuccessCallbackUrl,
-      loginWithTwitterUrl : config.loginWithTwitterUrl,
-      linkedinSuccessCallbackUrl : config.linkedinSuccessCallbackUrl,
-      loginWithLinkedinUrl : config.loginWithLinkedinUrl,
-      githubSuccessCallbackUrl : config.githubSuccessCallbackUrl,
-      loginWithGithubUrl : config.loginWithGithubUrl
+      facebookSuccessCallbackUrl: config.facebookSuccessCallbackUrl,
+      googleSuccessCallbackUrl: config.googleSuccessCallbackUrl,
+      loginWithFacebookUrl: config.loginWithFacebookUrl,
+      loginWithGoogleUrl: config.loginWithGoogleUrl,
+      twitterSuccessCallbackUrl: config.twitterSuccessCallbackUrl,
+      loginWithTwitterUrl: config.loginWithTwitterUrl,
+      linkedinSuccessCallbackUrl: config.linkedinSuccessCallbackUrl,
+      loginWithLinkedinUrl: config.loginWithLinkedinUrl,
+      githubSuccessCallbackUrl: config.githubSuccessCallbackUrl,
+      loginWithGithubUrl: config.loginWithGithubUrl
     }
   },
   methods: {
@@ -147,9 +144,8 @@ export default {
           var auth = await modelAuthentication.login(this.formLogin).catch(error => {
             if (error.response) {
               this.$Message.error(error.response.data)
-            } else
-            {
-              this.$Message.error("Fail login.")
+            } else {
+              this.$Message.error('Fail login.')
             }
             return
           })
@@ -203,7 +199,7 @@ export default {
     var mainDiv = document.getElementById('main-panel')
     let self = this
     mainDiv.onkeypress = function (e) {
-      if (e.key == 'Enter') self.handleSubmit('formLogin')
+      if (e.key === 'Enter') self.handleSubmit('formLogin')
     }
   }
 }
