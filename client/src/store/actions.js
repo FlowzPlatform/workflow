@@ -64,12 +64,5 @@ export default {
     .then(response => {
       return response.data.status
     })
-  },
-  getUser ({ commit }, email) {
-    return modelUser.getByParam(email).then((response) => {
-      if (response && response.data.data.length > 0) {
-        return response.data.data[0]
-      }
-    })
   }
 }
