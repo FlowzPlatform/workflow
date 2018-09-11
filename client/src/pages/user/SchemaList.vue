@@ -264,7 +264,6 @@
             })
           }
           for (let item of this.dataConfig) {
-            console.log(item)
             if (item.show) {
               cols.push({
                 title: item.title,
