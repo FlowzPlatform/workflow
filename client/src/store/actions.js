@@ -54,15 +54,16 @@ export default {
     })
   },
   authenticateToken ({ commit }, authToken) {
-    return axios({
-      method: 'post',
-      url: config.loginURL + '/validatetoken',
-      headers: {
-        'authorization': authToken
-      }
-    })
-    .then(response => {
-      return response.data.status
-    })
+    return true
+    // return axios({
+    //   method: 'post',
+    //   url: config.loginURL + '/validatetoken',
+    //   headers: {
+    //     'authorization': authToken
+    //   }
+    // })
+    // .then(response => {
+    //   return response.data.status
+    // })
   }
 }
