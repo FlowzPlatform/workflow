@@ -191,7 +191,7 @@ import saveemailTemplate from '@/api/emailtemplate'
 
 export default {
   name: 'SchemaView',
-  props: {abc
+  props: {
     options: {
       type: Object
     }
