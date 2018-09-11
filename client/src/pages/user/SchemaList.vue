@@ -1,8 +1,5 @@
 <template>
   <div class="SchemaList">
-
-    
-
     <div v-if="configuration" style="">
       <Button style="float: right; margin-top: -50px;" @click="handleConfiguration" ghost><i class="fa fa-cog"></i></Button>
       <Modal v-model="isShow" title="Set Configuration" width="750px"  style="">
@@ -44,18 +41,9 @@
               <Button icon="search" type="primary" long>Search</Button>
             </div>
           </div>
-
-          <!-- <div class="searchQueries">
-            <Tag @on-close="searchQuery = null" closable color="blue" v-if="searchQuery != null && searchQuery != ''">{{searchQuery}}</Tag>
-            <Tag @on-close="selectedFilterBy = null, enteredDateRange= []" closable color="blue" v-if="selectedFilterBy != null && selectedFilterBy != '' && selectedFilterBy == 'customRange'">{{selectedFilterBy}} : {{enteredDateRange}}</Tag>
-            <Tag @on-close="selectedFilterBy = null" closable color="blue" v-if="selectedFilterBy != null && selectedFilterBy != '' && selectedFilterBy != 'customRange'">{{selectedFilterBy}}</Tag>
-            <Tag closable color="blue" v-if="selectedSortBy != null && selectedSortBy != ''">{{selectedSortBy}}</Tag>
-          </div> -->
         </div>
       </div>
-      
     </div>
-
     <div>
       <Table highlight-row :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
       <div style="margin: 10px;overflow: hidden">
@@ -242,15 +230,9 @@
                   },
                   on: {
                     'click': async () => {
-                      // console.log('Params: ', this.instanceEntries, params)
                       this.$Loading.start()
                       let indexFind = _.findIndex(this.instanceEntries, (o) => { return o.id === params.row.id })
-                      // console.log('indexfind: ', indexFind)
-                      // this.$emit('setValues', this.instanceEntries[indexFind])
-                      // console.log('Click: ', params.row, params.index)
-                      // console.log('this.flowzData: ', this.flowzData)
                       let currentObj = this.flowzData.processList[this.instanceEntries[indexFind].currentStatus]
-                      // console.log('this.flowzData.schema SchemaList', this.flowzData.schema)
                       let values = {
                         id: this.flowzData.schema,
                         item: this.instanceEntries[indexFind],
@@ -258,23 +240,7 @@
                         currentState: currentObj.id,
                         flowzData: this.flowzData,
                         formData: params.row.data
-                        // nextState: resp[currentState].next,
-                        // currentState: currentState
                       }
-                      // console.log('_____________values', item)
-                      // console.log('this.instanceEntries[indexFind].stageReference.length: ', this.instanceEntries[indexFind].stageReference.length)
-                      // if (this.instanceEntries[indexFind].stageReference.length > 0) {
-                      //   let lastObj = this.instanceEntries[indexFind].stageReference[this.instanceEntries[indexFind].stageReference.length - 1]
-                      //   // console.log('last obj: ', lastObj)
-                      //   await flowzdataModal.get(lastObj.stageRecordId).then(res => {
-                      //     values.formData = res.data.data
-                      //     this.$Spin.hide()
-                      //   }).catch(err => {
-                      //     this.$Spin.hide()
-                      //     console.log(err)
-                      //   })
-                      // }
-                      // console.log('Values emitted: ', values)
                       this.$Loading.finish()
                       await this.$emit('setValues', values)
                     }
@@ -305,7 +271,6 @@
                 sortable: item.sortable,
                 width: item.width,
                 render: (h, params) => {
-                  // console.log('params.row.data: ', params.row.data)
                   return h('div', params.row.data[item.key])
                 }
               })
@@ -319,14 +284,12 @@
                 key: item.name,
                 width: 150,
                 render: (h, params) => {
-                  // console.log('params.row.data: ', params.row.data)
                   return h('div', params.row.data[item.name])
                 }
               })
             }
           }
         }
-        // console.log('cols: ', cols)
         return cols
       }
     },
