@@ -1,8 +1,5 @@
 <template>
   <div class="SchemaList">
-
-    
-
     <div v-if="configuration" style="">
       <Button style="float: right; margin-top: -50px;" @click="handleConfiguration" ghost><i class="fa fa-cog"></i></Button>
       <Modal v-model="isShow" title="Set Configuration" width="750px"  style="">
@@ -44,33 +41,22 @@
               <Button icon="search" type="primary" @click="searchData" long>Search</Button>
             </div>
           </div>
-
-          <!-- <div class="searchQueries">
-            <Tag @on-close="searchQuery = null" closable color="blue" v-if="searchQuery != null && searchQuery != ''">{{searchQuery}}</Tag>
-            <Tag @on-close="selectedFilterBy = null, enteredDateRange= []" closable color="blue" v-if="selectedFilterBy != null && selectedFilterBy != '' && selectedFilterBy == 'customRange'">{{selectedFilterBy}} : {{enteredDateRange}}</Tag>
-            <Tag @on-close="selectedFilterBy = null" closable color="blue" v-if="selectedFilterBy != null && selectedFilterBy != '' && selectedFilterBy != 'customRange'">{{selectedFilterBy}}</Tag>
-            <Tag closable color="blue" v-if="selectedSortBy != null && selectedSortBy != ''">{{selectedSortBy}}</Tag>
-          </div> -->
         </div>
       </div>
-      
     </div>
-
     <div>
       <Table @on-sort-change="sortTableData" highlight-row :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
       <div style="margin: 10px;overflow: hidden">
         <div style="float: right;">
-          <Page :total="total" :current="pageno" :page-size="limit" @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+          <Page :total="total" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
         </div>
       </div>
     </div>
   </div>
 </template>
 <script>
-  // import finstanceModal from '@/api/finstance'
-  // import flowzModal from '@/api/flowz'
-  // import flowzdataModal from '@/api/flowzdata'
   import _ from 'lodash'
+  import $ from 'jquery'
   export default {
     name: 'schemalist',
     props: {
@@ -81,11 +67,11 @@
       'flowzData': Object,
       'instanceEntries': Array,
       'dataTotal': Number,
-      'pageno': Number
+      'pageno': Number,
+      'limit': Number
     },
     data () {
       return {
-        limit: 10,
         skip: 0,
         total: 0,
         searchQuery: null,
@@ -244,15 +230,9 @@
                   },
                   on: {
                     'click': async () => {
-                      // console.log('Params: ', this.instanceEntries, params)
                       this.$Loading.start()
                       let indexFind = _.findIndex(this.instanceEntries, (o) => { return o.id === params.row.id })
-                      // console.log('indexfind: ', indexFind)
-                      // this.$emit('setValues', this.instanceEntries[indexFind])
-                      // console.log('Click: ', params.row, params.index)
-                      // console.log('this.flowzData: ', this.flowzData)
                       let currentObj = this.flowzData.processList[this.instanceEntries[indexFind].currentStatus]
-                      // console.log('this.flowzData.schema SchemaList', this.flowzData.schema)
                       let values = {
                         id: this.flowzData.schema,
                         item: this.instanceEntries[indexFind],
@@ -260,23 +240,7 @@
                         currentState: currentObj.id,
                         flowzData: this.flowzData,
                         formData: params.row.data
-                        // nextState: resp[currentState].next,
-                        // currentState: currentState
                       }
-                      // console.log('_____________values', item)
-                      // console.log('this.instanceEntries[indexFind].stageReference.length: ', this.instanceEntries[indexFind].stageReference.length)
-                      // if (this.instanceEntries[indexFind].stageReference.length > 0) {
-                      //   let lastObj = this.instanceEntries[indexFind].stageReference[this.instanceEntries[indexFind].stageReference.length - 1]
-                      //   // console.log('last obj: ', lastObj)
-                      //   await flowzdataModal.get(lastObj.stageRecordId).then(res => {
-                      //     values.formData = res.data.data
-                      //     this.$Spin.hide()
-                      //   }).catch(err => {
-                      //     this.$Spin.hide()
-                      //     console.log(err)
-                      //   })
-                      // }
-                      // console.log('Values emitted: ', values)
                       this.$Loading.finish()
                       await this.$emit('setValues', values)
                     }
@@ -307,7 +271,6 @@
                 sortable: item.sortable,
                 width: item.width,
                 render: (h, params) => {
-                  // console.log('params.row.data: ', params.row.data)
                   return h('div', params.row.data[item.key])
                 }
               })
@@ -321,36 +284,22 @@
                 key: item.name,
                 width: 150,
                 render: (h, params) => {
-                  // console.log('params.row.data: ', params.row.data)
                   return h('div', params.row.data[item.name])
                 }
               })
             }
           }
         }
-        // console.log('cols: ', cols)
         return cols
       }
     },
     mounted () {
       this.total = this.dataTotal
       this.mdata = this.data
-      // if (this.dynamicData) {
-      //   await flowzModal.get(id, {
-      //     $select: ['json']
-      //   }).then(async res => {
-      //     this.flowzData = res.data
-      //     await finstanceModal.get(null, query).then(resp => {
-      //       this.instanceEntries = resp.data
-      //     }).catch(err => {
-      //       this.instanceEntries = null
-      //       console.log('err', err)
-      //     })
-      //   }).catch(err => {
-      //     this.instanceEntries = null
-      //     console.log('....', err)
-      //   })
-      // }
+      $('.ivu-table td:nth-child(2) div span').mouseover(function () {
+        var valueOfTd = $(this).text()
+        $('.ivu-table td:nth-child(2) div span').attr('title', valueOfTd)
+      })
     },
     methods: {
       searchData () {
@@ -365,21 +314,12 @@
       handleConfiguration () {
         this.isShow = !this.isShow
       },
-      // mockTableData1 () {
-      //   console.log('this.data ', this.data)
-      //   let data = []
-      //   for (let i = 0; i < 10; i++) {
-      //     data.push(this.data[i])
-      //   }
-      //   return data
-      // },
       handlePage (page) {
         this.skip = (page * this.limit) - this.limit
         this.$emit('on-paginate', this.skip, this.limit, page)
       },
       handlePagesize (size) {
-        this.limit = size
-        this.skip = 0
+        this.$emit('on-handlepage', this.skip, this.limit, size)
       }
     },
     feathers: {
@@ -418,4 +358,12 @@
   .searchQueries{
     margin: 5px 0;
   }
+</style>
+
+<style>
+.ivu-table td:nth-child(2) div span{
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
 </style>

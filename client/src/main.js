@@ -132,7 +132,7 @@ router.beforeEach((to, from, next) => {
     delete axios.defaults.headers.common['authorization']
   }
 
-  if (to.matched.some(record => record.meta.requiresAuth) && (!token || token === 'null')) {
+  if (to.matched.some(record => record.meta.requiresAuth) && (!token || token === 'null' || store.state.token === undefined)) {
     next({
       path: '/login'
         // query: { redirect: to.fullPath }
