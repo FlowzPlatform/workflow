@@ -54,22 +54,16 @@ export default {
     })
   },
   authenticateToken ({ commit }, authToken) {
-    return axios({
-      method: 'post',
-      url: config.loginURL + '/validatetoken',
-      headers: {
-        'authorization': authToken
-      }
-    })
-    .then(response => {
-      return response.data.status
-    })
-  },
-  getUser ({ commit }, email) {
-    return modelUser.getByParam(email).then((response) => {
-      if (response && response.data.data.length > 0) {
-        return response.data.data[0]
-      }
-    })
+    return true
+    // return axios({
+    //   method: 'post',
+    //   url: config.loginURL + '/validatetoken',
+    //   headers: {
+    //     'authorization': authToken
+    //   }
+    // })
+    // .then(response => {
+    //   return response.data.status
+    // })
   }
 }
