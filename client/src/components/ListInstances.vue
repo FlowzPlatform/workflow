@@ -100,7 +100,6 @@ export default {
   },
   methods: {
     async getRecord (item) {
-      console.log('Item: ', this.flowzData)
       let currentObj = this.flowzData.processList[item.currentStatus]
       let values = {
         id: this.flowzData.schema,
@@ -124,7 +123,6 @@ export default {
   mounted () {
     $('#data tr').click(function () {
       var selected = $(this).hasClass('highlight')
-      console.log(selected)
       $('#data tr').removeClass('highlight')
       if (!selected) {
         $(this).addClass('highlight')

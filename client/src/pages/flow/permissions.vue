@@ -34,7 +34,7 @@
                                     <tr class="row">
                                         <template v-for="(field,fieldNumber) in fields[moduleName]">
                                             <td v-if="fieldNumber ==0" style="padding:10px;font-weight:bold;border-right: 3px solid #cdd0d4;">
-                                                {{ getName(item.service) }}
+                                                <!-- {{ getName(item.service) }} -->
                                             </td>
                                             <td v-else>
                                                 <table class="table-bordered" style="width:100%">
@@ -82,7 +82,7 @@
 
   // Vue.use(iView, { locale })
 
-  const deepRecord = require('../../assets/js/deepstream/deepRecord.js')
+  // const deepRecord = require('../../assets/js/deepstream/deepRecord.js')
   // import $ from 'jquery'
 
   // Vue.use(iView)
@@ -113,16 +113,16 @@
       }
     },
     methods: {
-      getName: function (taskId) {
-        return new Promise(async resolve => {
-          taskId = await this.titleCase(taskId)
-          let resultName = await deepRecord.deepRecord.getCurrentTraget(this.instanceId, taskId)
-          let name = resultName.name
-          resolve(name)
-        })
-        // console.log('Name: ', JSON.stringify(name))
-        // return name
-      },
+      // getName: function (taskId) {
+      //   return new Promise(async resolve => {
+      //     taskId = await this.titleCase(taskId)
+      //     let resultName = await deepRecord.deepRecord.getCurrentTraget(this.instanceId, taskId)
+      //     let name = resultName.name
+      //     resolve(name)
+      //   })
+      //   // console.log('Name: ', JSON.stringify(name))
+      //   // return name
+      // },
       getAllPermissions: async function (appName, totalApps) {
         var self = this
           // console.log('getAllPerm:', config.getAllPermissionsUrl+appName)
