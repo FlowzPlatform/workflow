@@ -15,9 +15,7 @@
   </div>
 </template>
 <script type="text/javascript">
-  import schema from '@/api/schema'
-  import api from '@/api'
-  // import _ from 'lodash'
+  import schemaModel from '@/api/schema'
   import moment from 'moment'
   export default {
     data () {
@@ -77,24 +75,6 @@
                   on: {
                     click: () => {
                       this.$router.push('schema/edit/' + this.schemaData[params.index].id)
-                    }
-                  }
-                }, ''),
-                h('Button', {
-                  props: {
-                    type: 'text',
-                    size: 'large',
-                    icon: 'arrow-swap'
-                  },
-                  style: {
-                    color: '#7DE144',
-                    marginRight: '3px',
-                    padding: '0px',
-                    fontSize: '20px'
-                  },
-                  on: {
-                    click: () => {
-                      this.$router.push('schema/' + this.schemaData[params.index].id + '/mapping')
                     }
                   }
                 }, ''),
@@ -171,8 +151,7 @@
           },
           onOk: () => {
             if (this.deleteSchemaValue === 'softdel') {
-              // alert(this.deleteSchemaValue)
-              api.request('patch', '/schema/' + this.schemaData[index].id, {isdeleted: true})
+              schemaModel.patch(this.schemaData[index].id, {isdeleted: true})
                 .then(response => {
                   this.$Notice.success({title: 'Success!!', desc: 'Schema Deleted...'})
                   this.total--
@@ -183,7 +162,7 @@
                   console.log(error)
                 })
             } else if (this.deleteSchemaValue === 'harddel') {
-              api.request('delete', '/schema/' + this.schemaData[index].id)
+              schemaModel.delete(this.schemaData[index].id)
                 .then(response => {
                   this.total--
                   this.schemaData.splice(index, 1)
@@ -202,7 +181,7 @@
       },
       async init () {
         var string = '&$skip=' + this.skip + '&$limit=' + this.limit
-        this.schemaData = await (schema.getCustom('?isdeleted=false&$sort[createdAt]=-1' + string).then(res => {
+        this.schemaData = await (schemaModel.getCustom('?isdeleted=false&$sort[createdAt]=-1' + string).then(res => {
           this.total = res.data.total
           return res.data.data
         }).catch(err => {

@@ -103,10 +103,7 @@
 </template>
 
 <script>
-/*eslint-disable*/
-// import axios from 'axios'
 import modelAuthentication from '@/api/authentication'
-import modelUser from '@/api/user'
 import config from '@/config'
 import psl from 'psl'
 export default {
@@ -127,16 +124,16 @@ export default {
           { required: true, message: 'Please fill in the password.', trigger: 'blur' }
         ]
       },
-      facebookSuccessCallbackUrl : config.facebookSuccessCallbackUrl,
-      googleSuccessCallbackUrl : config.googleSuccessCallbackUrl,
-      loginWithFacebookUrl : config.loginWithFacebookUrl,
-      loginWithGoogleUrl : config.loginWithGoogleUrl,
-      twitterSuccessCallbackUrl : config.twitterSuccessCallbackUrl,
-      loginWithTwitterUrl : config.loginWithTwitterUrl,
-      linkedinSuccessCallbackUrl : config.linkedinSuccessCallbackUrl,
-      loginWithLinkedinUrl : config.loginWithLinkedinUrl,
-      githubSuccessCallbackUrl : config.githubSuccessCallbackUrl,
-      loginWithGithubUrl : config.loginWithGithubUrl
+      facebookSuccessCallbackUrl: config.facebookSuccessCallbackUrl,
+      googleSuccessCallbackUrl: config.googleSuccessCallbackUrl,
+      loginWithFacebookUrl: config.loginWithFacebookUrl,
+      loginWithGoogleUrl: config.loginWithGoogleUrl,
+      twitterSuccessCallbackUrl: config.twitterSuccessCallbackUrl,
+      loginWithTwitterUrl: config.loginWithTwitterUrl,
+      linkedinSuccessCallbackUrl: config.linkedinSuccessCallbackUrl,
+      loginWithLinkedinUrl: config.loginWithLinkedinUrl,
+      githubSuccessCallbackUrl: config.githubSuccessCallbackUrl,
+      loginWithGithubUrl: config.loginWithGithubUrl
     }
   },
   methods: {
@@ -147,19 +144,32 @@ export default {
           var auth = await modelAuthentication.login(this.formLogin).catch(error => {
             if (error.response) {
               this.$Message.error(error.response.data)
-            } else 
-            {
-              this.$Message.error("Fail login.")
+            } else {
+              this.$Message.error('Fail login.')
             }
             return
           })
           if (auth) {
-            this.$store.commit('SET_TOKEN', auth.logintoken)
-						// Token Store in cookie
-						let location = psl.parse(window.location.hostname)    // get parent domain
-						location = location.domain === null ? location.input : location.domain
-						this.$cookie.set('auth_token', auth.logintoken, {expires: 1, domain: location})    // Store in cookie
-						this.$store.commit('SET_ROLE', null)
+            this.$store.commit('SET_TOKEN', auth.logintoken) // Token Store in cookie
+            let location = psl.parse(window.location.hostname)    // get parent domain
+            location = location.domain === null ? location.input : location.domain
+            this.$cookie.set('auth_token', auth.logintoken, {expires: 1, domain: location})    // Store in cookie
+            let userData = await this.$store.dispatch('authenticate', auth.logintoken)
+            this.$store.commit('SET_ROLE', 2)
+            if (userData.hasOwnProperty('package')) {
+              if (this.$store.state.subscription !== '' && this.$store.state.subscription !== undefined) {
+                if (userData.package[this.$store.state.subscription].role === 'admin') {
+                  this.$store.commit('SET_ROLE', 1)
+                }
+              } else {
+                if (userData.hasOwnProperty('defaultSubscriptionId')) {
+                  this.$store.state.subscription = userData.defaultSubscriptionId
+                  if (userData.package[this.$store.state.subscription].role === 'admin') {
+                    this.$store.commit('SET_ROLE', 1)
+                  }
+                }
+              }
+            }
             this.$router.push({path: '/'}) // Redirect to dashbord
           }
           this.loading = false
@@ -188,7 +198,7 @@ export default {
     var mainDiv = document.getElementById('main-panel')
     let self = this
     mainDiv.onkeypress = function (e) {
-      if (e.key == 'Enter') self.handleSubmit('formLogin')
+      if (e.key === 'Enter') self.handleSubmit('formLogin')
     }
   }
 }
