@@ -86,10 +86,10 @@
     <!-- Main Table -->
     <div v-show="rowview">
       <!-- <Table height="690" border :columns="mainColumns()" :data="tableData"></Table> -->
-      <Table v-if="schemaId !== null" height="590" border :columns="mainColumns()" :data="tableData"></Table>
+      <Table :loading="tableLoading" v-if="schemaId !== null" height="590" border :columns="mainColumns()" :data="tableData"></Table>
     </div>
     <div v-show="columnview">
-      <Table :row-class-name="rowClassName" :columns="colviewCols" height="590" :data="colviewData"></Table>
+      <Table :loading="tableLoading" :row-class-name="rowClassName" :columns="colviewCols" height="590" :data="colviewData"></Table>
     </div>
     <!-- <Table v-if="schemaId !== null" height="690" border :columns="mainColumns()" :data="tableData"></Table> -->
 
@@ -266,7 +266,9 @@ export default {
         }
       ],
       selectedSortBy: null,
-      enteredDateRange: null
+      enteredDateRange: null,
+      currentSchema: null,
+      tableLoading: false
     }
   },
   components: {
@@ -397,7 +399,108 @@ export default {
         // console.log('table cols: ', tableCols)
       return tableCols
     },
+
+    getFlowz () {
+      return flowzModal.get(this.fid, {
+        $paginate: false
+      })
+      .then((res) => {
+        return (res.data)
+      }).catch(err => {
+        this.tableLoading = false
+        console.log('Error: ', err)
+        return
+      })
+    },
+
+    getSchema (id) {
+      return schemaModal.getAll(id).then(res => {
+        return res
+      }).catch(err => {
+        this.tableLoading = false
+        console.log('Error: ', err)
+        return
+      })
+    },
+
+    populateTables () {
+      this.schemaId = this.currentSchema.id
+      this.flowName = this.flowzData.name
+
+      let cols = []
+      let colviewData = []
+      // console.log('res.data.processList: ', res.data.processList)
+      let listing = this.getByOrder(this.flowzData.processList)
+      for (let col of listing) {
+        if (col.type !== 'startevent' && col.type !== 'endevent') {
+          cols.push({
+            title: col.name || col.id,
+            key: col.id,
+            firstColumn: false,
+            show: true,
+            width: 150
+          })
+        }
+      }
+      // console.log('cols: ', cols)
+      this.anotherBinding = _.cloneDeep(cols)
+      this.configuration.fields = _.cloneDeep(cols)
+
+      dataQueryModel.get(null, {
+        $all: true,
+        fid: this.fid,
+        $paginate: false
+      }).then(queryresp => {
+        // this.$Spin.hide()
+        this.tableData = queryresp.data
+        colviewData = queryresp.data
+        let listing = this.getByOrder(this.flowzData.processList)
+        for (let item of colviewData) {
+          let isfirst = false
+          for (let task of listing) {
+            if (task.type !== 'startevent' && task.type !== 'endevent') {
+              // flowzdataModal.get().then(res => {
+
+              // }).catch(e => {
+              //   console.log('e', e)
+              // })
+              // console.log('colviewData.stageReference ', item, task)
+              let dataExist = _.find(item.stageReference, {StageName: task.id})
+              if (!isfirst) {
+                task.first = false
+                task.className = ''
+                isfirst = true
+              } else {
+                task.className = 'notfirst'
+              }
+              // console.log('dataExist: ', dataExist)
+              let m = {
+                id: item.id,
+                task: task.name || task.id,
+                className: task.className
+              }
+              if (task.hasOwnProperty('first')) {
+                m.first = task.first
+              }
+              if (dataExist !== null && dataExist !== undefined && dataExist.hasOwnProperty('data')) {
+                for (let k in dataExist.data) {
+                  m[k] = dataExist.data[k]
+                }
+                this.colviewData.push(m)
+              } else {
+                this.colviewData.push(m)
+              }
+            }
+          }
+        }
+        this.tableLoading = false
+      }).catch(err => {
+        this.tableLoading = false
+        console.log('Erro: ', err)
+      })
+    },
     async init () {
+      this.tableLoading = true
       // this.$Spin.show()
       // this.colviewCols = []
       this.colviewCols = [
@@ -482,82 +585,88 @@ export default {
       ]
       this.colviewData = []
       this.fid = this.$route.params.id
-      let colviewData = []
 
-      await flowzModal.get(this.fid, {
-        $paginate: false
-      }).then(res => {
-        this.schemaId = res.data.schema
-        this.flowName = res.data.name
-        let cols = []
-        // console.log('res.data.processList: ', res.data.processList)
-        let listing = this.getByOrder(res.data.processList)
-        for (let col of listing) {
-          if (col.type !== 'startevent' && col.type !== 'endevent') {
-            cols.push({
-              title: col.name || col.id,
-              key: col.id,
-              firstColumn: false,
-              show: true,
-              width: 150
-            })
-          }
-        }
-        // console.log('cols: ', cols)
-        this.anotherBinding = _.cloneDeep(cols)
-        this.configuration.fields = _.cloneDeep(cols)
+      let cachedFlowz = _.find(this.$store.state.flowz, (o) => { return o.id === this.$route.params.id })
+      let cachedSchema = _.find(this.$store.state.schema, (o) => { return o.id === cachedFlowz.schema })
 
-        dataQueryModel.get(null, {
-          $all: true,
-          fid: this.fid,
-          $paginate: false
-        }).then(queryresp => {
-          // this.$Spin.hide()
-          console.log('Res: ', queryresp)
-          this.tableData = queryresp.data
-          colviewData = queryresp.data
-          let listing = this.getByOrder(res.data.processList)
-          for (let item of colviewData) {
-            let isfirst = false
-            for (let task of listing) {
-              if (task.type !== 'startevent' && task.type !== 'endevent') {
-                // flowzdataModal.get().then(res => {
+      this.flowzData = cachedFlowz || await this.getFlowz()
+      this.currentSchema = cachedSchema || await this.getSchema(this.flowzData.schema)
+      this.populateTables()
 
-                // }).catch(e => {
-                //   console.log('e', e)
-                // })
-                // console.log('colviewData.stageReference ', item, task)
-                let dataExist = _.find(item.stageReference, {StageName: task.id})
-                if (!isfirst) {
-                  task.first = false
-                  task.className = ''
-                  isfirst = true
-                } else {
-                  task.className = 'notfirst'
-                }
-                // console.log('dataExist: ', dataExist)
-                let m = {
-                  id: item.id,
-                  task: task.name || task.id,
-                  className: task.className
-                }
-                if (task.hasOwnProperty('first')) {
-                  m.first = task.first
-                }
-                if (dataExist !== null && dataExist !== undefined && dataExist.hasOwnProperty('data')) {
-                  for (let k in dataExist.data) {
-                    m[k] = dataExist.data[k]
-                  }
-                  this.colviewData.push(m)
-                } else {
-                  this.colviewData.push(m)
-                }
-              }
-            }
-          }
-        }).catch(err => {
-          console.log('Erro: ', err)
-        })
+      // await flowzModal.get(this.fid, {
+      //   $paginate: false
+      // }).then(res => {
+      //   this.schemaId = res.data.schema
+      //   this.flowName = res.data.name
+      //   let cols = []
+      //   // console.log('res.data.processList: ', res.data.processList)
+      //   let listing = this.getByOrder(res.data.processList)
+      //   for (let col of listing) {
+      //     if (col.type !== 'startevent' && col.type !== 'endevent') {
+      //       cols.push({
+      //         title: col.name || col.id,
+      //         key: col.id,
+      //         firstColumn: false,
+      //         show: true,
+      //         width: 150
+      //       })
+      //     }
+      //   }
+      //   // console.log('cols: ', cols)
+      //   this.anotherBinding = _.cloneDeep(cols)
+      //   this.configuration.fields = _.cloneDeep(cols)
+
+      //   dataQueryModel.get(null, {
+      //     $all: true,
+      //     fid: this.fid,
+      //     $paginate: false
+      //   }).then(queryresp => {
+      //     // this.$Spin.hide()
+      //     console.log('Res: ', queryresp)
+      //     this.tableData = queryresp.data
+      //     colviewData = queryresp.data
+      //     let listing = this.getByOrder(res.data.processList)
+      //     for (let item of colviewData) {
+      //       let isfirst = false
+      //       for (let task of listing) {
+      //         if (task.type !== 'startevent' && task.type !== 'endevent') {
+      //           // flowzdataModal.get().then(res => {
+
+      //           // }).catch(e => {
+      //           //   console.log('e', e)
+      //           // })
+      //           // console.log('colviewData.stageReference ', item, task)
+      //           let dataExist = _.find(item.stageReference, {StageName: task.id})
+      //           if (!isfirst) {
+      //             task.first = false
+      //             task.className = ''
+      //             isfirst = true
+      //           } else {
+      //             task.className = 'notfirst'
+      //           }
+      //           // console.log('dataExist: ', dataExist)
+      //           let m = {
+      //             id: item.id,
+      //             task: task.name || task.id,
+      //             className: task.className
+      //           }
+      //           if (task.hasOwnProperty('first')) {
+      //             m.first = task.first
+      //           }
+      //           if (dataExist !== null && dataExist !== undefined && dataExist.hasOwnProperty('data')) {
+      //             for (let k in dataExist.data) {
+      //               m[k] = dataExist.data[k]
+      //             }
+      //             this.colviewData.push(m)
+      //           } else {
+      //             this.colviewData.push(m)
+      //           }
+      //         }
+      //       }
+      //     }
+      //   }).catch(err => {
+      //     console.log('Erro: ', err)
+      //   })
 
         // finstanceModal.get(null, {
         //   fid: this.fid,
@@ -587,26 +696,26 @@ export default {
         //   this.$Spin.hide()
         // })
 
-        schemaModal.get(res.data.schema).then(result => {
-          // let anyCustom = false
-          for (let item of result.data.entity) {
-            if (!item.customtype) {
-              this.colviewCols.push({
-                title: item.name,
-                key: item.name,
-                width: 150
-              })
-            } else {
-              // anyCustom = true
-            }
-          }
-        }).catch(e => {
-          console.log('e', e)
-        })
-      }).catch(err => {
-        console.log('Error: ', err)
-        this.$Spin.hide()
-      })
+      // schemaModal.get(this.flowzData.schema).then(result => {
+      //   // let anyCustom = false
+      for (let item of this.currentSchema.entity) {
+        if (!item.customtype) {
+          this.colviewCols.push({
+            title: item.name,
+            key: item.name,
+            width: 150
+          })
+        } else {
+          // anyCustom = true
+        }
+      }
+      // }).catch(e => {
+      //   console.log('e', e)
+      // })
+      // }).catch(err => {
+      //   console.log('Error: ', err)
+      //   this.$Spin.hide()
+      // })
     }
   },
   computed: {
