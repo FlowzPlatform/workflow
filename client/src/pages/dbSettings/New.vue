@@ -104,7 +104,6 @@
 <script>
 /*eslint-disable*/
 const $ = require('jquery')
-import Papa from 'papaparse'
 import api from '@/api'
 import InputTag from 'vue-input-tag'
 import mongo from '../../assets/images/mongo.png'
