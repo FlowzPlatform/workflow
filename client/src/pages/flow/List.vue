@@ -328,7 +328,7 @@ import expandRow2 from './assigned_invite_table-expand.vue'
 let subscriptionUrl = config.subscriptionUrl
 // Vue.use(VueWidgets)
 // import Permissions from './permissions'
-const deepRecord = require('../../assets/js/deepstream/deepRecord.js')
+// const deepRecord = require('../../assets/js/deepstream/deepRecord.js')
 import expandInviteRow from './own_assign.vue'
 import moment from 'moment'
 import Cookies from 'js-cookie'
@@ -745,7 +745,7 @@ export default {
       this.showTable = false
       this.tableData = null
       this.instanceId = this.selectedFlowObject.id
-      this.selectedFlowName = this.selectedFlowObject.ProcessName
+      this.selectedFlowName = query.row.name
       this.module = 'workflow_' + this.selectedFlowObject.id
       this.getRoles('workflow_' + this.selectedFlowObject.id)
       // Permissions.methods.getRoles('workflow_' + this.selectedFlowObject.id)
@@ -1237,19 +1237,19 @@ export default {
         return obj
       }))
     },
-    getName: async function (taskId) {
-      let respond = await Promise(async resolve => {
-        taskId = this.titleCase(taskId)
-        deepRecord.deepRecord.getCurrentTraget(this.instanceId, taskId).then(res => {
-          // let name = res.name
-          resolve('name')
-        }).catch(err => {
-          resolve('ERROR', err)
-        })
-      })
-      console.log(respond)
-      // return name
-    },
+    // getName: async function (taskId) {
+    //   let respond = await Promise(async resolve => {
+    //     taskId = this.titleCase(taskId)
+    //     deepRecord.deepRecord.getCurrentTraget(this.instanceId, taskId).then(res => {
+    //       // let name = res.name
+    //       resolve('name')
+    //     }).catch(err => {
+    //       resolve('ERROR', err)
+    //     })
+    //   })
+    //   console.log(respond)
+    //   // return name
+    // },
     getAllPermissions: async function (appName, totalApps) {
       var self = this
         // console.log('getAllPerm:', config.getAllPermissionsUrl+appName)
@@ -1349,19 +1349,19 @@ export default {
       })
       self.loadingPermisions = false
 
-      for (var tblData in self.tableData) {
-        // get task name from task id
-        for (let i = 0; i < self.tableData[tblData].length; i++) {
-          let taskId = self.titleCase(self.tableData[tblData][i].service)
-          await deepRecord.deepRecord.getCurrentTraget(self.instanceId, taskId).then(res => {
-            let name = res.name
-            self.tableData[tblData][i]['serviceName'] = name
-          }).catch(err => {
-            console.log(err)
-          })
-        }
-        await self.getAllPermissions(tblData, Object.keys(self.tableData).length)
-      }
+      // for (var tblData in self.tableData) {
+      //   // get task name from task id
+      //   for (let i = 0; i < self.tableData[tblData].length; i++) {
+      //     let taskId = self.titleCase(self.tableData[tblData][i].service)
+      //     await deepRecord.deepRecord.getCurrentTraget(self.instanceId, taskId).then(res => {
+      //       let name = res.name
+      //       self.tableData[tblData][i]['serviceName'] = name
+      //     }).catch(err => {
+      //       console.log(err)
+      //     })
+      //   }
+      //   await self.getAllPermissions(tblData, Object.keys(self.tableData).length)
+      // }
       this.showTable = true
       // axios.get(config.subscriptionUrl+'register-resource', {
       // headers: {
