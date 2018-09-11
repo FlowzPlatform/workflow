@@ -159,6 +159,7 @@
 /* eslint-disable */
 import _ from 'lodash'
 import axios from 'axios'
+import $ from 'jquery'
 
 import ListInstances from './ListInstances'
 import SchemaSubForm from './SchemaSubForm'
