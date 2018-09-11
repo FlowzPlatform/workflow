@@ -552,7 +552,7 @@ export default {
       this.$Loading.start()
       let subId = []
       let userData = this.$store.state.user.package
-      console.log(userData)
+      // console.log(userData)
       for (var key in userData) {
         if (userData.hasOwnProperty(key)) {
           if (userData[key].role === 'admin') {
