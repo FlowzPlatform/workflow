@@ -475,12 +475,6 @@ export default {
     }
   },
   methods: {
-    savePermissions () {
-
-    },
-    cancelModal () {
-
-    },
     showSecurityDialog (query) {
       this.selectedFlowObject = null
       this.selectedFlowObject = query.row
