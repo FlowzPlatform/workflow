@@ -34,7 +34,7 @@ export default {
   },
   authenticate ({ commit }, authToken) {
     let userData = commit('GET_USER')
-    if (!userData) {
+    if (userData !== undefined) {
       return userData
     }
     return axios({

@@ -156,7 +156,6 @@ export default {
 						location = location.domain === null ? location.input : location.domain
 						this.$cookie.set('auth_token', auth.logintoken, {expires: 1, domain: location})    // Store in cookie
             let userData = await this.$store.dispatch('authenticate', auth.logintoken)
-
             this.$store.commit('SET_ROLE', 2)
             if (userData.hasOwnProperty('package')) {
               if (this.$store.state.subscription !== '' && this.$store.state.subscription !== undefined) {
