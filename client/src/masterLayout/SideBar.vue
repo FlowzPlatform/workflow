@@ -99,7 +99,7 @@ export default {
     getByOrder (array) {
       let allProcess = []
       for (let key in array) {
-        allProcess.push(array[key])
+        allProcess[array[key].order] = array[key]
       }
       return allProcess.sort((a, b) => {
         return a.order - b.order
@@ -218,7 +218,7 @@ export default {
             this.flowzList = []
             this.loading = false
           })
-        }
+        // }
       } else {
         let modules = _.keysIn(this.$store.state.user.package[this.$store.state.subscription].role)
         let self = this

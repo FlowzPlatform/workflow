@@ -42,20 +42,38 @@ function beforeFind(hook) {
     delete hook.params.query.$all
     
     // ----------------------------- || Get Last Record Data || --------------------------
-    query = hook.app.services.finstance.createQuery(hook.params.query)
-    hook.params.rethinkdb = query.hasFields('stageReference').filter(function(mdoc) {
-      return mdoc("stageReference").count().gt(0)
-    }).map(function(item) {
-      return item.merge({
-        'stageReference': item('stageReference').map(function(doc1) {
-          return doc1.merge(function(doc) {
-            // return {data: doc1.getField('stageRecordId')}
-            // return {data: r.db('FlowzEngine').table('flowzdata').get(doc1.getField('stageRecordId')).getField('data')}
-            return {data: hook.app.services.flowzdata.table.get(doc1.getField('stageRecordId')).getField('data')}
-          })
-        })   
+    if (hook.params.query.$data) {
+      delete hook.params.query.$data
+      query = hook.app.services.flowzdata.createQuery(hook.params.query)
+      hook.params.rethinkdb = query.hasFields('stageReference').filter(function(mdoc) {
+        return mdoc("stageReference").count().gt(0)
+      }).map(function(item) {
+        return item.merge({
+          'stageReference': item('stageReference').map(function(doc1) {
+            return doc1.merge(function(doc) {
+              // return {data: doc1.getField('stageRecordId')}
+              // return {data: r.db('FlowzEngine').table('flowzdata').get(doc1.getField('stageRecordId')).getField('data')}
+              return {data: hook.app.services.flowzdata.table.get(doc1.getField('stageRecordId')).getField('data')}
+            })
+          })   
+        })
       })
-    })
+    } else {
+      query = hook.app.services.finstance.createQuery(hook.params.query)
+      hook.params.rethinkdb = query.hasFields('stageReference').filter(function(mdoc) {
+        return mdoc("stageReference").count().gt(0)
+      }).map(function(item) {
+        return item.merge({
+          'stageReference': item('stageReference').map(function(doc1) {
+            return doc1.merge(function(doc) {
+              // return {data: doc1.getField('stageRecordId')}
+              // return {data: r.db('FlowzEngine').table('flowzdata').get(doc1.getField('stageRecordId')).getField('data')}
+              return {data: hook.app.services.flowzdata.table.get(doc1.getField('stageRecordId')).getField('data')}
+            })
+          })   
+        })
+      })
+    }
   } else if (hook.params.query.hasOwnProperty("$last")) {
     delete hook.params.query.$last
     
