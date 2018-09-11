@@ -21,27 +21,27 @@
       <div class="col-md-12">
         <div class="card">
           <div class="row">
-            <div class="col-md-4">
+            <div class="col-md-6">
               <Input search enter-button placeholder="Search..." v-model="searchQuery"/>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
               <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-12">
                   <Select style="width: 100%" v-model="selectedFilterBy" clearable placeholder="Filter By">
                     <Option v-for="item in filterBy" :value="item.value" :key="item.value">{{ item.label }}</Option>
                   </Select>
                   <br>
                   <DatePicker v-if="selectedFilterBy === 'customRange'" type="daterange" split-panels placeholder="Select date" style="width: 100%; margin: 5px 0;" v-model="enteredDateRange"></DatePicker>
                 </div>
-                <div class="col-md-6">
+                <!-- <div class="col-md-6">
                   <Select style="width: 100%" v-model="selectedSortBy" clearable placeholder="Sort By">
                     <Option v-for="item in sortBy" :value="item.value" :key="item.value">{{ item.label }}</Option>
                   </Select>    
-                </div>
+                </div> -->
               </div>
             </div>
             <div class="col-md-2">
-              <Button icon="search" type="primary" long>Search</Button>
+              <Button icon="search" type="primary" @click="searchData" long>Search</Button>
             </div>
           </div>
 
@@ -57,7 +57,7 @@
     </div>
 
     <div>
-      <Table highlight-row :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
+      <Table @on-sort-change="sortTableData" highlight-row :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
       <div style="margin: 10px;overflow: hidden">
         <div style="float: right;">
           <Page :total="total" :current="pageno" :page-size="limit" @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
@@ -353,6 +353,15 @@
       // }
     },
     methods: {
+      searchData () {
+        let object = {
+          text: this.searchQuery
+        }
+        this.$emit('search-data', object)
+      },
+      sortTableData (object) {
+        this.$emit('sort-data', object)
+      },
       handleConfiguration () {
         this.isShow = !this.isShow
       },
