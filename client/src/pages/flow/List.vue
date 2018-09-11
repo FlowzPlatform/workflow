@@ -30,10 +30,14 @@
                                 </template>
                             </tr>
                             <template v-for="(item, itemNumber) in (tableData)[moduleName]">
-                                <tr class="row">
+                                <tr class="row" v-if="selectedFlowObject.processList[titleCase(item.service)] != undefined">
                                     <template v-for="(field,fieldNumber) in fields[moduleName]">
                                         <td v-if="fieldNumber ==0" style="padding:10px;font-weight:bold;border-right: 3px solid #cdd0d4;">
-                                            {{ item.serviceName }}
+                                            {{selectedFlowObject.processList[titleCase(item.service)].name}}
+                                            <!-- {{item.service}}
+                                            <br>
+                                            <br>
+                                            {{selectedFlowObject.processList[titleCase(item.service)]}} -->
                                         </td>
                                         <td v-else>
                                             <table class="table-bordered" style="width:100%">
@@ -475,12 +479,6 @@ export default {
     }
   },
   methods: {
-    savePermissions () {
-
-    },
-    cancelModal () {
-
-    },
     showSecurityDialog (query) {
       this.selectedFlowObject = null
       this.selectedFlowObject = query.row
@@ -557,34 +555,25 @@ export default {
     async getDataOfSubscriptionUser () {
       this.$Loading.start()
       let subId = []
-      axios.get(config.loginURL + '/userdetails', {
-        headers: {
-          authorization: Cookies.get('auth_token')
-        }
-      })
-      .then(response => {
-        let newData = response.data.data.package
-        for (var key in newData) {
-          if (newData.hasOwnProperty(key)) {
-            if (newData[key].role === 'admin') {
-              subId.push({
-                value2: newData[key].subscriptionId,
-                label2: newData[key].name
-              })
-              this.assigned_Arr3.push(newData[key])
-            } else {
-              this.assigned_Arr2.push(newData[key])
-            }
+      let userData = this.$store.state.user.package
+      // console.log(userData)
+      for (var key in userData) {
+        if (userData.hasOwnProperty(key)) {
+          if (userData[key].role === 'admin') {
+            subId.push({
+              value2: userData[key].subscriptionId,
+              label2: userData[key].name
+            })
+            this.assigned_Arr3.push(userData[key])
+          } else {
+            this.assigned_Arr2.push(userData[key])
           }
         }
-        this.data2 = this.assigned_Arr2
-        this.data3 = this.assigned_Arr3
-        this.options2 = subId
-        this.$Loading.finish()
-      })
-      .catch((err) => {
-        console.log('Error:', err)
-      })
+      }
+      this.data2 = this.assigned_Arr2
+      this.data3 = this.assigned_Arr3
+      this.options2 = subId
+      this.$Loading.finish()
     },
     async inviteNow () {
       if (this.value2 === undefined || this.value2 === '' || this.value1 === '') {
@@ -723,10 +712,10 @@ export default {
           }, o))
           self.loadingPermisions = false
 
-            // To resolve check/uncheck issue
-            // if(totalApps == self.count){
-            //     self.permissionsAll = _.groupBy(self.permissionsAll, 'app');
-            // }
+          // To resolve check/uncheck issue
+          // if (totalApps === self.count) {
+          //   self.permissionsAll = _.groupBy(self.permissionsAll, 'app')
+          // }
         } else {
           self.loadingPermisions = false
         }
@@ -794,6 +783,7 @@ export default {
         }
       }).then(async function (response) {
         let arrResources = await _.groupBy(response.data.data, 'module')
+        console.log('arrResources: ', arrResources)
         // self.tableData = arrResources
         // self.tableData = ['hi']
         self.tableData = await _.extend(self.tableData, arrResources)
@@ -806,19 +796,19 @@ export default {
       })
       self.loadingPermisions = false
 
-      // for (var tblData in self.tableData) {
-      //   // get task name from task id
-      //   for (let i = 0; i < self.tableData[tblData].length; i++) {
-      //     let taskId = self.titleCase(self.tableData[tblData][i].service)
-      //     await deepRecord.deepRecord.getCurrentTraget(self.instanceId, taskId).then(res => {
-      //       let name = res.name
-      //       self.tableData[tblData][i]['serviceName'] = name
-      //     }).catch(err => {
-      //       console.log(err)
-      //     })
-      //   }
-      //   await self.getAllPermissions(tblData, Object.keys(self.tableData).length)
-      // }
+      for (var tblData in self.tableData) {
+        // get task name from task id
+        // for (let i = 0; i < self.tableData[tblData].length; i++) {
+        //   let taskId = self.titleCase(self.tableData[tblData][i].service)
+        //   await deepRecord.deepRecord.getCurrentTraget(self.instanceId, taskId).then(res => {
+        //     let name = res.name
+        //     self.tableData[tblData][i]['serviceName'] = name
+        //   }).catch(err => {
+        //     console.log(err)
+        //   })
+        // }
+        await self.getAllPermissions(tblData, Object.keys(self.tableData).length)
+      }
       this.showTable = true
     },
     getCheckboxValue: function (role, resources, action, appName) {

@@ -65,7 +65,8 @@
         </TabPane>
         
         <TabPane v-if="itsFirstState === false" label="Data" icon="ios-albums">
-          <schemalist :schema="dataSchema" :pageno="pageno" v-on:on-paginate="pagination" :dataTotal="dataTotal" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData"></schemalist>
+
+          <schemalist :schema="dataSchema" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
 
           <div style="padding: 10px">
             <div class="row" v-if="id != null">
@@ -159,6 +160,7 @@
 /* eslint-disable */
 import _ from 'lodash'
 import axios from 'axios'
+import $ from 'jquery'
 
 import ListInstances from './ListInstances'
 import SchemaSubForm from './SchemaSubForm'
@@ -256,15 +258,60 @@ export default {
     'schemasubformview': SchemaSubFormView
   },
   methods: {
+    searchData (query) {
+      this.dataLoading = true
+      dataQuerymodel.get(null,{
+        $last: true,
+        fid: this.$route.params.id,
+        currentStatus: this.$route.params.stateid,
+        $skip: this.skip,
+        $limit: this.limit,
+        'id[$search]': '^' + query.text
+      }).then(res => {
+        console.log('Search Response : ', res)
+        this.isFlowzLoaded = true
+        let firstState = this.flowzData.first
+        if (firstState === this.$route.params.stateid) {
+          this.itsFirstState = true
+        } else {
+          this.itsFirstState = false
+        }
+        this.dataTotal = res.data.total
+        if (res.data.data.length > 0) {
+          this.instanceEntries = res.data.data
+          this.dataData = this.instanceEntries
+          this.$Loading.finish()
+          this.dataLoading = false
+        } else {
+          this.instanceEntries = null
+          this.dataData = []
+          this.itsFirstState = true
+          this.dataLoading = false
+          // this.$Spin.hide()
+          this.$Loading.finish()
+        }
+      }).catch(err => {
+        console.log('Error: ', err)
+      })
+    },
+    sortData (object) {
+      console.log('Parent Called: ', object)
+      
+    },
     emailService (item) {
       this.isEmailDone = true
       this.handleSubmit('formSchemaInstance')
     },
     pagination (skip, limit, page){
-      console.log(skip,limit,page)
       this.skip = skip
       this.limit = limit
       this.pageno = page
+      this.init()
+    },
+    handlepage (skip, limit, size){
+      console.log(skip,limit,size)
+      this.limit = size
+      this.skip = 0
       this.init()
     },
     info (item, index, button) {
@@ -375,7 +422,8 @@ export default {
       this.formSchemaInstance.entity = this.schema.entity
       // this.formSchemaInstance.data[0] = {}
       for (let [index, entity] of self.formSchemaInstance.entity.entries()) {
-        if (entity.customtype) {
+        if (entity.customtype === true) {
+          console.log('Entity: ', entity)
           self.formSchemaInstance.entity[index]['entity'] = await self.getChildEntity(entity.type)
         }
         // else {
@@ -545,6 +593,7 @@ export default {
         } else {
           nextTargetId = this.flowData.processList[currentStageObject.target[0].id]
         }
+        // console.log('nextTargetId ', nextTargetId)
         if (nextTargetId.type === 'sendproofmail') {
           this.id = null
           this.schemabinding = true
@@ -557,7 +606,11 @@ export default {
               }, 1000)
             })
             .catch((err) => {
-              console.log(err)
+              setTimeout(() => {
+                this.sendDataEmail = this.$refs.schemasubformview.$el.outerHTML
+                this.email = true
+                console.log(err)
+              }, 1000)
             })
           } else {
             setTimeout(() => {
@@ -790,9 +843,9 @@ export default {
           }
         }
         if (values.formData !== null, Object.keys(values.formData).length > 0) {
-          this.fetch(this.id, values.formData)
+          this.fetch(this.currentSchema.id, values.formData)
         } else {
-          this.fetch(this.id)
+          this.fetch(this.currentSchema.id)
         }
       }
       // let arr = [values.formData]
@@ -942,6 +995,9 @@ export default {
 
       this.flowzData = cachedFlowz || await this.getFlowz()
       this.currentSchema = cachedSchema || await this.getSchema() 
+
+      // this.flowzData = await this.getFlowz()
+      // this.currentSchema = await this.getSchema() 
       this.populateTables()
 
       // if (cachedFlowz) {
