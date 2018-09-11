@@ -65,7 +65,7 @@
         </TabPane>
         
         <TabPane v-if="itsFirstState === false" label="Data" icon="ios-albums">
-          <schemalist :schema="dataSchema" :pageno="pageno" v-on:on-paginate="pagination" :dataTotal="dataTotal" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData"></schemalist>
+          <schemalist :schema="dataSchema" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData"></schemalist>
 
           <div style="padding: 10px">
             <div class="row" v-if="id != null">
@@ -262,10 +262,15 @@ export default {
       this.handleSubmit('formSchemaInstance')
     },
     pagination (skip, limit, page){
-      console.log(skip,limit,page)
       this.skip = skip
       this.limit = limit
       this.pageno = page
+      this.init()
+    },
+    handlepage (skip, limit, size){
+      console.log(skip,limit,size)
+      this.limit = size
+      this.skip = 0
       this.init()
     },
     info (item, index, button) {
@@ -546,6 +551,7 @@ export default {
         } else {
           nextTargetId = this.flowData.processList[currentStageObject.target[0].id]
         }
+        console.log('nextTargetId ', nextTargetId)
         if (nextTargetId.type === 'sendproofmail') {
           this.id = null
           this.schemabinding = true
@@ -558,7 +564,11 @@ export default {
               }, 1000)
             })
             .catch((err) => {
-              console.log(err)
+              setTimeout(() => {
+                this.sendDataEmail = this.$refs.schemasubformview.$el.outerHTML
+                this.email = true
+                console.log(err)
+              }, 1000)
             })
           } else {
             setTimeout(() => {
