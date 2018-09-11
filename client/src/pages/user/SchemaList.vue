@@ -67,10 +67,8 @@
   </div>
 </template>
 <script>
-  // import finstanceModal from '@/api/finstance'
-  // import flowzModal from '@/api/flowz'
-  // import flowzdataModal from '@/api/flowzdata'
   import _ from 'lodash'
+  import $ from 'jquery'
   export default {
     name: 'schemalist',
     props: {
@@ -335,35 +333,15 @@
     mounted () {
       this.total = this.dataTotal
       this.mdata = this.data
-      // if (this.dynamicData) {
-      //   await flowzModal.get(id, {
-      //     $select: ['json']
-      //   }).then(async res => {
-      //     this.flowzData = res.data
-      //     await finstanceModal.get(null, query).then(resp => {
-      //       this.instanceEntries = resp.data
-      //     }).catch(err => {
-      //       this.instanceEntries = null
-      //       console.log('err', err)
-      //     })
-      //   }).catch(err => {
-      //     this.instanceEntries = null
-      //     console.log('....', err)
-      //   })
-      // }
+      $('.ivu-table td:nth-child(2) div span').mouseover(function () {
+        var valueOfTd = $(this).text()
+        $('.ivu-table td:nth-child(2) div span').attr('title', valueOfTd)
+      })
     },
     methods: {
       handleConfiguration () {
         this.isShow = !this.isShow
       },
-      // mockTableData1 () {
-      //   console.log('this.data ', this.data)
-      //   let data = []
-      //   for (let i = 0; i < 10; i++) {
-      //     data.push(this.data[i])
-      //   }
-      //   return data
-      // },
       handlePage (page) {
         this.skip = (page * this.limit) - this.limit
         this.$emit('on-paginate', this.skip, this.limit, page)
@@ -409,4 +387,12 @@
   .searchQueries{
     margin: 5px 0;
   }
+</style>
+
+<style>
+.ivu-table td:nth-child(2) div span{
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
 </style>
