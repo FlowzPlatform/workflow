@@ -303,11 +303,9 @@ export default {
     getByOrder (array) {
       let allProcess = []
       for (let key in array) {
-        allProcess.push(array[key])
+        allProcess[array[key].order] = array[key]
       }
-      return allProcess.sort((a, b) => {
-        return a.order - b.order
-      })
+      return allProcess
     },
     mainColumns () {
       // console.log('mainColumns')
@@ -484,7 +482,7 @@ export default {
       this.fid = this.$route.params.id
       let colviewData = []
 
-      await flowzModal.get(this.fid, {
+      flowzModal.get(this.fid, {
         $paginate: false
       }).then(res => {
         this.schemaId = res.data.schema
@@ -513,7 +511,7 @@ export default {
           $paginate: false
         }).then(queryresp => {
           // this.$Spin.hide()
-          console.log('Res: ', queryresp)
+          // console.log('Res: ', queryresp)
           this.tableData = queryresp.data
           colviewData = queryresp.data
           let listing = this.getByOrder(res.data.processList)

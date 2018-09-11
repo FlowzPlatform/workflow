@@ -103,10 +103,6 @@ var router = new VueRouter({
   }
 })
 
-// iView.LoadingBar.config({
-//   color: '#5cb85c',
-//   height: 5
-// })
 iView.LoadingBar.config({
   color: '#5cb85c',
   failedColor: '#f0ad4e',
