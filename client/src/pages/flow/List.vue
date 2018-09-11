@@ -11,8 +11,7 @@
         <label for="modal1" class="modal-close" @click="selectedFlowObject = null, permissionsModal = false">&times;</label>
           
         <div class="table-wrapper">
-          <!-- {{tableData}} -->
-            <h4 align="center" style="margin-bottom: 10px">{{titleCase(selectedFlowName)}}</h4>
+           <h4 align="center" style="margin-bottom: 10px">{{titleCase(selectedFlowName)}}</h4>
             <div v-if="showTable == true">
               <table align="center" class="table-bordered" style="font-size: 115%;">
                 <thead class="header">
@@ -23,8 +22,7 @@
                     <template>
 
                         <template v-for="(moduleName, index) in Object.keys(tableData)">
-                            <!-- <h3>{{ titleCase(moduleName) }}</h3> -->
-                            <tr class="row header blue">
+                           <tr class="row header blue">
                                 <template v-for="(field, fieldNumber) in fields[moduleName]">
                                     <td scope="col" style="text-align: center;padding:10px;border-left: 3px solid #cdd0d4;">
                                         {{ getTitle(field) }}
@@ -55,45 +53,6 @@
                                     </template>
                                 </tr>
                             </template>
-                            <!-- <Widget>
-                                <WidgetHeading :id="1" :Title="'Todo'" style="text-align:center;font-weight:bold;font-size:20px" :TextColor="false" :DeleteButton="false" :ColorBox="false" :Expand="false" :Collapse="true" :HeaderEditable="false">
-                                    {{ titleCase(moduleName) }}
-                                </WidgetHeading>
-                                <WidgetBody>
-                                    <tr class="row header blue">
-                                        <template v-for="(field, fieldNumber) in fields[moduleName]">
-                                            <td scope="col" style="text-align: center;padding:10px;border-left: 3px solid #cdd0d4;">
-                                                {{ getTitle(field) }}
-                                            </td>
-                                        </template>
-                                    </tr>
-                                    <template v-for="(item, itemNumber) in (tableData)[moduleName]">
-                                        <tr class="row">
-                                            <template v-for="(field,fieldNumber) in fields[moduleName]">
-                                                <td v-if="fieldNumber ==0" style="padding:10px;font-weight:bold;border-right: 3px solid #cdd0d4;">
-                                                    {{ getName(item.service) }}
-                                                </td>
-                                                <td v-else>
-                                                    <table class="table-bordered" style="width:100%">
-                                                        <tbody>
-                                                            <tr>
-                                                                <template v-for="n in item.actions">
-                                                                    <td v-for="(key, index) in Object.keys(n)" style="padding:10px;">
-                                                                        <span style="font-size:12px">{{ titleCase(key) }}</span>
-                                                                        <br/>
-                                                                        <input class="field.dataClass" style="width: 15px;height: 15px;cursor: pointer;" type="checkbox" @click="setAccessPermision(field, item, key,$event,moduleName)" :checked="getCheckboxValue(field, item, key,moduleName)" />
-                                                                    </td>
-                                                                </template>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </td>
-                                            </template>
-                                        </tr>
-                                    </template>
-
-                                </WidgetBody>
-                            </Widget> -->
                         </template>
                     </template>
                 </tbody>
@@ -162,71 +121,6 @@
         </div>
     </Modal>
 
-    <!-- <Modal v-if="selectedFlowObject != null"
-        v-model="permissionsModal"
-        title="Set Permissions"
-        width="720"
-        @on-ok="savePermissions"
-        @on-cancel="cancelModal"> -->
-        <!-- <strong v-if="selectedFlowObject != null">{{this.selectedFlowObject.id}}</strong> -->
-        <!-- <permissions  :instanceId="selectedFlowObject.id" :module="'workflow_' + selectedFlowObject.id"></permissions> -->
-        <!-- <strong>hi</strong> -->
-        <!-- <div v-if="loadingPermisions == false" class="table-wrapper">
-          <table class="table-bordered" style="font-size: 115%; width: 100%">
-              <thead class="header">
-
-              </thead>
-              <tbody class="results">
-
-                  <template>
-
-                      <template v-for="(moduleName, index) in Object.keys(tableData)">
-                          <Widget>
-                              <WidgetHeading :id="1" :Title="'Todo'" style="text-align:center;font-weight:bold;font-size:20px" :TextColor="false" :DeleteButton="false" :ColorBox="false" :Expand="false" :Collapse="true" :HeaderEditable="false">
-                                  {{ titleCase(moduleName) }}
-                              </WidgetHeading>
-                              <WidgetBody>
-                                  <tr class="row header blue">
-                                      <template v-for="(field, fieldNumber) in fields[moduleName]">
-                                          <td scope="col" style="text-align: center;padding:10px;border-left: 3px solid #cdd0d4;">
-                                              {{ getTitle(field) }}
-                                          </td>
-                                      </template>
-                                  </tr>
-                                  <template v-for="(item, itemNumber) in (tableData)[moduleName]">
-                                      <tr class="row">
-                                          <template v-for="(field,fieldNumber) in fields[moduleName]">
-                                              <td v-if="fieldNumber ==0" style="padding:10px;font-weight:bold;border-right: 3px solid #cdd0d4;">
-                                                  {{ getName(item.service) }}
-                                              </td>
-                                              <td v-else>
-                                                  <table class="table-bordered" style="width:100%">
-                                                      <tbody>
-                                                          <tr>
-                                                              <template v-for="n in item.actions">
-                                                                  <td v-for="(key, index) in Object.keys(n)" style="padding:10px;">
-                                                                      <span style="font-size:12px">{{ titleCase(key) }}</span>
-                                                                      <br/>
-                                                                      <input class="field.dataClass" style="width: 15px;height: 15px;cursor: pointer;" type="checkbox" @click="setAccessPermision(field, item, key,$event,moduleName)" :checked="getCheckboxValue(field, item, key,moduleName)" />
-                                                                  </td>
-                                                              </template>
-                                                          </tr>
-                                                      </tbody>
-                                                  </table>
-                                              </td>
-                                          </template>
-                                      </tr>
-                                  </template>
-
-                              </WidgetBody>
-                          </Widget>
-                      </template>
-                  </template>
-              </tbody>
-          </table>
-        </div> -->
-        
-    <!-- </Modal> -->
 
     <Row type="flex" justify="end">
       <Button type="primary" size="small" style="margin-bottom: 2px;" @click="addNewFlow" icon="plus"> Add</Button>
@@ -237,93 +131,18 @@
     <Row style="margin-top: 4px; float: right">
       <Page :total="total" :current="cpage" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
     </Row>
-    <!-- <div slot="content">
-        <div class="schema-form ivu-table-wrapper">
-            <div class="ivu-table ivu-table-border">
-                <div class="ivu-table-body"> -->
-                    <!-- <table cellspacing="0" cellpadding="0" border="0" style="width: 100%;">
-                        <thead>
-                            <tr>
-                                <th class="">
-                                    <div class="ivu-table-cell">
-                                        <span>Name</span>
-                                    </div>
-                                </th>
-                                <th class="">
-                                    <div class="ivu-table-cell"><span>Notes</span>
-                                    </div>
-                                </th>
-                                <th class="">
-                                    <div class="ivu-table-cell">
-                                        <span>Action</span>
-                                    </div>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="ivu-table-tbody">
-                            <template v-if="flowzList.length > 0">
-                            <tr class="ivu-table-row" v-for="(item, index) in flowzList">
-                                <td>
-                                <div class="ivu-table-cell">
-                                 {{columns10}}
-                                </div>
-                                </td>
-                                <td>
-                                <div class="ivu-table-cell">
-                                    {{item.ProcessName}}
-                                </div>
-                                </td>
-                                <td class="">
-                                    <div class="ivu-table-cell">
-                                        {{item.notes}}
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="ivu-table-cell">
-                                    <a @click="createNewInstance(index, item.id)" style="margin-right:8px"><Icon type="arrow-right-b" size="21" color="#2411c5"></Icon></a>
-                                    <a style="margin-right:8px"><router-link :to="{name: 'flow/edit', params: {id: item.id}}"><Icon type="edit" size="17"></Icon></router-link></a>
-                                    <a @click="deleteFlow(item.id)"><Icon type="android-delete" size="20" color="#e74c3c"></Icon></a>
-                                    <a @click="deleteFlow(item.id)"><Icon type="navicon-round" size="20"></Icon></a>
-                                    </div>
-                                </td>
-                            </tr>
-                            </template>
-                            <template v-else>
-                              <tr class="ivu-table-row">
-                                <td colspan="3">
-                                  <div class="ivu-table-cell" align="center">
-                                    No record found
-                                  </div>
-                                </td>
-                              </tr>
-                            </template>
-                        </tbody>
-                    </table> -->
-                <!-- </div>
-            </div>
-        </div> -->
-    <!-- </div> -->
   </div>
 </template>
 <script>
 import flowz from '@/api/flowz'
 import _ from 'lodash'
-const X2JS = require('x2js')
-import schemamappingModel from '@/api/schemamapping'
-import schemaModel from '@/api/schema'
-import approvalModel from '@/api/approval'
-// import instanceModel from '@/api/flowzinstance'
 import finstanceModal from '@/api/finstance'
-import expandRow from './table-expand.vue'
 import axios from 'axios'
 import viewSVG from './viewSVG'
 import psl from 'psl'
 import subscription from '@/components/subscription'
 
-// import Vue from 'vue'
-// import VueWidgets from 'vue-widgets'
-// import 'vue-widgets/dist/styles/vue-widgets.css'
-import config from '../../config/index'
+import config from '@/config'
 import expandRow2 from './assigned_invite_table-expand.vue'
 let subscriptionUrl = config.subscriptionUrl
 // Vue.use(VueWidgets)
@@ -337,10 +156,8 @@ export default {
   name: 'Flowz',
   components: {
     'viewSVG': viewSVG,
-    expandRow,
     expandRow2,
     subscription
-    // 'permissions': Permissions
   },
   data () {
     return {
@@ -368,18 +185,11 @@ export default {
       flowzList: [],
       columns10: [
         {
-          // title: '#',
-          key: 'ProcessName',
+          key: 'SVG',
           width: 50,
           align: 'center',
           type: 'expand',
-          // width: 50,
           render: (h, params) => {
-            // return h(expandRow, {
-            //   props: {
-            //     row: params.row
-            //   }
-            // })
             if (params.row.svg) {
               return h(viewSVG, {
                 props: {
@@ -387,35 +197,6 @@ export default {
                   svgStr: params.row.svg
                 }
               })
-              // return h('Poptip', {
-              //   props: {
-              //     // trigger: 'hover',
-              //     placement: 'right',
-              //     align: 'center'
-              //   }
-              // }, [
-              //   h(viewSVG, {
-              //     props: {
-              //       align: 'center',
-              //       svgStr: params.row.svg
-              //     }
-              //   }),
-              //   h('div', {
-              //     slot: 'title'
-              //   }, [
-              //     h('b', params.row.ProcessName)
-              //   ]),
-              //   h('div', {
-              //     slot: 'content'
-              //   }, [
-              //     h(viewSVG, {
-              //       props: {
-              //         // align: 'center',
-              //         svgStr: params.row.svg
-              //       }
-              //     })
-              //   ])
-              // ])
             } else {
               return h('div', 'No SVG')
             }
@@ -453,9 +234,7 @@ export default {
                 },
                 on: {
                   click: () => {
-                    // console.log('action', params.row.id)
                     this.createNewInstance(params.row.id)
-                    // console.log('item');
                   }
                 }
               }, ''),
@@ -540,24 +319,6 @@ export default {
                   }
                 }
               }, '')
-              // h('Button', {
-              //   props: {
-              //     type: 'text',
-              //     size: 'large',
-              //     icon: 'navicon-round'
-              //   },
-              //   style: {
-              //     marginRight: '3px',
-              //     padding: '0px',
-              //     fontSize: '20px',
-              //     color: '#00C851'
-              //   },
-              //   on: {
-              //     click: () => {
-              //       this.deleteFlow(this.flowzList[params.index].id)
-              //     }
-              //   }
-              // }, '')
             ])
           }
         }
@@ -569,7 +330,6 @@ export default {
       roleOption1: '',
       roleValue1: '',
       input: '',
-      // loading :false,
       waitingText: '',
       data2: [],
       data3: [],
@@ -698,16 +458,6 @@ export default {
     }
   },
   mounted () {
-    // flowz.get()
-    // .then(response => {
-    //   // console.log('response', response)
-    //   this.flowzList = response.data.data
-    //   this.loading = false
-    //   // console.log('this.flowzList', this.flowzList)
-    // })
-    // .catch(error => {
-    //   console.log(error)
-    // })
     this.init()
     this.getDataOfSubscriptionUser()
   },
@@ -752,10 +502,8 @@ export default {
       this.permissionsModal = true
     },
     ok () {
-      // this.$Message.info('Clicked ok')
     },
     cancel () {
-      // this.$Message.info('Clicked cancel')
     },
     handleAssign (value) {
       this.value2 = value
@@ -809,22 +557,6 @@ export default {
     async getDataOfSubscriptionUser () {
       this.$Loading.start()
       let subId = []
-      // await axios.get(subscriptionUrl + 'register-roles', {
-      //   params: {module: 'webbuilder'}
-      // })
-      // .then(response => {
-      //   let newData = response.data.data
-      //   for (let index = 0; index < newData.length; index++) {
-      //     roleId.push({
-      //       value1: newData[index].role,
-      //       label1: newData[index].role
-      //     })
-      //   }
-      //   this.options = roleId
-      // })
-      // .catch((err) => {
-      //   console.log(err)
-      // })
       axios.get(config.loginURL + '/userdetails', {
         headers: {
           authorization: Cookies.get('auth_token')
@@ -936,24 +668,6 @@ export default {
       })
     },
     createNewInstance (item) {
-      // // let generatedJson = await this.generateJson(this.flowzList[index].xml)
-      // let generatedJson = this.flowzList[index].json
-      // generatedJson.allowedusers = this.flowzList[index].allowedusers ? this.flowzList[index].allowedusers : []
-      // // console.log('generatedJson', JSON.stringify(generatedJson))
-      // // console.log('generatedJson', generatedJson)
-      // generatedJson.fid = id
-      // generatedJson.createdOn = Date()
-      // // console.log('instanceModel', instanceModel)
-      // instanceModel.post(generatedJson)
-      // .then(response => {
-      //   // console.log('response.data', response.data)
-      //   this.$router.push('/admin/flow/instance/' + response.data.id)
-      // })
-      // .catch(error => {
-      //   console.log(error)
-      // })
-      // console.log('item', item)
-      // this.item = item
       this.$Loading.start()
       let fheaders = null
       finstanceModal.post({fid: item.id}, null, fheaders).then(res => {
@@ -993,263 +707,6 @@ export default {
         }
       })
     },
-    async generateJson (xml) {
-      let self = this
-      let x2js = new X2JS()
-      let jsonXML = x2js.xml2js(xml)
-      jsonXML = jsonXML.definitions.process
-      let instanceObject = {}
-      instanceObject.name = jsonXML._name
-      instanceObject.start_delay = 3000
-      // Add Start Events
-      if (_.isArray(jsonXML.startEvent)) {
-        instanceObject.start_states = _.map(jsonXML.startEvent, (d) => { return d._id })
-      } else {
-        instanceObject.start_states = [jsonXML.startEvent._id]
-      }
-      // convert object to array object
-      if (!_.isArray(jsonXML.startEvent)) {
-        jsonXML.startEvent = [jsonXML.startEvent]
-      }
-      instanceObject.processList = []
-      // start process
-      for (let item of instanceObject.start_states) {
-        let processData = await self.getStartProcess(jsonXML)
-        let process = _.find(processData, (f) => {
-          return f.id === item
-        })
-        instanceObject.processList.push(process)
-        // other all process base on start target id
-        await self.getAllProcess(jsonXML, process, instanceObject.processList)
-      }
-      // convert uniq process
-      instanceObject.processList = _.uniqBy(instanceObject.processList, 'id')
-      return instanceObject
-      // return instanceObject
-    },
-    async getAllProcess (jsonXML, process, processRef) {
-      let self = this
-      if (process === undefined) {
-        return
-      }
-      for (let d of process.target) {
-      // _.forEach(process.target, (d) => {
-        // merge all module
-        var mergeModules = _.chain(jsonXML).map((m, k) => {
-          if (typeof m === 'object') {
-            m = _.isArray(m) ? m : [m]
-            m = _.map(m, im => {
-              im.workerType = k
-              return im
-            })
-          }
-          return m
-        }).filter((m, i) => {
-          return typeof m === 'object'
-        })
-        // .map((m, i) => {
-        //   return _.isArray(m) ? m : [m]
-        // })
-        .value()
-        // console.log('mergeModules', mergeModules)
-        // generate process
-        let result = await _.chain(_.union(...mergeModules))
-        .filter((f, i, k) => {
-          // console.log('k', k)
-          return f._id === d.id
-        })
-        .map(async (m) => {
-          // console.log('m', m)
-          let _mapping = await self.getMapping(m, mergeModules)
-          return {
-            id: m._id,
-            capacity: (m._isFormInput) ? m._capacity : false,
-            name: m._name,
-            type: m.workerType, // m.outgoing ? (m._name === 'recruiter' ? 'select' : 'task') : 'end',
-            target: m.outgoing ? self.getTargetId(m, jsonXML) : [],
-            mapping: (_.union(..._mapping)),
-            inputProperty: await self.getInputProperties(m),
-            outputProperty: await self.getOutputProperties(m)
-          }
-        }).head()
-        .value()
-        processRef.push(result)
-        await self.getAllProcess(jsonXML, result, processRef)
-      }
-    },
-    async getStartProcess (process) {
-      let self = this
-      return await Promise.all(_.chain(process.startEvent)
-      .map(async (m) => {
-        return {
-          id: m._id,
-          capacity: (m._isFormInput) ? m._capacity : false,
-          name: m._name,
-          type: 'start',
-          target: self.getTargetId(m, process),
-          mapping: [],
-          inputProperty: await self.getInputProperties(m),
-          outputProperty: await self.getOutputProperties(m)
-        }
-      }).value())
-    },
-    getTargetId (event, process) {
-      if (!_.isArray(event.outgoing)) {
-        event.outgoing = [event.outgoing]
-      }
-      return _.map(event.outgoing, (targetMap) => {
-        return _.chain(process.sequenceFlow).filter((ftr) => {
-          return ftr._id === targetMap.__text
-        }).map((m) => {
-          return {
-            id: m._targetRef,
-            outputid: m.extensionElements !== undefined ? m.extensionElements.myIOMapping.mapping._producer : ''
-          }
-        }).value()[0]
-        // return { id: targetMap.__text }
-      })
-    },
-    async getInputProperties (proccess) {
-      if (proccess.extensionElements && proccess.extensionElements.myInputs) {
-        if (!_.isArray(proccess.extensionElements.myInputs.input)) {
-          proccess.extensionElements.myInputs.input = [proccess.extensionElements.myInputs.input]
-        }
-        return await Promise.all(_.map(proccess.extensionElements.myInputs.input, async (m) => {
-          return {
-            id: m._id,
-            entityschema: await schemaModel.getAll(m._entityschema),
-            approvalClass: m._approvalClass !== undefined && m._approvalClass !== '0' ? await approvalModel.get(m._approvalClass).then(content => {
-              return content.data
-            }) : undefined,
-            cancelLabel: m._cancelLabel,
-            choice: m._choice,
-            createTemplate: m._createTemplate,
-            emailTemplate: m._emailTemplate,
-            notes: m._notes,
-            submitLabel: m._submitLabel,
-            viewTemplate: m._viewTemplate
-          }
-        }))
-      } else {
-        return []
-      }
-    },
-    async getOutputProperties (proccess) {
-      if (proccess.extensionElements && proccess.extensionElements.myOutputs) {
-        if (!_.isArray(proccess.extensionElements.myOutputs.output)) {
-          proccess.extensionElements.myOutputs.output = [proccess.extensionElements.myOutputs.output]
-        }
-        return await Promise.all(_.map(proccess.extensionElements.myOutputs.output, async (m) => {
-          return {
-            id: m._id,
-            entityschema: await schemaModel.getAll(m._entityschema),
-            approvalClass: m._approvalClass !== undefined && m._approvalClass !== '0' ? await approvalModel.get(m._approvalClass).then(content => {
-              return content.data
-            }) : undefined,
-            cancelLabel: m._cancelLabel,
-            choice: m._choice,
-            createTemplate: m._createTemplate,
-            emailTemplate: m._emailTemplate,
-            notes: m._notes,
-            submitLabel: m._submitLabel,
-            viewTemplate: m._viewTemplate
-          }
-        }))
-      } else {
-        return []
-      }
-    },
-    async getMapping (event, mergeModules) {
-      var self = this
-      if (!_.isArray(event.incoming)) {
-        event.incoming = [event.incoming]
-      }
-      return await Promise.all(_.chain(_.union(...mergeModules))
-        .filter((f) => {
-          return _.filter(event.incoming, (i) => { return i.__text === f._id }).length > 0
-        }).map(async (m) => {
-          let sourceRef = m._sourceRef
-          if (m.extensionElements && m.extensionElements.myIOMapping) {
-            if (!_.isArray(m.extensionElements.myIOMapping.mapping)) {
-              m.extensionElements.myIOMapping.mapping = [m.extensionElements.myIOMapping.mapping]
-            }
-            return await Promise.all(_.map(m.extensionElements.myIOMapping.mapping, async (m) => {
-              var content = await schemamappingModel.get(m._schemamapping)
-              content.data['sourceid'] = sourceRef // _.chain(_.union(...mergeModules)).find((fnd) => { return fnd._id === event.incoming.__text }).value()._sourceRef
-              content.data.MapData = await Promise.all(_.map(content.data.MapData, async (schema) => {
-                return {
-                  producerField: schema.producerField,
-                  transform: schema.transform,
-                  consumerField: schema.ctype ? (await self.getMapData(schema.consumerField)) : _.first(schema.consumerField)
-                }
-              }))
-              content.data.MapData = self.mapDataConvertToSquenceFlow(content.data.MapData)
-              return content.data
-            }))
-          } else {
-            return []
-          }
-        }).value())
-      // temp = await Promise.all(temp)
-      // return temp
-    },
-    mapDataConvertToSquenceFlow (MapData) {
-      let newMapData = []
-      _.map(MapData, (m) => {
-        if (_.isArray(m.consumerField)) {
-          _.forEach(m.consumerField, (fe) => {
-            if (!_.isArray(fe.consumerField)) {
-              newMapData.push({
-                consumerField: _.reduceRight([fe.consumerTitle], function (memo, arrayValue) {
-                  var obj = {}
-                  obj[arrayValue] = memo
-                  return obj
-                }, fe.consumerField),
-                transform: fe.transform,
-                producerField: _.reduceRight([fe.producerTitle], function (memo, arrayValue) {
-                  var obj = {}
-                  obj[arrayValue] = memo
-                  return obj
-                }, fe.producerField)
-              })
-            }
-          })
-        } else {
-          newMapData.push(m)
-        }
-      })
-      return newMapData
-    },
-    async getMapData (mapId) {
-      var content = await schemamappingModel.get(mapId)
-      let producer = await schemaModel.get(content.data.producer)
-      let consumer = await schemaModel.get(content.data.consumer)
-      return await Promise.all(_.map(content.data.MapData, async (schema) => {
-        var obj = {
-          consumerTitle: consumer.data.title,
-          producerTitle: producer.data.title,
-          transform: schema.transform,
-          producerField: schema.producerField,
-          consumerField: schema.ctype ? (await self.getMapData(schema.consumerField)) : _.first(schema.consumerField)
-        }
-        // obj[producer.data.title] = schema.producerField
-        // obj[consumer.data.title] = schema.ctype ? (await self.getMapData(schema.consumerField)) : _.first(schema.consumerField)
-        return obj
-      }))
-    },
-    // getName: async function (taskId) {
-    //   let respond = await Promise(async resolve => {
-    //     taskId = this.titleCase(taskId)
-    //     deepRecord.deepRecord.getCurrentTraget(this.instanceId, taskId).then(res => {
-    //       // let name = res.name
-    //       resolve('name')
-    //     }).catch(err => {
-    //       resolve('ERROR', err)
-    //     })
-    //   })
-    //   console.log(respond)
-    //   // return name
-    // },
     getAllPermissions: async function (appName, totalApps) {
       var self = this
         // console.log('getAllPerm:', config.getAllPermissionsUrl+appName)
@@ -1363,28 +820,6 @@ export default {
       //   await self.getAllPermissions(tblData, Object.keys(self.tableData).length)
       // }
       this.showTable = true
-      // axios.get(config.subscriptionUrl+'register-resource', {
-      // headers: {
-      // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-      // },
-      //  }).then(function (response) {
-      //     console.log("Get resources:",response.data.data);
-      //     if(response.data.data.length > 0){
-      //         let arrResources = _.groupBy(response.data.data, 'module');
-      //         self.tableData = arrResources;
-      //         //console.log("Table rows:",Object.keys(self.tableData));
-      //         for (var tblData in arrResources){
-      //             console.log("arrResources:",tblData)
-      //             self.getAllPermissions(tblData, Object.keys(self.tableData).length)
-      //         }
-      // }
-      // return response.data.data
-      // })
-      //     .catch(function (error) {
-      //     console.log("Get role permissions error:",error);
-      //     console.log(error);
-      // })
-      // self.tableData = ['hi']
     },
     getCheckboxValue: function (role, resources, action, appName) {
       let resID = resources.id + '_' + action
