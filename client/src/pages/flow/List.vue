@@ -32,10 +32,14 @@
                                 </template>
                             </tr>
                             <template v-for="(item, itemNumber) in (tableData)[moduleName]">
-                                <tr class="row">
+                                <tr class="row" v-if="selectedFlowObject.processList[titleCase(item.service)] != undefined">
                                     <template v-for="(field,fieldNumber) in fields[moduleName]">
                                         <td v-if="fieldNumber ==0" style="padding:10px;font-weight:bold;border-right: 3px solid #cdd0d4;">
-                                            {{ item.serviceName }}
+                                            {{selectedFlowObject.processList[titleCase(item.service)].name}}
+                                            <!-- {{item.service}}
+                                            <br>
+                                            <br>
+                                            {{selectedFlowObject.processList[titleCase(item.service)]}} -->
                                         </td>
                                         <td v-else>
                                             <table class="table-bordered" style="width:100%">
@@ -1237,19 +1241,20 @@ export default {
         return obj
       }))
     },
-    // getName: async function (taskId) {
-    //   let respond = await Promise(async resolve => {
-    //     taskId = this.titleCase(taskId)
-    //     deepRecord.deepRecord.getCurrentTraget(this.instanceId, taskId).then(res => {
-    //       // let name = res.name
-    //       resolve('name')
-    //     }).catch(err => {
-    //       resolve('ERROR', err)
-    //     })
-    //   })
-    //   console.log(respond)
-    //   // return name
-    // },
+    getName: async function (taskId) {
+      // console.log('Data: ', data)
+      // let respond = await Promise(async resolve => {
+      //   taskId = this.titleCase(taskId)
+      //   deepRecord.deepRecord.getCurrentTraget(this.instanceId, taskId).then(res => {
+      //     // let name = res.name
+      //     resolve('name')
+      //   }).catch(err => {
+      //     resolve('ERROR', err)
+      //   })
+      // })
+      // console.log(respond)
+      // return name
+    },
     getAllPermissions: async function (appName, totalApps) {
       var self = this
         // console.log('getAllPerm:', config.getAllPermissionsUrl+appName)
@@ -1266,10 +1271,10 @@ export default {
           }, o))
           self.loadingPermisions = false
 
-            // To resolve check/uncheck issue
-            // if(totalApps == self.count){
-            //     self.permissionsAll = _.groupBy(self.permissionsAll, 'app');
-            // }
+          // To resolve check/uncheck issue
+          // if (totalApps === self.count) {
+          //   self.permissionsAll = _.groupBy(self.permissionsAll, 'app')
+          // }
         } else {
           self.loadingPermisions = false
         }
@@ -1337,6 +1342,7 @@ export default {
         }
       }).then(async function (response) {
         let arrResources = await _.groupBy(response.data.data, 'module')
+        console.log('arrResources: ', arrResources)
         // self.tableData = arrResources
         // self.tableData = ['hi']
         self.tableData = await _.extend(self.tableData, arrResources)
@@ -1349,19 +1355,19 @@ export default {
       })
       self.loadingPermisions = false
 
-      // for (var tblData in self.tableData) {
-      //   // get task name from task id
-      //   for (let i = 0; i < self.tableData[tblData].length; i++) {
-      //     let taskId = self.titleCase(self.tableData[tblData][i].service)
-      //     await deepRecord.deepRecord.getCurrentTraget(self.instanceId, taskId).then(res => {
-      //       let name = res.name
-      //       self.tableData[tblData][i]['serviceName'] = name
-      //     }).catch(err => {
-      //       console.log(err)
-      //     })
-      //   }
-      //   await self.getAllPermissions(tblData, Object.keys(self.tableData).length)
-      // }
+      for (var tblData in self.tableData) {
+        // get task name from task id
+        // for (let i = 0; i < self.tableData[tblData].length; i++) {
+        //   let taskId = self.titleCase(self.tableData[tblData][i].service)
+        //   await deepRecord.deepRecord.getCurrentTraget(self.instanceId, taskId).then(res => {
+        //     let name = res.name
+        //     self.tableData[tblData][i]['serviceName'] = name
+        //   }).catch(err => {
+        //     console.log(err)
+        //   })
+        // }
+        await self.getAllPermissions(tblData, Object.keys(self.tableData).length)
+      }
       this.showTable = true
       // axios.get(config.subscriptionUrl+'register-resource', {
       // headers: {
