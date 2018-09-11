@@ -48,7 +48,7 @@
       <Table highlight-row :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
       <div style="margin: 10px;overflow: hidden">
         <div style="float: right;">
-          <Page :total="total" :current="pageno" :page-size="limit" @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+          <Page :total="total" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
         </div>
       </div>
     </div>
@@ -67,11 +67,11 @@
       'flowzData': Object,
       'instanceEntries': Array,
       'dataTotal': Number,
-      'pageno': Number
+      'pageno': Number,
+      'limit': Number
     },
     data () {
       return {
-        limit: 10,
         skip: 0,
         total: 0,
         searchQuery: null,
@@ -310,8 +310,7 @@
         this.$emit('on-paginate', this.skip, this.limit, page)
       },
       handlePagesize (size) {
-        this.limit = size
-        this.skip = 0
+        this.$emit('on-handlepage', this.skip, this.limit, size)
       }
     },
     feathers: {
