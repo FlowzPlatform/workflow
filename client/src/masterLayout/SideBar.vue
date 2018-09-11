@@ -99,7 +99,7 @@ export default {
     getByOrder (array) {
       let allProcess = []
       for (let key in array) {
-        allProcess.push(array[key])
+        allProcess[array[key].order] = array[key]
       }
       return allProcess
     },
@@ -179,23 +179,23 @@ export default {
       // console.log('this.$store.state.role', this.$store.state.role)
       if (this.$store.state.role === 1) {
         this.loading = true
-        if (this.$store.state.flowz.length > 0) {
-          let flowZData = _.cloneDeep(this.$store.state.flowz)
-          this.flowzList = _.map(flowZData, (m) => {
-            m.count = 0
-            _.map(m.processList, (p) => {
-              p.count = 0
-              return p
-            })
-            return m
-          })
-          this.loading = false
-          // console.log('flowzList', this.flowzList)
-          this.setCounters()
-        } else {
-          flowzModal.get(null, {
-            $paginate: false
-          })
+        // if (this.$store.state.flowz.length > 0) {
+        //   let flowZData = _.cloneDeep(this.$store.state.flowz)
+        //   this.flowzList = _.map(flowZData, (m) => {
+        //     m.count = 0
+        //     _.map(m.processList, (p) => {
+        //       p.count = 0
+        //       return p
+        //     })
+        //     return m
+        //   })
+        //   this.loading = false
+        //   // console.log('flowzList', this.flowzList)
+        //   this.setCounters()
+        // } else {
+        flowzModal.get(null, {
+          $paginate: false
+        })
           .then(async (response) => {
             this.loading = false
             this.$store.state.flowz = _.cloneDeep(response.data)
@@ -216,7 +216,7 @@ export default {
             this.flowzList = []
             this.loading = false
           })
-        }
+        // }
       } else {
         let modules = _.keysIn(this.$store.state.user.package[this.$store.state.subscription].role)
         let self = this
