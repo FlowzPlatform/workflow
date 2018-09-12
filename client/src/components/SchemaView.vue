@@ -1071,8 +1071,10 @@ export default {
         if (this.$store.state.role === 2) {
           if (data.claimuser === '') {
             this.dataClaim.push(data)
+            this.init()
           } else {
             this.dataData2.push(data)
+            this.init()
           }
           // if (data.currentStatus === this.$route.params.stateid) {
           //   data = data.data
