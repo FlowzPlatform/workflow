@@ -1,8 +1,5 @@
 <template>
   <div class="SchemaList">
-
-    
-
     <div v-if="configuration" style="">
       <Button style="float: right; margin-top: -50px;" @click="handleConfiguration" ghost><i class="fa fa-cog"></i></Button>
       <Modal v-model="isShow" title="Set Configuration" width="750px"  style="">
@@ -21,51 +18,66 @@
       <div class="col-md-12">
         <div class="card">
           <div class="row">
-            <div class="col-md-4">
+            <div class="col-md-6">
               <Input search enter-button placeholder="Search..." v-model="searchQuery"/>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
               <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-12">
                   <Select style="width: 100%" v-model="selectedFilterBy" clearable placeholder="Filter By">
                     <Option v-for="item in filterBy" :value="item.value" :key="item.value">{{ item.label }}</Option>
                   </Select>
                   <br>
                   <DatePicker v-if="selectedFilterBy === 'customRange'" type="daterange" split-panels placeholder="Select date" style="width: 100%; margin: 5px 0;" v-model="enteredDateRange"></DatePicker>
                 </div>
-                <div class="col-md-6">
+                <!-- <div class="col-md-6">
                   <Select style="width: 100%" v-model="selectedSortBy" clearable placeholder="Sort By">
                     <Option v-for="item in sortBy" :value="item.value" :key="item.value">{{ item.label }}</Option>
                   </Select>    
-                </div>
+                </div> -->
               </div>
             </div>
             <div class="col-md-2">
-              <Button icon="search" type="primary" long>Search</Button>
+              <Button icon="search" type="primary" @click="searchData">Search</Button>
+              <Tooltip content="Clear Search" style="float: right;">
+                <Button icon="ios-trash" type="error" @click="clearSearchData"></Button>  
+              </Tooltip>
+              
             </div>
           </div>
-
-          <!-- <div class="searchQueries">
-            <Tag @on-close="searchQuery = null" closable color="blue" v-if="searchQuery != null && searchQuery != ''">{{searchQuery}}</Tag>
-            <Tag @on-close="selectedFilterBy = null, enteredDateRange= []" closable color="blue" v-if="selectedFilterBy != null && selectedFilterBy != '' && selectedFilterBy == 'customRange'">{{selectedFilterBy}} : {{enteredDateRange}}</Tag>
-            <Tag @on-close="selectedFilterBy = null" closable color="blue" v-if="selectedFilterBy != null && selectedFilterBy != '' && selectedFilterBy != 'customRange'">{{selectedFilterBy}}</Tag>
-            <Tag closable color="blue" v-if="selectedSortBy != null && selectedSortBy != ''">{{selectedSortBy}}</Tag>
-          </div> -->
         </div>
       </div>
-      
     </div>
-
-    <div>
-      <Table class="thisTable" :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
+    <div v-if="role === 'admin'">
+      <Table @on-sort-change="sortTableData" highlight-row :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
+      <div style="margin: 10px;overflow: hidden">
+        <div style="float: right;">
+          <Page :total="total" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+        </div>
+      </div>
+    </div>
+    <div v-if="role === 'client'">
+      <Table @on-sort-change="sortTableData" highlight-row :columns="setColumns2" :data="data" :border="config.border" :stripe="config.stripe"></Table>
+      <div style="margin: 10px;overflow: hidden">
+        <div style="float: right;">
+          <Page :total="total" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+        </div>
+      </div>
+    </div>
+    <div v-if="role === 'client_unclaim'">
+      <Table @on-sort-change="sortTableData" highlight-row :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
+      <div style="margin: 10px;overflow: hidden">
+        <div style="float: right;">
+          <Page :total="total" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 <script>
-  // import finstanceModal from '@/api/finstance'
-  // import flowzModal from '@/api/flowz'
-  import flowzdataModal from '@/api/flowzdata'
   import _ from 'lodash'
+  import $ from 'jquery'
+  import finstanceModal from '@/api/finstance'
   export default {
     name: 'schemalist',
     props: {
@@ -74,10 +86,17 @@
       'configuration': Boolean,
       'dynamicData': Boolean,
       'flowzData': Object,
-      'instanceEntries': Array
+      'instanceEntries': Array,
+      'dataTotal': Number,
+      'pageno': Number,
+      'limit': Number,
+      'role': String
     },
     data () {
       return {
+        dataClaim: [],
+        skip: 0,
+        total: 0,
         searchQuery: null,
         filterBy: [
           {
@@ -220,7 +239,7 @@
       },
       setColumns () {
         const cols = []
-        if (this.dynamicData) {
+        if (this.dynamicData && this.$store.state.role === 1) {
           cols.push({
             title: 'Action',
             width: 100,
@@ -232,39 +251,23 @@
                     shape: 'circle',
                     icon: 'ios-play'
                   },
+                  domProps: {
+                    title: 'Start'
+                  },
                   on: {
                     'click': async () => {
-                      this.$Spin.show()
+                      this.$Loading.start()
                       let indexFind = _.findIndex(this.instanceEntries, (o) => { return o.id === params.row.id })
-                      // console.log('indexfind: ', indexFind)
-                      // this.$emit('setValues', this.instanceEntries[indexFind])
-                      // console.log('Click: ', params.row, params.index)
-                      let currentObj = _.find(this.flowzData.json.processList, {id: this.instanceEntries[indexFind].currentStatus})
-                      // console.log('this.flowzData.schema SchemaList', this.flowzData.schema)
+                      let currentObj = this.flowzData.processList[this.instanceEntries[indexFind].currentStatus]
                       let values = {
                         id: this.flowzData.schema,
                         item: this.instanceEntries[indexFind],
                         formName: currentObj.name,
                         currentState: currentObj.id,
                         flowzData: this.flowzData,
-                        formData: {}
-                        // nextState: resp[currentState].next,
-                        // currentState: currentState
+                        formData: params.row.data
                       }
-                      // console.log('_____________values', item)
-                      // console.log('this.instanceEntries[indexFind].stageReference.length: ', this.instanceEntries[indexFind].stageReference.length)
-                      if (this.instanceEntries[indexFind].stageReference.length > 0) {
-                        let lastObj = this.instanceEntries[indexFind].stageReference[this.instanceEntries[indexFind].stageReference.length - 1]
-                        // console.log('last obj: ', lastObj)
-                        await flowzdataModal.get(lastObj.stageRecordId).then(res => {
-                          values.formData = res.data.data
-                          this.$Spin.hide()
-                        }).catch(err => {
-                          this.$Spin.hide()
-                          console.log(err)
-                        })
-                      }
-                      // console.log('Values emitted: ', values)
+                      this.$Loading.finish()
                       await this.$emit('setValues', values)
                     }
                   }
@@ -274,7 +277,77 @@
           })
           cols.push({
             title: 'ID',
-            key: 'id',
+            key: 'iid',
+            width: 260
+          })
+        }
+        if (this.dynamicData && this.$store.state.role === 2) {
+          cols.push({
+            title: 'Action',
+            width: 200,
+            align: 'center',
+            render: (h, params) => {
+              return h('div', [
+                h('Button', {
+                  props: {
+                    shape: 'circle',
+                    icon: 'ios-play'
+                  },
+                  domProps: {
+                    title: 'Start'
+                  },
+                  on: {
+                    'click': async () => {
+                      this.$Loading.start()
+                      let indexFind = _.findIndex(this.instanceEntries, (o) => { return o.id === params.row.id })
+                      let currentObj = this.flowzData.processList[this.instanceEntries[indexFind].currentStatus]
+                      let values = {
+                        id: this.flowzData.schema,
+                        item: this.instanceEntries[indexFind],
+                        formName: currentObj.name,
+                        currentState: currentObj.id,
+                        flowzData: this.flowzData,
+                        formData: params.row.data
+                      }
+                      this.$Loading.finish()
+                      await this.$emit('setValues', values)
+                    }
+                  }
+                }, ''),
+                h('Button', {
+                  props: {
+                    shape: 'circle',
+                    icon: 'ios-undo',
+                    size: 'large'
+                  },
+                  style: {
+                    marginLeft: '7px',
+                    color: '#0052a9',
+                    'border-radius': '32px'
+                  },
+                  domProps: {
+                    title: 'Unclaim'
+                  },
+                  on: {
+                    'click': async () => {
+                      finstanceModal.patch(params.row.id, {claimuser: ''})
+                      .then((res) => {
+                        this.data.splice(params.index, 1)
+                        this.$Notice.success({title: 'Successfully Unclaim'})
+                      })
+                      .catch((err) => {
+                        console.log(err)
+                        this.$Notice.error({title: 'Unclaim error'})
+                      })
+                    }
+                  }
+                }, '')
+              ])
+            }
+          })
+          cols.push({
+            title: 'ID',
+            key: 'iid',
             width: 260
           })
         }
@@ -292,7 +365,10 @@
                 title: item.title,
                 key: item.key,
                 sortable: item.sortable,
-                width: item.width
+                width: item.width,
+                render: (h, params) => {
+                  return h('div', params.row.data[item.key])
+                }
               })
             }
           }
@@ -302,7 +378,83 @@
               cols.push({
                 title: item.name,
                 key: item.name,
-                width: 150
+                width: 150,
+                render: (h, params) => {
+                  return h('div', params.row.data[item.name])
+                }
+              })
+            }
+          }
+        }
+        return cols
+      },
+      setColumns2 () {
+        const cols = []
+        if (this.dynamicData) {
+          cols.push({
+            title: 'Action',
+            width: 100,
+            align: 'center',
+            render: (h, params) => {
+              return h('div', [
+                h('Button', {
+                  props: {
+                    shape: 'circle'
+                  },
+                  on: {
+                    'click': async () => {
+                      finstanceModal.patch(params.row.id, {claimuser: this.$store.state.user._id})
+                      .then((res) => {
+                        this.data.splice(params.index, 1)
+                        this.$Notice.success({title: 'Successfully Claim'})
+                      })
+                      .catch((err) => {
+                        console.log(err)
+                        this.$Notice.error({title: 'claim error'})
+                      })
+                    }
+                  }
+                }, 'claim')
+              ])
+            }
+          })
+          cols.push({
+            title: 'ID',
+            key: 'iid',
+            width: 260
+          })
+        }
+        if (this.configuration) {
+          if (this.config.index) {
+            cols.push({
+              type: 'index',
+              width: 60,
+              align: 'center'
+            })
+          }
+          for (let item of this.dataConfig) {
+            if (item.show) {
+              cols.push({
+                title: item.title,
+                key: item.key,
+                sortable: item.sortable,
+                width: item.width,
+                render: (h, params) => {
+                  return h('div', params.row.data[item.key])
+                }
+              })
+            }
+          }
+        } else {
+          if (this.schema.hasOwnProperty('entity')) {
+            for (let item of this.schema.entity) {
+              cols.push({
+                title: item.name,
+                key: item.name,
+                width: 150,
+                render: (h, params) => {
+                  return h('div', params.row.data[item.name])
+                }
               })
             }
           }
@@ -311,27 +463,46 @@
       }
     },
     mounted () {
+      this.total = this.dataTotal
       this.mdata = this.data
-      // if (this.dynamicData) {
-      //   await flowzModal.get(id, {
-      //     $select: ['json']
-      //   }).then(async res => {
-      //     this.flowzData = res.data
-      //     await finstanceModal.get(null, query).then(resp => {
-      //       this.instanceEntries = resp.data
-      //     }).catch(err => {
-      //       this.instanceEntries = null
-      //       console.log('err', err)
-      //     })
-      //   }).catch(err => {
-      //     this.instanceEntries = null
-      //     console.log('....', err)
-      //   })
-      // }
+      $('.ivu-table td:nth-child(2) div span').mouseover(function () {
+        var valueOfTd = $(this).text()
+        $('.ivu-table td:nth-child(2) div span').attr('title', valueOfTd)
+      })
+      $('.ivu-table-cell div').mouseover(function () {
+        var valueOfTd = $(this).text()
+        $('.ivu-table-cell div').attr('title', valueOfTd)
+      })
     },
     methods: {
+      clearSearchData () {
+        this.searchQuery = ''
+        this.selectedFilterBy = ''
+        let object = {
+          text: '',
+          filterBy: ''
+        }
+        this.$emit('search-data', object)
+      },
+      searchData () {
+        let object = {
+          text: this.searchQuery,
+          filterBy: this.selectedFilterBy
+        }
+        this.$emit('search-data', object)
+      },
+      sortTableData (object) {
+        this.$emit('sort-data', object)
+      },
       handleConfiguration () {
         this.isShow = !this.isShow
+      },
+      handlePage (page) {
+        this.skip = (page * this.limit) - this.limit
+        this.$emit('on-paginate', this.skip, this.limit, page)
+      },
+      handlePagesize (size) {
+        this.$emit('on-handlepage', this.skip, this.limit, size)
       }
     },
     feathers: {
@@ -344,8 +515,15 @@
           // }
         },
         updated (data) {
-          // console.log('updated called: ', data)
-          _.remove(this.data, (o) => { return o.id === data.id })
+          console.log('updated called: ', data)
+          // if (this.$store.state.role === 1) {
+          //   if (this.$route.params.stateid !== data.currentStatus) {
+          //     let inx = _.findIndex(this.data, (o) => { return o.id === data.id })
+          //     console.log('inx: ', this.data[0], inx)
+          //     this.data.splice(inx, 1)
+          //     // _.remove(this.data, (o) => { return o.id === data.id })
+          //   }
+          // }
         },
         removed (data) {
         }
@@ -369,5 +547,25 @@
 
   .searchQueries{
     margin: 5px 0;
+  }
+  .ivu-table-cell td div span{
+    width:200px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+</style>
+
+<style>
+.ivu-table td:nth-child(2) div span{
+  width:200px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+.ivu-table-cell div{
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
   }
 </style>

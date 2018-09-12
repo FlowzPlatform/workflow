@@ -16,6 +16,7 @@
                             </Row>
                             <Row v-else>
                                 <schemasubform :schemainstance="getObject(inx, index, field.name, field.type)"></schemasubform>
+                                
                             </Row>
                         </FormItem>
                     </Col>
@@ -27,19 +28,21 @@
                                 <Col :span="8" style="text-align: right; padding-right: 10px; padding-top: 10px;">
                                     <b class="field-label">{{field.name}}</b>
                                 </Col>
-                                <Col :span="16">
-                                    
-                                    <Input v-if="field.type == 'text' || field.type == 'email' || field.type == 'phone'" v-model="schemainstance.data[index][field.name]" type="text" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name" :min="(field.property.min > 0)?field.property.min : -Infinity"></Input>
+                                <Col :span="16" style="padding-top: 10px;">
+                                    <Input v-if="field.type == 'textarea'" v-model="schemainstance.data[index][field.name]" type="textarea" :rows="schemainstance.data[index][field.numberoflines]" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name" :max="(field.property.max > 0)?field.property.max : Infinity"/>
+                                    <Input v-if="field.type == 'text' || field.type == 'email' || field.type == 'phone'" v-model="schemainstance.data[index][field.name]" type="text" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name" :max="(field.property.max > 0)?field.property.max : Infinity"></Input>
+                                    <Input v-if="field.type == 'currentuser'" v-model="schemainstance.data[index][field.name]" type="text" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name" :max="(field.property.max > 0)?field.property.max : Infinity"></Input>
+                                    <Input v-if="field.type == 'currenttime'" v-model="schemainstance.data[index][field.name]" type="text" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name" :max="(field.property.max > 0)?field.property.max : Infinity"></Input>
                                     
                                     <InputNumber v-if="field.type == 'number'" :min="(field.property.min > 0)?field.property.min : -Infinity" :max="(field.property.max > 0)?field.property.max : Infinity" v-model="schemainstance.data[index][field.name]" :type="field.type" :placeholder="field.name"></InputNumber>
                                     
                                     <DatePicker v-if="field.type == 'date'" type="date" v-model="schemainstance.data[index][field.name]" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name"></DatePicker>
-                                    
+                                  
                                     <Select v-if="field.type == 'dropdown'" v-model="schemainstance.data[index][field.name]" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name">
                                         <Option v-for="dpd in field.property.options" :value="dpd" :key="dpd">{{ dpd }}</Option>
                                     </Select>
 
-                                    <Checkbox v-if="field.type == 'boolean'" v-model="schemainstance.data[index][field.name]" style="margin-top: 10px;"></Checkbox>
+                                    <Checkbox v-if="field.type == 'boolean'" v-model="schemainstance.data[index][field.name]"></Checkbox>
 
                                     <!-- <dynamicinput :type="(field.type) ? field.type : null" :bindmodel="(schemainstance.data[index][field.name]) ? schemainstance.data[index][field.name] : null " :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name" :min="(field.property.min > 0) ? field.property.min : -Infinity" :max="(field.property.max > 0) ? field.property.max : Infinity" :options="(field.property.options) ? field.property.options : null" :field="field"></dynamicinput> -->
                                 </Col>
@@ -50,20 +53,25 @@
                         <FormItem :key="inx" :rules="createRules(field)" style="margin-bottom:10px;">
                             <Row>
                                 <Col :span="2">
-                                    <!-- <b>{{field.name}}</b> -->
+                                    <b>{{field.name}}</b>
                                 </Col>
-                                <Col :span="22">
-                                    <input class="form-control" type="file" v-if="field.type == 'file'" @change="handleFileChange($event, index, field.name)" :multiple="(field.property.isMultiple)? field.property.isMultiple: false" />
-                                    <div v-if="schemainstance.data[index][field.name + 'List']">
-                                        <div class="list-group" v-for="val in schemainstance.data[index][field.name + 'List']" style="margin-bottom:0px;">
-                                            <a :href="val" class="list-group-item" target="_blank" style="color:blue;padding:2px 15px;">{{val}}</a>
+                                <Col :span="21" >
+                                    <input class="form-control" type="file" v-if="field.type == 'file'" @change="handleFileChange($event, index, field.name)" :multiple="(field.property.isMultiple)? field.property.isMultiple: false"/>
+                                    <div v-if="schemainstance.data[index][field.name]" >
+                                      <Progress v-if="stratProgress"  v-bind:percent="fileUploadProgress" :success-percent="30" />
+                                      <div class="" v-for="(val, i) in schemainstance.data[index][field.name]">
+                                            <Row>
+                                                <Col :span="23"> <a :href="val" class="list-group-item" target="_blank" style="color:blue;padding:2px 2px;" >{{val}}</a></Col>
+                                                <Col :span="1"><a href="#" style="color:red;float:right"  @click="removeSection(i, schemainstance.data[index][field.name])">&#10005;&nbsp;</a></Col>
+                                            </Row>          
                                         </div>
                                     </div>
                                 </Col>
+                                <Col :span="1">&nbsp;&nbsp;{{fileNumber}} / {{fileSize}}</Col>
                             </Row>
                         </FormItem>
                     </Col>
-                </template>
+                </template> 
             </div>
 
             <div v-if="index != 0" style="float:right">
@@ -77,72 +85,99 @@
     </div>
   </div>
 </template>
-
 <script>
-
 import $ from 'jquery'
 import SchemaSubForm from './SchemaSubForm'
 // import axios from 'axios'
 import moment from 'moment'
+import _ from 'lodash'
 import schemaModel from '@/api/schema'
 // let jumperLinks = [];
-
 var AWS = require('aws-sdk')
 AWS.config.update({
   accessKeyId: process.env.accesskey,
   secretAccessKey: process.env.secretkey
 })
 AWS.config.region = 'us-west-2'
-
 export default {
   name: 'schemasubform',
   props: ['schemainstance'],
   data () {
     return {
+      fileNumber: 0,
+      fileSize: 0,
+      fileUploadProgress: 0,
+      stratProgress: false,
       jumperLinks: []
     }
   },
   components: {
-    'schemasubform': SchemaSubForm
+    schemasubform: SchemaSubForm
   },
   methods: {
-    handleFileChange (e, index, fieldName) {
+    async handleFileChange (e, index, fieldName) {
       let self = this
       var files = e.target.files || e.dataTransfer.files
       let allFiles = []
       if (files.length > 0) {
-        // console.log('files', files[0])
         for (let i = 0; i < files.length; i++) {
-          let bucket = new AWS.S3({ params: { Bucket: 'airflowbucket1/obexpense/expenses' } })
-          var params = {
-            Key: moment().valueOf().toString() + i + files[i].name,
-            ContentType: files[i].type,
-            Body: files[i]
-          }
-          bucket.upload(params).on('httpUploadProgress', function (evt) {
-          }).send(function (err, data) {
-            if (err) {
-              alert(err)
-            } else {
-              allFiles.push(data.Location)
-            }
-          })
+          self.stratProgress = true
+          self.fileSize = files.length
+          let abc = await this.uploadToAWS(files[i], i)
+          allFiles.push(abc)
         }
       }
-      self.schemainstance.data[index][fieldName] = allFiles
+      self.schemainstance.data[index][fieldName] = _.uniq(self.schemainstance.data[index][fieldName], allFiles)
+    },
+    uploadToAWS (file, i) {
+      let self = this
+      return new Promise((resolve, reject) => {
+        let bucket = new AWS.S3({
+          params: { Bucket: 'airflowbucket1/obexpense/expenses' }
+        })
+        var params = {
+          Key:
+            moment()
+              .valueOf()
+              .toString() +
+            i +
+            file.name,
+          ContentType: file.type,
+          Body: file
+        }
+        bucket
+          .upload(params)
+          .on('httpUploadProgress', function (evt) {
+            self.fileUploadProgress = parseInt(evt.loaded * 100 / evt.total)
+          })
+          .send(function (err, data) {
+            if (err) {
+              alert(err)
+              reject(err)
+            } else {
+              self.fileNumber = i + 1
+              self.fileUploadProgress = 0
+              self.stratProgress = false
+              console.log('data.Location', data.Location)
+              resolve(data.Location)
+            }
+          })
+      })
+    },
+    removeSection: function (index, imgarray) {
+      imgarray.splice(index, 1)
     },
     getValidationProps (index, fieldName) {
       return 'data[' + index + '][' + fieldName + ']'
     },
     async getChildData (id) {
-      // alert(id)
       var arrObj = []
       var self = this
       await schemaModel.get(id)
         .then(async (response) => {
           var _res = response.data
           var obj = {}
-          // obj.id = self.getGuid();  // for guid for perticular row
+          // obj.id = self.getGuid()  // for guid for perticular row
           // obj.database = _res.database
           // obj.Schemaid = _res._id
           for (let v of _res.entity) {
@@ -159,8 +194,15 @@ export default {
                     obj[v.name] = 1
                   }
                 }
+              } else if (v.type === 'currentuser') {
+                obj[v.name] = this.$store.state.user.fullname || this.$store.state.user.email
+              } else if (v.type === 'currenttime') {
+                obj[v.name] = new Date()
               } else if (v.type === 'boolean') {
-                if (v.property.defaultValue !== '' || v.property.defaultValue === 'true') {
+                if (
+                  v.property.defaultValue !== '' ||
+                  v.property.defaultValue === 'true'
+                ) {
                   obj[v.name] = true
                 } else {
                   obj[v.name] = false
@@ -184,7 +226,7 @@ export default {
       return arrObj
     },
     getObject (eIndex, dataIndex, fname, ftype) {
-      console.log('get obj called: ', dataIndex)
+      // console.log('get obj called: ', dataIndex)
       var obj = {}
       obj.data = this.schemainstance.data[dataIndex][fname]
       obj.entity = this.schemainstance.entity[eIndex].entity[0].entity
@@ -207,7 +249,7 @@ export default {
       //   }
       // })
       var obj = {}
-      // obj.id = this.getGuid();
+      // obj.id = this.getGuid()
       // alert(ent.database)
       // obj.database = ent.database
       // obj.Schemaid = ent._id
@@ -225,8 +267,15 @@ export default {
                 obj[v.name] = 1
               }
             }
+          } else if (v.type === 'currentuser') {
+            obj[v.name] = this.$store.state.user.fullname || this.$store.state.user.email
+          } else if (v.type === 'currenttime') {
+            obj[v.name] = new Date()
           } else if (v.type === 'boolean') {
-            if (v.property.defaultValue !== '' || v.property.defaultValue === 'true') {
+            if (
+              v.property.defaultValue !== '' ||
+              v.property.defaultValue === 'true'
+            ) {
               obj[v.name] = true
             } else {
               obj[v.name] = false
@@ -243,16 +292,26 @@ export default {
         }
       }
       this.schemainstance.data[dataIndex][fname].push(obj)
-      // console.log('schemainstance: ', this.schemainstance.data)
     },
     // getGuid () {
-    //   return (this.S4() + this.S4() + "-" + this.S4() + "-4" + this.S4().substr(0,3) + "-" + this.S4() + "-" + this.S4() + this.S4() + this.S4()).toLowerCase()
+    //   return (this.S4() + this.S4() + '-' + this.S4() + '-4' + this.S4().substr(0,3) + '-' + this.S4() + '-' + this.S4() + this.S4() + this.S4()).toLowerCase()
     // },
     // S4() {
-    //     return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+    //     return (((1+Math.random())*0x10000)|0).toString(16).substring(1)
     // },
     getObjectType (type) {
-      return ['text', 'email', 'number', 'phone', 'boolean', 'date', 'dropdown', 'file'].indexOf(type) === -1
+      return (
+        [
+          'text ',
+          'email ',
+          'number ',
+          'phone ',
+          'boolean ',
+          'date ',
+          'dropdown ',
+          'file '
+        ].indexOf(type) === -1
+      )
     },
     createRules (row) {
       let rules = []
@@ -266,7 +325,9 @@ export default {
             if (!value) {
               return callback(new Error('Please input the value'))
             }
-            if (value.match(/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/)) {
+            if (
+              value.match(/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/)
+            ) {
               callback()
             } else {
               callback(new Error('Please input phone no'))
@@ -275,21 +336,32 @@ export default {
         })
       }
       if (row.property.optional === false) {
-        rules.push({required: true, message: 'This field is required.', trigger: 'blur'})
+        rules.push({
+          required: true,
+          message: 'This field is required.',
+          trigger: 'blur'
+        })
       }
       if (row.property.min > 0 && row.type === 'text') {
-        rules.push({ type: 'string', min: row.property.min, message: 'min' + row.property.min + ' length req' })
+        rules.push({
+          type: 'string',
+          min: row.property.min,
+          message: 'min' + row.property.min + ' length req'
+        })
       }
       if (row.property.max > 0 && row.type === 'text') {
-        rules.push({ type: 'string', max: row.property.max, message: 'max length ' + row.property.max + ' required.' })
+        rules.push({
+          type: 'string',
+          max: row.property.max,
+          message: 'max length ' + row.property.max + 'required.'
+        })
       }
       if (row.property.allowedValue.length > 0) {
-        rules.push({type: 'enum', enum: row.property.allowedValue})
+        rules.push({ type: 'enum', enum: row.property.allowedValue })
       }
       return rules
     },
-    handleEdit (row) {
-    },
+    handleEdit (row) {},
     handleRemove (index) {
       this.$Modal.confirm({
         title: 'Confirm',
@@ -297,103 +369,110 @@ export default {
         onOk: () => {
           this.schemainstance.data.splice(index, 1)
         },
-        onCancel: () => {
-        }
+        onCancel: () => {}
       })
     }
   },
-  mounted () {
-  },
-  created () {
-  }
+  mounted () {},
+  created () {}
+}
+</script>
+<!-- Add 'scoped' attribute to limit CSS to this component only -->
+<style scoped>
+.ui-card {
+  background-color: #fff;
+  box-shadow: 0px 0px 25px #dadada;
+  border-radius: 10px;
+  padding: 10px 20px;
 }
 
-</script>
+.ui-card{
+  background-color: #fff;
+  box-shadow: 0px 0px 25px #dadada;
+  border-radius: 10px;
+  padding: 10px 20px;
+}
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+.card-title{
+  text-transform: capitalize;
+  color: #FFF;
+  font-size: 18px;
+  background-color: #292929;
+  padding: 10px 30px;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+  margin-left: -20px;
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 999;
+}
 
-  .ui-card{
-    background-color: #fff;
-    box-shadow: 0px 0px 25px #dadada;
-    border-radius: 10px;
-    padding: 10px 20px;
-  }
+.btnAdd {
+  background-color: #53cae8;
+  border-radius: 50px;
+  font-size: 14px;
+  text-transform: uppercase;
+  color: #fff;
+  border: none;
+  font-style: italic;
+}
 
-  .card-title{
-    text-transform: capitalize;
-    color: #FFF;
-    font-size: 18px;
-    background-color: #292929;
-    padding: 10px 30px;
-    border-top-right-radius: 5px;
-    border-bottom-right-radius: 5px;
-    margin-left: -20px;
-    margin-bottom: 10px;
-    position: relative;
-    z-index: 999;
-  }
+.btnAdd:hover {
+  background-color: #83d5ea;
+  color: #fff;
+}
 
-  .btnAdd{
-    background-color: #53CAE8;
-    border-radius: 50px;
-    font-size: 14px;
-    text-transform: uppercase;
-    color: #fff;
-    border: none;
-    font-style: italic;
-  }
+.btnDelete {
+  font-size: 14px;
+  border-radius: 50px;
+  color: #fff !important;
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background-color: #ff0000;
+  width: 20px;
+  height: 20px;
+}
 
-  .btnAdd:hover{
-    background-color: #83d5ea;
-    color: #fff;
-  }
-
-  .btnDelete{
-    font-size: 14px;
-    border-radius: 50px;
-    color: #fff !important;
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    background-color: #FF0000;
-    width: 20px;
-    height: 20px;
-  }
-
-  .btnDelete i{
-    position: absolute;
+.btnDelete i {
+  position: absolute;
   top: 4px;
   left: 5px;
-  }
+}
 
-  .field-label{
-    text-transform: capitalize;
-  }
+.field-label {
+  text-transform: capitalize;
+}
 
-  .formTitle{
-    text-transform: capitalize;
-  }
+.formTitle {
+  text-transform: capitalize;
+}
 
-  .jumper-links{
-    list-style: none;
-    font-size: 14px;
-  }
+.jumper-links {
+  list-style: none;
+  font-size: 14px;
+}
 
-  .jumper-links a{
-    text-decoration: none;
-    /*color: #53cae8;*/
-    text-align: left;
-    font-weight: bold;
-    text-transform: capitalize;
-  }
+.jumper-links a {
+  text-decoration: none;
+  /*color: #53cae8;*/
+  text-align: left;
+  font-weight: bold;
+  text-transform: capitalize;
+}
 
-  .fixed-div{
-    position: fixed;
-    right: 0;
-  }
+.fixed-div {
+  position: fixed;
+  right: 0;
+}
 
-</style>
+.badge {
+  background-color: green;
+  border: 1px solid black;
+  padding: 2px;
+  transition: 1s;
+}
+
 <style>
   .ivu-form-item-content{
     line-height: 15px !important;

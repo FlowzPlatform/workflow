@@ -49,14 +49,16 @@ function beforeCreate (hook) {
 function afterCreate (hook) {
   if (hook.params.hasOwnProperty('isdone') && hook.params.isdone) {
     hook.params.query = {};
-    hook.params.query.$select = ['json'];
+    // hook.params.query.$select = ['json'];
     const query = Object.assign({}, hook.params.query);
     // console.log('++++++++++++++++++++++++++++++++++++++++++++++++++++++')
     // console.log('hook.params', hook.params)
     // console.log('++++++++++++++++++++++++++++++++++++++++++++++++++++++')
     return hook.app.service('flowz').get(hook.data.fid, {query}).then(res => {
-      let cuurentObj = _.find(res.json.processList, {id: hook.data.state});
-      let nextTargetObj = getNextTarget(res.json.processList, cuurentObj.target[0].id);
+      // let cuurentObj = _.find(res.json.processList, {id: hook.data.state});
+      let cuurentObj = res.processList[hook.data.state];
+      // let nextTargetObj = getNextTarget(res.json.processList, cuurentObj.target[0].id);
+      let nextTargetObj = res.processList[cuurentObj.target[0].id];
       return hook.app.service('finstance').get(hook.data.iid).then(finstRes => {
         let mdata = {
           currentStatus: nextTargetObj.id,
@@ -65,16 +67,17 @@ function afterCreate (hook) {
         if (hook.params.hasOwnProperty('nextTarget')) {
           mdata.currentStatus = hook.params.nextTarget;
         }
-        if (mdata.stageReference.length > 0) {
-          console.log(cuurentObj.id, mdata.stageReference[mdata.stageReference.length - 1].StageName)
-          // if (mdata.stageReference[mdata.stageReference.length - 1].StageName === cuurentObj.id) {
-          mdata.stageReference[mdata.stageReference.length - 1].completedAt = new Date().toISOString()
-          // }
-        }
+        // if (mdata.stageReference.length > 0) {
+        //   // console.log(cuurentObj.id, mdata.stageReference[mdata.stageReference.length - 1].StageName)
+        //   // if (mdata.stageReference[mdata.stageReference.length - 1].StageName === cuurentObj.id) {
+        //   mdata.stageReference[mdata.stageReference.length - 1].completedAt = new Date().toISOString()
+        //   // }
+        // }
         let referenceObj = {
           StageName: finstRes.currentStatus,
           stageRecordId: hook.result.id,
-          createdAt: new Date().toISOString(),
+          createdAt: finstRes.modifiedAt,
+          completedAt: new Date().toISOString(),
           user: {
             id: (hook.params.userPackageDetails !== undefined ? hook.params.userPackageDetails._id: null),
             name: (hook.params.userPackageDetails !== undefined ? hook.params.userPackageDetails.fullname: null),
@@ -113,15 +116,4 @@ function afterCreate (hook) {
       });
     });
   }
-}
-
-function getNextTarget (processList, targetId) {
-  let targetObj = _.find(processList,{'id': targetId});
-  // if (targetObj.type === 'start' || targetObj.type === 'endevent' || targetObj.type === 'intermediatethrowevent') {
-  //   return targetObj;
-  // }
-  // // if(targetObj.inputProperty.length === 0) {
-  // targetObj = getNextTarget(processList, targetObj.target[0].id);
-  // // }
-  return targetObj;
 }

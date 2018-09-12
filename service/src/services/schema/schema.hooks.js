@@ -5,7 +5,9 @@ module.exports = {
       hook => beforeFind(hook)
     ],
     get: [],
-    create: [],
+    create: [
+      hook => beforeCreate(hook)
+    ],
     update: [],
     patch: [],
     remove: []
@@ -50,4 +52,8 @@ let beforeFind = function (hook) {
     hook.params.paginate = hook.params.query.$paginate === 'false' || hook.params.query.$paginate === false;
     delete hook.params.query.$paginate;
   }
+}
+
+let beforeCreate = function (hook) {
+  hook.data.createdAt = new Date().toISOString()
 }

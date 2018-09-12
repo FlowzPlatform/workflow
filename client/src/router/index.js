@@ -4,70 +4,29 @@ import VueRouter from 'vue-router'
 // Master Layout
 import Layout from '@/masterLayout/Master'
 
-// // Layout
-// import Layout from '@/layout/Master'
-// import userLayout from '@/layout/user/Master'
+// Login
+import Login from '@/pages/Login'
+import Register from '@/pages/Register'
 
-// // import commonLayout from '@/layout/user/Common.vue'
-// // userLayout
-// // import userLayout from '@/userLayout/Master'
-// import UserDashboard from '@/pages/user/dashboard'
-// import list from '@/pages/user/List'
-
-// import Userconfig from '@/pages/user/UserConfig.vue'
-// // userLayout
-// // import userLayout from '@/userLayout/Master'
-// // import UserDashboard from '@/pages/user/dashboard'
 // Area
 import Dashboard from '@/area/Dashboard'
 import Flow from '@/area/Flow'
-// import DbSettings from '@/area/DbSettings'
 import Schema from '@/area/Schema'
-// import Approval from '@/area/Approval'
+
 // Schema area
-import SchemaMapping from '@/pages/schema/Mapping'
-import SchemaMappingNew from '@/pages/schema/mapping/New'
-import SchemaMappingList from '@/pages/schema/mapping/List'
 import SchemaList from '@/pages/schema/schemaList'
 import SchemaNew from '@/pages/schema/New'
+
 // Flow area
 import FlowzList from '@/pages/flow/List'
 import FlowNew from '@/pages/flow/New'
-import flowInstance from '@/pages/flow/instance/New'
-import flowLog from '@/pages/flow/systemLog'
-// // DbSettings area
-// import DbSettingsList from '@/pages/dbSettings/List'
-// import DbSettingsNew from '@/pages/dbSettings/New'
-// // pages
-import Login from '@/pages/Login'
-// import EmailVerification from '@/pages/EmailVerification'
-import Register from '@/pages/Register'
-// Approval area
-// import ApprovalList from '@/pages/approval/List'
-// import ApprovalNew from '@/pages/approval/New'
-// import Reply from '@/pages/approval/MailReply'
-// import FormReply from '@/pages/approval/FormReply'
 import Analytics from '@/pages/flow/analytics'
-import FlowOverview from '@/pages/flow/FlowOverview'
-// User area
-// import UserDashboard from '@/pages/user/dashboard'
-// import ManageBPMNPlugin from '@/pages/BPMNPlugins/Manage'
 
-// // Approval area
-// import ApprovalList from '@/pages/approval/List'
-// import ApprovalNew from '@/pages/approval/New'
-// import Reply from '@/pages/approval/MailReply'
-// import FormReply from '@/pages/approval/FormReply'
-// // User area
-// // import UserDashboard from '@/pages/user/dashboard'
-// // import ManageBPMNPlugin from '@/pages/BPMNPlugins/Manage'
-
-// // import UserDashboard from '@/pages/user/dashboard'
-// // import UserProcesslist from '@/pages/user/processlist'
-// import Analytics from '@/pages/flow/analytics'
 import ManageBPMNPlugin from '@/pages/BPMNPlugins/Manage'
-
 import SchemaView from '@/components/SchemaView'
+import emailtemplate from '@/components/emailtemplate'
+
+// const tagSpinner = resolve => require(['./spinner'], resolve)
 
 Vue.use(VueRouter)
 
@@ -88,14 +47,8 @@ const mroutes = [
         path: 'bpmn-plugin',
         component: ManageBPMNPlugin,
         name: 'bpmn-plugin',
-        meta: { description: 'Schema', requiresAuth: true, role: [1] }
+        meta: { description: 'bpmn-plugin' }
       },
-      // { // UserConfig
-      //   path: 'userconfig',
-      //   component: Userconfig,
-      //   name: 'userconfig',
-      //   meta: { description: 'Userconfig' }
-      // },
       { // Schema
         path: 'schema',
         component: Schema,
@@ -106,7 +59,7 @@ const mroutes = [
             path: 'edit/:id',
             component: SchemaNew,
             name: 'schema/edit',
-            meta: { description: 'Schema' },
+            meta: { description: 'Schema/edit' },
             props: {
               id: String,
               required: true
@@ -115,57 +68,22 @@ const mroutes = [
           {
             path: '',
             component: SchemaList,
-            meta: { description: 'Schema' }
+            name: 'schema/list',
+            meta: { description: 'Schema/list' }
           },
           {
             path: 'new',
             component: SchemaNew,
             name: 'schema/new',
-            meta: { description: 'Schema' }
-          },
-          {
-            path: ':id/mapping',
-            component: SchemaMapping,
-            name: 'schema/mapping',
-            meta: { description: 'SchemaMappingList' },
-            props: {
-              id: Number,
-              required: false
-            },
-            children: [
-              {
-                path: '', // http://localhost:8000/schema/f25db232-6985-45ea-8316-5c534e0d4e28/mapping
-                component: SchemaMappingList,
-                name: 'schema/mapping/list',
-                meta: { description: 'SchemaMappingList' },
-                props: {
-                  id: Number,
-                  required: false
-                }
-              },
-              {
-                path: 'new',
-                component: SchemaMappingNew,
-                name: 'schema/mapping/new',
-                meta: { description: 'SchemaMapping' },
-                props: {
-                  id: Number,
-                  required: false
-                }
-              },
-              {
-                path: 'edit/:mappingid',
-                component: SchemaMappingNew,
-                name: 'schema/mapping/edit',
-                meta: { description: 'SchemaMappingEdit' },
-                props: {
-                  id: Number,
-                  required: false
-                }
-              }
-            ]
+            meta: { description: 'Schema/new' }
           }
         ]
+      },
+      { // Emailtemplate
+        path: 'emailtemplate',
+        component: emailtemplate,
+        name: 'emailtemplate',
+        meta: { description: 'emailtemplate' }
       },
       { // Flow
         path: 'flow',
@@ -189,15 +107,6 @@ const mroutes = [
             }
           },
           {
-            path: 'flowoverview/:id',
-            alias: '',
-            component: FlowOverview,
-            name: 'FlowOverview',
-            props: {
-              id: String
-            }
-          },
-          {
             path: 'new',
             component: FlowNew,
             name: 'flow/new',
@@ -212,22 +121,6 @@ const mroutes = [
               id: Number,
               required: false
             }
-          },
-          {
-            path: 'instance/:id',
-            component: flowInstance,
-            name: 'flow/instance',
-            meta: { description: 'Flowz Instance' },
-            props: {
-              id: Number,
-              required: false
-            }
-          },
-          {
-            path: 'instance/log/:id',
-            component: flowLog,
-            name: 'flow/systemlog',
-            meta: { description: 'Flowz Instance systemlog' }
           }
         ]
       },

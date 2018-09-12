@@ -12,13 +12,6 @@ const rest = require('feathers-rest');
 const socketio = require('feathers-socketio');
 
 const handler = require('feathers-errors/handler');
-// const feathers = require('@feathersjs/feathers');
-// const express = require('@feathersjs/express');
-// const configuration = require('@feathersjs/configuration');
-// const rest = require('@feathersjs/express/rest');
-// const socketio = require('@feathersjs/socketio');
-
-// const handler = require('@feathersjs/express/errors');
 const notFound = require('feathers-errors/not-found');
 
 const middleware = require('./middleware');
@@ -29,7 +22,6 @@ const rethinkdb = require('./rethinkdb');
 const subscription = require('flowz-subscription');
 
 const app = feathers();
-// const app = express(feathers());
 
 // Load app configuration
 app.configure(configuration());
