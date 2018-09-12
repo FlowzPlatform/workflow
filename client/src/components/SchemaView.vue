@@ -147,11 +147,14 @@
 
 		</template> -->
     <!-- <Spin v-if="loadingEmail"></Spin> -->
-    <div v-if="schemabinding">
+    <div>
+      <Spin v-if="loadEmail" size="large" fix></Spin>
+      <div v-if="schemabinding">
       <schemasubformview ref="schemasubformview" :schemainstance="formSchemaInstance" id="schemasubformview"></schemasubformview>
     </div>
     <div v-if="email">
       <email :btnArr="btnArr" :flag="flag" :emailSchemaId="emailSchemaId" :sendDataEmail="sendDataEmail" :iid="item.id" v-on:on-done="emailService"></email>
+    </div>
     </div>
   </div>
 </template>
@@ -199,6 +202,7 @@ export default {
   },
   data () {
     return {
+      loadEmail: false,
       skip: 0,
       limit: 10,
       dataTotal: 0,
@@ -356,6 +360,10 @@ export default {
                   obj[v.name] = 1
                 }
               }
+            } else if (v.type === 'currentuser') {
+              obj[v.name] = this.$store.state.user.fullname || this.$store.state.user.email
+            } else if (v.type === 'currenttime') {
+              obj[v.name] = new Date()
             } else if (v.type === 'boolean') {
               if (v.property.defaultValue !== '' || v.property.defaultValue === 'true') {
                 obj[v.name] = true
@@ -532,6 +540,10 @@ export default {
                 obj[v.name] = 1
               }
             }
+          } else if (v.type === 'currentuser') {
+            obj[v.name] = this.$store.state.user.fullname || this.$store.state.user.email
+          } else if (v.type === 'currenttime') {
+            obj[v.name] = new Date()
           } else if (v.type === 'boolean') {
             if (v.property.defaultValue !== '' || v.property.defaultValue === 'true') {
               obj[v.name] = true
@@ -595,20 +607,23 @@ export default {
         }
         // console.log('nextTargetId ', nextTargetId)
         if (nextTargetId.type === 'sendproofmail') {
+          this.loadEmail = true
           this.id = null
           this.schemabinding = true
           if (nextTargetId.hasOwnProperty('emailtemplate')){
             saveemailTemplate.get(nextTargetId.emailtemplate)
             .then((res) => {
               setTimeout(() => {
-                this.sendDataEmail = res.data.template
+                this.sendDataEmail = res.data.template + this.$refs.schemasubformview.$el.outerHTML
                 this.email = true
+                this.loadEmail = false
               }, 1000)
             })
             .catch((err) => {
               setTimeout(() => {
                 this.sendDataEmail = this.$refs.schemasubformview.$el.outerHTML
                 this.email = true
+                this.loadEmail = false
                 console.log(err)
               }, 1000)
             })
@@ -616,6 +631,7 @@ export default {
             setTimeout(() => {
               this.sendDataEmail = this.$refs.schemasubformview.$el.outerHTML
               this.email = true
+              this.loadEmail = false
             }, 1000)
           }
           let flag = false
@@ -1249,4 +1265,11 @@ export default {
   #schemasubformview{
     display: none;
   }
+  .demo-spin-container{
+    	display: inline-block;
+        width: 200px;
+        height: 100px;
+        position: relative;
+        border: 1px solid #eee;
+    }
 </style>

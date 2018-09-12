@@ -155,7 +155,11 @@ import SchemaSubForm from './SchemaSubForm'
                   obj[v.name] = 1
                 }
               }
-            } else if (v.type === 'boolean') {
+            } else if (v.type === 'currentuser') {
+              obj[v.name] = this.$store.state.user.fullname || this.$store.state.user.email
+            } else if (v.type === 'currenttime') {
+              obj[v.name] = new Date()
+            }  else if (v.type === 'boolean') {
               if (v.property.defaultValue !== '' || v.property.defaultValue === 'true') {
                 obj[v.name] = true
               } else {
@@ -204,7 +208,11 @@ import SchemaSubForm from './SchemaSubForm'
                     obj[v.name] = 1
                   }
                 }
-              } else if (v.type === 'boolean') {
+              } else if (v.type === 'currentuser') {
+                obj[v.name] = this.$store.state.user.fullname || this.$store.state.user.email
+              } else if (v.type === 'currenttime') {
+                obj[v.name] = new Date()
+              }  else if (v.type === 'boolean') {
                 if (v.property.defaultValue !== '' || v.property.defaultValue === 'true') {
                   obj[v.name] = true
                 } else {
@@ -266,9 +274,11 @@ import SchemaSubForm from './SchemaSubForm'
           sendmailModal.post(this.emailForm)
           .then((res)=>{
             this.$emit('on-done', true)
+            this.$Message.success('Proof mail send successfully')
           })
           .catch((err)=>{
             console.log(err)
+            this.$Message.error('Proof mail send error')
           })
         } else {
           this.formSchemaInstance.data[0].html = []
@@ -286,9 +296,11 @@ import SchemaSubForm from './SchemaSubForm'
           sendmailModal.post(this.formSchemaInstance.data[0])
           .then((res)=>{
             this.$emit('on-done', true)
+            this.$Message.success('Proof mail send successfully')
           })
           .catch((err)=>{
             console.log(err)
+            this.$Message.error('Proof mail send error')
           })
         }
       }
