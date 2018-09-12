@@ -1,8 +1,8 @@
 <template>
   <div class="SchemaView">
   	<div class="container-fluid" v-if="isFlowzLoaded === true">
-      <Tabs>
-        <TabPane  v-if="itsFirstState === true" label="Instances" icon="ios-list">
+      <div>
+        <div v-if="itsFirstState === true && instanceEntries.length > 0">
           <list-instances :flowzData="flowzData" :instanceEntries="instanceEntries" v-on:setValues="setValues"></list-instances>
           <div>
             <div class="row" v-if="id != null">
@@ -62,9 +62,13 @@
               </div> -->
             </div>
           </div>
-        </TabPane>
+        </div>
+
+        <div v-if="instanceEntries.length == 0">
+          <p align="center">No Data</p>
+        </div>
         
-        <TabPane v-if="itsFirstState === false" label="Data" icon="ios-albums">
+        <div v-if="itsFirstState === false">
 
           <schemalist :schema="dataSchema" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
 
@@ -122,8 +126,8 @@
               </div> -->
             </div>
           </div>
-        </TabPane>
-      </Tabs>
+        </div>
+      </div>
 
       <!-- <mycustom></mycustom> -->
       <Spin size="large" fix v-if="dataLoading"></Spin>
@@ -241,7 +245,7 @@ export default {
       },
       configuration: true,
       dynamicData: true,
-      instanceEntries: null,
+      instanceEntries: [],
       isEmailDone: false,
       itsFirstState: true,
       sendDataEmail: null,
@@ -283,7 +287,7 @@ export default {
           this.$Loading.finish()
           this.dataLoading = false
         } else {
-          this.instanceEntries = null
+          this.instanceEntries = []
           this.dataData = []
           this.itsFirstState = true
           this.dataLoading = false
@@ -967,7 +971,7 @@ export default {
           this.$Loading.finish()
           this.dataLoading = false
         } else {
-          this.instanceEntries = null
+          this.instanceEntries = []
           this.dataData = []
           this.itsFirstState = true
           this.dataLoading = false
@@ -990,11 +994,11 @@ export default {
       this.schemabinding = false
       this.email = false
 
-      let cachedFlowz = _.find(this.$store.state.flowz, (o) => { return o.id === this.$route.params.id})
-      let cachedSchema = _.find(this.$store.state.schema, (o) => { return o.id === cachedFlowz.schema})
+      // let cachedFlowz = _.find(this.$store.state.flowz, (o) => { return o.id === this.$route.params.id})
+      // let cachedSchema = _.find(this.$store.state.schema, (o) => { return o.id === cachedFlowz.schema})
 
-      this.flowzData = cachedFlowz || await this.getFlowz()
-      this.currentSchema = cachedSchema || await this.getSchema() 
+      this.flowzData = await this.getFlowz()
+      this.currentSchema = await this.getSchema() 
 
       // this.flowzData = await this.getFlowz()
       // this.currentSchema = await this.getSchema() 
@@ -1130,10 +1134,27 @@ export default {
         updated (data) {
           // console.log('called on parent: ', data)
           if (data.currentStatus === this.$route.params.stateid) {
-            data = data.data
-            data.data['iid'] = data.id
-            this.instanceEntries.push(data)
-            this.dataData.push(data.data)
+            console.log('Socket Data: ', data)
+            // this.instanceEntries.push(data)
+
+            let fid = data.fid
+            let currentStatus = data.currentStatus
+
+            dataQuerymodel.get(null, {
+              $last: true,
+              fid: fid,
+              currentStatus: currentStatus,
+              $limit: 1
+            }).then(queryresp => {
+              console.log('Query Response: ', queryresp)
+              // this.instanceEntries.push(data)
+              // this.dataData.push(data)
+              // this.dataData = this.instanceEntries
+            }).catch(err => {
+              console.error('Error: ', err)
+            })
+
+            // this.dataData.push(data.data)
           }
           // this.init()
           // console.log('updated called: ', data)

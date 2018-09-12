@@ -582,11 +582,11 @@ export default {
       this.colviewData = []
       this.fid = this.$route.params.id
 
-      let cachedFlowz = _.find(this.$store.state.flowz, (o) => { return o.id === this.$route.params.id })
-      let cachedSchema = _.find(this.$store.state.schema, (o) => { return o.id === cachedFlowz.schema })
+      // let cachedFlowz = _.find(this.$store.state.flowz, (o) => { return o.id === this.$route.params.id })
+      // let cachedSchema = _.find(this.$store.state.schema, (o) => { return o.id === cachedFlowz.schema })
 
-      this.flowzData = cachedFlowz || await this.getFlowz()
-      this.currentSchema = cachedSchema || await this.getSchema(this.flowzData.schema)
+      this.flowzData = await this.getFlowz()
+      this.currentSchema = await this.getSchema(this.flowzData.schema)
       this.populateTables()
 
       //   // let anyCustom = false
