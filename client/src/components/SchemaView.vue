@@ -69,7 +69,8 @@
         </div>
         
         <div v-if="itsFirstState === false">
-
+          <tabs> 
+            <TabPane v-if="admin" label="Data" icon="lock-combination">
           <schemalist v-if="this.$store.state.role === 1" :schema="dataSchema" :pageno="pageno" :role="'admin'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
           <schemalist v-if="this.$store.state.role === 2" :schema="dataSchema" :pageno="pageno" :role="'client_unclaim'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
 
@@ -127,11 +128,13 @@
               </div> -->
             </div>
           </div>
-        </TabPane>
-        <TabPane v-if="client" label="Claim" icon="lock-combination">
+          </tabPane>
+          <TabPane v-if="client" label="Claim" icon="lock-combination">
           <schemalist :schema="dataSchema" :role="'client'" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataClaim" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
         </TabPane>
-      </Tabs>
+          </Tabs>
+        </div>
+      </div>
 
       <!-- <mycustom></mycustom> -->
       <Spin size="large" fix v-if="dataLoading"></Spin>
@@ -139,20 +142,15 @@
 		</div>
 
 		<!-- <template id="dynamicinput">
-
 			<div>
 				<i-input v-if="type == 'text' || type == 'email' || type == 'phone'" v-model="modelName" type="text" :placeholder="placeholder" :min="min"></i-input>
-
 			  <input-number v-if="type == 'number'" :min="min" :max="max" v-model="modelName" :type="type" :placeholder="placeholder"></input-number>
-
 			  <date-picker v-if="type == 'date'" type="date" v-model="modelName" :placeholder="placeholder"></date-picker>
-
 			  <i-select v-if="type == 'dropdown'" v-model="modelName" :placeholder="placeholder">
 			      <i-option v-for="dpd in options" :value="dpd" :key="dpd">{{ dpd }}</i-option>
 			  </i-select>
 			  <i-checkbox v-if="type == 'boolean'" v-model="modelName">{{field.name}}</i-checkbox>
 			</div>
-
 		</template> -->
     <!-- <Spin v-if="loadingEmail"></Spin> -->
     <div>
@@ -210,7 +208,7 @@ export default {
   data () {
     return {
       client: false,
-      client: true,
+      admin: true,
       dataClaim: [],
       loadEmail: false,
       skip: 0,
@@ -1035,8 +1033,12 @@ export default {
   },
   mounted () {
     this.init()
-    this.client = this.$store.state.role === 2 ? true : false
-    this.admin = this.$store.state.role === 1 ? true : false
+    if (this.$store.state.role === 2) {
+      this.client = true
+    }
+    if (this.$store.state.role === 1) {
+      this.admin = true
+    }
   },
   computed: {
   },
@@ -1049,38 +1051,38 @@ export default {
     }
   },
   feathers: {
-      'finstance': {
-        created (data) {
-        },
-        updated (data) {
-          if (this.$store.state.role === 1) {
-            if (data.currentStatus === this.$route.params.stateid) {
-                data = data.data
-                data.data['iid'] = data.id
-                this.instanceEntries.push(data)
-                this.dataData.push(data.data)
-            }
-          } 
-          if(this.$store.state.role === 2) {
-            if (data.claimuser === '') {
-              this.dataClaim.push(data)
-            } else {
-              this.dataData2.push(data)
-            }
-            // if (data.currentStatus === this.$route.params.stateid) {
-            //   data = data.data
-            //   data.data['iid'] = data.id
-            //   this.dataClaim.push(data.data)
-            // }
+    'finstance': {
+      created (data) {
+      },
+      updated (data) {
+        if (this.$store.state.role === 1) {
+          if (data.currentStatus === this.$route.params.stateid) {
+            data = data.data
+            data.data['iid'] = data.id
+            this.instanceEntries.push(data)
+            this.dataData.push(data.data)
           }
-          // this.init()
-          // console.log('updated called: ', data)
-          // _.remove(this.data, (o) => { return o.id === data.id })
-        },
-        removed (data) {
         }
+        if (this.$store.state.role === 2) {
+          if (data.claimuser === '') {
+            this.dataClaim.push(data)
+          } else {
+            this.dataData2.push(data)
+          }
+          // if (data.currentStatus === this.$route.params.stateid) {
+          //   data = data.data
+          //   data.data['iid'] = data.id
+          //   this.dataClaim.push(data.data)
+          // }
+        }
+        // this.init()
+        // console.log('updated called: ', data)
+        // _.remove(this.data, (o) => { return o.id === data.id })
+      },
+      removed (data) {
       }
     }
+  }
 }
 
 </script>
