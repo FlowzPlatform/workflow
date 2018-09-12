@@ -329,7 +329,9 @@ export default {
             finalValue.isCompletedTask = true
           } else {
             if (item.key === params.row.currentStatus) {
-              finalValue.obj = null
+              // console.log('params.row.stageReference.length: ', params.row.stageReference[(params.row.stageReference.length - 1)])
+              // obj = params.row.stageReference[(params.row.stageReference.length - 1)]
+              finalValue.obj = params.row.stageReference[(params.row.stageReference.length - 1)]
               finalValue.isCurrentTask = true
               finalValue.isCompletedTask = false
             } else {

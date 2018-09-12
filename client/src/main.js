@@ -10,10 +10,10 @@ import routes from './router'
 import store from './store'
 import config from '@/config'
 
-import BootstrapVue from 'bootstrap-vue'
-import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
-Vue.use(BootstrapVue)
+// import BootstrapVue from 'bootstrap-vue'
+// import 'bootstrap/dist/css/bootstrap.css'
+// import 'bootstrap-vue/dist/bootstrap-vue.css'
+// Vue.use(BootstrapVue)
 
 // import CellRender from '@/components/cellRender'
 // Vue.use(CellRender)
@@ -43,10 +43,10 @@ const vueFeathers = require('vue-feathers')
   // And plug it in]
 Vue.use(vueFeathers, feathers)
 
-import ElementUI from 'element-ui'
-import element from 'element-ui/src/locale/lang/en'
-import 'element-ui/lib/theme-default/index.css'
-Vue.use(ElementUI, { element })
+// import ElementUI from 'element-ui'
+// import element from 'element-ui/src/locale/lang/en'
+// import 'element-ui/lib/theme-default/index.css'
+// Vue.use(ElementUI, { element })
 
 /* vueTinymce */
 import vueTinymce from '@deveodk/vue-tinymce'

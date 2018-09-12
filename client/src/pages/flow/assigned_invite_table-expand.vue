@@ -24,7 +24,6 @@
     import axios from 'axios'
     import config from '../../config/index'
     let subscriptionUrl = config.subscriptionUrl
-    import Cookies from 'js-cookie'
     import moment from 'moment'
     import Vue from 'vue'
     import iView from 'iview'
@@ -123,7 +122,7 @@
           axios({
             method: 'post',
             url: 'https://api.' + process.env.domainkey + '/vmailmicro/sendEmail',
-            headers: { authorization: Cookies.get('auth_token') },
+            headers: { authorization: this.$store.state.token },
             data: { 'to': data.toEmail, 'from': data.fromEmail, 'subject': 'Invitation from Flowz', 'body': SendEmailBody }
           })
           .then(async (result) => {
@@ -158,7 +157,7 @@
                 url: subscriptionUrl + 'invite',
                 params: paramss,
                 headers: {
-                  authorization: Cookies.get('auth_token')
+                  authorization: this.$store.state.token
                 }
               })
               .then(function (response) {
@@ -185,7 +184,7 @@
               subscriptionId: this.row.subscriptionId
             },
             headers: {
-              authorization: Cookies.get('auth_token')
+              authorization: this.$store.state.token
             }
           })
           .then(function (result) {

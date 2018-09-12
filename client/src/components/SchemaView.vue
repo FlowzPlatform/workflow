@@ -275,7 +275,6 @@ export default {
         $limit: this.limit,
         'id[$search]': '^' + query.text
       }).then(res => {
-        console.log('Search Response : ', res)
         this.isFlowzLoaded = true
         let firstState = this.flowzData.first
         if (firstState === this.$route.params.stateid) {
@@ -302,7 +301,6 @@ export default {
       })
     },
     sortData (object) {
-      console.log('Parent Called: ', object)
     },
     emailService (item) {
       this.isEmailDone = true
@@ -315,7 +313,6 @@ export default {
       this.init()
     },
     handlepage (skip, limit, size) {
-      console.log(skip, limit, size)
       this.limit = size
       this.skip = 0
       this.init()

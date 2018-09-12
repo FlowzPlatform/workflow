@@ -154,7 +154,6 @@ let subscriptionUrl = config.subscriptionUrl
 // const deepRecord = require('../../assets/js/deepstream/deepRecord.js')
 import expandInviteRow from './own_assign.vue'
 import moment from 'moment'
-import Cookies from 'js-cookie'
 
 export default {
   name: 'Flowz',
@@ -541,7 +540,7 @@ export default {
       axios.get(subscriptionUrl + 'subscription-invitation', {
         // axios.get('http://172.16.230.86:3030/subscription-invitation', {
         headers: {
-          'Authorization': Cookies.get('auth_token')
+          'Authorization': this.$store.state.token
         },
         params: {isDeleted: true, own: false}
       })
@@ -595,7 +594,7 @@ export default {
           method: 'POST',
           url: subscriptionUrl + 'invite',
           headers: {
-            authorization: Cookies.get('auth_token')
+            authorization: this.$store.state.token
           },
           data: params
         })
@@ -616,8 +615,8 @@ export default {
           if (error.response.status === 401) {
             let location = psl.parse(window.location.hostname)
             location = location.domain === null ? location.input : location.domain
-            Cookies.remove('auth_token', {domain: location})
-            Cookies.remove('subscriptionId', {domain: location})
+            this.$cookie.remove('auth_token', {domain: location})
+            this.$cookie.remove('subscriptionId', {domain: location})
             self.$store.commit('logout', self)
             self.$router.push({
               name: 'login'

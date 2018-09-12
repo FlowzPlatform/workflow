@@ -38,7 +38,11 @@
               </div>
             </div>
             <div class="col-md-2">
-              <Button icon="search" type="primary" @click="searchData" long>Search</Button>
+              <Button icon="search" type="primary" @click="searchData">Search</Button>
+              <Tooltip content="Clear Search" style="float: right;">
+                <Button icon="ios-trash" type="error" @click="clearSearchData"></Button>  
+              </Tooltip>
+              
             </div>
           </div>
         </div>
@@ -306,9 +310,19 @@
       })
     },
     methods: {
+      clearSearchData () {
+        this.searchQuery = ''
+        this.selectedFilterBy = ''
+        let object = {
+          text: '',
+          filterBy: ''
+        }
+        this.$emit('search-data', object)
+      },
       searchData () {
         let object = {
-          text: this.searchQuery
+          text: this.searchQuery,
+          filterBy: this.selectedFilterBy
         }
         this.$emit('search-data', object)
       },
