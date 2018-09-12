@@ -267,7 +267,7 @@ export default {
                   let serviceInx = _.findIndex(resource.data.data, {id: resourceId})
                   if (serviceInx !== -1) {
                     let serviceId = resource.data.data[serviceInx].service
-                    _.map(item.json.processList, (o) => {
+                    _.map(item.processList, (o) => {
                       if (o.id.toLowerCase() === serviceId) {
                         if (o.hasOwnProperty('permission')) {
                           o.permission.push(action)
@@ -281,7 +281,7 @@ export default {
                 }
               }
             }
-            let firstTarget = _.find(item.json.processList, {type: 'start'})
+            let firstTarget = _.find(item.processList, {type: 'start'})
             if (firstTarget !== null && firstTarget !== undefined && Object.keys(firstTarget).length > 0) {
               let nextTId = firstTarget.target[0].id
               _.map(item.json.processList, (m) => {
@@ -291,7 +291,7 @@ export default {
                 return m
               })
             }
-            _.remove(item.json.processList, (m) => {
+            _.remove(item.processList, (m) => {
               if (!m.hasOwnProperty('permission')) {
                 return m
               }
@@ -300,7 +300,7 @@ export default {
           // console.log('fData', fData)
           this.flowzList = _.map(fData, (m) => {
             m.count = 0
-            _.map(m.json.processList, (p) => {
+            _.map(m.processList, (p) => {
               p.count = 0
               return p
             })
@@ -339,7 +339,7 @@ export default {
           let once = false
           let mdata = []
           sitem.count = 0
-          for (let pitem of sitem.processList) {
+          for (let pitem in sitem.processList) {
             if (!once) {
               finstanceModal.get(null, {
                 $paginate: false,

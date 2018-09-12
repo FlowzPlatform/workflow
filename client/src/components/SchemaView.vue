@@ -69,8 +69,10 @@
         </div>
         
         <div v-if="itsFirstState === false">
-
-          <schemalist :schema="dataSchema" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+          <tabs> 
+            <TabPane v-if="admin" label="Data" icon="lock-combination">
+          <schemalist v-if="this.$store.state.role === 1" :schema="dataSchema" :pageno="pageno" :role="'admin'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+          <schemalist v-if="this.$store.state.role === 2" :schema="dataSchema" :pageno="pageno" :role="'client_unclaim'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
 
           <div style="padding: 10px">
             <div class="row" v-if="id != null">
@@ -126,6 +128,11 @@
               </div> -->
             </div>
           </div>
+          </tabPane>
+          <TabPane v-if="client" label="Claim" icon="lock-combination">
+          <schemalist :schema="dataSchema" :role="'client'" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataClaim" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+        </TabPane>
+          </Tabs>
         </div>
       </div>
 
@@ -135,20 +142,15 @@
 		</div>
 
 		<!-- <template id="dynamicinput">
-
 			<div>
 				<i-input v-if="type == 'text' || type == 'email' || type == 'phone'" v-model="modelName" type="text" :placeholder="placeholder" :min="min"></i-input>
-
 			  <input-number v-if="type == 'number'" :min="min" :max="max" v-model="modelName" :type="type" :placeholder="placeholder"></input-number>
-
 			  <date-picker v-if="type == 'date'" type="date" v-model="modelName" :placeholder="placeholder"></date-picker>
-
 			  <i-select v-if="type == 'dropdown'" v-model="modelName" :placeholder="placeholder">
 			      <i-option v-for="dpd in options" :value="dpd" :key="dpd">{{ dpd }}</i-option>
 			  </i-select>
 			  <i-checkbox v-if="type == 'boolean'" v-model="modelName">{{field.name}}</i-checkbox>
 			</div>
-
 		</template> -->
     <!-- <Spin v-if="loadingEmail"></Spin> -->
     <div>
@@ -205,6 +207,9 @@ export default {
   },
   data () {
     return {
+      client: false,
+      admin: true,
+      dataClaim: [],
       loadEmail: false,
       skip: 0,
       limit: 10,
@@ -226,6 +231,7 @@ export default {
       schema: {},
       dataSchema: {},
       dataData: [],
+      dataData2: [],
       entity: [],
       savebutton: 'Save',
       validFlag: true,
@@ -980,7 +986,12 @@ export default {
         this.dataTotal = queryresp.data.total
         if (queryresp.data.data.length > 0) {
           this.instanceEntries = queryresp.data.data
-          this.dataData = this.instanceEntries
+          if (this.$store.state.role === 2) {
+            this.dataClaim = _.filter(this.instanceEntries, function (o) { return o.claimuser === '' })
+            this.dataData2 = _.filter(this.instanceEntries, function (o) { return o.claimuser !== '' })
+          } else {
+            this.dataData = this.instanceEntries
+          }
           // this.$Spin.hide()
           this.$Loading.finish()
           this.dataLoading = false
@@ -1019,6 +1030,12 @@ export default {
   },
   mounted () {
     this.init()
+    if (this.$store.state.role === 2) {
+      this.client = true
+    }
+    if (this.$store.state.role === 1) {
+      this.admin = true
+    }
   },
   computed: {
   },
@@ -1035,23 +1052,29 @@ export default {
       created (data) {
       },
       updated (data) {
-        if (data.currentStatus === this.$route.params.stateid) {
-          let fid = data.fid
-          let currentStatus = data.currentStatus
-          dataQuerymodel.get(null, {
-            $last: true,
-            fid: fid,
-            currentStatus: currentStatus,
-            $limit: 1
-          }).then(queryresp => {
-              // this.instanceEntries.push(data)
-              // this.dataData.push(data)
-              // this.dataData = this.instanceEntries
-          }).catch(err => {
-            console.error('Error: ', err)
-          })
+        if (this.$store.state.role === 1) {
+          if (data.currentStatus === this.$route.params.stateid) {
+            data = data.data
+            data.data['iid'] = data.id
+            this.instanceEntries.push(data)
+            this.dataData.push(data.data)
+          }
         }
-          // _.remove(this.data, (o) => { return o.id === data.id })
+        if (this.$store.state.role === 2) {
+          if (data.claimuser === '') {
+            this.dataClaim.push(data)
+          } else {
+            this.dataData2.push(data)
+          }
+          // if (data.currentStatus === this.$route.params.stateid) {
+          //   data = data.data
+          //   data.data['iid'] = data.id
+          //   this.dataClaim.push(data.data)
+          // }
+        }
+        // this.init()
+        // console.log('updated called: ', data)
+        // _.remove(this.data, (o) => { return o.id === data.id })
       },
       removed (data) {
       }

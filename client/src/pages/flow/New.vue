@@ -375,11 +375,9 @@
             schemaModel.get(null, {
               $paginate: false,
               isdeleted: false
-              // $limit: 0,
-              // $skip: 0
             }).then((response) => {
-              response.splice(0, 0, { title: '---select---', id: 0 })
-              resolve(response)
+              response.data.splice(0, 0, { title: '---select---', id: 0 })
+              resolve(response.data)
             }).catch(error => {
               reject(error)
             })

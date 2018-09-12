@@ -48,7 +48,23 @@
         </div>
       </div>
     </div>
-    <div>
+    <div v-if="role === 'admin'">
+      <Table @on-sort-change="sortTableData" highlight-row :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
+      <div style="margin: 10px;overflow: hidden">
+        <div style="float: right;">
+          <Page :total="total" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+        </div>
+      </div>
+    </div>
+    <div v-if="role === 'client'">
+      <Table @on-sort-change="sortTableData" highlight-row :columns="setColumns2" :data="data" :border="config.border" :stripe="config.stripe"></Table>
+      <div style="margin: 10px;overflow: hidden">
+        <div style="float: right;">
+          <Page :total="total" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+        </div>
+      </div>
+    </div>
+    <div v-if="role === 'client_unclaim'">
       <Table @on-sort-change="sortTableData" highlight-row :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
       <div style="margin: 10px;overflow: hidden">
         <div style="float: right;">
@@ -61,6 +77,7 @@
 <script>
   import _ from 'lodash'
   import $ from 'jquery'
+  import finstanceModal from '@/api/finstance'
   export default {
     name: 'schemalist',
     props: {
@@ -72,10 +89,12 @@
       'instanceEntries': Array,
       'dataTotal': Number,
       'pageno': Number,
-      'limit': Number
+      'limit': Number,
+      'role': String
     },
     data () {
       return {
+        dataClaim: [],
         skip: 0,
         total: 0,
         searchQuery: null,
@@ -220,7 +239,7 @@
       },
       setColumns () {
         const cols = []
-        if (this.dynamicData) {
+        if (this.dynamicData && this.$store.state.role === 1) {
           cols.push({
             title: 'Action',
             width: 100,
@@ -231,6 +250,9 @@
                   props: {
                     shape: 'circle',
                     icon: 'ios-play'
+                  },
+                  domProps: {
+                    title: 'Start'
                   },
                   on: {
                     'click': async () => {
@@ -250,6 +272,149 @@
                     }
                   }
                 }, '')
+              ])
+            }
+          })
+          cols.push({
+            title: 'ID',
+            key: 'iid',
+            width: 260
+          })
+        }
+        if (this.dynamicData && this.$store.state.role === 2) {
+          cols.push({
+            title: 'Action',
+            width: 200,
+            align: 'center',
+            render: (h, params) => {
+              return h('div', [
+                h('Button', {
+                  props: {
+                    shape: 'circle',
+                    icon: 'ios-play'
+                  },
+                  domProps: {
+                    title: 'Start'
+                  },
+                  on: {
+                    'click': async () => {
+                      this.$Loading.start()
+                      let indexFind = _.findIndex(this.instanceEntries, (o) => { return o.id === params.row.id })
+                      let currentObj = this.flowzData.processList[this.instanceEntries[indexFind].currentStatus]
+                      let values = {
+                        id: this.flowzData.schema,
+                        item: this.instanceEntries[indexFind],
+                        formName: currentObj.name,
+                        currentState: currentObj.id,
+                        flowzData: this.flowzData,
+                        formData: params.row.data
+                      }
+                      this.$Loading.finish()
+                      await this.$emit('setValues', values)
+                    }
+                  }
+                }, ''),
+                h('Button', {
+                  props: {
+                    shape: 'circle',
+                    icon: 'ios-undo',
+                    size: 'large'
+                  },
+                  style: {
+                    marginLeft: '7px',
+                    color: '#0052a9',
+                    'border-radius': '32px'
+                  },
+                  domProps: {
+                    title: 'Unclaim'
+                  },
+                  on: {
+                    'click': async () => {
+                      finstanceModal.patch(params.row.id, {claimuser: ''})
+                      .then((res) => {
+                        this.data.splice(params.index, 1)
+                        this.$Notice.success({title: 'Successfully Unclaim'})
+                      })
+                      .catch((err) => {
+                        console.log(err)
+                        this.$Notice.error({title: 'Unclaim error'})
+                      })
+                    }
+                  }
+                }, '')
+              ])
+            }
+          })
+          cols.push({
+            title: 'ID',
+            key: 'iid',
+            width: 260
+          })
+        }
+        if (this.configuration) {
+          if (this.config.index) {
+            cols.push({
+              type: 'index',
+              width: 60,
+              align: 'center'
+            })
+          }
+          for (let item of this.dataConfig) {
+            if (item.show) {
+              cols.push({
+                title: item.title,
+                key: item.key,
+                sortable: item.sortable,
+                width: item.width,
+                render: (h, params) => {
+                  return h('div', params.row.data[item.key])
+                }
+              })
+            }
+          }
+        } else {
+          if (this.schema.hasOwnProperty('entity')) {
+            for (let item of this.schema.entity) {
+              cols.push({
+                title: item.name,
+                key: item.name,
+                width: 150,
+                render: (h, params) => {
+                  return h('div', params.row.data[item.name])
+                }
+              })
+            }
+          }
+        }
+        return cols
+      },
+      setColumns2 () {
+        const cols = []
+        if (this.dynamicData) {
+          cols.push({
+            title: 'Action',
+            width: 100,
+            align: 'center',
+            render: (h, params) => {
+              return h('div', [
+                h('Button', {
+                  props: {
+                    shape: 'circle'
+                  },
+                  on: {
+                    'click': async () => {
+                      finstanceModal.patch(params.row.id, {claimuser: this.$store.state.user._id})
+                      .then((res) => {
+                        this.data.splice(params.index, 1)
+                        this.$Notice.success({title: 'Successfully Claim'})
+                      })
+                      .catch((err) => {
+                        console.log(err)
+                        this.$Notice.error({title: 'claim error'})
+                      })
+                    }
+                  }
+                }, 'claim')
               ])
             }
           })
@@ -351,27 +516,9 @@
         },
         updated (data) {
           // console.log('updated called: ', data)
-          // _.remove(this.data, (o) => { return o.id === data.id })
-          // let self = this
-          // if (data.fid === this.$route.params.id) {
-          //   if (this.$route.params.stateid) {
-          //     if (data.currentStatus !== this.$route.params.stateid) {
-          //       let inx = _.findIndex(this.instanceEntries, {id: data.id})
-          //       if (inx !== -1) {
-          //         self.instanceEntries.splice(inx, 1)
-          //         self.id = null
-          //       }
-          //     } else {
-          //       self.instanceEntries.push(data)
-          //     }
-          //   } else {
-          //     let inx = _.findIndex(this.instanceEntries, {id: data.id})
-          //     if (inx !== -1) {
-          //       self.instanceEntries.splice(inx, 1)
-          //       self.instanceEntries.splice(inx, 0, data)
-          //     }
-          //   }
-          // }
+          if (this.$store.state.role === 1) {
+            _.remove(this.data, (o) => { return o.id === data.id })
+          }
         },
         removed (data) {
         }
