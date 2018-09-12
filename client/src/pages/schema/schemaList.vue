@@ -20,7 +20,7 @@
   export default {
     data () {
       return {
-        loading: true,
+        loading: false,
         schemaData: [],
         limit: 10,
         cpage: 1,
@@ -180,15 +180,22 @@
         })
       },
       async init () {
-        var string = '&$skip=' + this.skip + '&$limit=' + this.limit
-        this.schemaData = await (schemaModel.getCustom('?isdeleted=false&$sort[createdAt]=-1' + string).then(res => {
+        // var string = '&$skip=' + this.skip + '&$limit=' + this.limit
+        this.loading = true
+        this.schemaData = await (schemaModel.get(null, {
+          isdeleted: false,
+          '$sort[createdAt]': -1,
+          $skip: this.skip,
+          $limit: this.$limit
+        }).then(res => {
+          this.loading = false
           this.total = res.data.total
           return res.data.data
         }).catch(err => {
           console.log(err)
+          this.loading = false
           return []
         }))
-        this.loading = false
       }
     },
     mounted () {
