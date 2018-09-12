@@ -380,8 +380,12 @@ export default {
           label: 'File'
         },
         {
-          value: 'autogenerate',
-          label: 'Auto Generate'
+          value: 'currentuser',
+          label: 'Current User'
+        },
+        {
+          value: 'currenttime',
+          label: 'Current Time'
         }
       ],
       cutomtypes: [],
@@ -602,8 +606,8 @@ export default {
         'boolean': ['defaultValue', 'placeholder', 'optional'],
         'date': ['defaultValue', 'mindate', 'maxdate', 'placeholder', 'optional'],
         'dropdown': ['options', 'defaultValue', 'placeholder', 'optional'],
-        'file': ['optional', 'isMultiple'],
-        'autogenerate': ['format', 'lengthofdigits', 'startfrom']
+        'file': ['optional', 'isMultiple']
+
       }
       if (typePropertys[this.formSchema.entity[index].type] === undefined) {
         return ['IsArray'].indexOf(property) >= 0

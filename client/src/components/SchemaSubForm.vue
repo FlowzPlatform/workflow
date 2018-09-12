@@ -29,10 +29,10 @@
                                     <b class="field-label">{{field.name}}</b>
                                 </Col>
                                 <Col :span="16" style="padding-top: 10px;">
-                                    
                                     <Input v-if="field.type == 'textarea'" v-model="schemainstance.data[index][field.name]" type="textarea" :rows="schemainstance.data[index][field.numberoflines]" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name" :max="(field.property.max > 0)?field.property.max : Infinity"/>
-
                                     <Input v-if="field.type == 'text' || field.type == 'email' || field.type == 'phone'" v-model="schemainstance.data[index][field.name]" type="text" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name" :max="(field.property.max > 0)?field.property.max : Infinity"></Input>
+                                    <Input v-if="field.type == 'currentuser'" v-model="schemainstance.data[index][field.name]" type="text" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name" :max="(field.property.max > 0)?field.property.max : Infinity"></Input>
+                                    <Input v-if="field.type == 'currenttime'" v-model="schemainstance.data[index][field.name]" type="text" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name" :max="(field.property.max > 0)?field.property.max : Infinity"></Input>
                                     
                                     <InputNumber v-if="field.type == 'number'" :min="(field.property.min > 0)?field.property.min : -Infinity" :max="(field.property.max > 0)?field.property.max : Infinity" v-model="schemainstance.data[index][field.name]" :type="field.type" :placeholder="field.name"></InputNumber>
                                     
@@ -193,6 +193,10 @@ export default {
                     obj[v.name] = 1
                   }
                 }
+              } else if (v.type === 'currentuser') {
+                obj[v.name] = this.$store.state.user.fullname || this.$store.state.user.email
+              } else if (v.type === 'currenttime') {
+                obj[v.name] = new Date()
               } else if (v.type === 'boolean') {
                 if (
                   v.property.defaultValue !== '' ||
@@ -262,6 +266,10 @@ export default {
                 obj[v.name] = 1
               }
             }
+          } else if (v.type === 'currentuser') {
+            obj[v.name] = this.$store.state.user.fullname || this.$store.state.user.email
+          } else if (v.type === 'currenttime') {
+            obj[v.name] = new Date()
           } else if (v.type === 'boolean') {
             if (
               v.property.defaultValue !== '' ||
