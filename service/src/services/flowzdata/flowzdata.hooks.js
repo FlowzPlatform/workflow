@@ -67,16 +67,17 @@ function afterCreate (hook) {
         if (hook.params.hasOwnProperty('nextTarget')) {
           mdata.currentStatus = hook.params.nextTarget;
         }
-        if (mdata.stageReference.length > 0) {
-          console.log(cuurentObj.id, mdata.stageReference[mdata.stageReference.length - 1].StageName)
-          // if (mdata.stageReference[mdata.stageReference.length - 1].StageName === cuurentObj.id) {
-          mdata.stageReference[mdata.stageReference.length - 1].completedAt = new Date().toISOString()
-          // }
-        }
+        // if (mdata.stageReference.length > 0) {
+        //   // console.log(cuurentObj.id, mdata.stageReference[mdata.stageReference.length - 1].StageName)
+        //   // if (mdata.stageReference[mdata.stageReference.length - 1].StageName === cuurentObj.id) {
+        //   mdata.stageReference[mdata.stageReference.length - 1].completedAt = new Date().toISOString()
+        //   // }
+        // }
         let referenceObj = {
           StageName: finstRes.currentStatus,
           stageRecordId: hook.result.id,
-          createdAt: new Date().toISOString(),
+          createdAt: finstRes.modifiedAt,
+          completedAt: new Date().toISOString(),
           user: {
             id: (hook.params.userPackageDetails !== undefined ? hook.params.userPackageDetails._id: null),
             name: (hook.params.userPackageDetails !== undefined ? hook.params.userPackageDetails.fullname: null),

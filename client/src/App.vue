@@ -9,10 +9,50 @@
 export default {
   name: 'app',
   mounted () {
-    // this.$store.state.schema = []
-    // this.$store.dispatch('getSchema')
-    // this.$store.state.flowz = []
-    // this.$store.dispatch('getFlowzdata')
+  },
+  feathers: {
+    'schema': {
+      created (data) {
+        this.$store.state.Cache = null
+        this.$store.state.Cache = {}
+      },
+      updated (data) {
+        this.$store.state.Cache = null
+        this.$store.state.Cache = {}
+      },
+      removed (data) {
+        this.$store.state.Cache = null
+        this.$store.state.Cache = {}
+      }
+    },
+    'flowz': {
+      created (data) {
+        this.$store.state.Cache = null
+        this.$store.state.Cache = {}
+      },
+      updated (data) {
+        this.$store.state.Cache = null
+        this.$store.state.Cache = {}
+      },
+      removed (data) {
+        this.$store.state.Cache = null
+        this.$store.state.Cache = {}
+      }
+    },
+    'emailtemplate': {
+      created (data) {
+        this.$store.state.Cache = null
+        this.$store.state.Cache = {}
+      },
+      updated (data) {
+        this.$store.state.Cache = null
+        this.$store.state.Cache = {}
+      },
+      removed (data) {
+        this.$store.state.Cache = null
+        this.$store.state.Cache = {}
+      }
+    }
   }
 }
 </script>

@@ -18,7 +18,7 @@ module.exports = {
       hook => beforeUpdate(hook)
     ],
     patch: [
-      hook => beforeUpdate(hook)
+      hook => beforePatch(hook)
     ],
     remove: []
   },
@@ -81,6 +81,12 @@ function beforeFind (hook) {
 
 function beforeUpdate (hook) {
   hook.data.modifiedAt = new Date().toISOString();
+}
+
+function beforePatch (hook) {
+  if (hook.data.hasOwnProperty('stageReference')) {
+    hook.data.modifiedAt = new Date().toISOString();
+  }
 }
 
 function beforeCreate (hook) {
