@@ -23,6 +23,12 @@
                         Home
                       </router-link>
                     </Menu-item> -->
+                    <Menu-item name="4" v-if="getRole == 1">
+                        <router-link to="/admin/emailtemplate">
+                            <Icon type="email" :size="14"></Icon>
+                            Email Template
+                        </router-link>
+                    </Menu-item>
                     <Menu-item name="2" v-if="getRole == 1">
                         <router-link to="/admin/schema">
                             <Icon type="filing" :size="14"></Icon>

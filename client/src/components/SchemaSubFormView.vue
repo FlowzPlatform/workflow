@@ -42,10 +42,10 @@
                                 </div>
                                 <div style="display: block; width: 49%;">
                                     <label type="file" v-if="field.type == 'file'"/>
-                                      <div v-for="val in schemainstance.data[index][field.name]">
+                                      <div v-for="(val,i) in schemainstance.data[index][field.name].slice(1)">
                                           <ul>
                                             <li>
-                                              <a :href="val" target="_blank" style="color:black;padding:2px">Attachment - {{inx}}</a>
+                                              <a :href="val" target="_blank" style="color:black;padding:2px">Attachment - {{i+1}}</a>
                                             </li>
                                           </ul>
                                       </div>
@@ -94,7 +94,6 @@ export default {
       }
     },
     async getChildData (id) {
-      // alert(id)
       var arrObj = []
       var self = this
       await schemaModel.get(id)

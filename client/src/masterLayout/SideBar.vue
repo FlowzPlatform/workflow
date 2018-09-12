@@ -37,8 +37,7 @@
           <template v-else>
             <Submenu :name="index" v-for="(item, index) in flowzList" :key="index">
               <template slot="title">
-                  <!-- <Icon type="ios-people" /> -->
-                  {{item.json.name}}&nbsp;&nbsp;
+                  {{item.name}}&nbsp;&nbsp;
                   <span>
                     <Badge :count="item.count"  class-name="demo-badge-alone"></Badge>
                   </span>
@@ -50,15 +49,14 @@
                   </span>
               </template>
               <template
-                v-for="(subItem, inx) in item.json.processList" 
-                v-if="subItem.type !== 'start' && subItem.type !== 'endevent' && subItem.type !== 'intermediatethrowevent'"
+                v-for="(subItem, key) in getByOrder(item.processList)" 
+                v-if="subItem.type !== 'startevent' && subItem.type !== 'endevent' && subItem.type !== 'intermediatethrowevent'"
               >
                 <Menu-item 
                   :name="item.id + '/' + subItem.id" 
-                  :key="inx" 
+                  :key="key" 
                 >
                   <div :title="subItem.id" class="submentItem">
-                    <!-- <a @click="handleSubmenu(item, subItem)"> -->
                       {{subItem.name}}
                       <span style="float:right;">
                         <Badge :count="subItem.count"  class-name="demo-badge-alone"></Badge>
@@ -66,7 +64,6 @@
                       <span v-if="subItem.isfirst" style="float:right;padding-right:5px;" title="Create Instance" @click.prevent="createInstance(item, subItem.id)">
                         <i class="fa fa-plus"></i>
                       </span>
-                    <!-- </a> -->
                   </div>
                 </Menu-item>
               </template>
@@ -99,6 +96,15 @@ export default {
     // console.log('this.$store.state.activeFlow', this.$store.state.activeFlow)
   },
   methods: {
+    getByOrder (array) {
+      let allProcess = []
+      for (let key in array) {
+        allProcess[array[key].order] = array[key]
+      }
+      return allProcess.sort((a, b) => {
+        return a.order - b.order
+      })
+    },
     createInstance (item, subItemID) {
       // console.log('item', item)
       this.$Loading.start()
@@ -140,7 +146,6 @@ export default {
         this.$router.push('/schemaview/' + node[0] + '/' + node[1])
       }
     },
-
     makeid () {
       var text = ''
       var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
@@ -149,10 +154,6 @@ export default {
 
       return text
     },
-    // handleSubmenu (item, subitem) {
-    //   // console.log(item, subitem)
-    //   this.$router.push('/schemaview/' + item.id + '/' + subitem.id)
-    // },
     async getModuleRoles (moduleId) {
       if (this.roles[moduleId]) {
         return this.roles[moduleId]
@@ -181,22 +182,20 @@ export default {
       if (this.$store.state.role === 1) {
         this.loading = true
         if (this.$store.state.flowz.length > 0) {
-          // console.log('......', this.$store.state.flowz)
-          // this.loading = false
           let flowZData = _.cloneDeep(this.$store.state.flowz)
           this.flowzList = _.map(flowZData, (m) => {
             m.count = 0
-            _.map(m.json.processList, (p) => {
+            _.map(m.processList, (p) => {
               p.count = 0
               return p
             })
             return m
           })
           this.loading = false
+          // console.log('flowzList', this.flowzList)
           this.setCounters()
         } else {
           await flowzModal.get(null, {
-            $select: ['json', 'id'],
             $paginate: false
           })
           .then(async (response) => {
@@ -204,7 +203,7 @@ export default {
             this.$store.state.flowz = _.cloneDeep(response.data)
             this.flowzList = _.map(response.data, (m) => {
               m.count = 0
-              _.map(m.json.processList, (p) => {
+              _.map(m.processList, (p) => {
                 p.count = 0
                 return p
               })
@@ -268,7 +267,7 @@ export default {
                   let serviceInx = _.findIndex(resource.data.data, {id: resourceId})
                   if (serviceInx !== -1) {
                     let serviceId = resource.data.data[serviceInx].service
-                    _.map(item.json.processList, (o) => {
+                    _.map(item.processList, (o) => {
                       if (o.id.toLowerCase() === serviceId) {
                         if (o.hasOwnProperty('permission')) {
                           o.permission.push(action)
@@ -282,7 +281,7 @@ export default {
                 }
               }
             }
-            let firstTarget = _.find(item.json.processList, {type: 'start'})
+            let firstTarget = _.find(item.processList, {type: 'start'})
             if (firstTarget !== null && firstTarget !== undefined && Object.keys(firstTarget).length > 0) {
               let nextTId = firstTarget.target[0].id
               _.map(item.json.processList, (m) => {
@@ -292,7 +291,7 @@ export default {
                 return m
               })
             }
-            _.remove(item.json.processList, (m) => {
+            _.remove(item.processList, (m) => {
               if (!m.hasOwnProperty('permission')) {
                 return m
               }
@@ -301,7 +300,7 @@ export default {
           // console.log('fData', fData)
           this.flowzList = _.map(fData, (m) => {
             m.count = 0
-            _.map(m.json.processList, (p) => {
+            _.map(m.processList, (p) => {
               p.count = 0
               return p
             })
@@ -325,10 +324,14 @@ export default {
           }).then(res => {
             // console.log('res count', res.data)
             sitem.count = 0
-            for (let pitem of sitem.json.processList) {
+            _.map(sitem.processList, (pitem) => {
               pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
               sitem.count += pitem.count
-            }
+            })
+            // for (let pitem of sitem.json.processList) {
+            //   pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
+            //   sitem.count += pitem.count
+            // }
           }).catch(err => {
             console.log('error', err)
           })
@@ -336,7 +339,7 @@ export default {
           let once = false
           let mdata = []
           sitem.count = 0
-          for (let pitem of sitem.json.processList) {
+          for (let pitem in sitem.processList) {
             if (!once) {
               finstanceModal.get(null, {
                 $paginate: false,
@@ -345,20 +348,20 @@ export default {
                 fid: sitem.id
               }, {
                 workflowid: 'workflow_' + sitem.id,
-                stateid: pitem.id
+                stateid: sitem.processList[pitem].id
               }).then(res => {
                 if (res.data.length > 0) {
                   once = true
                   mdata = res.data
-                  pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
-                  sitem.count += pitem.count
+                  sitem.processList[pitem].count = _.filter(res.data, {currentStatus: sitem.processList[pitem].id}).length
+                  sitem.count += sitem.processList[pitem].count
                 }
               }).catch(err => {
                 console.log('error', err)
               })
             } else {
-              pitem.count = _.filter(mdata, {currentStatus: pitem.id}).length
-              sitem.count += pitem.count
+              sitem.processList[pitem].count = _.filter(mdata, {currentStatus: sitem.processList[pitem].id}).length
+              sitem.count += sitem.processList[pitem].count
             }
           }
         }
@@ -372,10 +375,10 @@ export default {
               fid: item.id
             }).then(res => {
               if (res.data.length > 0) {
-                for (let pitem of item.json.processList) {
+                _.map(item.processList, (pitem) => {
                   pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
                   item.count += pitem.count
-                }
+                })
               }
             }).catch(err => {
               console.log('error', err)
@@ -383,7 +386,7 @@ export default {
           } else {
             let isonce = false
             let pdata = []
-            for (let element of item.json.processList) {
+            for (let key in item.processList) {
               if (!isonce) {
                 finstanceModal.get(null, {
                   $paginate: false,
@@ -392,16 +395,16 @@ export default {
                   fid: item.id
                 }, {
                   workflowid: 'workflow_' + item.id,
-                  stateid: element.id
+                  stateid: item.processList[key].id
                 }).then(res => {
                   if (res.data.length > 0) {
                     isonce = true
                     pdata = res.data
                     // console.log('res.data.length', res.data)
                     // for (let pitem of item.json.processList) {
-                    element.count = _.filter(res.data, {currentStatus: element.id}).length
+                    item.processList[key].count = _.filter(res.data, {currentStatus: item.processList[key].id}).length
                     // console.log('element.count', element.count)
-                    item.count += element.count
+                    item.count += item.processList[key]
                     // this.flowzList[inx].count = 5
                     // }
                   }
@@ -409,8 +412,8 @@ export default {
                   console.log('error', err)
                 })
               } else {
-                element.count = _.filter(pdata, {currentStatus: element.id}).length
-                item.count += element.count
+                item.processList[key].count = _.filter(pdata, {currentStatus: item.processList[key].id}).length
+                item.count += item.processList[key].count
               }
             }
           }
@@ -470,50 +473,67 @@ export default {
     },
     'flowz': {
       created (data) {
+        if (this.$store.state.role === 1) {
+          // this.$store.state.flowz = []
+          // this.init()
+          this.flowzList.push(data)
+        }
         // console.log('Created Data: ', data)
-        this.$Notice.success({
-          title: 'Flowz Updated.',
-          duration: 10,
-          render: h => {
-            return h('Button', {
-              props: {
-                type: 'ghost'
-              },
-              on: {
-                'click': (value) => {
-                  this.$store.state.flowz = []
-                  this.init()
-                  // window.location.reload()
-                }
-              }
-            }, 'Update View')
-          }
-        })
+        // this.$Notice.success({
+        //   title: 'Flowz Updated.',
+        //   duration: 10,
+        //   render: h => {
+        //     return h('Button', {
+        //       props: {
+        //         type: 'ghost'
+        //       },
+        //       on: {
+        //         'click': (value) => {
+        //           this.$store.state.flowz = []
+        //           this.init()
+        //           // window.location.reload()
+        //         }
+        //       }
+        //     }, 'Update View')
+        //   }
+        // })
       },
       updated (data) {
+        if (this.$store.state.role === 1) {
+          this.$store.state.flowz = []
+          this.init()
+          // let i = _.findIndex(this.flowzList, (o) => { return o.id === data.id })
+          // this.flowzList[i] = data
+        }
         // console.log('Updated Data: ', data)
-        this.$Notice.success({
-          title: 'Flowz Updated.',
-          duration: 10,
-          render: h => {
-            return h('Button', {
-              props: {
-                type: 'ghost'
-              },
-              on: {
-                'click': (value) => {
-                  // window.location.reload()
-                  this.$store.state.flowz = []
-                  this.init()
-                }
-              }
-            }, 'Update View')
-          }
-        })
+        // this.$Notice.success({
+        //   title: 'Flowz Updated.',
+        //   duration: 10,
+        //   render: h => {
+        //     return h('Button', {
+        //       props: {
+        //         type: 'ghost'
+        //       },
+        //       on: {
+        //         'click': (value) => {
+        //           // window.location.reload()
+        //           this.$store.state.flowz = []
+        //           this.init()
+        //         }
+        //       }
+        //     }, 'Update View')
+        //   }
+        // })
         // this.init()
       },
       removed (data) {
         console.log('Removed Data: ', data)
+        if (this.$store.state.role === 1) {
+          // this.$store.state.flowz = []
+          // this.init()
+          let i = _.findIndex(this.flowzList, (o) => { return o.id === data.id })
+          this.flowzList.splice(i, 1)
+        }
       }
     }
   }

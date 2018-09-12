@@ -1,10 +1,9 @@
 <template>
   <div class="SchemaView">
-  	<div class="container-fluid">
-
-      <Tabs>
-        <TabPane v-if="itsFirstState === true" label="Instances" icon="ios-list">
-          <list-instances v-on:setValues="setValues"></list-instances>
+  	<div class="container-fluid" v-if="isFlowzLoaded === true">
+      <div>
+        <div v-if="itsFirstState === true && instanceEntries.length > 0">
+          <list-instances :flowzData="flowzData" :instanceEntries="instanceEntries" v-on:setValues="setValues"></list-instances>
           <div>
             <div class="row" v-if="id != null">
               <div class="col-md-12" id="top">
@@ -63,102 +62,17 @@
               </div> -->
             </div>
           </div>
-        </TabPane>
-        <!-- <TabPane label="Data" icon="ios-albums">
-          <b-row>
-            <b-col md="6" class="my-1">
-              <b-form-group horizontal label="Filter" class="mb-0">
-                <b-input-group>
-                  <b-form-input v-model="filter" placeholder="Type to Search" />
-                  <b-input-group-append>
-                    <b-btn :disabled="!filter" @click="filter = ''">Clear</b-btn>
-                  </b-input-group-append>
-                </b-input-group>
-              </b-form-group>
-            </b-col>
-            <b-col md="4" class="my-1">
-              <b-form-group horizontal label="Sort direction" class="mb-0">
-                <b-input-group>
-                  <b-form-select v-model="sortDirection" slot="append">
-                    <option value="asc">Asc</option>
-                    <option value="desc">Desc</option>
-                    <option value="last">Last</option>
-                  </b-form-select>
-                </b-input-group>
-              </b-form-group>
-            </b-col>
-            <b-col md="2" class="my-1">
-              <b-form-group horizontal label="Per page" class="mb-0">
-                <b-form-select :options="pageOptions" v-model="perPage" />
-              </b-form-group>
-            </b-col>
-          </b-row>
+        </div>
 
-          <b-table show-empty
-                   stacked="md"
-                   :items="items"
-                   :fields="fields"
-                   :current-page="currentPage"
-                   :per-page="perPage"
-                   :filter="filter"
-                   :sort-by.sync="sortBy"
-                   :sort-desc.sync="sortDesc"
-                   :sort-direction="sortDirection"
-                   @filtered="onFiltered"
-          >
-            <template slot="name" slot-scope="row">{{row.value.first}} {{row.value.last}}</template>
-            <template slot="isActive" slot-scope="row">{{row.value?'Yes :)':'No :('}}</template>
-            <template slot="actions" slot-scope="row">
-              <!- We use @click.stop here to prevent a 'row-clicked' event from also happening  ->
-              <b-button size="sm" @click.stop="info(row.item, row.index, $event.target)" class="mr-1">
-                Info modal
-              </b-button>
-              <b-button size="sm" @click.stop="row.toggleDetails">
-                {{ row.detailsShowing ? 'Hide' : 'Show' }} Details
-              </b-button>
-            </template>
-            <template slot="row-details" slot-scope="row">
-              <b-card>
-                <ul>
-                  <li v-for="(value, key) in row.item" :key="key">{{ key }}: {{ value}}</li>
-                </ul>
-              </b-card>
-            </template>
-          </b-table>
-
-          <b-row>
-            <b-col md="6" class="my-1">
-              <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" class="my-0" />
-            </b-col>
-          </b-row>
-
-          <b-modal id="modalInfo" @hide="resetModal" :title="modalInfo.title" ok-only>
-            <pre>{{ modalInfo.content }}</pre>
-          </b-modal>
-
-          <div>
-            <table class="table table-striped table-hover">
-              <thead>
-                <tr>
-                  <th width="50">#</th>
-                  <th>Instance ID</th>
-                  <th width="150">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(instance, index) in instanceEntries">
-                  <td>{{(index + 1)}}</td>
-                  <td>{{instance.id}}</td>
-                  <td>
-                    <button class="btn btn-sm btn-success"><i class="fa fa-play"></i></button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </TabPane>-->
-        <TabPane v-if="itsFirstState === false" label="Data" icon="ios-albums">
-          <schemalist :schema="dataSchema" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData"></schemalist>
+        <div v-if="instanceEntries.length == 0">
+          <p align="center">No Data</p>
+        </div>
+        
+        <div v-if="itsFirstState === false">
+          <tabs> 
+            <TabPane v-if="admin" :label="dataCount" icon="lock-combination">
+          <schemalist v-if="this.$store.state.role === 1" :schema="dataSchema" :pageno="pageno" :role="'admin'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+          <schemalist v-if="this.$store.state.role === 2" :schema="dataSchema" :pageno="pageno" :role="'client_unclaim'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
 
           <div style="padding: 10px">
             <div class="row" v-if="id != null">
@@ -173,7 +87,7 @@
 
                 <div class="row">
                   <div class="col-md-12">
-                    <schemasubform v-on:updateJumperList="updateJumperList" :schemainstance="formSchemaInstance"></schemasubform>
+                    <schemasubform v-on:upadteJumperList="updateJumperList" :schemainstance="formSchemaInstance"></schemasubform>
                     <div v-if="isMultiple">
                     <div class="row" style="margin-top: 15px;">
                       <div class="col-md-12">
@@ -214,44 +128,47 @@
               </div> -->
             </div>
           </div>
+          </tabPane>
+          <TabPane v-if="client" :label="'Claim ('+ dataClaim.length + ')'" icon="lock-combination">
+          <schemalist :schema="dataSchema" :role="'client'" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataClaim" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
         </TabPane>
-      </Tabs>
+          </Tabs>
+        </div>
+      </div>
 
       <!-- <mycustom></mycustom> -->
-
+      <Spin size="large" fix v-if="dataLoading"></Spin>
 
 		</div>
 
 		<!-- <template id="dynamicinput">
-
 			<div>
 				<i-input v-if="type == 'text' || type == 'email' || type == 'phone'" v-model="modelName" type="text" :placeholder="placeholder" :min="min"></i-input>
-
 			  <input-number v-if="type == 'number'" :min="min" :max="max" v-model="modelName" :type="type" :placeholder="placeholder"></input-number>
-
 			  <date-picker v-if="type == 'date'" type="date" v-model="modelName" :placeholder="placeholder"></date-picker>
-
 			  <i-select v-if="type == 'dropdown'" v-model="modelName" :placeholder="placeholder">
 			      <i-option v-for="dpd in options" :value="dpd" :key="dpd">{{ dpd }}</i-option>
 			  </i-select>
 			  <i-checkbox v-if="type == 'boolean'" v-model="modelName">{{field.name}}</i-checkbox>
 			</div>
-
 		</template> -->
     <!-- <Spin v-if="loadingEmail"></Spin> -->
-    <div v-if="schemabinding">
+    <div>
+      <Spin v-if="loadEmail" size="large" fix></Spin>
+      <div v-if="schemabinding">
       <schemasubformview ref="schemasubformview" :schemainstance="formSchemaInstance" id="schemasubformview"></schemasubformview>
     </div>
     <div v-if="email">
-      <email :btnArr="btnArr" :sendDataEmail="sendDataEmail" :iid="item.id" v-on:on-done="emailService"></email>
+      <email :btnArr="btnArr" :flag="flag" :emailSchemaId="emailSchemaId" :sendDataEmail="sendDataEmail" :iid="item.id" v-on:on-done="emailService"></email>
+    </div>
     </div>
   </div>
 </template>
 
 <script>
-/* eslint-disable */
 import _ from 'lodash'
-import axios from 'axios'
+// import axios from 'axios'
+import $ from 'jquery'
 
 import ListInstances from './ListInstances'
 import SchemaSubForm from './SchemaSubForm'
@@ -264,7 +181,9 @@ import flowzModel from '@/api/flowz'
 import schemalist from '@/pages/user/SchemaList'
 import schemaModel from '@/api/schema'
 
-import finstanceModal from '@/api/finstance'
+// import finstanceModal from '@/api/finstance'
+import dataQuerymodel from '@/api/dataquery'
+import saveemailTemplate from '@/api/emailtemplate'
 // const deepstream = require('deepstream.io-client-js')
 
 // const DeepRecord = require('@/assets/js/deepstream/deepRecord')
@@ -288,6 +207,15 @@ export default {
   },
   data () {
     return {
+      client: false,
+      admin: true,
+      dataClaim: [],
+      loadEmail: false,
+      skip: 0,
+      limit: 10,
+      dataTotal: 0,
+      pageno: 1,
+      isFlowzLoaded: false,
       htmlcontent: false,
       schemabinding: false,
       flowzData: null,
@@ -297,10 +225,13 @@ export default {
         data: [],
         entity: []
       },
+      flag: true,
+      emailSchemaId: '',
       btnArr: {},
       schema: {},
       dataSchema: {},
       dataData: [],
+      dataData2: [],
       entity: [],
       savebutton: 'Save',
       validFlag: true,
@@ -323,24 +254,74 @@ export default {
       },
       configuration: true,
       dynamicData: true,
-      instanceEntries: null,
+      instanceEntries: [],
       isEmailDone: false,
-      itsFirstState: false,
+      itsFirstState: true,
       sendDataEmail: null,
-      loadingEmail: true
+      loadingEmail: true,
+      currentSchema: null,
+      dataLoading: true
     }
   },
   components: {
     'list-instances': ListInstances,
     'schemasubform': SchemaSubForm,
     'schemalist': schemalist,
-    'email' : email,
+    'email': email,
     'schemasubformview': SchemaSubFormView
   },
   methods: {
-    async emailService (item) {
+    searchData (query) {
+      this.dataLoading = true
+      dataQuerymodel.get(null, {
+        $last: true,
+        fid: this.$route.params.id,
+        currentStatus: this.$route.params.stateid,
+        $skip: this.skip,
+        $limit: this.limit,
+        'id[$search]': '^' + query.text
+      }).then(res => {
+        this.isFlowzLoaded = true
+        let firstState = this.flowzData.first
+        if (firstState === this.$route.params.stateid) {
+          this.itsFirstState = true
+        } else {
+          this.itsFirstState = false
+        }
+        this.dataTotal = res.data.total
+        if (res.data.data.length > 0) {
+          this.instanceEntries = res.data.data
+          this.dataData = this.instanceEntries
+          this.$Loading.finish()
+          this.dataLoading = false
+        } else {
+          this.instanceEntries = []
+          this.dataData = []
+          this.itsFirstState = true
+          this.dataLoading = false
+          // this.$Spin.hide()
+          this.$Loading.finish()
+        }
+      }).catch(err => {
+        console.log('Error: ', err)
+      })
+    },
+    sortData (object) {
+    },
+    emailService (item) {
       this.isEmailDone = true
-      await this.handleSubmit('formSchemaInstance')
+      this.handleSubmit('formSchemaInstance')
+    },
+    pagination (skip, limit, page) {
+      this.skip = skip
+      this.limit = limit
+      this.pageno = page
+      this.init()
+    },
+    handlepage (skip, limit, size) {
+      this.limit = size
+      this.skip = 0
+      this.init()
     },
     info (item, index, button) {
       this.modalInfo.title = `Row index: ${index}`
@@ -360,8 +341,9 @@ export default {
       // alert(id)
       var arrObj = []
       var self = this
-      await schemaModel.get(id)
+      schemaModel.get(id)
       .then(async (response) => {
+        // var _res = this.currentSchema
         var _res = response.data
         var obj = {}
 
@@ -383,6 +365,10 @@ export default {
                   obj[v.name] = 1
                 }
               }
+            } else if (v.type === 'currentuser') {
+              obj[v.name] = this.$store.state.user.fullname || this.$store.state.user.email
+            } else if (v.type === 'currenttime') {
+              obj[v.name] = new Date()
             } else if (v.type === 'boolean') {
               if (v.property.defaultValue !== '' || v.property.defaultValue === 'true') {
                 obj[v.name] = true
@@ -409,7 +395,6 @@ export default {
     },
 
     async getChildEntity (id) {
-      // alert('entity')
       var self = this
       var res = []
       // var _res = await axios.get('https://api.flowzcluster.tk/eng/schema/' + id).catch(function (error) { console.log(error) })
@@ -431,9 +416,7 @@ export default {
       // const result = await Schema.getAll(id)
       // var response = await axios.get('https://api.flowzcluster.tk/eng/schema/' + id).catch(function (error) { console.log(error) })
       // console.log('...........', id)
-      let response = await schemaModel.get(id).catch(error => {
-        console.log(error)
-      })
+      // let response = currentSchema
       // console.log('response', response)
       // this.formTitle = response.data.title
       // if (this.lastLog === undefined) {
@@ -446,12 +429,13 @@ export default {
       //     this.formSchemaInstance.data = this.lastLog.input
       //   }
       // }
-      this.schema = response.data
-      this.entity = response.data.entity
+      this.schema = this.currentSchema
+      this.entity = this.currentSchema.entity
       this.formSchemaInstance.entity = this.schema.entity
       // this.formSchemaInstance.data[0] = {}
       for (let [index, entity] of self.formSchemaInstance.entity.entries()) {
-        if (entity.customtype) {
+        if (entity.customtype === true) {
+          // console.log('Entity: ', entity)
           self.formSchemaInstance.entity[index]['entity'] = await self.getChildEntity(entity.type)
         }
         // else {
@@ -468,7 +452,7 @@ export default {
         let m = [arr]
         this.formSchemaInstance.data = m
       } else {
-        await this.handleAdd()
+        this.handleAdd()
       }
       // if (self.formSchemaInstance.data[0].length === 0) {
       // if (this.lastLog !== undefined && this.lastLog.input.length !== 0) {
@@ -505,9 +489,12 @@ export default {
       // setTimeout(async ()=>{
       // await this.handleAdd()
       this.$Loading.finish()
-      $('html, body').animate({
-          scrollTop: $("#top").offset().top
-      }, 500);
+      setTimeout(() => {
+        $('html, body').animate({
+          scrollTop: $('#top').offset().top
+        }, 500)
+      }, 0)
+
       // },4000)
       // }
       // }
@@ -543,80 +530,53 @@ export default {
     },
 
     async handleAdd () {
-      var self = this
-      var obj = {}
-      // if (this.lastLog !== undefined && this.lastLog.input.length !== 0) {
-      //   for (let mdata of self.lastLog.input) {
-      //     for (let ent of self.schema.entity) {
-      //       if (ent.type === 'file') {
-      //         mdata[ent.name + 'List'] = mdata[ent.name]
-      //         mdata[ent.name] = []
-      //       } else if (ent.customtype) {
-      //         mdata[ent.name] = self.setFileList(mdata[ent.name], ent.entity[0])
-      //       }
-      //     }
-      //   }
-      //   self.formSchemaInstance.data = _.map(self.lastLog.input, (entry) => {
-      //     entry.Schemaid = self.schema.id
-      //     return _.chain(entry).omit(['id', '_id']).reduce((result, value, key) => {
-      //       // if (_.isArray(value)) {
-      //       //   result[key] = self.deleteId(value)
-      //       // } else {
-      //       result[key] = value
-      //       // }
-      //       return result
-      //     }, {}).value()
-      //   })
-      //   // _.forEach(self.lastLog.input, (obj) => {
-      //   //   // obj = this.lastLog.input[0]
-      //   //   // obj.database = this.schema.database
-      //   //   obj.Schemaid = self.schema.id
-      //   //   delete obj.id
-      //   //   delete obj._id
-      //   //   self.formSchemaInstance.data.push(obj)
-      //   // })
-      // } else {
-        // obj.database = this.schema.database
-      obj.Schemaid = this.schema.id
-      // _.forEach(self.entity, async function (v) {
-      for (let v of self.entity) {
-        if (v.customtype) {
-          obj[v.name] = await self.getChildData(v.type)
-        } else {
-          if (v.type === 'number') {
-            if (v.property.defaultValue !== '') {
-              obj[v.name] = v.property.defaultValue
-            } else {
-              if (v.property.min !== 0 && v.property.min !== '') {
-                obj[v.name] = v.property.min
-              } else {
-                obj[v.name] = 1
-              }
-            }
-          } else if (v.type === 'boolean') {
-            if (v.property.defaultValue !== '' || v.property.defaultValue === 'true') {
-              obj[v.name] = true
-            } else {
-              obj[v.name] = false
-            }
-          } else if (v.type === 'file') {
-            obj[v.name] = []
+      try {
+        var self = this
+        var obj = {}
+        obj.Schemaid = this.schema.id
+        for (let v of self.entity) {
+          if (v.customtype) {
+            obj[v.name] = await self.getChildData(v.type)
           } else {
-            if (v.property.defaultValue !== '') {
-              obj[v.name] = v.property.defaultValue
+            if (v.type === 'number') {
+              if (v.property.defaultValue !== '') {
+                obj[v.name] = v.property.defaultValue
+              } else {
+                if (v.property.min !== 0 && v.property.min !== '') {
+                  obj[v.name] = v.property.min
+                } else {
+                  obj[v.name] = 1
+                }
+              }
+            } else if (v.type === 'currentuser') {
+              obj[v.name] = this.$store.state.user.fullname || this.$store.state.user.email
+            } else if (v.type === 'currenttime') {
+              obj[v.name] = new Date()
+            } else if (v.type === 'boolean') {
+              if (v.property.defaultValue !== '' || v.property.defaultValue === 'true') {
+                obj[v.name] = true
+              } else {
+                obj[v.name] = false
+              }
+            } else if (v.type === 'file') {
+              obj[v.name] = []
             } else {
-              obj[v.name] = ''
+              if (v.property.defaultValue !== '') {
+                obj[v.name] = v.property.defaultValue
+              } else {
+                obj[v.name] = ''
+              }
             }
           }
         }
+        this.formSchemaInstance.data.push(obj)
+      } catch (e) {
+        console.log('Error catched: ', e)
       }
-      this.formSchemaInstance.data.push(obj)
-
-      // }
     },
 
     makeObj () {
-      var obj = this.schema
+      const obj = this.schema
       obj.Schemaid = this.schema.id
       obj.data = this.formSchemaInstance.data
       return obj
@@ -640,28 +600,56 @@ export default {
       return mdata
     },
 
-    async handleSubmit (name) {
+    handleSubmit (name) {
       let currentStateId = this.$route.params.stateid
-      if(!this.isEmailDone){
-        let currentStageObject = _.find(this.flowData.json.processList, {'id': currentStateId})
+      if (this.schema.hasOwnProperty('emailSchema')) {
+        if (this.schema.emailSchema.action === true) {
+          this.emailSchemaId = this.schema.emailSchema.schemaId
+          this.flag = false
+        }
+      }
+      if (!this.isEmailDone) {
+        let currentStageObject = this.flowData.processList[currentStateId]
         let nextTargetId
         if (this.isMultiple) {
-          nextTargetId = _.find(this.flowData.json.processList, {'id': this.nextTarget.value})
+          nextTargetId = this.flowData.processList[this.nextTarget.value]
         } else {
-          nextTargetId = _.find(this.flowData.json.processList, {'id': currentStageObject.target[0].id})
+          nextTargetId = this.flowData.processList[currentStageObject.target[0].id]
         }
+        // console.log('nextTargetId ', nextTargetId)
         if (nextTargetId.type === 'sendproofmail') {
+          this.loadEmail = true
           this.id = null
           this.schemabinding = true
-          setTimeout(() => {
-            this.sendDataEmail = '<link rel="stylesheet" href="https://unpkg.com/iview@3.0.1/dist/styles/iview.css">' + ' <style> .ui-card{background-color: #fff; box-shadow: 0px 0px 25px #dadada; border-radius: 10px; padding: 10px 20px;}.card-title{text-transform: capitalize; color: #FFF; font-size: 18px; background-color: #292929; padding: 10px 30px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; margin-left: -20px; margin-bottom: 10px;}.btnAdd{background-color: #53CAE8; border-radius: 50px; font-size: 14px; text-transform: uppercase; color: #fff; border: none; font-style: italic;}.btnAdd:hover{background-color: #83d5ea; color: #fff;}.btnDelete{font-size: 14px; border-radius: 50px; color: #fff !important; position: absolute; bottom: 10px; right: 10px; background-color: #FF0000; width: 20px; height: 20px;}.btnDelete i{position: absolute; top: 4px; left: 5px;}.field-label{text-transform: capitalize;}.formTitle{text-transform: capitalize;}.jumper-links{list-style: none; font-size: 14px;}.jumper-links a{text-decoration: none; /*color: #53cae8;*/ text-align: left; font-weight: bold; text-transform: capitalize;}.fixed-div{position: fixed; right: 0;}.ivu-form-item-content{/*line-height: 15px !important;*/} </style>' + this.$refs.schemasubformview.$el.outerHTML
-            this.email = true
-          }, 1000)
+          if (nextTargetId.hasOwnProperty('emailtemplate')) {
+            saveemailTemplate.get(nextTargetId.emailtemplate)
+            .then((res) => {
+              setTimeout(() => {
+                this.sendDataEmail = res.data.template + this.$refs.schemasubformview.$el.outerHTML
+                this.email = true
+                this.loadEmail = false
+              }, 1000)
+            })
+            .catch((err) => {
+              setTimeout(() => {
+                this.sendDataEmail = this.$refs.schemasubformview.$el.outerHTML
+                this.email = true
+                this.loadEmail = false
+                console.log(err)
+              }, 1000)
+            })
+          } else {
+            setTimeout(() => {
+              this.sendDataEmail = this.$refs.schemasubformview.$el.outerHTML
+              this.email = true
+              this.loadEmail = false
+            }, 1000)
+          }
           let flag = false
           if (nextTargetId.target.length > 1) {
             let arr = {}
             for (let index = 0; index < nextTargetId.target.length; index++) {
-              let target = _.find(this.flowData.json.processList, {'id': nextTargetId.target[index].id})
+              let target = this.flowData.processList[nextTargetId.target[index].id]
               if (nextTargetId.target[index].hasOwnProperty('label')) {
                 arr[nextTargetId.target[index].label] = target.id
                 flag = true
@@ -673,12 +661,11 @@ export default {
             arr['approve'] = nextTargetId.target[0].id
             this.btnArr = arr
           }
-          if (flag == false) {
+          if (flag === false) {
             if (nextTargetId.target.length > 1) {
               let arr = {}
               for (let index = 0; index < nextTargetId.target.length; index++) {
-                let target = _.find(this.flowData.json.processList, {'id': nextTargetId.target[index].id})
-                console.log('target', target)
+                let target = this.flowData.processList[nextTargetId.target[index].id]
                 arr[target.name] = target.id
               }
               this.btnArr = arr
@@ -691,58 +678,54 @@ export default {
         } else {
           this.saveDataMethod()
         }
-      } else{
-        this.saveDataMethod();
+      } else {
+        this.saveDataMethod()
       }
     },
     async saveDataMethod () {
-        // this.bLoading = true
-        var obj = this.makeObj()
-        this.validFlag = true
-        this.validErr = []
-        // var check = this.checkValidation(obj.data[0], this.entity)
-        let allcheck = []
-        for (let dobj of obj.data) {
-          let flag = this.checkValidation(dobj, this.entity)
-          allcheck.push(flag)
-        }
-        let check = _.indexOf(allcheck, false)
-        // var check = this.checkValidation(obj.data[0], this.entity)
-        this.$Loading.start()
-        if (check === -1) {
-          let mergeData = this.mergeFileList(obj.data, obj)
-          obj.data = mergeData
+      var obj = this.makeObj()
+      this.validFlag = true
+      this.validErr = []
+      let allcheck = []
+      for (let dobj of obj.data) {
+        let flag = this.checkValidation(dobj, this.entity)
+        allcheck.push(flag)
+      }
+      let check = _.indexOf(allcheck, false)
+      this.$Loading.start()
+      if (check === -1) {
+        let mergeData = this.mergeFileList(obj.data, obj)
+        obj.data = mergeData
           // let returnObj = await DeepRecord.deepRecord.instanceStageSubmit(client, this.item, obj.data[0])
-          let saveObj = {
-            fid: this.item.fid,
-            iid: this.item.id,
-            state: this.item.currentStatus,
-            data: obj.data[0]
-          }
-          if (this.isMultiple) {
-            saveObj.nextTarget = this.nextTarget.value
-          }
-          this.bLoading = true
+        let saveObj = {
+          fid: this.item.fid,
+          iid: this.item.id,
+          state: this.item.currentStatus,
+          data: obj.data[0]
+        }
+        if (this.isMultiple) {
+          saveObj.nextTarget = this.nextTarget.value
+        }
+        this.bLoading = true
           // this.bLoading = false
-          await flowzdataModal.post(saveObj).then(res => {
-            this.id = null
-            this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
-            this.$Loading.finish()
-            this.bLoading = false
-            this.email = false
-            this.isEmailDone = false
-          }).catch(err => {
-            console.log('Error', err)
-            this.$Loading.finish()
-            this.bLoading = false
-            this.email = false
-            this.isEmailDone = false
-            this.$Notice.error({title: 'Not Saved!'})
-          })
+        flowzdataModal.post(saveObj).then(res => {
+          this.id = null
+          this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
+          this.$Loading.finish()
+          this.bLoading = false
+          this.email = false
+          this.isEmailDone = false
+        }).catch(err => {
+          console.log('Error', err)
+          this.$Loading.finish()
+          this.bLoading = false
+          this.email = false
+          this.isEmailDone = false
+          this.$Notice.error({title: 'Not Saved!'})
+        })
 
           // let instanceObj = await DeepRecord.deepRecord.getRecordObject(client, this.item)
           // instanceObj.set('currentStatus', this.nextState)
-
 
           // axios.post('http://192.81.213.41:3033/eng/instance/', { data: obj.data })
           // .then(response => {
@@ -754,10 +737,10 @@ export default {
           //   this.$Notice.error({title: 'Error!', desc: 'Instance not saved...'})
           //   this.$Loading.error()
           // })
-        } else {
-          this.validErr = _.uniqBy(this.validErr, 'name')
-          this.$Notice.error({title: 'Validation Error!'})
-        }
+      } else {
+        this.validErr = _.uniqBy(this.validErr, 'name')
+        this.$Notice.error({title: 'Validation Error!'})
+      }
     },
     checkValidation (data, ent) {
       var self = this
@@ -869,12 +852,12 @@ export default {
         this.item = values.item
         this.formTitle = values.formName
         this.flowData = values.flowzData
-        let targetObj = _.find(values.flowzData.json.processList, {id: values.currentState})
+        let targetObj = values.flowzData.processList[values.currentState]
         if (Object.keys(targetObj).length > 0) {
           if (targetObj.target.length > 1) {
             let opts = []
             for (let m of targetObj.target) {
-              let label = _.find(values.flowzData.json.processList, {id: m.id}).name
+              let label = values.flowzData.processList[m.id].name
               opts.push({
                 label: label,
                 value: m.id
@@ -885,91 +868,163 @@ export default {
             this.isMultiple = true
           }
         }
-        if (values.formData !== null, Object.keys(values.formData).length > 0) {
-          this.fetch(this.id, values.formData)
+        // if (values.formData !== null, Object.keys(values.formData).length > 0) {
+        if (values.formData) {
+          this.fetch(this.currentSchema.id, values.formData)
         } else {
-          this.fetch(this.id)
+          this.fetch(this.currentSchema.id)
         }
       }
       // let arr = [values.formData]
       // this.formSchemaInstance.data = arr[0]
-      // console.log('form instance data: ', this.formSchemaInstance.data)
       // this.nextState = values.nextState
       // this.currentState = values.currentState
     },
 
-    async getFData (item) {
-      // console.log('item: ', item)
+    getFData (item) {
       let returnData = null
       if (item) {
         let lastItem = _.last(item)
         if (lastItem.stageRecordId) {
           let stageRecordId = lastItem.stageRecordId
-          await flowzdataModal.get(null, {
+          flowzdataModal.get(null, {
             id: stageRecordId
-          }).then( (resData) => {
-            // console.log('resultDatadadadaadd: ', resData.data[0].data)
+          }).then((resData) => {
             returnData = resData.data[0].data
-          }).catch( (err) => {
+          }).catch((err) => {
             console.log('err: ', err)
           })
         }
       }
-      return(returnData)
+      return (returnData)
     },
 
-    async init () {
+    getFlowz () {
+      return flowzModel.get(null, {
+        id: this.$route.params.id
+      })
+      .then((res) => {
+        return (res.data.data[0])
+      }).catch(err => {
+        console.log('Error: ', err)
+        this.dataLoading = false
+        return
+      })
+    },
+
+    getSchema () {
+      return schemaModel.getAll(this.flowzData.schema).then(res => {
+        return res
+      }).catch(err => {
+        console.log('Error: ', err)
+        this.dataLoading = false
+        return
+      })
+    },
+
+    populateTables (schema) {
+      this.dataLoading = true
+      this.dataSchema = this.currentSchema
       this.email = false
       this.htmlcontent = false
       this.id = null
-      this.$Spin.show()
 
-      let query = {
+      // let query = {
+      //   fid: this.$route.params.id,
+      //   currentStatus: this.$route.params.stateid,
+      //   '$paginate': false
+      // }
+
+      // var settings = {
+      //   'async': true,
+      //   'url': 'https://api.flowzcluster.tk/eng/dataquery?$last=true&fid=' + this.$route.params.id + '&currentStatus=' + this.$route.params.stateid + '&$skip=0&$limit=10',
+      //   'method': 'GET',
+      // }
+
+      // $.ajax(settings).done((queryresp) => {
+      //   console.log('query response: ', queryresp)
+      //   this.isFlowzLoaded = true
+      //   let firstState = this.flowzData.first
+      //   if (firstState === this.$route.params.stateid) {
+      //     this.itsFirstState = true
+      //   } else {
+      //     this.itsFirstState = false
+      //   }
+      //   this.dataTotal = queryresp.data.total
+      //   if (queryresp.data.length > 0) {
+      //     this.instanceEntries = queryresp.data
+
+      //     this.dataData = this.instanceEntries
+      //     // this.$Spin.hide()
+      //     this.$Loading.finish()
+      //     this.dataLoading = false
+      //   } else {
+      //     this.instanceEntries = null
+      //     this.dataData = []
+      //     this.itsFirstState = true
+      //     this.dataLoading = false
+      //     // this.$Spin.hide()
+      //     this.$Loading.finish()
+      //   }
+      // }).fail((err) => {
+      //   console.error('Error: ', err)
+      //   this.$Loading.error()
+      //   this.dataLoading = false
+      // });
+
+      dataQuerymodel.get(null, {
+        $last: true,
         fid: this.$route.params.id,
         currentStatus: this.$route.params.stateid,
-        '$paginate': false
-      }
-
-      await flowzModel.get(this.$route.params.id, {
-        $select: ['json', 'schema']
-      }).then(async res => {
-        this.flowzData = res.data
-        // if (this.$route.params.stateid) {
-        //   let m = _.find(this.flowzData.json.processList, {id: this.$route.params.stateid})
-        //   if (m && m !== null && Object.keys(m).length > 0) {
-        //     this.breadItem.state = m.name
-        //   }
-        // }
-        await finstanceModal.get(null, query).then(async resp => {
-          if (resp.data.length === 0) {
-            this.itsFirstState = true
-            this.$Spin.hide()
+        $skip: this.skip,
+        $limit: this.limit
+      }).then(queryresp => {
+        this.isFlowzLoaded = true
+        let firstState = this.flowzData.first
+        if (firstState === this.$route.params.stateid) {
+          this.itsFirstState = true
+        } else {
+          this.itsFirstState = false
+        }
+        this.dataTotal = queryresp.data.total
+        if (queryresp.data.data.length > 0) {
+          this.instanceEntries = queryresp.data.data
+          if (this.$store.state.role === 2) {
+            this.dataClaim = _.filter(this.instanceEntries, function (o) { return o.claimuser === '' })
+            this.dataData2 = _.filter(this.instanceEntries, function (o) { return o.claimuser !== '' })
           } else {
-            // console.log('resp data: ', resp.data)
-            this.itsFirstState = false
-            this.instanceEntries = resp.data
-            for ( let i = 0; i < this.instanceEntries.length; i++) {
-              if (this.instanceEntries[i].stageReference.length > 0) {
-                this.instanceEntries[i]['lastData'] = await this.getFData(this.instanceEntries[i].stageReference)
-                this.instanceEntries[i].lastData['id'] = this.instanceEntries[i].id
-              } else {
-                this.itsFirstState = true
-              }
-            }
-            if (this.itsFirstState === false) {
-              this.dataData = _.map(this.instanceEntries, (o) => { return o.lastData })
-            }
-            this.$Spin.hide()
+            this.dataData = this.instanceEntries
           }
-        }).catch(err => {
-          console.log('err', err)
-          this.$Spin.hide()
-        })
-
+          // this.$Spin.hide()
+          this.$Loading.finish()
+          this.dataLoading = false
+        } else {
+          this.instanceEntries = []
+          this.dataData = []
+          this.itsFirstState = true
+          this.dataLoading = false
+          // this.$Spin.hide()
+          this.$Loading.finish()
+        }
       }).catch(err => {
-        console.log('....', err)
-        this.$Spin.hide()
+        console.error('Error: ', err)
+        this.$Loading.error()
+        this.dataLoading = false
       })
+    },
+
+    async init () {
+      this.dataLoading = true
+      this.instanceEntries = []
+      this.isFlowzLoaded = false
+      this.itsFirstState = true
+      this.$Loading.start()
+      this.schemabinding = false
+      this.email = false
+      this.flowzData = await this.getFlowz()
+      this.currentSchema = await this.getSchema()
+      this.populateTables()
+      this.isFlowzLoaded = true
     },
 
     updateJumperList (objectArr) {
@@ -977,45 +1032,23 @@ export default {
     }
   },
   mounted () {
-    this.schemabinding = false
-    this.email = false
-    flowzModel.get(null, {
-      id: this.$route.params.id
-    })
-    .then( (res) => {
-      // console.log('res flowz get call: ', res.data.data[0])
-      let taskData = _.find(res.data.data[0].json.processList, (o) => { return o.id == this.$route.params.stateid})
-      let inputschemaId = res.data.data[0].schema
-      schemaModel.getAll(inputschemaId).then(res => {
-        this.dataSchema = res
-        // console.log('Res:: ', res)
-        // get flowz data
-        // flowzdataModal.get(null, {
-        //   fid: this.$route.params.id,
-        //   state: this.$route.params.stateid,
-        //   $paginate: false
-        // }).then( (resultData) => {
-        //   // console.log('FData: ', resultData)
-        //   let finalData = _.map(resultData, (o) => { return o.data })
-        //   console.log('Final Data: ', finalData)
-        //   this.dataData = finalData
-        // })
-        this.init()
-      }).catch(err => {
-        console.error('Error: ', err)
-      })
-      // console.log('Task Data: ', inputschemaId)
-    })
-    // await finstanceModal.get(null, query).then(resp => {
-    //   console.log('Instance response Data: ', resp)
-    //   this.instanceEntries = resp.data
-    // }).catch(err => {
-    //   this.tableLoading = false
-    //   this.instanceEntries = null
-    //   console.log('err', err)
-    // })
+    this.init()
+    if (this.$store.state.role === 2) {
+      this.client = true
+    }
+    if (this.$store.state.role === 1) {
+      this.admin = true
+    }
   },
   computed: {
+    dataCount () {
+      if (this.$store.state.role === 2) {
+        return 'Data (' + this.dataData2.length + ')'
+      }
+      if (this.$store.state.role === 1) {
+        return 'Data (' + this.dataData.length + ')'
+      }
+    }
   },
   watch: {
     '$route.params': function (value) {
@@ -1026,31 +1059,45 @@ export default {
     }
   },
   feathers: {
-      'finstance': {
-        created (data) {
-          // console.log('created called from parent: ', data)
-          // this.init()
-          // let findIndex = _.findIndex(this.data, (o) => { return o.id })
-          // if (findIndex !== -1) {
-          //   this.data.push(data)
-          // }
-        },
-        async updated (data) {
-          // console.log('called on parent: ', data)
+    'finstance': {
+      created (data) {
+      },
+      updated (data) {
+        if (this.$store.state.role === 1) {
           if (data.currentStatus === this.$route.params.stateid) {
-            data['lastData'] = await this.getFData(data.stageReference)
-            data.lastData['id'] = data.id
+            data = data.data
+            data.data['iid'] = data.id
             this.instanceEntries.push(data)
-            this.dataData.push(data.lastData)
+            this.dataData.push(data.data)
+          } else {
+            let inx = _.findIndex(this.instanceEntries, (o) => { return o.id === data.id })
+            console.log('Inx: ', inx)
+            this.instanceEntries.splice(inx, 1)
+            this.dataData = this.instanceEntries
           }
-          // this.init()
-          // console.log('updated called: ', data)
-          // _.remove(this.data, (o) => { return o.id === data.id })
-        },
-        removed (data) {
         }
+        if (this.$store.state.role === 2) {
+          if (data.claimuser === '') {
+            this.dataClaim.push(data)
+            this.init()
+          } else {
+            this.dataData2.push(data)
+            this.init()
+          }
+          // if (data.currentStatus === this.$route.params.stateid) {
+          //   data = data.data
+          //   data.data['iid'] = data.id
+          //   this.dataClaim.push(data.data)
+          // }
+        }
+        // this.init()
+        // console.log('updated called: ', data)
+        // _.remove(this.data, (o) => { return o.id === data.id })
+      },
+      removed (data) {
       }
     }
+  }
 }
 
 </script>
@@ -1157,4 +1204,11 @@ export default {
   #schemasubformview{
     display: none;
   }
+  .demo-spin-container{
+    	display: inline-block;
+        width: 200px;
+        height: 100px;
+        position: relative;
+        border: 1px solid #eee;
+    }
 </style>

@@ -2,18 +2,10 @@ import api from '../../api'
 let model = 'schema'
 let getAllEntity = async(id) => {
   let response = await api.request('get', '/' + model + '/' + id)
-  // console.log('response', response)
   for (let [index, item] of response.data.entity.entries()) {
     if (item.customtype) {
-      response.data.entity[index] = await getAllEntity(item.type)
+      response.data.entity[index]['entity'] = await getAllEntity(item.type)
       response.data.entity[index]['name'] = item.name
-      response.data.entity[index]['customtype'] = true
-      response.data.entity[index]['type'] = item.property.IsArray ? 'array' : 'object'
-      if (response.data.entity[index]['type'] === 'array') {
-        response.data.entity[index]['items'] = {}
-        response.data.entity[index]['items']['type'] = 'object'
-        response.data.entity[index]['items']['entity'] = JSON.parse(JSON.stringify(response.data.entity[index].entity))
-      }
     }
   }
   return response.data
@@ -21,9 +13,7 @@ let getAllEntity = async(id) => {
 export default {
   get: (id = null, params = null) => {
     if (id === null) {
-      return api.request('get', '/' + model, null, params).then(response => {
-        return response.data
-      })
+      return api.request('get', '/' + model, null, params)
     } else {
       return api.request('get', '/' + model + '/' + id)
     }

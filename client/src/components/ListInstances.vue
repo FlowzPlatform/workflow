@@ -4,16 +4,15 @@
       <a class="btn btn-info" href="javascript:void(0)" @click="getRecord(item)">{{item}}</a>
     </div> -->
     <Breadcrumb style="padding-bottom: 5px;">
-        <BreadcrumbItem>{{breadItem.name}}</BreadcrumbItem>
-        <BreadcrumbItem>{{breadItem.state}}</BreadcrumbItem>
+        <BreadcrumbItem>{{setBreadcrumbs.name}}</BreadcrumbItem>
+        <BreadcrumbItem>{{setBreadcrumbs.state}}</BreadcrumbItem>
     </Breadcrumb>
-    <div v-if="instanceEntries !== null && instanceEntries.length !== 0" >
-      <table class="table" v-loading="tableLoading">
+    <div v-if="instanceEntries !== [] && instanceEntries.length !== 0" >
+      <table class="table" id="data">
         <thead>
           <tr>
             <th>Instance Id</th>
             <th>Current Status</th>
-            <th>Process State</th>
             <th width="150px">Action</th>
           </tr>
         </thead>
@@ -21,15 +20,10 @@
             <tr v-for="(item, inx) in instanceEntries">
               <td>{{item.id}}</td>
               <td>
-                <Tag v-if="item.currentState == 'Complated'" color="blue" class="uppercase"><Icon type="ios-done-all" /> {{valueStatus(item.currentStatus)}}</Tag>
-                <Tag v-else color="blue" class="uppercase">{{valueStatus(item.currentStatus)}}</Tag>
+                <Tag color="blue" type="border" class="uppercase">{{item.mainStatus}}</Tag>
               </td>
               <td>
-                <Tag color="blue" type="border" class="uppercase">{{item.mainStatus}}</Tag>
-                </td>
-              <td>
                 <a href="javascript:void(0)" @click="getRecord(item)">
-                  <!-- <Button type="text" icon="ios-play"></Button> -->
                   <Tooltip content="Start" placement="top">
                     <Icon type="ios-play" />
                   </Tooltip>
@@ -40,7 +34,7 @@
       </table>
     </div>
     <div v-else>
-      <table class="table" v-loading="tableLoading">
+      <table class="table">
         <thead>
           <tr>
             <th>Instance Id</th>
@@ -65,13 +59,14 @@
 <script>
 
 // const deepstream = require('deepstream.io-client-js')
-import finstanceModal from '@/api/finstance'
-import flowzModal from '@/api/flowz'
+// import finstanceModal from '@/api/finstance'
+// import flowzModal from '@/api/flowz'
+import $ from 'jquery'
 import flowzdataModal from '@/api/flowzdata'
+// import dataQuerymodel from '@/api/dataquery'
 import _ from 'lodash'
 
 // const DeepRecord = require('@/assets/js/deepstream/deepRecord')
-
 // const client = deepstream('ws://204.48.26.167:6020').login()
 // let instanceId = '39c53741_ec14_4ceb_a9db_97d7066cd424'
 // let instanceId1 = '39c53741-ec14-4ceb-a9db-97d7066cd424'
@@ -81,46 +76,39 @@ import _ from 'lodash'
 
 export default {
   name: 'ListInstances',
+  props: ['instanceEntries', 'flowzData'],
   data () {
     return {
-      instanceEntries: null,
-      flowzData: null,
-      listEntries: null,
-      tableLoading: false,
       breadItem: {
         name: '',
         state: ''
       }
     }
   },
-  component: {
+  computed: {
+    setBreadcrumbs () {
+      let state = ''
+      let m = this.flowzData.processList[this.$route.params.stateid]
+      if (m && m !== null && Object.keys(m).length > 0) {
+        state = m.name
+      }
+      return {
+        name: this.flowzData.name,
+        state: state
+      }
+    }
   },
   methods: {
-    valueStatus (value) {
-      if (!value) return ''
-      return _.find(this.flowzData.json.processList, {id: value}).name
-    },
     async getRecord (item) {
-      // DeepRecord.deepRecord.getRecord(client, item, async (err, resp) => {
-      //   let stageRecordId = resp.stageReference[(resp.stageReference.length) - 1].stageRecordId
-      //   let previousObject = await DeepRecord.deepRecord.getRecordObject(client, stageRecordId)
-      //   if (err) {
-      //   }
-
-      //   let result = await DeepRecord.deepRecord.getCurrentTraget(instanceId, resp.currentStatus)
-      //   // let currentState = resp.currentStatus.toLowerCase()
-      //   // let schemaId = resp[currentState].schemaId
-      let currentObj = _.find(this.flowzData.json.processList, {id: item.currentStatus})
-      // console.log('this.flowzData.schema', this.flowzData)
+      let currentObj = this.flowzData.processList[item.currentStatus]
+      console.log('currentObj: ', currentObj)
       let values = {
         id: this.flowzData.schema,
         item: item,
         formName: currentObj.name,
         currentState: currentObj.id,
         flowzData: this.flowzData,
-        formData: {}
-        // nextState: resp[currentState].next,
-        // currentState: currentState
+        formData: null
       }
       if (item.stageReference.length > 0) {
         let lastObj = item.stageReference[item.stageReference.length - 1]
@@ -131,87 +119,16 @@ export default {
         })
       }
       await this.$emit('setValues', values)
-      //   // app.id = schemaId;
-      //   // app.item = item;
-      //   // app.nextState = resp[currentState].next;
-      //   // app.currentState = currentState;
-      //   // app.fetch(schemaId);
-      // })
-    },
-    async init (id, stateid) {
-      this.tableLoading = true
-      this.$emit('setValues', {id: null})
-      let query = {
-        fid: id,
-        '$paginate': false
-      }
-      if (stateid) {
-        query.currentStatus = stateid
-      }
-      await flowzModal.get(id, {
-        $select: ['json', 'schema']
-      }).then(async res => {
-        this.flowzData = res.data
-        this.breadItem.name = this.flowzData.json.name
-        if (stateid) {
-          let m = _.find(this.flowzData.json.processList, {id: stateid})
-          if (m && m !== null && Object.keys(m).length > 0) {
-            this.breadItem.state = m.name
-          }
-        }
-        await finstanceModal.get(null, query).then(resp => {
-          this.tableLoading = false
-          this.instanceEntries = resp.data
-        }).catch(err => {
-          this.tableLoading = false
-          this.instanceEntries = null
-          console.log('err', err)
-        })
-      }).catch(err => {
-        this.tableLoading = false
-        this.instanceEntries = null
-        console.log('....', err)
-      })
-    }
-    // listChanged (entries) {
-    //   this.listEntries = entries
-    // },
-    // updateList (entries) {
-    //   this.instanceEntries = []
-    //   this.listEntries = entries
-    //   for (let i = 0; i < this.listEntries.length; i++) {
-    //     DeepRecord.deepRecord.getRecord(client, this.listEntries[i], async (err, resp) => {
-    //       if (err) {
-    //         console.log('Error: ', err)
-    //       }
-
-    //       let result = await DeepRecord.deepRecord.getCurrentTraget(instanceId, resp.currentStatus)
-
-    //       let pushValue = {
-    //         instanceId: this.listEntries[i],
-    //         currentState: result.name,
-    //         mainStatus: resp.mainStatus
-    //       }
-
-    //       this.instanceEntries.push(pushValue)
-    //     })
-    //   }
-    // }
-  },
-  async mounted () {
-    // await instanceList.subscribe(this.updateList, false)
-    // this.updateList()
-    if (this.$route.params.id) {
-      this.init(this.$route.params.id, this.$route.params.stateid)
     }
   },
-  watch: {
-    '$route.params.id': function (oldValue, newValue) {
-      this.init(this.$route.params.id, this.$route.params.stateid)
-    },
-    '$route.params.stateid': function (oldValue, newValue) {
-      this.init(this.$route.params.id, this.$route.params.stateid)
-    }
+  mounted () {
+    $('#data tr').click(function () {
+      var selected = $(this).hasClass('highlight')
+      $('#data tr').removeClass('highlight')
+      if (!selected) {
+        $(this).addClass('highlight')
+      }
+    })
   },
   feathers: {
     'finstance': {
@@ -228,6 +145,7 @@ export default {
         }
       },
       updated (data) {
+        // console.log('Data: ', data)
         let self = this
         if (data.fid === this.$route.params.id) {
           if (this.$route.params.stateid) {
@@ -248,6 +166,7 @@ export default {
         }
       },
       removed (data) {
+        // console.log('Data: ', data)
         let self = this
         let inx = _.findIndex(this.instanceEntries, {id: data.id})
         if (inx !== -1) {
@@ -306,5 +225,9 @@ export default {
 
   .uppercase{
     text-transform: uppercase;
+  }
+
+  .highlight {
+    background-color:#ebf7fe;
   }
 </style>

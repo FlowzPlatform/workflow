@@ -17,9 +17,17 @@
           </ul>
 
           <!-- <Button class="settingsBtn" icon="ios-settings"></Button> -->
-          <Tooltip class="settingsBtn" content="Settings">
-            <Button @click="isModel = !isModel"><i class="fa fa-cog"></i></Button>
-          </Tooltip>
+          <div class="settingsBtn">
+            <Tooltip content="Settings">
+              <Button shape="circle" type="info" @click="isModel = !isModel"><i class="fa fa-cog"></i></Button>
+            </Tooltip>
+              <div style="float:right; margin-left:5px;">
+                <ButtonGroup shape="circle">
+                  <Button title="Overview" icon="ios-keypad" type="primary" @click="viewChange(1)"></Button>
+                  <Button title="Data View" icon="navicon-round" type="primary" @click="viewChange(2)"></Button>
+                </ButtonGroup>
+              </div>
+          </div>
 
        </div>
       </div>
@@ -76,14 +84,23 @@
     </Modal>
 
     <!-- Main Table -->
-    <Table v-if="schemaId !== null" height="690" border :columns="mainColumns()" :data="tableData"></Table>
+    <div v-show="rowview">
+      <!-- <Table height="690" border :columns="mainColumns()" :data="tableData"></Table> -->
+      <Table :loading="tableLoading" v-if="schemaId !== null" height="590" border :columns="mainColumns()" :data="tableData"></Table>
+    </div>
+    <div v-show="columnview">
+      <Table :loading="tableLoading" :row-class-name="rowClassName" :columns="colviewCols" height="590" :data="colviewData"></Table>
+    </div>
+    <!-- <Table v-if="schemaId !== null" height="690" border :columns="mainColumns()" :data="tableData"></Table> -->
 
   </div>
 </template>
 
 <script>
 import flowzModal from '@/api/flowz'
-import finstanceModal from '@/api/finstance'
+// import finstanceModal from '@/api/finstance'
+import dataQueryModel from '@/api/dataquery'
+import schemaModal from '@/api/schema'
 import CellRender from '@/components/cellRender'
 import ConfigExpand from '@/components/configExpand'
 import _ from 'lodash'
@@ -93,10 +110,26 @@ export default {
   name: 'dashboard',
   data () {
     return {
+      rowview: true,
+      columnview: false,
       flowName: null,
       tableData: [],
       isModel: false,
       anotherBinding: [],
+      colviewCols: [
+        {
+          title: 'ID',
+          key: 'id',
+          fixed: 'left',
+          width: 280
+        },
+        {
+          title: 'Task',
+          key: 'task',
+          width: 150
+        }
+      ],
+      colviewData: [],
       configCols: [
         {
           type: 'expand',
@@ -233,7 +266,9 @@ export default {
         }
       ],
       selectedSortBy: null,
-      enteredDateRange: null
+      enteredDateRange: null,
+      currentSchema: null,
+      tableLoading: false
     }
   },
   components: {
@@ -245,6 +280,18 @@ export default {
     }
   },
   methods: {
+    rowClassName (row, index) {
+      return row.className
+    },
+    viewChange (item) {
+      if (item === 1) {
+        this.rowview = true
+        this.columnview = false
+      } else {
+        this.rowview = false
+        this.columnview = true
+      }
+    },
     searchInstances () {
       // this.tableData = _.filter(this.tableData, (o) => { return o.id === this.searchQuery })
     },
@@ -254,6 +301,13 @@ export default {
     },
     cancel () {
       this.anotherBinding = _.cloneDeep(this.configuration.fields)
+    },
+    getByOrder (array) {
+      let allProcess = []
+      for (let key in array) {
+        allProcess[array[key].order] = array[key]
+      }
+      return allProcess
     },
     mainColumns () {
       // console.log('mainColumns')
@@ -275,7 +329,9 @@ export default {
             finalValue.isCompletedTask = true
           } else {
             if (item.key === params.row.currentStatus) {
-              finalValue.obj = null
+              // console.log('params.row.stageReference.length: ', params.row.stageReference[(params.row.stageReference.length - 1)])
+              // obj = params.row.stageReference[(params.row.stageReference.length - 1)]
+              finalValue.obj = params.row.stageReference[(params.row.stageReference.length - 1)]
               finalValue.isCurrentTask = true
               finalValue.isCompletedTask = false
             } else {
@@ -343,45 +399,207 @@ export default {
         // console.log('table cols: ', tableCols)
       return tableCols
     },
-    async init () {
-      this.$Spin.show()
-      this.fid = this.$route.params.id
-      await flowzModal.get(this.fid, {
-        $select: ['json', 'schema'],
+
+    getFlowz () {
+      return flowzModal.get(this.fid, {
         $paginate: false
-      }).then(res => {
-        this.schemaId = res.data.schema
-        this.flowName = res.data.json.name
-        let cols = []
-        for (let col of res.data.json.processList) {
-          if (col.type !== 'start' && col.type !== 'endevent') {
-            cols.push({
-              title: col.name || col.id,
-              key: col.id,
-              firstColumn: false,
-              show: true,
-              width: 150
-            })
+      })
+      .then((res) => {
+        return (res.data)
+      }).catch(err => {
+        this.tableLoading = false
+        console.log('Error: ', err)
+        return
+      })
+    },
+
+    getSchema (id) {
+      return schemaModal.getAll(id).then(res => {
+        return res
+      }).catch(err => {
+        this.tableLoading = false
+        console.log('Error: ', err)
+        return
+      })
+    },
+
+    populateTables () {
+      this.schemaId = this.currentSchema.id
+      this.flowName = this.flowzData.name
+
+      let cols = []
+      let colviewData = []
+      // console.log('res.data.processList: ', res.data.processList)
+      let listing = this.getByOrder(this.flowzData.processList)
+      for (let col of listing) {
+        if (col.type !== 'startevent' && col.type !== 'endevent') {
+          cols.push({
+            title: col.name || col.id,
+            key: col.id,
+            firstColumn: false,
+            show: true,
+            width: 150
+          })
+        }
+      }
+      // console.log('cols: ', cols)
+      this.anotherBinding = _.cloneDeep(cols)
+      this.configuration.fields = _.cloneDeep(cols)
+
+      dataQueryModel.get(null, {
+        $all: true,
+        fid: this.fid,
+        $paginate: false
+      }).then(queryresp => {
+        // this.$Spin.hide()
+        this.tableData = queryresp.data
+        colviewData = queryresp.data
+        let listing = this.getByOrder(this.flowzData.processList)
+        for (let item of colviewData) {
+          let isfirst = false
+          for (let task of listing) {
+            if (task.type !== 'startevent' && task.type !== 'endevent') {
+              // flowzdataModal.get().then(res => {
+
+              // }).catch(e => {
+              //   console.log('e', e)
+              // })
+              // console.log('colviewData.stageReference ', item, task)
+              let dataExist = _.find(item.stageReference, {StageName: task.id})
+              if (!isfirst) {
+                task.first = false
+                task.className = ''
+                isfirst = true
+              } else {
+                task.className = 'notfirst'
+              }
+              // console.log('dataExist: ', dataExist)
+              let m = {
+                id: item.id,
+                task: task.name || task.id,
+                className: task.className
+              }
+              if (task.hasOwnProperty('first')) {
+                m.first = task.first
+              }
+              if (dataExist !== null && dataExist !== undefined && dataExist.hasOwnProperty('data')) {
+                for (let k in dataExist.data) {
+                  m[k] = dataExist.data[k]
+                }
+                this.colviewData.push(m)
+              } else {
+                this.colviewData.push(m)
+              }
+            }
           }
         }
-        this.anotherBinding = _.cloneDeep(cols)
-        this.configuration.fields = _.cloneDeep(cols)
-
-        finstanceModal.get(null, {
-          fid: this.fid,
-          $paginate: false
-        }).then(resp => {
-          // console.log('resp: ', resp)
-          this.tableData = resp.data
-          this.$Spin.hide()
-        }).catch(err => {
-          console.log('Error: ', err)
-          this.$Spin.hide()
-        })
+        this.tableLoading = false
       }).catch(err => {
-        console.log('Error: ', err)
-        this.$Spin.hide()
+        this.tableLoading = false
+        console.log('Erro: ', err)
       })
+    },
+    async init () {
+      this.tableLoading = true
+      this.colviewCols = [
+        {
+          title: 'ID',
+          key: 'id',
+          fixed: 'left',
+          width: 280,
+          render: (h, params) => {
+            if (params.row.hasOwnProperty('first')) {
+              if (params.row.first) {
+                return h('div', [
+                  h('span', params.row.id),
+                  h('span', {
+                    attrs: {
+                      class: 'btn btn-default btn-sm showHideBtn'
+                    },
+                    on: {
+                      click: () => {
+                        for (let [inx, item] of this.colviewData.entries()) {
+                          if (item.id === params.row.id && params.index !== inx) {
+                            if (!params.row.first) {
+                              item.className = ''
+                            } else {
+                              item.className = 'notfirst'
+                            }
+                          }
+                          if (params.index === inx) {
+                            item.first = !item.first
+                          }
+                        }
+                      }
+                    }
+                  }, [
+                    h('i', {
+                      attrs: {
+                        class: 'fa fa-angle-up'
+                      }
+                    })
+                  ])
+                ])
+              } else {
+                return h('div', [
+                  h('span', params.row.id),
+                  h('span', {
+                    attrs: {
+                      class: 'btn btn-sm showHideBtn'
+                    },
+                    on: {
+                      click: () => {
+                        for (let [inx, item] of this.colviewData.entries()) {
+                          if (item.id === params.row.id && params.index !== inx) {
+                            if (!params.row.first) {
+                              item.className = ''
+                            } else {
+                              item.className = 'notfirst'
+                            }
+                          }
+                          if (params.index === inx) {
+                            item.first = !item.first
+                          }
+                        }
+                      }
+                    }
+                  }, [
+                    h('i', {
+                      attrs: {
+                        class: 'fa fa-angle-down'
+                      }
+                    })
+                  ])
+                ])
+              }
+            }
+          }
+        },
+        {
+          title: 'Task',
+          key: 'task',
+          width: 150
+        }
+      ]
+      this.colviewData = []
+      this.fid = this.$route.params.id
+
+      this.flowzData = await this.getFlowz()
+      this.currentSchema = await this.getSchema(this.flowzData.schema)
+      this.populateTables()
+
+      //   // let anyCustom = false
+      for (let item of this.currentSchema.entity) {
+        if (!item.customtype) {
+          this.colviewCols.push({
+            title: item.name,
+            key: item.name,
+            width: 150
+          })
+        } else {
+          // anyCustom = true
+        }
+      }
     }
   },
   computed: {
@@ -445,7 +663,11 @@ export default {
     top: 14px;
   }
 
-  
+  .notfirst {
+    display: none
+  }
+
+
 </style>
 <style>
   .ivu-modal-body{
@@ -502,5 +724,19 @@ export default {
 
   th .ivu-table-cell > span, td .ivu-table-cell > span, td .ivu-table-cell > .ivu-poptip {
     padding-left: 10px;
+  }
+
+  .ivu-btn-circle, .ivu-btn-circle-outline{
+    padding: 0;
+    width: 32px;
+    height: 32px;
+  }
+
+  .notfirst {
+    display: none;
+  }
+
+  .showHideBtn{
+    float: right;
   }
 </style>  
