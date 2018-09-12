@@ -70,7 +70,8 @@
         
         <div v-if="itsFirstState === false">
 
-          <schemalist :schema="dataSchema" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+          <schemalist v-if="this.$store.state.role === 1" :schema="dataSchema" :pageno="pageno" :role="'admin'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+          <schemalist v-if="this.$store.state.role === 2" :schema="dataSchema" :pageno="pageno" :role="'client_unclaim'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
 
           <div style="padding: 10px">
             <div class="row" v-if="id != null">
@@ -126,8 +127,11 @@
               </div> -->
             </div>
           </div>
-        </div>
-      </div>
+        </TabPane>
+        <TabPane v-if="client" label="Claim" icon="lock-combination">
+          <schemalist :schema="dataSchema" :role="'client'" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataClaim" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+        </TabPane>
+      </Tabs>
 
       <!-- <mycustom></mycustom> -->
       <Spin size="large" fix v-if="dataLoading"></Spin>
@@ -205,6 +209,9 @@ export default {
   },
   data () {
     return {
+      client: false,
+      client: true,
+      dataClaim: [],
       loadEmail: false,
       skip: 0,
       limit: 10,
@@ -226,6 +233,7 @@ export default {
       schema: {},
       dataSchema: {},
       dataData: [],
+      dataData2: [],
       entity: [],
       savebutton: 'Save',
       validFlag: true,
@@ -983,7 +991,12 @@ export default {
         this.dataTotal = queryresp.data.total
         if (queryresp.data.data.length > 0) {
           this.instanceEntries = queryresp.data.data
-          this.dataData = this.instanceEntries
+          if (this.$store.state.role === 2) {
+            this.dataClaim = _.filter(this.instanceEntries, function (o) { return o.claimuser === '' })
+            this.dataData2 = _.filter(this.instanceEntries, function (o) { return o.claimuser !== '' })
+          } else {
+            this.dataData = this.instanceEntries
+          }
           // this.$Spin.hide()
           this.$Loading.finish()
           this.dataLoading = false
@@ -1022,6 +1035,8 @@ export default {
   },
   mounted () {
     this.init()
+    this.client = this.$store.state.role === 2 ? true : false
+    this.admin = this.$store.state.role === 1 ? true : false
   },
   computed: {
   },
@@ -1034,32 +1049,38 @@ export default {
     }
   },
   feathers: {
-    'finstance': {
-      created (data) {
-      },
-      updated (data) {
-        if (data.currentStatus === this.$route.params.stateid) {
-          let fid = data.fid
-          let currentStatus = data.currentStatus
-          dataQuerymodel.get(null, {
-            $last: true,
-            fid: fid,
-            currentStatus: currentStatus,
-            $limit: 1
-          }).then(queryresp => {
-              // this.instanceEntries.push(data)
-              // this.dataData.push(data)
-              // this.dataData = this.instanceEntries
-          }).catch(err => {
-            console.error('Error: ', err)
-          })
-        }
+      'finstance': {
+        created (data) {
+        },
+        updated (data) {
+          if (this.$store.state.role === 1) {
+            if (data.currentStatus === this.$route.params.stateid) {
+                data = data.data
+                data.data['iid'] = data.id
+                this.instanceEntries.push(data)
+                this.dataData.push(data.data)
+            }
+          } 
+          if(this.$store.state.role === 2) {
+            if (data.claimuser === '') {
+              this.dataClaim.push(data)
+            } else {
+              this.dataData2.push(data)
+            }
+            // if (data.currentStatus === this.$route.params.stateid) {
+            //   data = data.data
+            //   data.data['iid'] = data.id
+            //   this.dataClaim.push(data.data)
+            // }
+          }
+          // this.init()
+          // console.log('updated called: ', data)
           // _.remove(this.data, (o) => { return o.id === data.id })
-      },
-      removed (data) {
+        },
+        removed (data) {
+        }
       }
     }
-  }
 }
 
 </script>
