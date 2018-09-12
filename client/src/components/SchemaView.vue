@@ -601,7 +601,7 @@ export default {
             saveemailTemplate.get(nextTargetId.emailtemplate)
             .then((res) => {
               setTimeout(() => {
-                this.sendDataEmail = res.data.template
+                this.sendDataEmail = res.data.template + this.$refs.schemasubformview.$el.outerHTML
                 this.email = true
               }, 1000)
             })
