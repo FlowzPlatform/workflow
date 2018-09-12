@@ -132,7 +132,6 @@ export default {
   feathers: {
     'finstance': {
       created (data) {
-        console.log('Data: ', data)
         let self = this
         if (data.fid === this.$route.params.id) {
           if (this.$route.params.stateid) {
