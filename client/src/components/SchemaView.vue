@@ -1,8 +1,8 @@
 <template>
   <div class="SchemaView">
   	<div class="container-fluid" v-if="isFlowzLoaded === true">
-      <Tabs>
-        <TabPane  v-if="itsFirstState === true" label="Instances" icon="ios-list">
+      <div>
+        <div v-if="itsFirstState === true && instanceEntries.length > 0">
           <list-instances :flowzData="flowzData" :instanceEntries="instanceEntries" v-on:setValues="setValues"></list-instances>
           <div>
             <div class="row" v-if="id != null">
@@ -62,9 +62,13 @@
               </div> -->
             </div>
           </div>
-        </TabPane>
+        </div>
+
+        <div v-if="instanceEntries.length == 0">
+          <p align="center">No Data</p>
+        </div>
         
-        <TabPane v-if="itsFirstState === false" label="Data" icon="ios-albums">
+        <div v-if="itsFirstState === false">
 
           <schemalist v-if="this.$store.state.role === 1" :schema="dataSchema" :pageno="pageno" :role="'admin'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
           <schemalist v-if="this.$store.state.role === 2" :schema="dataSchema" :pageno="pageno" :role="'client_unclaim'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
@@ -164,9 +168,8 @@
 </template>
 
 <script>
-/* eslint-disable */
 import _ from 'lodash'
-import axios from 'axios'
+// import axios from 'axios'
 import $ from 'jquery'
 
 import ListInstances from './ListInstances'
@@ -180,7 +183,7 @@ import flowzModel from '@/api/flowz'
 import schemalist from '@/pages/user/SchemaList'
 import schemaModel from '@/api/schema'
 
-import finstanceModal from '@/api/finstance'
+// import finstanceModal from '@/api/finstance'
 import dataQuerymodel from '@/api/dataquery'
 import saveemailTemplate from '@/api/emailtemplate'
 // const deepstream = require('deepstream.io-client-js')
@@ -253,7 +256,7 @@ export default {
       },
       configuration: true,
       dynamicData: true,
-      instanceEntries: null,
+      instanceEntries: [],
       isEmailDone: false,
       itsFirstState: true,
       sendDataEmail: null,
@@ -266,13 +269,13 @@ export default {
     'list-instances': ListInstances,
     'schemasubform': SchemaSubForm,
     'schemalist': schemalist,
-    'email' : email,
+    'email': email,
     'schemasubformview': SchemaSubFormView
   },
   methods: {
     searchData (query) {
       this.dataLoading = true
-      dataQuerymodel.get(null,{
+      dataQuerymodel.get(null, {
         $last: true,
         fid: this.$route.params.id,
         currentStatus: this.$route.params.stateid,
@@ -295,7 +298,7 @@ export default {
           this.$Loading.finish()
           this.dataLoading = false
         } else {
-          this.instanceEntries = null
+          this.instanceEntries = []
           this.dataData = []
           this.itsFirstState = true
           this.dataLoading = false
@@ -308,20 +311,19 @@ export default {
     },
     sortData (object) {
       console.log('Parent Called: ', object)
-      
     },
     emailService (item) {
       this.isEmailDone = true
       this.handleSubmit('formSchemaInstance')
     },
-    pagination (skip, limit, page){
+    pagination (skip, limit, page) {
       this.skip = skip
       this.limit = limit
       this.pageno = page
       this.init()
     },
-    handlepage (skip, limit, size){
-      console.log(skip,limit,size)
+    handlepage (skip, limit, size) {
+      console.log(skip, limit, size)
       this.limit = size
       this.skip = 0
       this.init()
@@ -439,7 +441,7 @@ export default {
       // this.formSchemaInstance.data[0] = {}
       for (let [index, entity] of self.formSchemaInstance.entity.entries()) {
         if (entity.customtype === true) {
-          console.log('Entity: ', entity)
+          // console.log('Entity: ', entity)
           self.formSchemaInstance.entity[index]['entity'] = await self.getChildEntity(entity.type)
         }
         // else {
@@ -493,9 +495,12 @@ export default {
       // setTimeout(async ()=>{
       // await this.handleAdd()
       this.$Loading.finish()
-      $('html, body').animate({
-          scrollTop: $("#top").offset().top
-      }, 500);
+      setTimeout(() => {
+        $('html, body').animate({
+          scrollTop: $('#top').offset().top
+        }, 500)
+      }, 0)
+
       // },4000)
       // }
       // }
@@ -600,12 +605,12 @@ export default {
     handleSubmit (name) {
       let currentStateId = this.$route.params.stateid
       if (this.schema.hasOwnProperty('emailSchema')) {
-        if (this.schema.emailSchema.action == true) {
+        if (this.schema.emailSchema.action === true) {
           this.emailSchemaId = this.schema.emailSchema.schemaId
           this.flag = false
         }
       }
-      if(!this.isEmailDone){
+      if (!this.isEmailDone) {
         let currentStageObject = this.flowData.processList[currentStateId]
         let nextTargetId
         if (this.isMultiple) {
@@ -618,7 +623,7 @@ export default {
           this.loadEmail = true
           this.id = null
           this.schemabinding = true
-          if (nextTargetId.hasOwnProperty('emailtemplate')){
+          if (nextTargetId.hasOwnProperty('emailtemplate')) {
             saveemailTemplate.get(nextTargetId.emailtemplate)
             .then((res) => {
               setTimeout(() => {
@@ -658,7 +663,7 @@ export default {
             arr['approve'] = nextTargetId.target[0].id
             this.btnArr = arr
           }
-          if (flag == false) {
+          if (flag === false) {
             if (nextTargetId.target.length > 1) {
               let arr = {}
               for (let index = 0; index < nextTargetId.target.length; index++) {
@@ -675,55 +680,54 @@ export default {
         } else {
           this.saveDataMethod()
         }
-      } else{
-        this.saveDataMethod();
+      } else {
+        this.saveDataMethod()
       }
     },
     async saveDataMethod () {
-        var obj = this.makeObj()
-        this.validFlag = true
-        this.validErr = []
-        let allcheck = []
-        for (let dobj of obj.data) {
-          let flag = this.checkValidation(dobj, this.entity)
-         allcheck.push(flag)
-        }
-        let check = _.indexOf(allcheck, false)
-        this.$Loading.start()
-        if (check === -1) {
-          let mergeData = this.mergeFileList(obj.data, obj)
-          obj.data = mergeData
+      var obj = this.makeObj()
+      this.validFlag = true
+      this.validErr = []
+      let allcheck = []
+      for (let dobj of obj.data) {
+        let flag = this.checkValidation(dobj, this.entity)
+        allcheck.push(flag)
+      }
+      let check = _.indexOf(allcheck, false)
+      this.$Loading.start()
+      if (check === -1) {
+        let mergeData = this.mergeFileList(obj.data, obj)
+        obj.data = mergeData
           // let returnObj = await DeepRecord.deepRecord.instanceStageSubmit(client, this.item, obj.data[0])
-          let saveObj = {
-            fid: this.item.fid,
-            iid: this.item.id,
-            state: this.item.currentStatus,
-            data: obj.data[0]
-          }
-          if (this.isMultiple) {
-            saveObj.nextTarget = this.nextTarget.value
-          }
-          this.bLoading = true
+        let saveObj = {
+          fid: this.item.fid,
+          iid: this.item.id,
+          state: this.item.currentStatus,
+          data: obj.data[0]
+        }
+        if (this.isMultiple) {
+          saveObj.nextTarget = this.nextTarget.value
+        }
+        this.bLoading = true
           // this.bLoading = false
-          flowzdataModal.post(saveObj).then(res => {
-            this.id = null
-            this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
-            this.$Loading.finish()
-            this.bLoading = false
-            this.email = false
-            this.isEmailDone = false
-          }).catch(err => {
-            console.log('Error', err)
-            this.$Loading.finish()
-            this.bLoading = false
-            this.email = false
-            this.isEmailDone = false
-            this.$Notice.error({title: 'Not Saved!'})
-          })
+        flowzdataModal.post(saveObj).then(res => {
+          this.id = null
+          this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
+          this.$Loading.finish()
+          this.bLoading = false
+          this.email = false
+          this.isEmailDone = false
+        }).catch(err => {
+          console.log('Error', err)
+          this.$Loading.finish()
+          this.bLoading = false
+          this.email = false
+          this.isEmailDone = false
+          this.$Notice.error({title: 'Not Saved!'})
+        })
 
           // let instanceObj = await DeepRecord.deepRecord.getRecordObject(client, this.item)
           // instanceObj.set('currentStatus', this.nextState)
-
 
           // axios.post('http://192.81.213.41:3033/eng/instance/', { data: obj.data })
           // .then(response => {
@@ -735,10 +739,10 @@ export default {
           //   this.$Notice.error({title: 'Error!', desc: 'Instance not saved...'})
           //   this.$Loading.error()
           // })
-        } else {
-          this.validErr = _.uniqBy(this.validErr, 'name')
-          this.$Notice.error({title: 'Validation Error!'})
-        }
+      } else {
+        this.validErr = _.uniqBy(this.validErr, 'name')
+        this.$Notice.error({title: 'Validation Error!'})
+      }
     },
     checkValidation (data, ent) {
       var self = this
@@ -866,7 +870,8 @@ export default {
             this.isMultiple = true
           }
         }
-        if (values.formData !== null, Object.keys(values.formData).length > 0) {
+        // if (values.formData !== null, Object.keys(values.formData).length > 0) {
+        if (values.formData !== null) {
           this.fetch(this.currentSchema.id, values.formData)
         } else {
           this.fetch(this.currentSchema.id)
@@ -886,14 +891,14 @@ export default {
           let stageRecordId = lastItem.stageRecordId
           flowzdataModal.get(null, {
             id: stageRecordId
-          }).then( (resData) => {
+          }).then((resData) => {
             returnData = resData.data[0].data
-          }).catch( (err) => {
+          }).catch((err) => {
             console.log('err: ', err)
           })
         }
       }
-      return(returnData)
+      return (returnData)
     },
 
     getFlowz () {
@@ -926,11 +931,11 @@ export default {
       this.htmlcontent = false
       this.id = null
 
-      let query = {
-        fid: this.$route.params.id,
-        currentStatus: this.$route.params.stateid,
-        '$paginate': false
-      }
+      // let query = {
+      //   fid: this.$route.params.id,
+      //   currentStatus: this.$route.params.stateid,
+      //   '$paginate': false
+      // }
 
       // var settings = {
       //   'async': true,
@@ -996,7 +1001,7 @@ export default {
           this.$Loading.finish()
           this.dataLoading = false
         } else {
-          this.instanceEntries = null
+          this.instanceEntries = []
           this.dataData = []
           this.itsFirstState = true
           this.dataLoading = false
@@ -1018,120 +1023,9 @@ export default {
       this.$Loading.start()
       this.schemabinding = false
       this.email = false
-
-      let cachedFlowz = _.find(this.$store.state.flowz, (o) => { return o.id === this.$route.params.id})
-      let cachedSchema = _.find(this.$store.state.schema, (o) => { return o.id === cachedFlowz.schema})
-
-      this.flowzData = cachedFlowz || await this.getFlowz()
-      this.currentSchema = cachedSchema || await this.getSchema() 
-
-      // this.flowzData = await this.getFlowz()
-      // this.currentSchema = await this.getSchema() 
+      this.flowzData = await this.getFlowz()
+      this.currentSchema = await this.getSchema()
       this.populateTables()
-
-      // if (cachedFlowz) {
-      //   this.flowzData = cachedFlowz
-        
-      //   // check cached schema
-      //   if (cachedSchema) {
-      //     await this.populateTables(cachedSchema)
-      //   } else {
-      //     let unCachedSchema = await this.getSchema(cachedFlowz.schema)
-      //     await this.populateTables(unCachedSchema)
-      //   }
-      // } else {
-      //   this.flowzData = await this.getFlowz()
-      //   if (cachedSchema) {
-      //     await this.populateTables()  
-      //   } else {
-      //     let unCachedSchema = await this.getSchema(this.flowzData.schema)
-      //     await this.populateTables(unCachedSchema)
-      //   }
-        
-      // }
-
-      // await flowzModel.get(null, {
-      //   id: this.$route.params.id
-      // })
-      // .then( async (res) => {
-      //   // console.log('res flowz get call: ', res.data.data[0])
-      //   this.flowzData = res.data.data[0]
-
-      //   let startId = this.flowzData.startId
-      //   let firstState = ''
-      //   for (let startItems of startId) {
-      //     // console.log('startItems: ', startItems)
-      //     if (this.flowzData.processList[startItems].target.length > 0) {
-      //       firstState = this.flowzData.processList[startItems].target[0].id
-      //       break
-      //     }
-      //   }
-      //   if (firstState === this.$route.params.stateid) {
-      //     this.itsFirstState = true
-      //   } else {
-      //     this.itsFirstState = false
-      //   }
-      //   // console.log('target : ', firstState)
-
-      //   // let taskData = _.find(res.data.data[0].json.processList, (o) => { return o.id == this.$route.params.stateid})
-      //   let inputschemaId = res.data.data[0].schema
-      //   await schemaModel.getAll(inputschemaId).then(async res => {
-      //     this.dataSchema = res
-      //     this.email = false
-      //     this.htmlcontent = false
-      //     this.id = null
-      //     // this.$Spin.show()
-
-      //     let query = {
-      //       fid: this.$route.params.id,
-      //       currentStatus: this.$route.params.stateid,
-      //       '$paginate': false
-      //     }
-      //     await dataQuerymodel.get(null, {
-      //       $last: true,
-      //       fid: this.$route.params.id,
-      //       currentStatus: this.$route.params.stateid
-      //     }).then(queryresp => {
-      //       if (queryresp.data.data.length > 0) {
-      //         // console.log('Response DataQuery: ', queryresp)
-      //         this.instanceEntries = queryresp.data.data
-
-      //         // for (let i = 0; i < this.instanceEntries.length; i++) {
-      //         //   if (this.instanceEntries[i].data) {
-      //         //     this.itsFirstState = false
-      //         //     this.instanceEntries[i].data['iid'] = this.instanceEntries[i].id
-      //         //   } else {
-      //         //     this.itsFirstState = true
-      //         //   }
-      //         // }
-      //         // this.dataData = _.map(this.instanceEntries, (o) => { return o.data })
-      //         // this.dataData = _.map(this.instanceEntries, (o) => { 
-      //         //   for (let k in o.data) {
-      //         //     o[k] = o.data[k]
-      //         //   }
-      //         //   return o
-      //         // })
-      //         this.dataData = this.instanceEntries
-      //         // this.$Spin.hide()
-      //         this.$Loading.finish()
-      //       } else {
-      //         this.itsFirstState = true
-      //         // this.$Spin.hide()
-      //         this.$Loading.finish()
-      //       }
-      //     }).catch(err => {
-      //       console.error('Error: ', err)
-      //       // this.$Spin.hide()
-      //       this.$Loading.error()
-      //     })
-      //   }).catch(err => {
-      //     console.error('Error: ', err)
-      //     this.$Loading.error()
-      //   })
-      // }).catch(err => {
-      //   console.error('Error: ', err)
-      //   this.$Loading.error()
-      // })
       this.isFlowzLoaded = true
     },
 

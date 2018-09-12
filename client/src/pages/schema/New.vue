@@ -416,9 +416,9 @@ export default {
       return this.defaultType.concat(this.cutomtypes)
     }
   },
-  mounted () {
-    this.setSchemaTypes()
-    this.fetch(this.$route.params.id)
+  async mounted () {
+    await this.setSchemaTypes()
+    await this.fetch(this.$route.params.id)
   },
   methods: {
     back () {
@@ -489,7 +489,7 @@ export default {
         $select: ['title', 'id'],
         $paginate: false
       }).then(res => {
-        for (let item of res) {
+        for (let item of res.data) {
           this.cutomtypes.push({
             value: item.id,
             label: item.title

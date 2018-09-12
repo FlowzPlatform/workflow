@@ -507,7 +507,9 @@
         },
         updated (data) {
           // console.log('updated called: ', data)
-          // _.remove(this.data, (o) => { return o.id === data.id })
+         if (this.$store.state.role === 1) {
+            _.remove(this.data, (o) => { return o.id === data.id })
+          }
         },
         removed (data) {
         }
