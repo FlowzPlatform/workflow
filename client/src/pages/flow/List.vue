@@ -643,8 +643,11 @@ export default {
       this.init()
     },
     init () {
-      var string = '?$skip=' + this.skip + '&$limit=' + this.limit
-      flowz.getCustom(string)
+      // var string = '?$skip=' + this.skip + '&$limit=' + this.limit
+      flowz.get(null, {
+        $skip: this.skip,
+        $limit: this.limit
+      })
       .then(response => {
         this.total = response.data.total
         this.flowzList = response.data.data
