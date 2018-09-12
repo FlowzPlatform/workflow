@@ -10,6 +10,14 @@ import routes from './router'
 import store from './store'
 import config from '@/config'
 
+// import BootstrapVue from 'bootstrap-vue'
+// import 'bootstrap/dist/css/bootstrap.css'
+// import 'bootstrap-vue/dist/bootstrap-vue.css'
+// Vue.use(BootstrapVue)
+
+// import CellRender from '@/components/cellRender'
+// Vue.use(CellRender)
+
 // Include and set up feathers client
 const Feathers = require('feathers/client')
 const hooks = require('feathers-hooks')
@@ -17,6 +25,10 @@ const hooks = require('feathers-hooks')
 const socketio = require('feathers-socketio/client')
 const io = require('socket.io-client')
 let socket = io(config.socketURI)
+socket.on('connect', function () {
+})
+socket.on('disconnect', function () {
+})
   // if (process.env.NODE_ENV !== 'development') {
   //   socket = io(config.serverURI, {path: '/eng/socket.io'})
   // } else {
@@ -28,13 +40,8 @@ const feathers = Feathers()
   // .configure(authentication({storage: window.localStorage}))
   // Include it as a CommonJS module
 const vueFeathers = require('vue-feathers')
-  // And plug it in
+  // And plug it in]
 Vue.use(vueFeathers, feathers)
-
-import ElementUI from 'element-ui'
-import element from 'element-ui/src/locale/lang/en'
-import 'element-ui/lib/theme-default/index.css'
-Vue.use(ElementUI, { element })
 
 /* vueTinymce */
 import vueTinymce from '@deveodk/vue-tinymce'
@@ -91,83 +98,64 @@ var router = new VueRouter({
   }
 })
 
+iView.LoadingBar.config({
+  color: '#5cb85c',
+  failedColor: '#f0ad4e',
+  height: 5
+})
+
+import axios from 'axios'
 import psl from 'psl'
 // Some middleware to help us ensure the user is authenticated.
 router.beforeEach((to, from, next) => {
-  console.log('before load')
+  iView.LoadingBar.start()
   iView.LoadingBar.config({ color: '#0e406d' })
-    // window.console.log('Transition', transition)
-    // router.app.$store.state.token
-  let obId = false
+  // window.console.log('Transition', transition)
+  // router.app.$store.state.token
   let location = psl.parse(window.location.hostname) // get parent domain
   location = location.domain === null ? location.input : location.domain
-  if (to.query.ob_id) {
-    // let location = psl.parse(window.location.hostname) // get parent domain
-    // location = location.domain === null ? location.input : location.domain
-    // router.app.$cookie.set('auth_token', to.query.ob_id, { expires: 1, domain: location })
-    obId = to.query.ob_id
-  }
+
   if (to.query.token) {
     router.app.$cookie.set('auth_token', to.query.token, { expires: 1, domain: location })
   }
   const token = router.app.$cookie.get('auth_token')
-  if (to.matched.some(record => record.meta.requiresAuth) && obId) {
-    window.console.log('ob_id obtained')
-    next({
-      path: '/email-verification',
-      query: { ob_id: obId }
-    })
-  } else if (to.matched.some(record => record.meta.requiresAuth) && (!token || token === 'null')) {
-    window.console.log('Not authenticated')
+  store.state.token = token
+  // set token in axios
+  if (token) {
+    axios.defaults.headers.common['authorization'] = token
+  } else {
+    delete axios.defaults.headers.common['authorization']
+  }
+
+  if (to.matched.some(record => record.meta.requiresAuth) && (!token || token === 'null' || store.state.token === undefined)) {
     next({
       path: '/login'
         // query: { redirect: to.fullPath }
     })
   } else {
     if (to.matched.some(record => record.meta.requiresAuth) || (to.path === '/login')) {
-      store.dispatch('authenticate', token).then(response => {
-        store.commit('SET_USER', response)
-          // get user role
-        if (to.matched.some(record => record.meta.role)) {
-          store.dispatch('getUser', response.email).then(user => {
-            if (user) {
-              if (store.state.role !== null) {
-                store.commit('SET_ROLE', user.role)
-                if (to.matched.find(record => record.meta.role).meta.role.indexOf(parseInt(user.role)) === -1) {
-                  next({
-                    path: '/login'
-                    // query: { redirect: to.fullPath }
-                  })
-                  // next()
-                } else {
-                  next()
-                }
-              } else {
-                store.commit('SET_ROLE', user.role)
-                next({
-                  path: parseInt(user.role) === 1 ? '/admin/dashboard' : '/'
-                })
-              }
-            } else {
-              next()
-            }
-          }).catch(error => {
-            console.log(error)
-              // window.console.log('Not authenticated')
+      store.dispatch('authenticateToken', token).then(response => {
+        // get user role
+        if (to.path !== '/') {
+          if (to.matched.find(record => record.meta.role).meta.role.indexOf(parseInt(store.state.role)) === -1) {
             next({
-              path: '/login'
-                // query: { redirect: to.fullPath }
+              path: '/'
             })
-          })
+          } else {
+            next()
+          }
         } else {
-          next({
-            path: (to.path === '/login') ? (parseInt(store.state.role) === 1 ? '/admin/dashboard' : '/') : to.path
-          })
-          // next()
+          if (store.state.role === 1) {
+            next({
+              path: '/admin/dashboard'
+            })
+          } else {
+            next({
+              path: '/dashboard'
+            })
+          }
         }
-      }).catch(error => {
-        console.log(error.message)
-          // window.console.log('Not authenticated')
+      }).catch(() => {
         router.app.$cookie.delete('auth_token', { domain: location })
         store.commit('SET_TOKEN', null)
         store.commit('SET_USER', null)
@@ -175,29 +163,24 @@ router.beforeEach((to, from, next) => {
         if (to.path !== '/login') {
           next({
             path: '/login'
-              // query: { redirect: to.fullPath }
           })
         } else {
           next()
         }
       })
     } else {
-      // let path = token ? ((to.path === '/login') ? (parseInt(store.state.role) === 1 ? '/admin/dashboard' : '/') : to.path) : '/login'
-      // console.log(path)
-      // path: (token ? ((to.path === '/login') ? (parseInt(store.state.role) === 1 ? '/admin/dashboard' : '/') : to.path) : '/login')
-
-      // console.log('login ===> ')
-      // next({
-      //   path: '/login'
-      // })
-
       next()
     }
   }
 })
 
+router.afterEach(route => {
+  iView.LoadingBar.finish()
+})
+
 sync(store, router)
   // console.log('process.env.accesskey', process.env.accesskey)
+
 new Vue({
   el: '#app',
   router,

@@ -1,10 +1,10 @@
 var _ = require('lodash')
 export default {
-  TOGGLE_LOADING (state) {
-    state.callingAPI = !state.callingAPI
-  },
   SET_USER (state, user) {
     state.user = user
+  },
+  GET_USER (state) {
+    return state.user
   },
   SET_TOKEN (state, token) {
     state.token = token
@@ -14,13 +14,6 @@ export default {
   },
   SET_SCHEMA (state, schema) {
     state.schema = schema
-  },
-  SET_SETTINGS (state, settings) {
-    state.settings = settings
-  },
-  SET_TABDATA (state, tabdata) {
-    // console.log('SET_TABDATA', tabdata)
-    state.tabdata.push(tabdata)
   },
   SET_FLOWZDATA (state, flowz) {
     state.flowz = flowz
@@ -36,7 +29,6 @@ export default {
     }
   },
   SET_DELTHISMAPTEMP (state, data) {
-    // console.log('SET_DELTHISMAPTEMP', data)
     state.mappingTemp.splice(data.index, 1)
   },
   SET_XML (state, data) {
@@ -46,4 +38,3 @@ export default {
     state.BPMNxml = ''
   }
 }
-

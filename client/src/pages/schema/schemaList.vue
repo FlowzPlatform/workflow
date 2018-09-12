@@ -1,32 +1,58 @@
 <template>
   <div>
-  <row type="flex" justify="end">
-    <router-link :to="{name:'schema/new'}">
-      <Button type="primary" size="small" style="margin-bottom: 2px;" icon="plus">Add</Button>
-    </router-link>
-  </row>
-    <Table size="small" :loading="loading" :columns="schemaCol" :data="schemaData"></Table>
+    <Row type="flex" justify="end" >
+      <div style="font-size:14px">Total: <b> {{ total }} </b> &nbsp;&nbsp;&nbsp;</div style="">
+      <router-link :to="{name:'schema/new'}">
+        <Button type="primary" size="small"  style="margin-bottom: 4px;" icon="plus">Add</Button>
+      </router-link>
+    </Row>
+    <Row>
+      <Table size="small" :loading="loading" :columns="schemaCol" :data="schemaData"></Table>
+    </Row>
+    <Row style="margin-top: 4px; float: right">
+      <Page :total="total" :current="cpage" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+    </Row>
   </div>
 </template>
 <script type="text/javascript">
-  import schema from '@/api/schema'
-  import api from '@/api'
-  import _ from 'lodash'
+  import schemaModel from '@/api/schema'
+  import moment from 'moment'
   export default {
     data () {
       return {
-        loading: true,
-        schemaName: [],
+        loading: false,
         schemaData: [],
+        limit: 10,
+        cpage: 1,
+        skip: 0,
+        total: 0,
         deleteSchemaValue: 'softdel',
         schemaCol: [
           {
             title: 'Title',
-            key: 'title'
+            key: 'title',
+            sortable: true
           },
           {
             title: 'ID',
-            key: '_id'
+            key: 'id'
+          },
+          {
+            title: 'Created',
+            key: 'createdAt',
+            render: (h, params) => {
+              if (params.row.createdAt !== undefined) {
+                return h('div', [
+                  h('Tooltip', {
+                    props: {
+                      content: params.row.createdAt
+                    }
+                  }, moment(params.row.createdAt).format('lll'))
+                ])
+              } else {
+                return h('div', '--')
+              }
+            }
           },
           {
             title: 'Action',
@@ -48,25 +74,7 @@
                   },
                   on: {
                     click: () => {
-                      this.$router.push('schema/edit/' + this.schemaName[params.index]._id)
-                    }
-                  }
-                }, ''),
-                h('Button', {
-                  props: {
-                    type: 'text',
-                    size: 'large',
-                    icon: 'arrow-swap'
-                  },
-                  style: {
-                    color: '#7DE144',
-                    marginRight: '3px',
-                    padding: '0px',
-                    fontSize: '20px'
-                  },
-                  on: {
-                    click: () => {
-                      this.$router.push('schema/' + this.schemaName[params.index]._id + '/mapping')
+                      this.$router.push('schema/edit/' + this.schemaData[params.index].id)
                     }
                   }
                 }, ''),
@@ -84,7 +92,7 @@
                   },
                   on: {
                     click: () => {
-                      console.log('removed')
+                      // console.log('removed')
                       this.handleRemove(params.index)
                     }
                   }
@@ -96,6 +104,16 @@
       }
     },
     methods: {
+      handlePage (page) {
+        this.cpage = page
+        this.skip = (page * this.limit) - this.limit
+        this.init()
+      },
+      handlePagesize (size) {
+        this.limit = size
+        this.skip = 0
+        this.init()
+      },
       handleRemove (index) {
         this.$Modal.confirm({
           title: 'Confirm, Are you sure you want to delete?',
@@ -114,8 +132,6 @@
               on: {
                 'on-change': (value) => {
                   this.deleteSchemaValue = value
-                  console.log('this.deleteSchemaValue', this.deleteSchemaValue)
-                  // console.log(this.mongoDt[params.index].isenable);
                 }
               }
             }, [
@@ -135,15 +151,10 @@
           },
           onOk: () => {
             if (this.deleteSchemaValue === 'softdel') {
-              // alert(this.deleteSchemaValue)
-              api.request('delete', '/schema/' + this.schemaName[index]._id + '?type=' + this.deleteSchemaValue)
+              schemaModel.patch(this.schemaData[index].id, {isdeleted: true})
                 .then(response => {
                   this.$Notice.success({title: 'Success!!', desc: 'Schema Deleted...'})
-                  // this.$store.dispatch('getSchema')
-
-                  // this.schema = response.data
-                  // console.log(response.data)
-                  // this.schema.splice(index, 1)
+                  this.total--
                   this.schemaData.splice(index, 1)
                 })
                 .catch(error => {
@@ -151,11 +162,10 @@
                   console.log(error)
                 })
             } else if (this.deleteSchemaValue === 'harddel') {
-              // alert(this.deleteSchemaValue)
-              api.request('delete', '/schema/' + this.schemaName[index]._id + '?type=' + this.deleteSchemaValue)
+              schemaModel.delete(this.schemaData[index].id)
                 .then(response => {
-                  // this.schema = response.data
-                  // this.schema.splice(index, 1)
+                  this.total--
+                  this.schemaData.splice(index, 1)
                 })
                 .catch(error => {
                   console.log(error)
@@ -163,33 +173,44 @@
             } else {
               this.$Message.error('Error!!')
             }
-            // api.request('delete', '/schema/' + this.schema[index]._id)
-            // .then(response => {
-            //   // this.schema = response.data
-            //   this.schema.splice(index, 1)
-            // })
-            // .catch(error => {
-            //   console.log(error)
-            // })
-            // this.formSchema.entity.splice(index, 1)
           },
           onCancel: () => {
             this.deleteSchemaValue = 'softdel'
           }
         })
+      },
+      async init () {
+        // var string = '&$skip=' + this.skip + '&$limit=' + this.limit
+        this.loading = true
+        this.schemaData = await (schemaModel.get(null, {
+          isdeleted: false,
+          '$sort[createdAt]': -1,
+          $skip: this.skip,
+          $limit: this.$limit
+        }).then(res => {
+          this.loading = false
+          this.total = res.data.total
+          return res.data.data
+        }).catch(err => {
+          console.log(err)
+          this.loading = false
+          return []
+        }))
       }
     },
     mounted () {
-      schema.get().then(response => {
-        this.schemaName = _.reject(response.data, { 'isdeleted': true })
-        // this.schemaData = _.map(this.schemaName, m => {
-        //   return {
-        //     title: m.title
-        //   }
-        // })
-        this.schemaData = this.schemaName
-        this.loading = false
-      })
+      this.init()
+    },
+    feathers: {
+      'schema': {
+        created (data) {
+          this.init()
+        },
+        updated (data) {
+        },
+        removed (data) {
+        }
+      }
     }
   }
 </script>
