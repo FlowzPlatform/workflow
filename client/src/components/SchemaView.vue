@@ -360,6 +360,10 @@ export default {
                   obj[v.name] = 1
                 }
               }
+            } else if (v.type === 'currentuser') {
+              obj[v.name] = this.$store.state.user.fullname || this.$store.state.user.email
+            } else if (v.type === 'currenttime') {
+              obj[v.name] = new Date()
             } else if (v.type === 'boolean') {
               if (v.property.defaultValue !== '' || v.property.defaultValue === 'true') {
                 obj[v.name] = true
@@ -536,6 +540,10 @@ export default {
                 obj[v.name] = 1
               }
             }
+          } else if (v.type === 'currentuser') {
+            obj[v.name] = this.$store.state.user.fullname || this.$store.state.user.email
+          } else if (v.type === 'currenttime') {
+            obj[v.name] = new Date()
           } else if (v.type === 'boolean') {
             if (v.property.defaultValue !== '' || v.property.defaultValue === 'true') {
               obj[v.name] = true
