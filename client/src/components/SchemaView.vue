@@ -1063,10 +1063,8 @@ export default {
           } 
           if(this.$store.state.role === 2) {
             if (data.claimuser === '') {
-              console.log('if',this.dataClaim)
               this.dataClaim.push(data)
             } else {
-              console.log('else',this.dataData2)
               this.dataData2.push(data)
             }
             // if (data.currentStatus === this.$route.params.stateid) {
