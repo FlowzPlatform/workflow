@@ -7,14 +7,14 @@ export default {
       return api.request('get', '/' + model, null, params, headers)
     } else {
       // console.log('get by id')
-      if (this.$store.state.flowzdef.hasOwnProperty(id)) {
-        return this.$store.state.flowzdef[id]
-      } else {
-        return api.request('get', '/' + model + '/' + id, null, params, headers).then(res => {
-          this.$store.state.flowzdef[id] = res.data
-          return res
-        })
-      }
+      // if (this.$store.state.flowzdef.hasOwnProperty(id)) {
+      //   return this.$store.state.flowzdef[id]
+      // } else {
+      return api.request('get', '/' + model + '/' + id, null, params, headers).then(res => {
+        // this.$store.state.flowzdef[id] = res.data
+        return res
+      })
+      // }
     }
   },
   getCustom: (string) => {
