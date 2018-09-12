@@ -127,7 +127,7 @@ export default {
           allFiles.push(abc)
         }
       }
-      self.schemainstance.data[index][fieldName] = _.concat(self.schemainstance.data[index][fieldName], allFiles)
+      self.schemainstance.data[index][fieldName] = _.uniq(self.schemainstance.data[index][fieldName], allFiles)
     },
     uploadToAWS (file, i) {
       let self = this
@@ -158,6 +158,7 @@ export default {
               self.fileNumber = i + 1
               self.fileUploadProgress = 0
               self.stratProgress = false
+              console.log('data.Location', data.Location)
               resolve(data.Location)
             }
           })
