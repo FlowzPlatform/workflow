@@ -42,12 +42,6 @@ const feathers = Feathers()
 const vueFeathers = require('vue-feathers')
   // And plug it in]
 Vue.use(vueFeathers, feathers)
-
-// import ElementUI from 'element-ui'
-// import element from 'element-ui/src/locale/lang/en'
-// import 'element-ui/lib/theme-default/index.css'
-// Vue.use(ElementUI, { element })
-
 /* vueTinymce */
 import vueTinymce from '@deveodk/vue-tinymce'
 // You need a specific loader for CSS files like https://github.com/webpack/css-loader

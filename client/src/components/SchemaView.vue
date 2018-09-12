@@ -69,8 +69,10 @@
         </div>
         
         <div v-if="itsFirstState === false">
-
-          <schemalist :schema="dataSchema" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+          <tabs> 
+            <TabPane v-if="admin" label="Data" icon="lock-combination">
+          <schemalist v-if="this.$store.state.role === 1" :schema="dataSchema" :pageno="pageno" :role="'admin'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+          <schemalist v-if="this.$store.state.role === 2" :schema="dataSchema" :pageno="pageno" :role="'client_unclaim'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
 
           <div style="padding: 10px">
             <div class="row" v-if="id != null">
@@ -126,6 +128,11 @@
               </div> -->
             </div>
           </div>
+          </tabPane>
+          <TabPane v-if="client" label="Claim" icon="lock-combination">
+          <schemalist :schema="dataSchema" :role="'client'" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataClaim" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+        </TabPane>
+          </Tabs>
         </div>
       </div>
 
@@ -135,20 +142,15 @@
 		</div>
 
 		<!-- <template id="dynamicinput">
-
 			<div>
 				<i-input v-if="type == 'text' || type == 'email' || type == 'phone'" v-model="modelName" type="text" :placeholder="placeholder" :min="min"></i-input>
-
 			  <input-number v-if="type == 'number'" :min="min" :max="max" v-model="modelName" :type="type" :placeholder="placeholder"></input-number>
-
 			  <date-picker v-if="type == 'date'" type="date" v-model="modelName" :placeholder="placeholder"></date-picker>
-
 			  <i-select v-if="type == 'dropdown'" v-model="modelName" :placeholder="placeholder">
 			      <i-option v-for="dpd in options" :value="dpd" :key="dpd">{{ dpd }}</i-option>
 			  </i-select>
 			  <i-checkbox v-if="type == 'boolean'" v-model="modelName">{{field.name}}</i-checkbox>
 			</div>
-
 		</template> -->
     <!-- <Spin v-if="loadingEmail"></Spin> -->
     <div>
@@ -164,9 +166,8 @@
 </template>
 
 <script>
-/* eslint-disable */
 import _ from 'lodash'
-import axios from 'axios'
+// import axios from 'axios'
 import $ from 'jquery'
 
 import ListInstances from './ListInstances'
@@ -180,7 +181,7 @@ import flowzModel from '@/api/flowz'
 import schemalist from '@/pages/user/SchemaList'
 import schemaModel from '@/api/schema'
 
-import finstanceModal from '@/api/finstance'
+// import finstanceModal from '@/api/finstance'
 import dataQuerymodel from '@/api/dataquery'
 import saveemailTemplate from '@/api/emailtemplate'
 // const deepstream = require('deepstream.io-client-js')
@@ -206,6 +207,9 @@ export default {
   },
   data () {
     return {
+      client: false,
+      admin: true,
+      dataClaim: [],
       loadEmail: false,
       skip: 0,
       limit: 10,
@@ -227,6 +231,7 @@ export default {
       schema: {},
       dataSchema: {},
       dataData: [],
+      dataData2: [],
       entity: [],
       savebutton: 'Save',
       validFlag: true,
@@ -262,13 +267,13 @@ export default {
     'list-instances': ListInstances,
     'schemasubform': SchemaSubForm,
     'schemalist': schemalist,
-    'email' : email,
+    'email': email,
     'schemasubformview': SchemaSubFormView
   },
   methods: {
     searchData (query) {
       this.dataLoading = true
-      dataQuerymodel.get(null,{
+      dataQuerymodel.get(null, {
         $last: true,
         fid: this.$route.params.id,
         currentStatus: this.$route.params.stateid,
@@ -304,20 +309,19 @@ export default {
     },
     sortData (object) {
       console.log('Parent Called: ', object)
-      
     },
     emailService (item) {
       this.isEmailDone = true
       this.handleSubmit('formSchemaInstance')
     },
-    pagination (skip, limit, page){
+    pagination (skip, limit, page) {
       this.skip = skip
       this.limit = limit
       this.pageno = page
       this.init()
     },
-    handlepage (skip, limit, size){
-      console.log(skip,limit,size)
+    handlepage (skip, limit, size) {
+      console.log(skip, limit, size)
       this.limit = size
       this.skip = 0
       this.init()
@@ -435,7 +439,7 @@ export default {
       // this.formSchemaInstance.data[0] = {}
       for (let [index, entity] of self.formSchemaInstance.entity.entries()) {
         if (entity.customtype === true) {
-          console.log('Entity: ', entity)
+          // console.log('Entity: ', entity)
           self.formSchemaInstance.entity[index]['entity'] = await self.getChildEntity(entity.type)
         }
         // else {
@@ -489,9 +493,12 @@ export default {
       // setTimeout(async ()=>{
       // await this.handleAdd()
       this.$Loading.finish()
-      $('html, body').animate({
-          scrollTop: $("#top").offset().top
-      }, 500);
+      setTimeout(() => {
+        $('html, body').animate({
+          scrollTop: $('#top').offset().top
+        }, 500)
+      }, 0)
+
       // },4000)
       // }
       // }
@@ -596,12 +603,12 @@ export default {
     handleSubmit (name) {
       let currentStateId = this.$route.params.stateid
       if (this.schema.hasOwnProperty('emailSchema')) {
-        if (this.schema.emailSchema.action == true) {
+        if (this.schema.emailSchema.action === true) {
           this.emailSchemaId = this.schema.emailSchema.schemaId
           this.flag = false
         }
       }
-      if(!this.isEmailDone){
+      if (!this.isEmailDone) {
         let currentStageObject = this.flowData.processList[currentStateId]
         let nextTargetId
         if (this.isMultiple) {
@@ -614,7 +621,7 @@ export default {
           this.loadEmail = true
           this.id = null
           this.schemabinding = true
-          if (nextTargetId.hasOwnProperty('emailtemplate')){
+          if (nextTargetId.hasOwnProperty('emailtemplate')) {
             saveemailTemplate.get(nextTargetId.emailtemplate)
             .then((res) => {
               setTimeout(() => {
@@ -654,7 +661,7 @@ export default {
             arr['approve'] = nextTargetId.target[0].id
             this.btnArr = arr
           }
-          if (flag == false) {
+          if (flag === false) {
             if (nextTargetId.target.length > 1) {
               let arr = {}
               for (let index = 0; index < nextTargetId.target.length; index++) {
@@ -671,55 +678,54 @@ export default {
         } else {
           this.saveDataMethod()
         }
-      } else{
-        this.saveDataMethod();
+      } else {
+        this.saveDataMethod()
       }
     },
     async saveDataMethod () {
-        var obj = this.makeObj()
-        this.validFlag = true
-        this.validErr = []
-        let allcheck = []
-        for (let dobj of obj.data) {
-          let flag = this.checkValidation(dobj, this.entity)
-         allcheck.push(flag)
-        }
-        let check = _.indexOf(allcheck, false)
-        this.$Loading.start()
-        if (check === -1) {
-          let mergeData = this.mergeFileList(obj.data, obj)
-          obj.data = mergeData
+      var obj = this.makeObj()
+      this.validFlag = true
+      this.validErr = []
+      let allcheck = []
+      for (let dobj of obj.data) {
+        let flag = this.checkValidation(dobj, this.entity)
+        allcheck.push(flag)
+      }
+      let check = _.indexOf(allcheck, false)
+      this.$Loading.start()
+      if (check === -1) {
+        let mergeData = this.mergeFileList(obj.data, obj)
+        obj.data = mergeData
           // let returnObj = await DeepRecord.deepRecord.instanceStageSubmit(client, this.item, obj.data[0])
-          let saveObj = {
-            fid: this.item.fid,
-            iid: this.item.id,
-            state: this.item.currentStatus,
-            data: obj.data[0]
-          }
-          if (this.isMultiple) {
-            saveObj.nextTarget = this.nextTarget.value
-          }
-          this.bLoading = true
+        let saveObj = {
+          fid: this.item.fid,
+          iid: this.item.id,
+          state: this.item.currentStatus,
+          data: obj.data[0]
+        }
+        if (this.isMultiple) {
+          saveObj.nextTarget = this.nextTarget.value
+        }
+        this.bLoading = true
           // this.bLoading = false
-          flowzdataModal.post(saveObj).then(res => {
-            this.id = null
-            this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
-            this.$Loading.finish()
-            this.bLoading = false
-            this.email = false
-            this.isEmailDone = false
-          }).catch(err => {
-            console.log('Error', err)
-            this.$Loading.finish()
-            this.bLoading = false
-            this.email = false
-            this.isEmailDone = false
-            this.$Notice.error({title: 'Not Saved!'})
-          })
+        flowzdataModal.post(saveObj).then(res => {
+          this.id = null
+          this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
+          this.$Loading.finish()
+          this.bLoading = false
+          this.email = false
+          this.isEmailDone = false
+        }).catch(err => {
+          console.log('Error', err)
+          this.$Loading.finish()
+          this.bLoading = false
+          this.email = false
+          this.isEmailDone = false
+          this.$Notice.error({title: 'Not Saved!'})
+        })
 
           // let instanceObj = await DeepRecord.deepRecord.getRecordObject(client, this.item)
           // instanceObj.set('currentStatus', this.nextState)
-
 
           // axios.post('http://192.81.213.41:3033/eng/instance/', { data: obj.data })
           // .then(response => {
@@ -731,10 +737,10 @@ export default {
           //   this.$Notice.error({title: 'Error!', desc: 'Instance not saved...'})
           //   this.$Loading.error()
           // })
-        } else {
-          this.validErr = _.uniqBy(this.validErr, 'name')
-          this.$Notice.error({title: 'Validation Error!'})
-        }
+      } else {
+        this.validErr = _.uniqBy(this.validErr, 'name')
+        this.$Notice.error({title: 'Validation Error!'})
+      }
     },
     checkValidation (data, ent) {
       var self = this
@@ -862,7 +868,8 @@ export default {
             this.isMultiple = true
           }
         }
-        if (values.formData !== null, Object.keys(values.formData).length > 0) {
+        // if (values.formData !== null, Object.keys(values.formData).length > 0) {
+        if (values.formData !== null) {
           this.fetch(this.currentSchema.id, values.formData)
         } else {
           this.fetch(this.currentSchema.id)
@@ -882,14 +889,14 @@ export default {
           let stageRecordId = lastItem.stageRecordId
           flowzdataModal.get(null, {
             id: stageRecordId
-          }).then( (resData) => {
+          }).then((resData) => {
             returnData = resData.data[0].data
-          }).catch( (err) => {
+          }).catch((err) => {
             console.log('err: ', err)
           })
         }
       }
-      return(returnData)
+      return (returnData)
     },
 
     getFlowz () {
@@ -922,11 +929,11 @@ export default {
       this.htmlcontent = false
       this.id = null
 
-      let query = {
-        fid: this.$route.params.id,
-        currentStatus: this.$route.params.stateid,
-        '$paginate': false
-      }
+      // let query = {
+      //   fid: this.$route.params.id,
+      //   currentStatus: this.$route.params.stateid,
+      //   '$paginate': false
+      // }
 
       // var settings = {
       //   'async': true,
@@ -982,7 +989,12 @@ export default {
         this.dataTotal = queryresp.data.total
         if (queryresp.data.data.length > 0) {
           this.instanceEntries = queryresp.data.data
-          this.dataData = this.instanceEntries
+          if (this.$store.state.role === 2) {
+            this.dataClaim = _.filter(this.instanceEntries, function (o) { return o.claimuser === '' })
+            this.dataData2 = _.filter(this.instanceEntries, function (o) { return o.claimuser !== '' })
+          } else {
+            this.dataData = this.instanceEntries
+          }
           // this.$Spin.hide()
           this.$Loading.finish()
           this.dataLoading = false
@@ -1010,7 +1022,7 @@ export default {
       this.schemabinding = false
       this.email = false
       this.flowzData = await this.getFlowz()
-      this.currentSchema = await this.getSchema() 
+      this.currentSchema = await this.getSchema()
       this.populateTables()
       this.isFlowzLoaded = true
     },
@@ -1021,6 +1033,12 @@ export default {
   },
   mounted () {
     this.init()
+    if (this.$store.state.role === 2) {
+      this.client = true
+    }
+    if (this.$store.state.role === 1) {
+      this.admin = true
+    }
   },
   computed: {
   },
@@ -1033,32 +1051,38 @@ export default {
     }
   },
   feathers: {
-      'finstance': {
-        created (data) {
-        },
-        updated (data) {
+    'finstance': {
+      created (data) {
+      },
+      updated (data) {
+        if (this.$store.state.role === 1) {
           if (data.currentStatus === this.$route.params.stateid) {
-            let fid = data.fid
-            let currentStatus = data.currentStatus
-            dataQuerymodel.get(null, {
-              $last: true,
-              fid: fid,
-              currentStatus: currentStatus,
-              $limit: 1
-            }).then(queryresp => {
-              // this.instanceEntries.push(data)
-              // this.dataData.push(data)
-              // this.dataData = this.instanceEntries
-            }).catch(err => {
-              console.error('Error: ', err)
-            })
+            data = data.data
+            data.data['iid'] = data.id
+            this.instanceEntries.push(data)
+            this.dataData.push(data.data)
           }
-          // _.remove(this.data, (o) => { return o.id === data.id })
-        },
-        removed (data) {
         }
+        if (this.$store.state.role === 2) {
+          if (data.claimuser === '') {
+            this.dataClaim.push(data)
+          } else {
+            this.dataData2.push(data)
+          }
+          // if (data.currentStatus === this.$route.params.stateid) {
+          //   data = data.data
+          //   data.data['iid'] = data.id
+          //   this.dataClaim.push(data.data)
+          // }
+        }
+        // this.init()
+        // console.log('updated called: ', data)
+        // _.remove(this.data, (o) => { return o.id === data.id })
+      },
+      removed (data) {
       }
     }
+  }
 }
 
 </script>

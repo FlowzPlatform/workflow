@@ -81,32 +81,32 @@
             <div class="container-fluid">
             <div class="row" style="background-color:#ffffff">
             <div class="col-md-4">
-                <el-input placeholder="Please enter email id" v-model="input"></el-input>
+                <Input placeholder="Please enter email id" v-model="input"></Input>
             </div>  
             <div class="col-md-3" >
-                <el-select v-model="value1" placeholder="Select Role">
-                <el-option
+                <Select v-model="value1" placeholder="Select Role">
+                <Option
                 v-for="item in options"
                 :key="item.value1"
                 :label="item.label1"
                 :value="item.value1">
-                </el-option>
-            </el-select>
+                </Option>
+            </Select>
             </div>
             <div class="col-md-5">
                 <div class="col-md-8">
-                <el-select v-model="value2" placeholder="Select subscription">
-                    <el-option
+                <Select v-model="value2" placeholder="Select subscription">
+                    <Option
                     v-for="item in options2"
                     :key="item.value2"
                     :label="item.label2"
                     :value="item.value2">
-                    </el-option>
-                </el-select>
+                    </Option>
+                </Select>
                 <!-- <subscription :token="$store.state.token" :value="value2" @on-change="handleAssign"></subscription> -->
                 </div>
                 <div class="col-md-4">
-            <el-button type="primary" :loading="loading" @click="inviteNow()">Invite Now</el-button>
+            <Button type="primary" :loading="loading" @click="inviteNow()">Invite Now</Button>
                 </div>
             </div>
             </div>
