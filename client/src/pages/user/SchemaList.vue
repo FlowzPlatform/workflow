@@ -329,7 +329,6 @@
                       finstanceModal.patch(params.row.id, {claimuser: ''})
                       .then((res) => {
                         this.data.splice(params.index, 1)
-                        console.log(this.data)
                         this.$Notice.success({title: 'Successfully Unclaim'})
                       })
                       .catch((err) => {
@@ -402,9 +401,7 @@
                     'click': async () => {
                       finstanceModal.patch(params.row.id, {claimuser: this.$store.state.user._id})
                       .then((res) => {
-                        console.log(params.index)
                         this.data.splice(params.index, 1)
-                        console.log(this.data)
                         this.$Notice.success({title: 'Successfully Claim'})
                       })
                       .catch((err) => {
@@ -462,8 +459,6 @@
       }
     },
     mounted () {
-      // this.dataClaim = _.filter(this.data, function (o) { return o.claimuser === '' })
-      console.log(this.data)
       this.total = this.dataTotal
       this.mdata = this.data
       $('.ivu-table td:nth-child(2) div span').mouseover(function () {
