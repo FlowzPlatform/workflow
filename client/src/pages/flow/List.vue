@@ -507,8 +507,8 @@ export default {
     },
     async showInviteDialog (query) {
       var self = this
-      let newValue = 'workflow_' + query.row.id
-      await axios.get(config.subscriptionUrl + 'register-roles?module=' + newValue, {
+      this.flowId = 'workflow_' + query.row.id
+      await axios.get(config.subscriptionUrl + 'register-roles?module=' + this.flowId, {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded;'
         }
@@ -576,7 +576,7 @@ export default {
     },
     async inviteNow () {
       if (this.value2 === undefined || this.value2 === '' || this.value1 === '') {
-        this.$message.warning('Please select both subscription & role for invitation')
+        this.$Message.warning('Please select both subscription & role for invitation')
       } else {
         this.loading = true
         let self = this
@@ -601,13 +601,13 @@ export default {
         .then(function (response) {
           self.loading = false
           if (response.data.status === 404) {
-            self.$message.warning(response.data.data)
+            self.$Message.warning(response.data.data)
           } else if (response.data.code === '201') {
             // self.$message.success(response.data.message);
-            self.$message.success('User assigned successfully')
+            self.$Message.success('User assigned successfully')
           } else if (response.data.code === '200') {
             // self.$message.success(response.data.message);
-            self.$message.warning('User already assigned for this subscription with same role')
+            self.$Message.warning('User already assigned for this subscription with same role')
           }
         })
         .catch(function (error) {
