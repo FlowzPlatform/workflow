@@ -18,16 +18,28 @@
         <img src="http://placehold.it/20x20" style="margin-top: 20px;">
       </div>
     </div> -->
-    <span v-if="item.obj != null" :title="getAgoActualStatus(item.obj.createdAt)" style="display: block;">
+    <span v-if="item.obj != null && item.isCompletedTask == true" :title="getAgoActualStatus(item.obj.createdAt)" style="display: block;">
       <i class="fa fa-calendar fa-fw"></i>
       <small>{{getAgoStatus(item.obj.createdAt)}}</small>
     </span>
-    <span v-if="item.obj != null" title="Duration" style="display: block;">
+
+    <span v-if="item.obj != null && item.isCompletedTask == false && item.isCurrentTask == true" :title="getAgoActualStatus(item.obj.createdAt)" style="display: block;">
+      <i class="fa fa-calendar fa-fw"></i>
+      <!-- {{item.obj}} -->
+      <small>{{getAgoStatus(item.obj.createdAt)}}</small>
+    </span>
+
+    <span v-if="item.obj != null && item.isCompletedTask == true" title="Duration" style="display: block;">
       <i class="fa fa-clock-o fa-fw"></i>
       <small>{{ getDuration(item.obj.createdAt, item.obj.completedAt) }} Hours</small>
     </span>
 
-    <img v-if="item.obj != null" :title="getUserHoverDetails(item)" :src="getUserAvatar(item)" class="avatarImg" alt="User Avatar">
+    <span v-if="item.obj != null && item.isCompletedTask == false" title="Duration" style="display: block;">
+      <i class="fa fa-clock-o fa-fw"></i>
+      <small>{{ getDuration(item.obj.createdAt, item.obj.completedAt) }} Hours</small>
+    </span>
+
+    <img v-if="item.obj != null && item.isCompletedTask == true" :title="getUserHoverDetails(item)" :src="getUserAvatar(item)" class="avatarImg" alt="User Avatar">
     
     <!-- <span :title="getCompletedActualStatus(item.row, item.column.key)">
       <i class="fa fa-calendar fa-fw"></i>
@@ -35,7 +47,7 @@
       <!- <small>{{ items.createdAt | momentDate }}</small> ->
     </span> -->
 
-    <span v-if="item.obj != null" class="showData" title="View Data">
+    <span v-if="item.obj != null && item.isCompletedTask == true" class="showData" title="View Data">
       <i class="fa fa-info-circle" @click="showData(item)"></i>
     </span>
 
@@ -85,7 +97,6 @@ export default {
   },
   filters: {
     getAgoStatus (item) {
-      console.log('item: ', item)
       return moment(item).fromNow()
     }
   },
@@ -96,6 +107,7 @@ export default {
     cancel () {
     },
     classObject (item) {
+      // console.log('item: ', item)
       if (item.isCurrentTask === true && item.isCompletedTask === false) {
         return { 'currentTask': true }
       } else if (item.isCurrentTask === false && item.isCompletedTask === true) {

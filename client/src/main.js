@@ -10,10 +10,10 @@ import routes from './router'
 import store from './store'
 import config from '@/config'
 
-import BootstrapVue from 'bootstrap-vue'
-import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
-Vue.use(BootstrapVue)
+// import BootstrapVue from 'bootstrap-vue'
+// import 'bootstrap/dist/css/bootstrap.css'
+// import 'bootstrap-vue/dist/bootstrap-vue.css'
+// Vue.use(BootstrapVue)
 
 // import CellRender from '@/components/cellRender'
 // Vue.use(CellRender)
@@ -42,6 +42,7 @@ const feathers = Feathers()
 const vueFeathers = require('vue-feathers')
   // And plug it in]
 Vue.use(vueFeathers, feathers)
+
 /* vueTinymce */
 import vueTinymce from '@deveodk/vue-tinymce'
 // You need a specific loader for CSS files like https://github.com/webpack/css-loader
