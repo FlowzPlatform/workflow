@@ -7,7 +7,7 @@
         <BreadcrumbItem>{{setBreadcrumbs.name}}</BreadcrumbItem>
         <BreadcrumbItem>{{setBreadcrumbs.state}}</BreadcrumbItem>
     </Breadcrumb>
-    <div v-if="instanceEntries !== null && instanceEntries.length !== 0" >
+    <div v-if="instanceEntries !== [] && instanceEntries.length !== 0" >
       <table class="table" id="data">
         <thead>
           <tr>
@@ -144,6 +144,7 @@ export default {
         }
       },
       updated (data) {
+        // console.log('Data: ', data)
         let self = this
         if (data.fid === this.$route.params.id) {
           if (this.$route.params.stateid) {
@@ -164,6 +165,7 @@ export default {
         }
       },
       removed (data) {
+        // console.log('Data: ', data)
         let self = this
         let inx = _.findIndex(this.instanceEntries, {id: data.id})
         if (inx !== -1) {

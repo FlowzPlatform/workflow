@@ -1,8 +1,8 @@
 <template>
   <div class="SchemaView">
   	<div class="container-fluid" v-if="isFlowzLoaded === true">
-      <Tabs>
-        <TabPane  v-if="itsFirstState === true" label="Instances" icon="ios-list">
+      <div>
+        <div v-if="itsFirstState === true && instanceEntries.length > 0">
           <list-instances :flowzData="flowzData" :instanceEntries="instanceEntries" v-on:setValues="setValues"></list-instances>
           <div>
             <div class="row" v-if="id != null">
@@ -62,9 +62,13 @@
               </div> -->
             </div>
           </div>
-        </TabPane>
+        </div>
+
+        <div v-if="instanceEntries.length == 0">
+          <p align="center">No Data</p>
+        </div>
         
-        <TabPane v-if="itsFirstState === false" label="Data" icon="ios-albums">
+        <div v-if="itsFirstState === false">
 
           <schemalist :schema="dataSchema" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
 
@@ -122,8 +126,8 @@
               </div> -->
             </div>
           </div>
-        </TabPane>
-      </Tabs>
+        </div>
+      </div>
 
       <!-- <mycustom></mycustom> -->
       <Spin size="large" fix v-if="dataLoading"></Spin>
@@ -245,7 +249,7 @@ export default {
       },
       configuration: true,
       dynamicData: true,
-      instanceEntries: null,
+      instanceEntries: [],
       isEmailDone: false,
       itsFirstState: true,
       sendDataEmail: null,
@@ -287,7 +291,7 @@ export default {
           this.$Loading.finish()
           this.dataLoading = false
         } else {
-          this.instanceEntries = null
+          this.instanceEntries = []
           this.dataData = []
           this.itsFirstState = true
           this.dataLoading = false
@@ -983,7 +987,7 @@ export default {
           this.$Loading.finish()
           this.dataLoading = false
         } else {
-          this.instanceEntries = null
+          this.instanceEntries = []
           this.dataData = []
           this.itsFirstState = true
           this.dataLoading = false
@@ -1005,120 +1009,9 @@ export default {
       this.$Loading.start()
       this.schemabinding = false
       this.email = false
-
-      let cachedFlowz = _.find(this.$store.state.flowz, (o) => { return o.id === this.$route.params.id})
-      let cachedSchema = _.find(this.$store.state.schema, (o) => { return o.id === cachedFlowz.schema})
-
-      this.flowzData = cachedFlowz || await this.getFlowz()
-      this.currentSchema = cachedSchema || await this.getSchema() 
-
-      // this.flowzData = await this.getFlowz()
-      // this.currentSchema = await this.getSchema() 
+      this.flowzData = await this.getFlowz()
+      this.currentSchema = await this.getSchema() 
       this.populateTables()
-
-      // if (cachedFlowz) {
-      //   this.flowzData = cachedFlowz
-        
-      //   // check cached schema
-      //   if (cachedSchema) {
-      //     await this.populateTables(cachedSchema)
-      //   } else {
-      //     let unCachedSchema = await this.getSchema(cachedFlowz.schema)
-      //     await this.populateTables(unCachedSchema)
-      //   }
-      // } else {
-      //   this.flowzData = await this.getFlowz()
-      //   if (cachedSchema) {
-      //     await this.populateTables()  
-      //   } else {
-      //     let unCachedSchema = await this.getSchema(this.flowzData.schema)
-      //     await this.populateTables(unCachedSchema)
-      //   }
-        
-      // }
-
-      // await flowzModel.get(null, {
-      //   id: this.$route.params.id
-      // })
-      // .then( async (res) => {
-      //   // console.log('res flowz get call: ', res.data.data[0])
-      //   this.flowzData = res.data.data[0]
-
-      //   let startId = this.flowzData.startId
-      //   let firstState = ''
-      //   for (let startItems of startId) {
-      //     // console.log('startItems: ', startItems)
-      //     if (this.flowzData.processList[startItems].target.length > 0) {
-      //       firstState = this.flowzData.processList[startItems].target[0].id
-      //       break
-      //     }
-      //   }
-      //   if (firstState === this.$route.params.stateid) {
-      //     this.itsFirstState = true
-      //   } else {
-      //     this.itsFirstState = false
-      //   }
-      //   // console.log('target : ', firstState)
-
-      //   // let taskData = _.find(res.data.data[0].json.processList, (o) => { return o.id == this.$route.params.stateid})
-      //   let inputschemaId = res.data.data[0].schema
-      //   await schemaModel.getAll(inputschemaId).then(async res => {
-      //     this.dataSchema = res
-      //     this.email = false
-      //     this.htmlcontent = false
-      //     this.id = null
-      //     // this.$Spin.show()
-
-      //     let query = {
-      //       fid: this.$route.params.id,
-      //       currentStatus: this.$route.params.stateid,
-      //       '$paginate': false
-      //     }
-      //     await dataQuerymodel.get(null, {
-      //       $last: true,
-      //       fid: this.$route.params.id,
-      //       currentStatus: this.$route.params.stateid
-      //     }).then(queryresp => {
-      //       if (queryresp.data.data.length > 0) {
-      //         // console.log('Response DataQuery: ', queryresp)
-      //         this.instanceEntries = queryresp.data.data
-
-      //         // for (let i = 0; i < this.instanceEntries.length; i++) {
-      //         //   if (this.instanceEntries[i].data) {
-      //         //     this.itsFirstState = false
-      //         //     this.instanceEntries[i].data['iid'] = this.instanceEntries[i].id
-      //         //   } else {
-      //         //     this.itsFirstState = true
-      //         //   }
-      //         // }
-      //         // this.dataData = _.map(this.instanceEntries, (o) => { return o.data })
-      //         // this.dataData = _.map(this.instanceEntries, (o) => { 
-      //         //   for (let k in o.data) {
-      //         //     o[k] = o.data[k]
-      //         //   }
-      //         //   return o
-      //         // })
-      //         this.dataData = this.instanceEntries
-      //         // this.$Spin.hide()
-      //         this.$Loading.finish()
-      //       } else {
-      //         this.itsFirstState = true
-      //         // this.$Spin.hide()
-      //         this.$Loading.finish()
-      //       }
-      //     }).catch(err => {
-      //       console.error('Error: ', err)
-      //       // this.$Spin.hide()
-      //       this.$Loading.error()
-      //     })
-      //   }).catch(err => {
-      //     console.error('Error: ', err)
-      //     this.$Loading.error()
-      //   })
-      // }).catch(err => {
-      //   console.error('Error: ', err)
-      //   this.$Loading.error()
-      // })
       this.isFlowzLoaded = true
     },
 
@@ -1144,15 +1037,22 @@ export default {
         created (data) {
         },
         updated (data) {
-          // console.log('called on parent: ', data)
           if (data.currentStatus === this.$route.params.stateid) {
-            data = data.data
-            data.data['iid'] = data.id
-            this.instanceEntries.push(data)
-            this.dataData.push(data.data)
+            let fid = data.fid
+            let currentStatus = data.currentStatus
+            dataQuerymodel.get(null, {
+              $last: true,
+              fid: fid,
+              currentStatus: currentStatus,
+              $limit: 1
+            }).then(queryresp => {
+              // this.instanceEntries.push(data)
+              // this.dataData.push(data)
+              // this.dataData = this.instanceEntries
+            }).catch(err => {
+              console.error('Error: ', err)
+            })
           }
-          // this.init()
-          // console.log('updated called: ', data)
           // _.remove(this.data, (o) => { return o.id === data.id })
         },
         removed (data) {

@@ -337,7 +337,27 @@
         },
         updated (data) {
           // console.log('updated called: ', data)
-          _.remove(this.data, (o) => { return o.id === data.id })
+          // _.remove(this.data, (o) => { return o.id === data.id })
+          // let self = this
+          // if (data.fid === this.$route.params.id) {
+          //   if (this.$route.params.stateid) {
+          //     if (data.currentStatus !== this.$route.params.stateid) {
+          //       let inx = _.findIndex(this.instanceEntries, {id: data.id})
+          //       if (inx !== -1) {
+          //         self.instanceEntries.splice(inx, 1)
+          //         self.id = null
+          //       }
+          //     } else {
+          //       self.instanceEntries.push(data)
+          //     }
+          //   } else {
+          //     let inx = _.findIndex(this.instanceEntries, {id: data.id})
+          //     if (inx !== -1) {
+          //       self.instanceEntries.splice(inx, 1)
+          //       self.instanceEntries.splice(inx, 0, data)
+          //     }
+          //   }
+          // }
         },
         removed (data) {
         }
