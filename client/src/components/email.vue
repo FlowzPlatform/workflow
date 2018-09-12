@@ -266,9 +266,11 @@ import SchemaSubForm from './SchemaSubForm'
           sendmailModal.post(this.emailForm)
           .then((res)=>{
             this.$emit('on-done', true)
+            this.$Message.success('Proof mail send successfully')
           })
           .catch((err)=>{
             console.log(err)
+            this.$Message.error('Proof mail send error')
           })
         } else {
           this.formSchemaInstance.data[0].html = []
@@ -286,9 +288,11 @@ import SchemaSubForm from './SchemaSubForm'
           sendmailModal.post(this.formSchemaInstance.data[0])
           .then((res)=>{
             this.$emit('on-done', true)
+            this.$Message.success('Proof mail send successfully')
           })
           .catch((err)=>{
             console.log(err)
+            this.$Message.error('Proof mail send error')
           })
         }
       }
