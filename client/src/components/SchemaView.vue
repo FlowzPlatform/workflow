@@ -395,7 +395,6 @@ export default {
     },
 
     async getChildEntity (id) {
-      // alert('entity')
       var self = this
       var res = []
       // var _res = await axios.get('https://api.flowzcluster.tk/eng/schema/' + id).catch(function (error) { console.log(error) })
@@ -531,45 +530,49 @@ export default {
     },
 
     async handleAdd () {
-      var self = this
-      var obj = {}
-      obj.Schemaid = this.schema.id
-      for (let v of self.entity) {
-        if (v.customtype) {
-          obj[v.name] = await self.getChildData(v.type)
-        } else {
-          if (v.type === 'number') {
-            if (v.property.defaultValue !== '') {
-              obj[v.name] = v.property.defaultValue
-            } else {
-              if (v.property.min !== 0 && v.property.min !== '') {
-                obj[v.name] = v.property.min
-              } else {
-                obj[v.name] = 1
-              }
-            }
-          } else if (v.type === 'currentuser') {
-            obj[v.name] = this.$store.state.user.fullname || this.$store.state.user.email
-          } else if (v.type === 'currenttime') {
-            obj[v.name] = new Date()
-          } else if (v.type === 'boolean') {
-            if (v.property.defaultValue !== '' || v.property.defaultValue === 'true') {
-              obj[v.name] = true
-            } else {
-              obj[v.name] = false
-            }
-          } else if (v.type === 'file') {
-            obj[v.name] = []
+      try {
+        var self = this
+        var obj = {}
+        obj.Schemaid = this.schema.id
+        for (let v of self.entity) {
+          if (v.customtype) {
+            obj[v.name] = await self.getChildData(v.type)
           } else {
-            if (v.property.defaultValue !== '') {
-              obj[v.name] = v.property.defaultValue
+            if (v.type === 'number') {
+              if (v.property.defaultValue !== '') {
+                obj[v.name] = v.property.defaultValue
+              } else {
+                if (v.property.min !== 0 && v.property.min !== '') {
+                  obj[v.name] = v.property.min
+                } else {
+                  obj[v.name] = 1
+                }
+              }
+            } else if (v.type === 'currentuser') {
+              obj[v.name] = this.$store.state.user.fullname || this.$store.state.user.email
+            } else if (v.type === 'currenttime') {
+              obj[v.name] = new Date()
+            } else if (v.type === 'boolean') {
+              if (v.property.defaultValue !== '' || v.property.defaultValue === 'true') {
+                obj[v.name] = true
+              } else {
+                obj[v.name] = false
+              }
+            } else if (v.type === 'file') {
+              obj[v.name] = []
             } else {
-              obj[v.name] = ''
+              if (v.property.defaultValue !== '') {
+                obj[v.name] = v.property.defaultValue
+              } else {
+                obj[v.name] = ''
+              }
             }
           }
         }
+        this.formSchemaInstance.data.push(obj)
+      } catch (e) {
+        console.log('Error catched: ', e)
       }
-      this.formSchemaInstance.data.push(obj)
     },
 
     makeObj () {
@@ -866,7 +869,7 @@ export default {
           }
         }
         // if (values.formData !== null, Object.keys(values.formData).length > 0) {
-        if (values.formData !== null) {
+        if (values.formData) {
           this.fetch(this.currentSchema.id, values.formData)
         } else {
           this.fetch(this.currentSchema.id)
@@ -1066,13 +1069,20 @@ export default {
             data.data['iid'] = data.id
             this.instanceEntries.push(data)
             this.dataData.push(data.data)
+          } else {
+            let inx = _.findIndex(this.instanceEntries, (o) => { return o.id === data.id })
+            console.log('Inx: ', inx)
+            this.instanceEntries.splice(inx, 1)
+            this.dataData = this.instanceEntries
           }
         }
         if (this.$store.state.role === 2) {
           if (data.claimuser === '') {
             this.dataClaim.push(data)
+            this.init()
           } else {
             this.dataData2.push(data)
+            this.init()
           }
           // if (data.currentStatus === this.$route.params.stateid) {
           //   data = data.data

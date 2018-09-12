@@ -23,10 +23,10 @@
       <small>{{getAgoStatus(item.obj.createdAt)}}</small>
     </span>
 
-    <span v-if="item.obj != null && item.isCompletedTask == false && item.isCurrentTask == true" :title="getAgoActualStatus(item.obj.createdAt)" style="display: block;">
+    <span v-if="item.obj != null && item.isCompletedTask == false && item.isCurrentTask == true" :title="getAgoActualStatus(item.obj.completedAt)" style="display: block;">
       <i class="fa fa-calendar fa-fw"></i>
       <!-- {{item.obj}} -->
-      <small>{{getAgoStatus(item.obj.createdAt)}}</small>
+      <small>{{getAgoStatus(item.obj.completedAt)}}</small>
     </span>
 
     <span v-if="item.obj != null && item.isCompletedTask == true" title="Duration" style="display: block;">
@@ -36,7 +36,7 @@
 
     <span v-if="item.obj != null && item.isCompletedTask == false" title="Duration" style="display: block;">
       <i class="fa fa-clock-o fa-fw"></i>
-      <small>{{ getDuration(item.obj.createdAt, item.obj.completedAt) }} Hours</small>
+      <small>{{ getDuration(item.obj.completedAt) }} Hours</small>
     </span>
 
     <img v-if="item.obj != null && item.isCompletedTask == true" :title="getUserHoverDetails(item)" :src="getUserAvatar(item)" class="avatarImg" alt="User Avatar">
@@ -123,9 +123,15 @@ export default {
       return moment(item).fromNow()
     },
     getDuration (x, y) {
-      let x1 = moment(x)
-      let y1 = moment(y)
-      return y1.diff(x1, 'hours')
+      if (y) {
+        let x1 = moment(x)
+        let y1 = moment(y)
+        return y1.diff(x1, 'hours')
+      } else {
+        let x1 = moment(x)
+        let y1 = moment()
+        return y1.diff(x1, 'hours')
+      }
     },
     getUserAvatar (item) {
       if (item.obj.user.avatar) {

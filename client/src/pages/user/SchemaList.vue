@@ -515,10 +515,15 @@
           // }
         },
         updated (data) {
-          // console.log('updated called: ', data)
-          if (this.$store.state.role === 1) {
-            _.remove(this.data, (o) => { return o.id === data.id })
-          }
+          console.log('updated called: ', data)
+          // if (this.$store.state.role === 1) {
+          //   if (this.$route.params.stateid !== data.currentStatus) {
+          //     let inx = _.findIndex(this.data, (o) => { return o.id === data.id })
+          //     console.log('inx: ', this.data[0], inx)
+          //     this.data.splice(inx, 1)
+          //     // _.remove(this.data, (o) => { return o.id === data.id })
+          //   }
+          // }
         },
         removed (data) {
         }
