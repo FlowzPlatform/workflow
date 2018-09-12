@@ -101,13 +101,14 @@ export default {
   methods: {
     async getRecord (item) {
       let currentObj = this.flowzData.processList[item.currentStatus]
+      console.log('currentObj: ', currentObj)
       let values = {
         id: this.flowzData.schema,
         item: item,
         formName: currentObj.name,
         currentState: currentObj.id,
         flowzData: this.flowzData,
-        formData: {}
+        formData: null
       }
       if (item.stageReference.length > 0) {
         let lastObj = item.stageReference[item.stageReference.length - 1]
