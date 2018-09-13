@@ -1102,11 +1102,30 @@ export default {
       updated (data) {
         if (this.$store.state.role === 1) {
           if (data.currentStatus === this.$route.params.stateid) {
-            data = data.data
-            data.data['iid'] = data.id
-            this.instanceEntries.push(data)
-            this.dataData.push(data.data)
-          } else {
+            // // data = data.data
+            // // data.data['iid'] = data.id
+            // // this.instanceEntries.push(data)
+            // // this.dataData.push(data.data)
+            // let StageName = data.stageReference[(data.stageReference.length - 1)].StageName
+
+            // setTimeout(() => {
+            //   flowzdataModal.get(null, {
+            //     iid: data.id,
+            //     state: StageName
+            //   }).then((resData) => {
+            //     // console.log('Form Data: ', resData)
+            //     data.data = resData.data[0].data
+            //     data.data['iid'] = data.id
+
+            //     console.log('Data: ', data)
+            //     this.instanceEntries.push(data)
+            //     this.dataData.push(data.data)
+            //   }).catch((err) => {
+            //     console.log('err: ', err)
+            //   })
+            // }, 2000)
+            this.init()
+          } else if (this.$route.params.stateid === data.stageReference[(data.stageReference.length - 1)].StageName) {
             let inx = _.findIndex(this.instanceEntries, (o) => { return o.id === data.id })
             this.instanceEntries.splice(inx, 1)
             this.dataData = this.instanceEntries
