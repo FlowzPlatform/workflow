@@ -158,7 +158,6 @@ export default {
               self.fileNumber = i + 1
               self.fileUploadProgress = 0
               self.stratProgress = false
-              console.log('data.Location', data.Location)
               resolve(data.Location)
             }
           })

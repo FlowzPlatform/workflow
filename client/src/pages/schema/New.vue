@@ -606,7 +606,9 @@ export default {
         'boolean': ['defaultValue', 'placeholder', 'optional'],
         'date': ['defaultValue', 'mindate', 'maxdate', 'placeholder', 'optional'],
         'dropdown': ['options', 'defaultValue', 'placeholder', 'optional'],
-        'file': ['optional', 'isMultiple']
+        'file': ['optional', 'isMultiple'],
+        'currentuser': ['optional'],
+        'currenttime': ['optional']
 
       }
       if (typePropertys[this.formSchema.entity[index].type] === undefined) {

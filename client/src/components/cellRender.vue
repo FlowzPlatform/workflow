@@ -25,18 +25,17 @@
 
     <span v-if="item.obj != null && item.isCompletedTask == false && item.isCurrentTask == true" :title="getAgoActualStatus(item.obj.completedAt)" style="display: block;">
       <i class="fa fa-calendar fa-fw"></i>
-      <!-- {{item.obj}} -->
       <small>{{getAgoStatus(item.obj.completedAt)}}</small>
     </span>
 
     <span v-if="item.obj != null && item.isCompletedTask == true" title="Duration" style="display: block;">
       <i class="fa fa-clock-o fa-fw"></i>
-      <small>{{ getDuration(item.obj.createdAt, item.obj.completedAt) }} Hours</small>
+      <small>{{ getDuration(item.obj.createdAt, item.obj.completedAt) }}</small>
     </span>
 
     <span v-if="item.obj != null && item.isCompletedTask == false" title="Duration" style="display: block;">
       <i class="fa fa-clock-o fa-fw"></i>
-      <small>{{ getDuration(item.obj.completedAt) }} Hours</small>
+      <small>{{ getDuration( undefined, item.obj.completedAt) }}</small>
     </span>
 
     <img v-if="item.obj != null && item.isCompletedTask == true" :title="getUserHoverDetails(item)" :src="getUserAvatar(item)" class="avatarImg" alt="User Avatar">
@@ -123,15 +122,43 @@ export default {
       return moment(item).fromNow()
     },
     getDuration (x, y) {
-      if (y) {
+      if (x) {
         let x1 = moment(x)
         let y1 = moment(y)
-        return y1.diff(x1, 'hours')
+        let milliseconds = y1.diff(x1)
+        return this.msToTime(milliseconds)
       } else {
-        let x1 = moment(x)
+        let x1 = moment(y)
         let y1 = moment()
-        return y1.diff(x1, 'hours')
+        let milliseconds = y1.diff(x1)
+        return this.msToTime(milliseconds)
       }
+    },
+    msToTime (duration) {
+      // let milliseconds = parseInt((duration % 1000) / 100)
+      let seconds = parseInt((duration / 1000) % 60)
+      let minutes = parseInt((duration / (1000 * 60)) % 60)
+      let hours = parseInt((duration / (1000 * 60 * 60)) % 24)
+      let days = parseInt(Math.floor(hours / 24))
+
+      days = (days > 0) ? ((days > 1) ? days + ' days' : days + ' day') : ''
+      hours = (hours > 0) ? ((hours > 1) ? hours + ' hours' : hours + ' hour') : ''
+      minutes = (minutes > 0) ? ((minutes > 1) ? minutes + ' minutes' : minutes + ' minute') : ''
+      seconds = (seconds > 0) ? ((seconds > 1) ? seconds + ' seconds' : seconds + ' second') : ''
+
+      // hours = (hours < 10) ? '0' + hours : hours
+      // minutes = (minutes < 10) ? '0' + minutes : minutes
+      // seconds = (seconds < 10) ? '0' + seconds : seconds
+      if (days !== '') {
+        return days
+      } else if (hours !== '') {
+        return hours
+      } else if (minutes !== '') {
+        return minutes
+      } else if (seconds !== '') {
+        return seconds
+      }
+      // return days + hours + minutes + seconds
     },
     getUserAvatar (item) {
       if (item.obj.user.avatar) {
@@ -232,7 +259,7 @@ export default {
   display: block;
   position: relative;
   min-width: 100%;
-  min-height: 40px;
+  min-height: 48px;
   background-color: #FFC5CF;
   /*margin-top: 2px;*/
 }
@@ -241,7 +268,7 @@ export default {
   display: block;
   position: relative;
   min-width: 100%;
-  min-height: 40px;
+  min-height: 48px;
   background-color: #BCEDC7;
   /*margin-top: 2px;*/
   /*margin-left: 11px;*/
@@ -253,7 +280,7 @@ export default {
   display: block;
   position: relative;
   min-width: 100%;
-  min-height: 40px;
+  min-height: 48px;
   background-color: #B7D9FD;
   /*margin-top: 2px; */
 }
@@ -272,6 +299,7 @@ export default {
 
 .stageTuple {
   position: relative;
+  padding: 5px 10px;
 } 
 
 .stageTuple:hover > .showData i{
@@ -285,4 +313,15 @@ export default {
   border-radius: 50px; 
   width: 20px;
 }
+.ivu-table-cell{
+  padding-left: 0;
+  padding-right: 0;
+}
+</style>
+
+<style>
+  .ivu-table-cell{
+    padding-left: 0;
+    padding-right: 0;
+  }
 </style>
