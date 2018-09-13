@@ -609,6 +609,7 @@ export default {
           this.flag = false
         }
       }
+      let obj = this.makeObj()
       if (!this.isEmailDone) {
         let currentStageObject = this.flowData.processList[currentStateId]
         let nextTargetId
@@ -618,7 +619,6 @@ export default {
           nextTargetId = this.flowData.processList[currentStageObject.target[0].id]
         }
         if (nextTargetId.type === 'sendproofmail') {
-          var obj = this.makeObj()
           this.validFlag = true
           this.validErr = []
           let allcheck = []
