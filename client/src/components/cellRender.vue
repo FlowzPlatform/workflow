@@ -184,7 +184,6 @@ export default {
         await flowzdataModal.get(null, {
           id: this.currentPopTipObj.stageRecordId
         }).then(async (resData) => {
-          console.log('Data: ', resData)
           this.currentPopTipData = resData.data[0].data
           await schemaModel.get(this.schemaId).then(async schemaRes => {
             this.schemainstance.entity = schemaRes.data.entity

@@ -473,7 +473,6 @@ export default {
         $skip: this.skip,
         $limit: this.limit
       }).then(queryresp => {
-        console.log('queryresp: ', queryresp)
         // this.$Spin.hide()
         this.tableData = queryresp.data.data
         colviewData = queryresp.data.data
