@@ -154,6 +154,10 @@ export default {
             let location = psl.parse(window.location.hostname)    // get parent domain
             location = location.domain === null ? location.input : location.domain
             this.$cookie.set('auth_token', auth.logintoken, {expires: 1, domain: location})    // Store in cookie
+            this.$store.state.flowz = []
+            this.$store.state.schema = []
+            this.$store.state.Cache = null
+            this.$store.state.Cache = {}
             let userData = await this.$store.dispatch('authenticate', auth.logintoken)
             this.$store.commit('SET_ROLE', 2)
             if (userData.hasOwnProperty('package')) {

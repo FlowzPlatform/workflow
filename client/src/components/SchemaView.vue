@@ -207,6 +207,7 @@ export default {
   },
   data () {
     return {
+      check: 0,
       client: false,
       admin: true,
       dataClaim: [],
@@ -616,57 +617,53 @@ export default {
         } else {
           nextTargetId = this.flowData.processList[currentStageObject.target[0].id]
         }
-        // console.log('nextTargetId ', nextTargetId)
         if (nextTargetId.type === 'sendproofmail') {
-          this.loadEmail = true
-          this.id = null
-          this.schemabinding = true
-          if (nextTargetId.hasOwnProperty('emailtemplate')) {
-            saveemailTemplate.get(nextTargetId.emailtemplate)
-            .then((res) => {
-              setTimeout(() => {
-                this.sendDataEmail = res.data.template + this.$refs.schemasubformview.$el.outerHTML
-                this.email = true
-                this.loadEmail = false
-              }, 1000)
-            })
-            .catch((err) => {
+          var obj = this.makeObj()
+          this.validFlag = true
+          this.validErr = []
+          let allcheck = []
+          for (let dobj of obj.data) {
+            let flag = this.checkValidation(dobj, this.entity)
+            allcheck.push(flag)
+          }
+          this.check = _.indexOf(allcheck, false)
+          if (this.check === -1) {
+            this.loadEmail = true
+            this.id = null
+            this.schemabinding = true
+            if (nextTargetId.hasOwnProperty('emailtemplate')) {
+              saveemailTemplate.get(nextTargetId.emailtemplate)
+              .then((res) => {
+                setTimeout(() => {
+                  this.sendDataEmail = res.data.template + this.$refs.schemasubformview.$el.outerHTML
+                  this.email = true
+                  this.loadEmail = false
+                }, 1000)
+              })
+              .catch((err) => {
+                setTimeout(() => {
+                  this.sendDataEmail = this.$refs.schemasubformview.$el.outerHTML
+                  this.email = true
+                  this.loadEmail = false
+                  console.log(err)
+                }, 1000)
+              })
+            } else {
               setTimeout(() => {
                 this.sendDataEmail = this.$refs.schemasubformview.$el.outerHTML
                 this.email = true
                 this.loadEmail = false
-                console.log(err)
               }, 1000)
-            })
-          } else {
-            setTimeout(() => {
-              this.sendDataEmail = this.$refs.schemasubformview.$el.outerHTML
-              this.email = true
-              this.loadEmail = false
-            }, 1000)
-          }
-          let flag = false
-          if (nextTargetId.target.length > 1) {
-            let arr = {}
-            for (let index = 0; index < nextTargetId.target.length; index++) {
-              let target = this.flowData.processList[nextTargetId.target[index].id]
-              if (nextTargetId.target[index].hasOwnProperty('label')) {
-                arr[nextTargetId.target[index].label] = target.id
-                flag = true
-              }
             }
-            this.btnArr = arr
-          } else {
-            let arr = {}
-            arr['approve'] = nextTargetId.target[0].id
-            this.btnArr = arr
-          }
-          if (flag === false) {
+            let flag = false
             if (nextTargetId.target.length > 1) {
               let arr = {}
               for (let index = 0; index < nextTargetId.target.length; index++) {
                 let target = this.flowData.processList[nextTargetId.target[index].id]
-                arr[target.name] = target.id
+                if (nextTargetId.target[index].hasOwnProperty('label')) {
+                  arr[nextTargetId.target[index].label] = target.id
+                  flag = true
+                }
               }
               this.btnArr = arr
             } else {
@@ -674,73 +671,112 @@ export default {
               arr['approve'] = nextTargetId.target[0].id
               this.btnArr = arr
             }
+            if (flag === false) {
+              if (nextTargetId.target.length > 1) {
+                let arr = {}
+                for (let index = 0; index < nextTargetId.target.length; index++) {
+                  let target = this.flowData.processList[nextTargetId.target[index].id]
+                  arr[target.name] = target.id
+                }
+                this.btnArr = arr
+              } else {
+                let arr = {}
+                arr['approve'] = nextTargetId.target[0].id
+                this.btnArr = arr
+              }
+            }
+          } else {
+            this.validErr = _.uniqBy(this.validErr, 'name')
+            this.$Notice.error({title: 'Validation Error!'})
           }
         } else {
-          this.saveDataMethod()
+          this.validFlag = true
+          this.validErr = []
+          let allcheck = []
+          for (let dobj of obj.data) {
+            let flag = this.checkValidation(dobj, this.entity)
+            allcheck.push(flag)
+          }
+          this.check = _.indexOf(allcheck, false)
+          if (this.check === -1) {
+            this.saveDataMethod()
+          } else {
+            this.validErr = _.uniqBy(this.validErr, 'name')
+            this.$Notice.error({title: 'Validation Error!'})
+          }
         }
       } else {
-        this.saveDataMethod()
+        this.validFlag = true
+        this.validErr = []
+        let allcheck = []
+        for (let dobj of obj.data) {
+          let flag = this.checkValidation(dobj, this.entity)
+          allcheck.push(flag)
+        }
+        this.check = _.indexOf(allcheck, false)
+        if (this.check === -1) {
+          this.saveDataMethod()
+        } else {
+          this.validErr = _.uniqBy(this.validErr, 'name')
+          this.$Notice.error({title: 'Validation Error!'})
+        }
       }
     },
     async saveDataMethod () {
       var obj = this.makeObj()
-      this.validFlag = true
-      this.validErr = []
-      let allcheck = []
-      for (let dobj of obj.data) {
-        let flag = this.checkValidation(dobj, this.entity)
-        allcheck.push(flag)
-      }
-      let check = _.indexOf(allcheck, false)
+      // this.validFlag = true
+      // this.validErr = []
+      // let allcheck = []
+      // for (let dobj of obj.data) {
+      //   let flag = this.checkValidation(dobj, this.entity)
+      //   allcheck.push(flag)
+      // }
+      // let check = _.indexOf(allcheck, false)
       this.$Loading.start()
-      if (check === -1) {
-        let mergeData = this.mergeFileList(obj.data, obj)
-        obj.data = mergeData
-          // let returnObj = await DeepRecord.deepRecord.instanceStageSubmit(client, this.item, obj.data[0])
-        let saveObj = {
-          fid: this.item.fid,
-          iid: this.item.id,
-          state: this.item.currentStatus,
-          data: obj.data[0]
-        }
-        if (this.isMultiple) {
-          saveObj.nextTarget = this.nextTarget.value
-        }
-        this.bLoading = true
-          // this.bLoading = false
-        flowzdataModal.post(saveObj).then(res => {
-          this.id = null
-          this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
-          this.$Loading.finish()
-          this.bLoading = false
-          this.email = false
-          this.isEmailDone = false
-        }).catch(err => {
-          console.log('Error', err)
-          this.$Loading.finish()
-          this.bLoading = false
-          this.email = false
-          this.isEmailDone = false
-          this.$Notice.error({title: 'Not Saved!'})
-        })
-
-          // let instanceObj = await DeepRecord.deepRecord.getRecordObject(client, this.item)
-          // instanceObj.set('currentStatus', this.nextState)
-
-          // axios.post('http://192.81.213.41:3033/eng/instance/', { data: obj.data })
-          // .then(response => {
-          //   this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
-          //   this.$Loading.finish()
-          // })
-          // .catch(error => {
-          //   console.log('Error', error)
-          //   this.$Notice.error({title: 'Error!', desc: 'Instance not saved...'})
-          //   this.$Loading.error()
-          // })
-      } else {
-        this.validErr = _.uniqBy(this.validErr, 'name')
-        this.$Notice.error({title: 'Validation Error!'})
+      let mergeData = this.mergeFileList(obj.data, obj)
+      obj.data = mergeData
+        // let returnObj = await DeepRecord.deepRecord.instanceStageSubmit(client, this.item, obj.data[0])
+      let saveObj = {
+        fid: this.item.fid,
+        iid: this.item.id,
+        state: this.item.currentStatus,
+        data: obj.data[0]
       }
+      if (this.isMultiple) {
+        saveObj.nextTarget = this.nextTarget.value
+      }
+      this.bLoading = true
+        // this.bLoading = false
+      flowzdataModal.post(saveObj).then(res => {
+        this.id = null
+        this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
+        this.$Loading.finish()
+        this.bLoading = false
+        this.email = false
+        this.validErr = []
+        this.isEmailDone = false
+      }).catch(err => {
+        console.log('Error', err)
+        this.$Loading.finish()
+        this.bLoading = false
+        this.email = false
+        this.isEmailDone = false
+        this.$Notice.error({title: 'Not Saved!'})
+      })
+
+        // let instanceObj = await DeepRecord.deepRecord.getRecordObject(client, this.item)
+        // instanceObj.set('currentStatus', this.nextState)
+
+        // axios.post('http://192.81.213.41:3033/eng/instance/', { data: obj.data })
+        // .then(response => {
+        //   this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
+        //   this.$Loading.finish()
+        // })
+        // .catch(error => {
+        //   console.log('Error', error)
+        //   this.$Notice.error({title: 'Error!', desc: 'Instance not saved...'})
+        //   this.$Loading.error()
+        // })
     },
     checkValidation (data, ent) {
       var self = this
@@ -842,6 +878,7 @@ export default {
     },
 
     setValues (values) {
+      this.validErr = []
       this.email = false
       this.schemabinding = false
       this.nextTarget.value = ''

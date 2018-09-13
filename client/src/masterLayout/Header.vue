@@ -70,6 +70,9 @@
                         </Menu-item>
                     </Submenu>
                     </Menu-item>
+                    <Menu-item name="5">
+                      <i @click="hardRefresh" class="fa fa-refresh" aria-hidden="true" title="hard refresh"></i>
+                    </Menu-item>
                 </div>
                 </Row>
         </i-col>
@@ -112,6 +115,13 @@
       }
     },
     methods: {
+      hardRefresh () {
+        this.$store.state.flowz = []
+        this.$store.state.schema = []
+        this.$store.state.Cache = null
+        this.$store.state.Cache = {}
+        window.location.reload()
+      },
       gotoDashboard () {
         if (this.$store.state.role === 1) {
           this.$router.push('/admin/dashboard')
@@ -126,6 +136,10 @@
         this.$store.commit('SET_TOKEN', null)
         this.$store.commit('SET_USER', null)
         this.$store.commit('SET_ROLE', null)
+        this.$store.state.flowz = []
+        this.$store.state.schema = []
+        this.$store.state.Cache = null
+        this.$store.state.Cache = {}
         this.$router.push('/login')
       },
       handleChange (value) {
