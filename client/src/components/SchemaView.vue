@@ -1071,7 +1071,6 @@ export default {
             this.dataData.push(data.data)
           } else {
             let inx = _.findIndex(this.instanceEntries, (o) => { return o.id === data.id })
-            console.log('Inx: ', inx)
             this.instanceEntries.splice(inx, 1)
             this.dataData = this.instanceEntries
           }

@@ -130,7 +130,13 @@ export default {
     },
     viewProgress (item) {
       // console.log('item: ', item)
-      this.$router.push('/admin/flow/analytics/' + item.id)
+      if (item.id === this.$route.params.id) {
+        let randomStr = this.makeid()
+        this.$store.state.updateView = randomStr
+        this.$router.push('/admin/flow/analytics/' + item.id)
+      } else {
+        this.$router.push('/admin/flow/analytics/' + item.id)
+      }
     },
     handleopenChange (node) {
       node = node.split('/')
