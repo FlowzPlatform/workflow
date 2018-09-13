@@ -611,7 +611,6 @@ export default {
         'currenttime': ['optional']
 
       }
-      console.log(typePropertys[this.formSchema.entity[index].type])
       if (typePropertys[this.formSchema.entity[index].type] === undefined) {
         return ['IsArray'].indexOf(property) >= 0
       } else {
