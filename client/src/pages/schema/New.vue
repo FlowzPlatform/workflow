@@ -606,9 +606,12 @@ export default {
         'boolean': ['defaultValue', 'placeholder', 'optional'],
         'date': ['defaultValue', 'mindate', 'maxdate', 'placeholder', 'optional'],
         'dropdown': ['options', 'defaultValue', 'placeholder', 'optional'],
-        'file': ['optional', 'isMultiple']
+        'file': ['optional', 'isMultiple'],
+        'currentuser': ['optional'],
+        'currenttime': ['optional']
 
       }
+      console.log(typePropertys[this.formSchema.entity[index].type])
       if (typePropertys[this.formSchema.entity[index].type] === undefined) {
         return ['IsArray'].indexOf(property) >= 0
       } else {
