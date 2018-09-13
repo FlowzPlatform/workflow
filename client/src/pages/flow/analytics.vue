@@ -87,9 +87,15 @@
     <div v-show="rowview">
       <!-- <Table height="690" border :columns="mainColumns()" :data="tableData"></Table> -->
       <Table :loading="tableLoading" v-if="schemaId !== null" height="590" border :columns="mainColumns()" :data="tableData"></Table>
+      <Row style="margin-top: 4px; float: right">
+        <Page :total="total" :current="cpage" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+      </Row>
     </div>
     <div v-show="columnview">
       <Table :loading="tableLoading" :row-class-name="rowClassName" :columns="colviewCols" height="590" :data="colviewData"></Table>
+      <Row style="margin-top: 4px; float: right">
+        <Page :total="total" :current="cpage" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+      </Row>
     </div>
     <!-- <Table v-if="schemaId !== null" height="690" border :columns="mainColumns()" :data="tableData"></Table> -->
 
@@ -268,7 +274,11 @@ export default {
       selectedSortBy: null,
       enteredDateRange: null,
       currentSchema: null,
-      tableLoading: false
+      tableLoading: false,
+      limit: 10,
+      cpage: 1,
+      skip: 0,
+      total: 0
     }
   },
   components: {
@@ -280,6 +290,16 @@ export default {
     }
   },
   methods: {
+    handlePage (page) {
+      this.cpage = page
+      this.skip = (page * this.limit) - this.limit
+      this.init()
+    },
+    handlePagesize (size) {
+      this.limit = size
+      this.skip = 0
+      this.init()
+    },
     rowClassName (row, index) {
       return row.className
     },
@@ -325,6 +345,7 @@ export default {
             isCompletedTask: true
           }
           if (obj) {
+            obj['createdAt'] = params.row.createdAt
             finalValue.isCurrentTask = false
             finalValue.isCompletedTask = true
           } else {
@@ -449,11 +470,14 @@ export default {
       dataQueryModel.get(null, {
         $all: true,
         fid: this.fid,
-        $paginate: false
+        $skip: this.skip,
+        $limit: this.limit
       }).then(queryresp => {
+        console.log('queryresp: ', queryresp)
         // this.$Spin.hide()
-        this.tableData = queryresp.data
-        colviewData = queryresp.data
+        this.tableData = queryresp.data.data
+        colviewData = queryresp.data.data
+        this.total = queryresp.data.total
         let listing = this.getByOrder(this.flowzData.processList)
         for (let item of colviewData) {
           let isfirst = false
@@ -612,6 +636,9 @@ export default {
   },
   watch: {
     '$route.params.id': function (newValue, oldValue) {
+      this.init()
+    },
+    '$store.state.updateView': function (newValue, oldValue) {
       this.init()
     }
   }
