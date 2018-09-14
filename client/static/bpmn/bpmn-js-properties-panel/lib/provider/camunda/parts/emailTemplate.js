@@ -75,7 +75,6 @@ let userData = require('../../../../../../../src/store/index')
 let emailTemplateData;
 module.exports = function (generalGroup, element, bpmnFactory, translate, options) {
   var bo = getBusinessObject(element);
-
   if (!bo) {
     return;
   }

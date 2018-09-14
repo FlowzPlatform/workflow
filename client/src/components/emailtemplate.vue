@@ -6,13 +6,13 @@
     </div>
     <div class="editor" v-if="newTemplate">
       <h2 class="heading">Create Template</h2>
-      <editor v-model="GetHtmlOfEditor" :toolbar="toolbar1" :plugins="plugins" :init="settings" :initial-value="gethtmlcontent"></editor>
+      <editor v-model="GetHtmlOfEditor" api-key="ppzi01crrfo3pvd43s3do89pguwkhowrwajpjdqdkginzj7k" :toolbar="toolbar1" :plugins="plugins" :init="settings" :initial-value="gethtmlcontent"></editor>
       <Input v-model="templateName" placeholder="Enter Template name" style="width: 300px" class="dataEnter"/>
       <Button type="primary" @click="saveTemplate" class="dataEnter">Save Template</Button>
     </div>
     <div class="editor" v-else>
       <h2 class="heading">View Template</h2>
-      <editor v-model="GetHtmlOfEditor" :initial-value="GetHtmlContent"></editor>
+      <editor v-model="GetHtmlOfEditor" api-key="ppzi01crrfo3pvd43s3do89pguwkhowrwajpjdqdkginzj7k" :initial-value="GetHtmlContent"></editor>
       <Input v-model="templateName" placeholder="Enter Template name" style="width: 300px" class="dataEnter"/>
       <Button type="primary" @click="updateTemplate" class="dataEnter">Update Template</Button>
       <Button type="error" @click="cancelUpdateTemplate" class="dataEnter">Cancel</Button>
@@ -173,7 +173,6 @@ export default {
     }
   },
   mounted () {
-    console.log('editor', Editor)
     saveemailTemplate.get(null, {
       'user': this.$store.state.user._id
     })
@@ -232,6 +231,19 @@ export default {
   overflow-y: auto;
   overflow-x: hidden
 }
+
+.mce-widget.mce-notification.mce-notification-warning.mce-has-close.mce-in{
+  display: none !important;
+  z-index: -999999 !important;
+}
 </style>
+
+<style>
+
+.mce-widget.mce-notification.mce-notification-warning.mce-has-close.mce-in{
+  display: none !important;
+}
+</style>
+
 
 

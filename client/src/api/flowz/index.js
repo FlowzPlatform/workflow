@@ -18,6 +18,9 @@ export default {
   put: (id, data) => {
     return api.request('put', '/' + model + '/' + id, data)
   },
+  patch: (id, data) => {
+    return api.request('patch', '/' + model + '/' + id, data)
+  },
   delete: (id) => {
     return api.request('delete', '/' + model + '/' + id)
   }

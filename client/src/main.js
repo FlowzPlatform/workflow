@@ -73,8 +73,8 @@ import 'animate.css/animate.css'
 // import 'bootstrap/dist/css/bootstrap.css'
 // import 'bootstrap-vue/dist/bootstrap-vue.css'
 
-import AsyncComputed from 'vue-async-computed'
-Vue.use(AsyncComputed)
+// import AsyncComputed from 'vue-async-computed'
+// Vue.use(AsyncComputed)
 
 /* vue-split-panel */
 import VueSplit from 'vue-split-panel'
