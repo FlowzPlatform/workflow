@@ -2,15 +2,17 @@
   <div class="SchemaView">
   	<div class="container-fluid" v-if="isFlowzLoaded === true">
       <div>
-        <div v-if="itsFirstState === true && instanceEntries.length > 0">
-          <list-instances :flowzData="flowzData" :instanceEntries="instanceEntries" v-on:setValues="setValues"></list-instances>
+        <div v-if="itsFirstState === true">
+          <!-- <list-instances :flowzData="flowzData" :instanceEntries="instanceEntries" v-on:setValues="setValues"></list-instances> -->
           <div>
-            <div class="row" v-if="id != null">
+            <div class="row">
               <div class="col-md-12" id="top">
                 <div class="row" style="margin-top: 15px;">
                   <div class="col-md-12">
                     <div class="ui-card">
-                      <h3 class="formTitle">{{formTitle}}<span style="font-size:12px">&nbsp;&nbsp;({{item.id}})</span></h3>
+                      <h3 class="formTitle">{{flowzData.name}}
+                        <!-- <span style="font-size:12px">&nbsp;&nbsp;({{item.id}})</span> -->
+                      </h3>
                     </div>
                   </div>
                 </div>
@@ -181,7 +183,7 @@ import flowzModel from '@/api/flowz'
 import schemalist from '@/pages/user/SchemaList'
 import schemaModel from '@/api/schema'
 
-// import finstanceModal from '@/api/finstance'
+import finstanceModal from '@/api/finstance'
 import dataQuerymodel from '@/api/dataquery'
 import saveemailTemplate from '@/api/emailtemplate'
 // const deepstream = require('deepstream.io-client-js')
@@ -489,12 +491,13 @@ export default {
       // } else {
       // setTimeout(async ()=>{
       // await this.handleAdd()
+
       this.$Loading.finish()
-      setTimeout(() => {
-        $('html, body').animate({
-          scrollTop: $('#top').offset().top
-        }, 500)
-      }, 0)
+      // setTimeout(() => {
+      //   $('html, body').animate({
+      //     scrollTop: $('#top').offset().top
+      //   }, 500)
+      // }, 0)
 
       // },4000)
       // }
@@ -601,7 +604,96 @@ export default {
       return mdata
     },
 
-    handleSubmit (name) {
+    createInstanceAndSave () {
+      this.$Loading.start()
+      let fheaders = null
+      fheaders = {
+        workflowid: 'workflow_' + this.flowzData.id,
+        stateid: this.$route.params.stateid
+      }
+
+      let saveObj = {
+        fid: this.$route.params.id,
+        currentState: this.$route.params.stateid,
+        data: this.formSchemaInstance.data
+      }
+      finstanceModal.post(saveObj, null, fheaders)
+        .then(res => {
+          console.log('res: ', res)
+          this.$Loading.finish()
+          this.$Notice.success({title: 'Saved Successfully'})
+          setTimeout(() => {
+            $('html, body').animate({
+              scrollTop: $('#top').offset().top
+            }, 500)
+          }, 0)
+          this.init()
+
+        // this.$Notice.success({title: 'Instance Generated'})
+        // let item = {
+        //   fid: this.flowzData.id,
+        //   iid: res.data.id,
+        //   currentStatus: res.data.currentStatus
+        // }
+        // let values = {
+        //   id: this.flowzData.schema,
+        //   // item: item,
+        //   formName: this.flowzData.name,
+        //   currentState: this.flowzData.currentStatus,
+        //   flowzData: this.flowzData,
+        //   formData: null
+        // }
+
+        // this.validErr = []
+        // this.email = false
+        // this.schemabinding = false
+        // this.nextTarget.value = ''
+        // this.nextTarget.options = []
+        // this.isMultiple = false
+        // this.id = values.id
+        // if (values.id !== null) {
+        //   this.item = values.item
+        //   this.formTitle = values.formName
+        //   this.flowData = values.flowzData
+        //   let targetObj = values.flowzData.processList[values.currentState]
+        //   if (Object.keys(targetObj).length > 0) {
+        //     if (targetObj.target.length > 1) {
+        //       let opts = []
+        //       for (let m of targetObj.target) {
+        //         let label = values.flowzData.processList[m.id].name
+        //         opts.push({
+        //           label: label,
+        //           value: m.id
+        //         })
+        //       }
+        //       this.nextTarget.value = ''
+        //       this.nextTarget.options = opts
+        //       this.isMultiple = true
+        //     }
+        //   }
+        //   // if (values.formData !== null, Object.keys(values.formData).length > 0) {
+        //   // if (values.formData) {
+        //   //   this.fetch(this.currentSchema.id, values.formData)
+        //   // } else {
+        //   //   this.fetch(this.currentSchema.id)
+        //   // }
+        // }
+
+        // this.item = item
+        // this.saveInstanceData()
+        // this.$Loading.finish()
+        }).catch(e => {
+          this.$Loading.error()
+          console.log('error', e)
+          if (e.response.data.message) {
+            this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+          } else {
+            this.$Notice.error({title: 'Error', desc: 'Instace Not Generated'})
+          }
+        })
+    },
+
+    saveInstanceData () {
       let currentStateId = this.$route.params.stateid
       if (this.schema.hasOwnProperty('emailSchema')) {
         if (this.schema.emailSchema.action === true) {
@@ -720,6 +812,14 @@ export default {
           this.validErr = _.uniqBy(this.validErr, 'name')
           this.$Notice.error({title: 'Validation Error!'})
         }
+      }
+    },
+
+    handleSubmit (name) {
+      if (this.flowzData.first === this.$route.params.stateid) {
+        this.createInstanceAndSave()
+      } else {
+        this.saveInstanceData()
       }
     },
     async saveDataMethod () {
@@ -1060,7 +1160,14 @@ export default {
       this.email = false
       this.flowzData = await this.getFlowz()
       this.currentSchema = await this.getSchema()
-      this.populateTables()
+      console.log('Flowz Data: ', this.flowzData)
+      if (this.flowzData.first === this.$route.params.stateid) {
+        console.log('this.currentSchema.id: ', this.currentSchema.id)
+        await this.fetch(this.currentSchema.id)
+        this.dataLoading = false
+      } else {
+        this.populateTables()
+      }
       this.isFlowzLoaded = true
     },
 
