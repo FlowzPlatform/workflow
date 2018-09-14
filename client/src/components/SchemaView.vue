@@ -422,7 +422,6 @@ export default {
       // this.formTitle = response.data.title
       // if (this.lastLog === undefined) {
       this.formSchemaInstance.data = []
-      this.formSchemaInstance.permission = []
       // } else {
       //   if (this.lastLog.input.length === 0) {
       //     this.formSchemaInstance.data = []
@@ -436,6 +435,7 @@ export default {
       let currentStageP = this.$route.params.stateid
       let currentStateP = this.flowzData.processList[currentStageP]
       if (currentStateP.hasOwnProperty('permission')) {
+        this.formSchemaInstance.permission = []
         this.formSchemaInstance.permission = currentStateP.permission
       }
       // console.log('this.formData.processList', currentStageP)
