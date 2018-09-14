@@ -434,6 +434,14 @@ export default {
       // }
       this.schema = this.currentSchema
       this.entity = this.currentSchema.entity
+      let currentStageP = this.$route.params.stateid
+      let currentStateP = this.flowzData.processList[currentStageP]
+      if (currentStateP.hasOwnProperty('permission')) {
+        this.formSchemaInstance.permission = []
+        this.formSchemaInstance.permission = currentStateP.permission
+      }
+      // console.log('this.formData.processList', currentStageP)
+
       this.formSchemaInstance.entity = this.schema.entity
       // this.formSchemaInstance.data[0] = {}
       for (let [index, entity] of self.formSchemaInstance.entity.entries()) {
@@ -700,6 +708,7 @@ export default {
           this.flag = false
         }
       }
+      let obj = this.makeObj()
       if (!this.isEmailDone) {
         let currentStageObject = this.flowData.processList[currentStateId]
         let nextTargetId
@@ -709,7 +718,6 @@ export default {
           nextTargetId = this.flowData.processList[currentStageObject.target[0].id]
         }
         if (nextTargetId.type === 'sendproofmail') {
-          var obj = this.makeObj()
           this.validFlag = true
           this.validErr = []
           let allcheck = []
@@ -1206,11 +1214,30 @@ export default {
       updated (data) {
         if (this.$store.state.role === 1) {
           if (data.currentStatus === this.$route.params.stateid) {
-            data = data.data
-            data.data['iid'] = data.id
-            this.instanceEntries.push(data)
-            this.dataData.push(data.data)
-          } else {
+            // // data = data.data
+            // // data.data['iid'] = data.id
+            // // this.instanceEntries.push(data)
+            // // this.dataData.push(data.data)
+            // let StageName = data.stageReference[(data.stageReference.length - 1)].StageName
+
+            // setTimeout(() => {
+            //   flowzdataModal.get(null, {
+            //     iid: data.id,
+            //     state: StageName
+            //   }).then((resData) => {
+            //     // console.log('Form Data: ', resData)
+            //     data.data = resData.data[0].data
+            //     data.data['iid'] = data.id
+
+            //     console.log('Data: ', data)
+            //     this.instanceEntries.push(data)
+            //     this.dataData.push(data.data)
+            //   }).catch((err) => {
+            //     console.log('err: ', err)
+            //   })
+            // }, 2000)
+            this.init()
+          } else if (this.$route.params.stateid === data.stageReference[(data.stageReference.length - 1)].StageName) {
             let inx = _.findIndex(this.instanceEntries, (o) => { return o.id === data.id })
             this.instanceEntries.splice(inx, 1)
             this.dataData = this.instanceEntries

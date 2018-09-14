@@ -740,8 +740,8 @@ export default {
   }
 
   .ivu-table-cell{
-    padding-left: 0;
-    padding-right: 0;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
   }
 
   .searchQueries{

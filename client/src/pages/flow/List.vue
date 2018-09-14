@@ -124,7 +124,33 @@
         </div>
         </div>
     </Modal>
-
+    <Modal
+        v-model="permissionModel"
+        title="Permission Model"
+        @on-ok="ok"
+        @on-cancel="cancel" width='1000'>
+        <div>
+          <table class="table table-striped table-border">
+            <thead></thead>
+            <tbody>
+              <tr>
+                <td></td>
+                <td v-for="item in 'item'">
+                  {{item}}
+                </td>
+              </tr>
+              <tr v-for="i in 'schemaname'">
+                <td>
+                  {{i}}
+                </td>
+                <td v-for="items in 'item'">
+                  <Switch v-model="hideShow" @on-change="change" />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+    </Modal>
 
     <Row type="flex" justify="end">
       <Button type="primary" size="small" style="margin-bottom: 2px;" @click="addNewFlow" icon="plus"> Add</Button>
@@ -164,6 +190,8 @@ export default {
   },
   data () {
     return {
+      hideShow: false,
+      permissionModel: false,
       showTable: false,
       isDone: 'abc',
       loadingPermisions: true,
@@ -301,6 +329,35 @@ export default {
                   }
                 }
               }, ''),
+              h('Button', {
+                props: {
+                  type: 'text',
+                  size: 'large'
+                },
+                style: {
+                  marginRight: '3px',
+                  padding: '0px',
+                  fontSize: '20px',
+                  color: '#703636'
+                },
+                on: {
+                  click: () => {
+                    this.showPermissionDialog(params)
+                  }
+                }
+              }, [
+                h('i', {
+                  attrs: {
+                    class: 'fa fa-lock'
+                  },
+                  style: {
+                    marginRight: '3px',
+                    padding: '0px',
+                    fontSize: '20px',
+                    color: '#808080'
+                  }
+                })
+              ]),
               h('Button', {
                 props: {
                   type: 'text',
@@ -531,6 +588,14 @@ export default {
           console.log(error)
         })
       this.modal1 = true
+    },
+
+    showPermissionDialog (query) {
+      // this.permissionModel = true
+      this.$router.push('/admin/permission/' + query.row.id)
+    },
+    change () {
+      console.log('change')
     },
     capitalize (str) {
       str = str[0].toUpperCase() + str.slice(1)
