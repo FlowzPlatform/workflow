@@ -406,6 +406,8 @@
             })
           } else {
             await this.initBPMN({
+              userId: this.$store.state.user._id,
+              emailTemplate: tempVar,
               schema: response[0],
               AddEntity: () => {
                 this.storeXMLtolocalStorage()
