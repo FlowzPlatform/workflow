@@ -55,7 +55,6 @@ function afterCreate (hook) {
     // console.log('hook.params', hook.params)
     // console.log('++++++++++++++++++++++++++++++++++++++++++++++++++++++')
     return hook.app.service('flowz').get(hook.data.fid, {query}).then(res => {
-      console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^6^: ', res)
       // let cuurentObj = _.find(res.json.processList, {id: hook.data.state});
       let cuurentObj = res.processList[hook.data.state];
       console.log('________________________________________________cuurentObj', cuurentObj)

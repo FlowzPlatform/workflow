@@ -619,7 +619,6 @@ export default {
       }
       finstanceModal.post(saveObj, null, fheaders)
         .then(res => {
-          console.log('res: ', res)
           this.$Loading.finish()
           this.$Notice.success({title: 'Saved Successfully'})
           setTimeout(() => {
@@ -1160,9 +1159,7 @@ export default {
       this.email = false
       this.flowzData = await this.getFlowz()
       this.currentSchema = await this.getSchema()
-      console.log('Flowz Data: ', this.flowzData)
       if (this.flowzData.first === this.$route.params.stateid) {
-        console.log('this.currentSchema.id: ', this.currentSchema.id)
         await this.fetch(this.currentSchema.id)
         this.dataLoading = false
       } else {
