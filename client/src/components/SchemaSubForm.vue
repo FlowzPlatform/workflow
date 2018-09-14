@@ -36,6 +36,23 @@
                       </div>
                     </div>
                   </div>
+                  <div>
+                    <Col :span="24" style="margin-bottom: 20px;" :id="field.name">
+                        <FormItem :key="inx" style="margin-bottom:10px;">
+                            <Row style="font-size:16px">
+                                <span class="card-title">{{field.name}}</span>
+                            </Row>
+                            <Row v-if="field.property.IsArray">
+                                <schemasubform :schemainstance="getObject(inx, index, field.name, field.type)"></schemasubform>
+                                <Button class="btnAdd" @click="handleAdd(inx, index, schemainstance.entity[inx].entity[0], schemainstance.data[index][field.name], field.name)" icon="plus"> Add ({{field.name}})</Button>
+                            </Row>
+                            <Row v-else>
+                                <schemasubform :schemainstance="getObject(inx, index, field.name, field.type)"></schemasubform>
+                                
+                            </Row>
+                        </FormItem>
+                    </Col>
+                  </div>
                 </template>
                 <template v-else>
                   <div v-if="schemainstance.permission !== undefined">
@@ -125,7 +142,7 @@
                             </FormItem>
                         </Col>
                       </div>
-                    </div>
+                  </div>
                     <div v-else>
                       <Col :span="12" style="padding:0px 20px 0px 2px" v-if="field.type !== 'file'">
                             <FormItem :key="inx" :rules="createRules(field)" style="margin-bottom:10px;">
@@ -152,7 +169,7 @@
                                   </Col>
                                 </Row>
                             </FormItem>
-                      </Col>
+                        </Col>
                       </div>
                 </template> 
             </div>

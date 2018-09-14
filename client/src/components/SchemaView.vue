@@ -435,12 +435,12 @@ export default {
       this.entity = this.currentSchema.entity
       let currentStageP = this.$route.params.stateid
       let currentStateP = this.flowzData.processList[currentStageP]
-      console.log(currentStateP.permission)
-      this.formSchemaInstance.permission = currentStateP.permission
+      if (currentStateP.hasOwnProperty('permission')) {
+        this.formSchemaInstance.permission = currentStateP.permission
+      }
       // console.log('this.formData.processList', currentStageP)
 
       this.formSchemaInstance.entity = this.schema.entity
-      console.log('this.schema.entity', this.schema.entity)
       // this.formSchemaInstance.data[0] = {}
       for (let [index, entity] of self.formSchemaInstance.entity.entries()) {
         if (entity.customtype === true) {
