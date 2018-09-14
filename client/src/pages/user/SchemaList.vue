@@ -515,7 +515,7 @@
           // }
         },
         updated (data) {
-          console.log('updated called: ', data)
+          // console.log('updated called: ', data)
           // if (this.$store.state.role === 1) {
           //   if (this.$route.params.stateid !== data.currentStatus) {
           //     let inx = _.findIndex(this.data, (o) => { return o.id === data.id })

@@ -57,8 +57,10 @@ function afterCreate (hook) {
     return hook.app.service('flowz').get(hook.data.fid, {query}).then(res => {
       // let cuurentObj = _.find(res.json.processList, {id: hook.data.state});
       let cuurentObj = res.processList[hook.data.state];
+      console.log('________________________________________________cuurentObj', cuurentObj)
       // let nextTargetObj = getNextTarget(res.json.processList, cuurentObj.target[0].id);
       let nextTargetObj = res.processList[cuurentObj.target[0].id];
+      console.log('________________________________________________nextTargetObj', nextTargetObj)
       return hook.app.service('finstance').get(hook.data.iid).then(finstRes => {
         let mdata = {
           currentStatus: nextTargetObj.id,

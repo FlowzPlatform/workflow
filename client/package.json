@@ -19,7 +19,7 @@
     "@tinymce/tinymce-vue": "^1.0.9",
     "animate.css": "^3.7.0",
     "aws": "0.0.3-2",
-    "aws-sdk": "^2.309.0",
+    "aws-sdk": "^2.315.0",
     "axios": "^0.16.2",
     "babel-loader": "^7.1.1",
     "babel-plugin-syntax-jsx": "^6.18.0",
@@ -39,7 +39,7 @@
     "iview": "^2.9.2",
     "jquery": "^3.3.1",
     "location": "0.0.1",
-    "lodash": "^4.17.4",
+    "lodash": "^4.17.11",
     "moment": "^2.20.1",
     "navigator": "^1.0.1",
     "net": "^1.0.2",
@@ -120,7 +120,7 @@
     "webpack": "^2.7.0",
     "webpack-bundle-analyzer": "^2.10.0",
     "webpack-dev-middleware": "^1.12.2",
-    "webpack-hot-middleware": "^2.23.1",
+    "webpack-hot-middleware": "^2.24.0",
     "webpack-merge": "^4.1.4"
   },
   "engines": {
