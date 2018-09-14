@@ -29,11 +29,9 @@ export default {
     'f-footer': Footer
   },
   data () {
+    return {}
   },
   computed: {
-    iconSize () {
-      return this.spanLeft === 5 ? 14 : 24
-    },
     styles () {
       let style = {}
       if (this.$store.state.sidenavtoggle && !this.$store.state.sidenavtoggle || !this.$store.state.sidenavpin) {
