@@ -36,7 +36,7 @@
                       </div>
                     </div>
                   </div>
-                  <div>
+                  <div v-else>
                     <Col :span="24" style="margin-bottom: 20px;" :id="field.name">
                         <FormItem :key="inx" style="margin-bottom:10px;">
                             <Row style="font-size:16px">
