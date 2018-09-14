@@ -57,21 +57,12 @@ import 'iview/dist/styles/iview.css' // CSS
 
 Vue.use(iView, { locale })
 
-import VueCodeMirror from 'vue-codemirror'
-Vue.use(VueCodeMirror)
-
-/* jquery-ui */
-
 import VueParticles from 'vue-particles'
 Vue.use(VueParticles)
 
 /* Animated css */
 
 import 'animate.css/animate.css'
-
-/* IView */
-// import 'bootstrap/dist/css/bootstrap.css'
-// import 'bootstrap-vue/dist/bootstrap-vue.css'
 
 // import AsyncComputed from 'vue-async-computed'
 // Vue.use(AsyncComputed)
