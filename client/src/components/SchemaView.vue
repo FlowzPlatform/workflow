@@ -501,11 +501,11 @@ export default {
       // await this.handleAdd()
 
       this.$Loading.finish()
-      // setTimeout(() => {
-      //   $('html, body').animate({
-      //     scrollTop: $('#top').offset().top
-      //   }, 500)
-      // }, 0)
+      setTimeout(() => {
+        $('html, body').animate({
+          scrollTop: $('#top').offset().top
+        }, 500)
+      }, 0)
 
       // },4000)
       // }
