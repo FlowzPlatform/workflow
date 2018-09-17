@@ -38,9 +38,9 @@ module.exports = {
 };
 
 function beforeCreate (hook) {
-  console.log('_______________________________________________________________: ')
-  console.log('Hook: ', hook)
-  console.log('_______________________________________________________________: ')
+  // console.log('_______________________________________________________________: ')
+  // console.log('Hook: ', hook)
+  // console.log('_______________________________________________________________: ')
 
   hook.data.createdAt = new Date().toISOString();
   hook.params.isdone = true;
@@ -79,7 +79,7 @@ function afterCreate (hook) {
         //   mdata.stageReference[mdata.stageReference.length - 1].completedAt = new Date().toISOString()
         //   // }
         // }
-        console.log('&&&&&&&&&&&&&&&&&&%%%%%%%%%%%%%%%%: ', finstRes)
+        // console.log('&&&&&&&&&&&&&&&&&&%%%%%%%%%%%%%%%%: ', finstRes)
         let referenceObj = {
           StageName: finstRes.currentStatus,
           stageRecordId: hook.result.id,
