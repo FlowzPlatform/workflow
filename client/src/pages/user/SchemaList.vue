@@ -278,7 +278,25 @@
           cols.push({
             title: 'ID',
             key: 'iid',
-            width: 260
+            width: 260,
+            render: (h, params) => {
+              return h('span', {
+                attrs: {
+                  title: 'Click to Copy',
+                  class: 'clickToCopy'
+                },
+                on: {
+                  click: () => {
+                    var $temp = $('<input>')
+                    $('body').append($temp)
+                    $temp.val(params.row.id).select()
+                    document.execCommand('copy')
+                    this.$Message.info('Copied to Clipboard')
+                    $temp.remove()
+                  }
+                }
+              }, params.row.iid)
+            }
           })
         }
         if (this.dynamicData && this.$store.state.role === 2) {
@@ -465,14 +483,14 @@
     mounted () {
       this.total = this.dataTotal
       this.mdata = this.data
-      $('.ivu-table td:nth-child(2) div span').mouseover(function () {
-        var valueOfTd = $(this).text()
-        $('.ivu-table td:nth-child(2) div span').attr('title', valueOfTd)
-      })
-      $('.ivu-table-cell div').mouseover(function () {
-        var valueOfTd = $(this).text()
-        $('.ivu-table-cell div').attr('title', valueOfTd)
-      })
+      // $('.ivu-table td:nth-child(2) div span').mouseover(function () {
+      //   var valueOfTd = $(this).text()
+      //   $('.ivu-table td:nth-child(2) div span').attr('title', valueOfTd)
+      // })
+      // $('.ivu-table-cell div').mouseover(function () {
+      //   var valueOfTd = $(this).text()
+      //   $('.ivu-table-cell div').attr('title', valueOfTd)
+      // })
     },
     methods: {
       clearSearchData () {
