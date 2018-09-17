@@ -296,10 +296,10 @@ export default {
               pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
               sitem.count += pitem.count
             })
-            // for (let pitem of sitem.json.processList) {
-            //   pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
-            //   sitem.count += pitem.count
-            // }
+            for (let pitem of sitem.json.processList) {
+              pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
+              sitem.count += pitem.count
+            }
           }).catch(err => {
             console.log('error', err)
           })
