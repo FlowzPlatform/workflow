@@ -66,11 +66,11 @@
           </div>
         </div>
 
-        <div v-if="instanceEntries.length == 0">
+        <div v-if="instanceEntries.length === 0">
           <p align="center">No Data</p>
         </div>
         
-        <div v-if="itsFirstState === false">
+        <div v-if="itsFirstState === false && instanceEntries.length !== 0">
           <tabs> 
             <TabPane v-if="admin" :label="dataCount" icon="lock-combination">
           <schemalist v-if="this.$store.state.role === 1" :schema="dataSchema" :pageno="pageno" :role="'admin'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
@@ -1067,6 +1067,7 @@ export default {
     },
 
     populateTables (schema) {
+      this.itsFirstState = false
       this.dataLoading = true
       this.dataSchema = this.currentSchema
       this.email = false
@@ -1124,12 +1125,12 @@ export default {
         $limit: this.limit
       }).then(queryresp => {
         this.isFlowzLoaded = true
-        let firstState = this.flowzData.first
-        if (firstState === this.$route.params.stateid) {
-          this.itsFirstState = true
-        } else {
-          this.itsFirstState = false
-        }
+        // let firstState = this.flowzData.first
+        // if (firstState === this.$route.params.stateid) {
+        //   this.itsFirstState = true
+        // } else {
+        //   this.itsFirstState = false
+        // }
         this.dataTotal = queryresp.data.total
         if (queryresp.data.data.length > 0) {
           this.instanceEntries = queryresp.data.data
@@ -1145,7 +1146,7 @@ export default {
         } else {
           this.instanceEntries = []
           this.dataData = []
-          this.itsFirstState = true
+          // this.itsFirstState = true
           this.dataLoading = false
           // this.$Spin.hide()
           this.$Loading.finish()
@@ -1161,16 +1162,18 @@ export default {
       this.dataLoading = true
       this.instanceEntries = []
       this.isFlowzLoaded = false
-      this.itsFirstState = true
+      // this.itsFirstState = true
       this.$Loading.start()
       this.schemabinding = false
       this.email = false
       this.flowzData = await this.getFlowz()
       this.currentSchema = await this.getSchema()
       if (this.flowzData.first === this.$route.params.stateid) {
+        this.itsFirstState = true
         await this.fetch(this.currentSchema.id)
         this.dataLoading = false
       } else {
+        this.itsFirstState = false
         this.populateTables()
       }
       this.isFlowzLoaded = true
