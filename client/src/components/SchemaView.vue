@@ -512,37 +512,54 @@ export default {
     },
 
     createInstanceAndSave () {
-      this.$Loading.start()
-      let fheaders = null
-      fheaders = {
-        workflowid: 'workflow_' + this.flowzData.id,
-        stateid: this.$route.params.stateid
+      this.validFlag = true
+      this.validErr = []
+      let allcheck = []
+      this.bLoading = true
+      for (let dobj of this.formSchemaInstance.data) {
+        let flag = this.checkValidation(dobj, this.entity)
+        allcheck.push(flag)
       }
+      this.check = _.indexOf(allcheck, false)
+      if (this.check === -1) {
+        this.$Loading.start()
+        let fheaders = null
+        fheaders = {
+          workflowid: 'workflow_' + this.flowzData.id,
+          stateid: this.$route.params.stateid
+        }
 
-      let saveObj = {
-        fid: this.$route.params.id,
-        currentStatus: this.$route.params.stateid,
-        data: this.formSchemaInstance.data[0]
+        let saveObj = {
+          fid: this.$route.params.id,
+          currentStatus: this.$route.params.stateid,
+          data: this.formSchemaInstance.data[0]
+        }
+        finstanceModal.post(saveObj, null, fheaders)
+          .then(res => {
+            this.$Loading.finish()
+            this.$Notice.success({title: 'Saved Successfully'})
+            this.bLoading = false
+            setTimeout(() => {
+              $('html, body').animate({
+                scrollTop: $('#top').offset().top
+              }, 500)
+            }, 0)
+            this.init()
+          }).catch(e => {
+            this.$Loading.error()
+            console.log('error', e)
+            this.bLoading = false
+            if (e.response.data.message) {
+              this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+            } else {
+              this.$Notice.error({title: 'Error', desc: 'Instace Not Generated'})
+            }
+          })
+      } else {
+        this.validErr = _.uniqBy(this.validErr, 'name')
+        this.$Notice.error({title: 'Validation Error!'})
+        this.bLoading = false
       }
-      finstanceModal.post(saveObj, null, fheaders)
-        .then(res => {
-          this.$Loading.finish()
-          this.$Notice.success({title: 'Saved Successfully'})
-          setTimeout(() => {
-            $('html, body').animate({
-              scrollTop: $('#top').offset().top
-            }, 500)
-          }, 0)
-          this.init()
-        }).catch(e => {
-          this.$Loading.error()
-          console.log('error', e)
-          if (e.response.data.message) {
-            this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
-          } else {
-            this.$Notice.error({title: 'Error', desc: 'Instace Not Generated'})
-          }
-        })
     },
 
     saveInstanceData () {
@@ -670,6 +687,7 @@ export default {
     handleSubmit (name) {
       if (this.flowzData.first === this.$route.params.stateid) {
         this.createInstanceAndSave()
+        // this.saveInstanceData()
       } else {
         this.saveInstanceData()
       }
@@ -707,7 +725,7 @@ export default {
       })
     },
     checkValidation (data, ent) {
-      var self = this
+      let self = this
       for (let v of ent) {
         if (v.customtype) {
           for (let d of data[v.name]) {
@@ -723,8 +741,8 @@ export default {
               self.validFlag = false
             } else if (v.type === 'text') {
               if (v.property.regEx !== '') {
-                var patt0 = v.property.regEx
-                var res0 = patt0.test(data[v.name])
+                let patt0 = v.property.regEx
+                let res0 = patt0.test(data[v.name])
                 if (!res0) {
                   self.validErr.push({name: v.name, errmsg: 'Invalid Email.'})
                   self.validFlag = false
@@ -742,8 +760,8 @@ export default {
                 }
               }
             } else if (v.type === 'email' && data[v.name] !== '') {
-              var patt1 = (v.property.regEx === '') ? new RegExp('[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}$') : new RegExp(v.property.regEx)
-              var res1 = patt1.test(data[v.name])
+              let patt1 = (v.property.regEx === '') ? new RegExp('[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}$') : new RegExp(v.property.regEx)
+              let res1 = patt1.test(data[v.name])
               if (!res1) {
                 self.validErr.push({name: v.name, errmsg: 'Invalid Email.'})
                 self.validFlag = false
@@ -755,8 +773,8 @@ export default {
                 }
               }
             } else if (v.type === 'phone') {
-              var patt2 = (v.property.regEx === '') ? new RegExp('^\\(?([0-9]{3})\\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$') : new RegExp(v.property.regEx)
-              var res2 = patt2.test(data[v.name])
+              let patt2 = (v.property.regEx === '') ? new RegExp('^\\(?([0-9]{3})\\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$') : new RegExp(v.property.regEx)
+              let res2 = patt2.test(data[v.name])
               if (!res2) {
                 self.validErr.push({name: v.name, errmsg: 'Invalid Phone.'})
                 self.validFlag = false
@@ -894,7 +912,7 @@ export default {
         $skip: this.skip,
         $limit: this.limit
       }).then(queryresp => {
-        console.log('queryresp: ', queryresp)
+        // console.log('queryresp: ', queryresp)
         this.isFlowzLoaded = true
         this.dataTotal = queryresp.data.total
         if (queryresp.data.data.length > 0) {
@@ -927,6 +945,7 @@ export default {
       this.$Loading.start()
       this.schemabinding = false
       this.email = false
+      this.isMultiple = false
       this.flowzData = await this.getFlowz()
       this.currentSchema = await this.getSchema()
       if (this.flowzData.first === this.$route.params.stateid) {
