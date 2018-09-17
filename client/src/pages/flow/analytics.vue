@@ -88,13 +88,13 @@
       <!-- <Table height="690" border :columns="mainColumns()" :data="tableData"></Table> -->
       <Table :loading="tableLoading" v-if="schemaId !== null" height="590" border :columns="mainColumns()" :data="tableData"></Table>
       <Row style="margin-top: 4px; float: right">
-        <Page :total="total" :current="cpage" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+        <Page placement="top" :total="total" :current="cpage" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
       </Row>
     </div>
     <div v-show="columnview">
       <Table :loading="tableLoading" :row-class-name="rowClassName" :columns="colviewCols" height="590" :data="colviewData"></Table>
       <Row style="margin-top: 4px; float: right">
-        <Page :total="total" :current="cpage" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+        <Page placement="top" :total="total" :current="cpage" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
       </Row>
     </div>
     <!-- <Table v-if="schemaId !== null" height="690" border :columns="mainColumns()" :data="tableData"></Table> -->
