@@ -2,6 +2,30 @@
     <div>
       <Row>
         <Col>
+          <Row type="flex" justify="end">
+            <router-link :to="{name:'bpmn-plugin/new'}">
+              <Button type="primary" size="small"  style="margin-bottom: 4px;" icon="plus">Add</Button>
+            </router-link>
+          </Row>
+          <Collapse>
+            <Panel name="1">
+                Add
+                <div slot="content">
+                 <Form :model="fileJson">
+                    <Row>
+                    <Col :span='8'>
+                        Title<Input v-model="fileJson.title" style="margin-right: 10px;"></Input></Col>
+                    <Col :span="8">
+                        PluginType<Input v-model="fileJson.pluginType"></Input>
+                    </Col>
+                    <Col :span='4'>
+                      <Button type="primary" size="small"  style="margin-top: 22px; float: right;">Save</Button>
+                    </Col>
+                    </Row>
+                  </Form>
+                </div>
+            </Panel>
+        </Collapse>
           <Table size="small" :loading="logingPluginList" border ref="selection" :columns="columns" :data="plugins" stripe></Table>
         </Col>
       </Row>
