@@ -72,7 +72,7 @@
         
         <div v-if="itsFirstState === false && instanceEntries.length !== 0">
           <tabs> 
-            <TabPane v-if="table1" :label="dataCount" icon="lock-combination">
+            <TabPane v-if="this.$store.state.role === 1" :label="dataCount" icon="lock-combination">
           <schemalist v-if="this.$store.state.role === 1" :schema="dataSchema" :pageno="pageno" :datashow="'dataA'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
           <schemalist v-if="this.$store.state.role === 2" :schema="dataSchema" :pageno="pageno" :datashow="'dataU'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
 
@@ -131,7 +131,7 @@
             </div>
           </div>
           </tabPane>
-          <TabPane v-if="table2" :label="'Claim ('+ dataClaim.length + ')'" icon="lock-combination">
+          <TabPane v-if="this.$store.state.role === 2" :label="'Claim ('+ dataClaim.length + ')'" icon="lock-combination">
           <schemalist :schema="dataSchema" :datashow="'dataC'" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataClaim" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
         </TabPane>
           </Tabs>
@@ -210,8 +210,6 @@ export default {
   data () {
     return {
       check: 0,
-      table2: false,
-      table1: true,
       dataClaim: [],
       loadEmail: false,
       skip: 0,
@@ -1185,12 +1183,6 @@ export default {
   },
   mounted () {
     this.init()
-    if (this.$store.state.role === 2) {
-      this.table2 = true
-    }
-    if (this.$store.state.role === 1) {
-      this.table1 = true
-    }
   },
   computed: {
     dataCount () {
