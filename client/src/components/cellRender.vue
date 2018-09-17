@@ -35,7 +35,8 @@
 
     <span v-if="item.obj != null && item.isCompletedTask == false" title="Duration" style="display: block;">
       <i class="fa fa-clock-o fa-fw"></i>
-      <small>{{ getDuration( undefined, item.obj.completedAt) }}</small>
+      <!-- <small>{{ getDuration( undefined, item.obj.completedAt) }}</small> -->
+      <small><em>Waiting</em></small>
     </span>
 
     <img v-if="item.obj != null && item.isCompletedTask == true" :title="getUserHoverDetails(item)" :src="getUserAvatar(item)" class="avatarImg" alt="User Avatar">

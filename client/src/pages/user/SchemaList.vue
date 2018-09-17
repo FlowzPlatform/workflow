@@ -158,7 +158,6 @@
                   },
                   on: {
                     'on-change': (value) => {
-                      // console.log('show', value)
                       this.configData[params.index].show = !this.configData[params.index].show
                     }
                   }
@@ -177,7 +176,6 @@
                   },
                   on: {
                     'on-change': (value) => {
-                      // console.log('sortable', value)
                       this.configData[params.index].sortable = !this.configData[params.index].sortable
                     }
                   }
@@ -200,7 +198,6 @@
                   },
                   on: {
                     'keyup': (event) => {
-                      // console.log('value', event.target.value, event.keyCode)
                       if (event.target.value && event.target.value !== null && event.keyCode === 13) {
                         if (event.target.value <= 0) {
                           this.configData[params.index].width = 150
@@ -257,12 +254,9 @@
                   on: {
                     'click': async () => {
                       this.$Loading.start()
-                      // let indexFind = _.findIndex(this.instanceEntries, (o) => { return o.id === params.row.id })
-                      // let currentObj = this.flowzData.processList[this.instanceEntries[indexFind].currentStatus]
                       let values = {
                         id: this.flowzData.schema,
                         item: params.row,
-                        // formName: currentObj.name,
                         currentState: params.row.currentStatus,
                         flowzData: this.flowzData,
                         formData: params.row.data
@@ -483,14 +477,6 @@
     mounted () {
       this.total = this.dataTotal
       this.mdata = this.data
-      // $('.ivu-table td:nth-child(2) div span').mouseover(function () {
-      //   var valueOfTd = $(this).text()
-      //   $('.ivu-table td:nth-child(2) div span').attr('title', valueOfTd)
-      // })
-      // $('.ivu-table-cell div').mouseover(function () {
-      //   var valueOfTd = $(this).text()
-      //   $('.ivu-table-cell div').attr('title', valueOfTd)
-      // })
     },
     methods: {
       clearSearchData () {
@@ -521,30 +507,6 @@
       },
       handlePagesize (size) {
         this.$emit('on-handlepage', this.skip, this.limit, size)
-      }
-    },
-    feathers: {
-      'finstance': {
-        created (data) {
-          // console.log('created called: ', data)
-          // let findIndex = _.findIndex(this.data, (o) => { return o.id })
-          // if (findIndex !== -1) {
-          //   this.data.push(data)
-          // }
-        },
-        updated (data) {
-          // console.log('updated called: ', data)
-          // if (this.$store.state.role === 1) {
-          //   if (this.$route.params.stateid !== data.currentStatus) {
-          //     let inx = _.findIndex(this.data, (o) => { return o.id === data.id })
-          //     console.log('inx: ', this.data[0], inx)
-          //     this.data.splice(inx, 1)
-          //     // _.remove(this.data, (o) => { return o.id === data.id })
-          //   }
-          // }
-        },
-        removed (data) {
-        }
       }
     }
   }
