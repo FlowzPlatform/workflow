@@ -41,16 +41,16 @@
                   <span>
                     <Badge :count="item.count"  class-name="demo-badge-alone"></Badge>
                   </span>
-                  <span v-if="$store.state.role === 1" style="float:right;" title="Create Instance" @click.prevent="createInstance(item)">
+                  <!-- <span v-if="$store.state.role === 1" style="float:right;" title="Create Instance" @click.prevent="createInstance(item)">
                     <i class="fa fa-plus"></i>
-                  </span>
+                  </span> -->
                   <span v-if="$store.state.role === 1" style="float:right;padding-right:5px;" title="Preview Progress" @click.prevent="viewProgress(item)">
                     <i class="fa fa-line-chart"></i>
                   </span>
               </template>
               <template
                 v-for="(subItem, key) in getByOrder(item.processList)" 
-                v-if="subItem.type !== 'startevent' && subItem.type !== 'endevent' && subItem.type !== 'intermediatethrowevent'"
+                v-if="subItem && subItem.type !== 'startevent' && subItem.type !== 'endevent' && subItem.type !== 'intermediatethrowevent'"
               >
                 <Menu-item 
                   :name="item.id + '/' + subItem.id" 
@@ -61,9 +61,9 @@
                       <span style="float:right;">
                         <Badge :count="subItem.count"  class-name="demo-badge-alone"></Badge>
                       </span>
-                      <span v-if="subItem.isfirst" style="float:right;padding-right:5px;" title="Create Instance" @click.prevent="createInstance(item, subItem.id)">
+                      <!-- <span v-if="subItem.isfirst" style="float:right;padding-right:5px;" title="Create Instance" @click.prevent="createInstance(item, subItem.id)">
                         <i class="fa fa-plus"></i>
-                      </span>
+                      </span> -->
                   </div>
                 </Menu-item>
               </template>
@@ -105,29 +105,29 @@ export default {
         return a.order - b.order
       })
     },
-    createInstance (item, subItemID) {
-      // console.log('item', item)
-      this.$Loading.start()
-      let fheaders = null
-      if (subItemID !== undefined) {
-        fheaders = {
-          workflowid: 'workflow_' + item.id,
-          stateid: subItemID
-        }
-      }
-      finstanceModal.post({fid: item.id}, null, fheaders).then(res => {
-        this.$Notice.success({title: 'Instance Generated'})
-        this.$Loading.finish()
-      }).catch(e => {
-        this.$Loading.error()
-        console.log('error', e.response)
-        if (e.response.data.message) {
-          this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
-        } else {
-          this.$Notice.error({title: 'Error', desc: 'Instace Not Generated'})
-        }
-      })
-    },
+    // createInstance (item, subItemID) {
+    //   // console.log('item', item)
+    //   this.$Loading.start()
+    //   let fheaders = null
+    //   if (subItemID !== undefined) {
+    //     fheaders = {
+    //       workflowid: 'workflow_' + item.id,
+    //       stateid: subItemID
+    //     }
+    //   }
+    //   finstanceModal.post({fid: item.id}, null, fheaders).then(res => {
+    //     this.$Notice.success({title: 'Instance Generated'})
+    //     this.$Loading.finish()
+    //   }).catch(e => {
+    //     this.$Loading.error()
+    //     console.log('error', e.response)
+    //     if (e.response.data.message) {
+    //       this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+    //     } else {
+    //       this.$Notice.error({title: 'Error', desc: 'Instace Not Generated'})
+    //     }
+    //   })
+    // },
     viewProgress (item) {
       // console.log('item: ', item)
       if (item.id === this.$route.params.id) {
@@ -149,7 +149,7 @@ export default {
         }
         // this.$router.push('/admin/schemaview/' + node[0] + '/' + node[1])
       } else {
-        this.$router.push('/schemaview/' + node[0] + '/' + node[1])
+        this.$router.push('/view/' + node[0] + '/' + node[1])
       }
     },
     makeid () {
@@ -184,12 +184,28 @@ export default {
       return await axios.get(config.getAllPermissionsUrl + 'workflow_' + moduleId)
     },
     async init () {
-      // console.log('this.$store.state.role', this.$store.state.role)
       if (this.$store.state.role === 1) {
         this.loading = true
-        if (this.$store.state.flowz.length > 0) {
-          let flowZData = _.cloneDeep(this.$store.state.flowz)
-          this.flowzList = _.map(flowZData, (m) => {
+        // if (this.$store.state.flowz.length > 0) {
+        //   let flowZData = _.cloneDeep(this.$store.state.flowz)
+        //   this.flowzList = _.map(flowZData, (m) => {
+        //     m.count = 0
+        //     _.map(m.processList, (p) => {
+        //       p.count = 0
+        //       return p
+        //     })
+        //     return m
+        //   })
+        //   this.loading = false
+        //   this.setCounters()
+        // } else {
+        flowzModal.get(null, {
+          $paginate: false
+        })
+        .then(async (response) => {
+          this.loading = false
+          this.$store.state.flowz = _.cloneDeep(response.data)
+          this.flowzList = _.map(response.data, (m) => {
             m.count = 0
             _.map(m.processList, (p) => {
               p.count = 0
@@ -198,33 +214,14 @@ export default {
             return m
           })
           this.loading = false
-          // console.log('flowzList', this.flowzList)
           this.setCounters()
-        } else {
-          await flowzModal.get(null, {
-            $paginate: false
-          })
-          .then(async (response) => {
-            this.loading = false
-            this.$store.state.flowz = _.cloneDeep(response.data)
-            this.flowzList = _.map(response.data, (m) => {
-              m.count = 0
-              _.map(m.processList, (p) => {
-                p.count = 0
-                return p
-              })
-              return m
-            })
-            this.loading = false
-            this.setCounters()
-            // console.log('flowzlist: ', this.flowzList)
-          })
-          .catch(error => {
-            console.log(error)
-            this.flowzList = []
-            this.loading = false
-          })
-        }
+        })
+        .catch(error => {
+          console.log(error)
+          this.flowzList = []
+          this.loading = false
+        })
+        // }
       } else {
         let modules = _.keysIn(this.$store.state.user.package[this.$store.state.subscription].role)
         let self = this
@@ -234,28 +231,24 @@ export default {
             return {value: o, role: self.$store.state.user.package[self.$store.state.subscription].role[o]}
           }
         })
-        // console.log('modules', modules)
         if (modules.length > 0) {
           this.loading = true
           let fData = []
           for (let item of modules) {
             let id = item.value.split('_')[1]
-            let finx = _.findIndex(this.$store.state.flowz, {id: id})
-            if (finx !== -1) {
-              let mData = _.cloneDeep(this.$store.state.flowz[finx])
-              mData.role = item.role
-              fData.push(mData)
-            } else {
-              await flowzModal.get(id, {
-                $select: ['id', 'json']
-              }, {
-                workflowid: 'workflow_' + id
-              }).then(res => {
-                res.data.role = item.role
-                // console.log('res.data', res.data)
-                fData.push(res.data)
-              })
-            }
+            // let finx = _.findIndex(this.$store.state.flowz, {id: id})
+            // if (finx !== -1) {
+            //   let mData = _.cloneDeep(this.$store.state.flowz[finx])
+            //   mData.role = item.role
+            //   fData.push(mData)
+            // } else {
+            await flowzModal.get(id, null, {
+              workflowid: 'workflow_' + id
+            }).then(res => {
+              res.data.role = item.role
+              fData.push(res.data)
+            })
+            // }
           }
           for (let item of fData) {
             let resource = await this.getModuleResource(item.id)
@@ -273,37 +266,26 @@ export default {
                   let serviceInx = _.findIndex(resource.data.data, {id: resourceId})
                   if (serviceInx !== -1) {
                     let serviceId = resource.data.data[serviceInx].service
-                    _.map(item.processList, (o) => {
+                    _.map(item.processList, (o, k) => {
                       if (o.id.toLowerCase() === serviceId) {
-                        if (o.hasOwnProperty('permission')) {
-                          o.permission.push(action)
+                        if (o.hasOwnProperty('isaccess')) {
+                          o.isaccess.push(action)
                         } else {
-                          o.permission = [action]
+                          o.isaccess = [action]
                         }
-                        o.permission = _.uniq(o.permission)
+                        o.isaccess = _.uniq(o.isaccess)
                       }
                     })
                   }
                 }
               }
-            }
-            let firstTarget = _.find(item.processList, {type: 'start'})
-            if (firstTarget !== null && firstTarget !== undefined && Object.keys(firstTarget).length > 0) {
-              let nextTId = firstTarget.target[0].id
-              _.map(item.json.processList, (m) => {
-                if (m.id === nextTId) {
-                  m.isfirst = true
+              for (let proc in item.processList) {
+                if (!item.processList[proc].hasOwnProperty('isaccess')) {
+                  delete item.processList[proc]
                 }
-                return m
-              })
-            }
-            _.remove(item.processList, (m) => {
-              if (!m.hasOwnProperty('permission')) {
-                return m
               }
-            })
+            }
           }
-          // console.log('fData', fData)
           this.flowzList = _.map(fData, (m) => {
             m.count = 0
             _.map(m.processList, (p) => {
@@ -393,6 +375,7 @@ export default {
             let isonce = false
             let pdata = []
             for (let key in item.processList) {
+              // console.log('item', item)
               if (!isonce) {
                 finstanceModal.get(null, {
                   $paginate: false,
@@ -406,13 +389,8 @@ export default {
                   if (res.data.length > 0) {
                     isonce = true
                     pdata = res.data
-                    // console.log('res.data.length', res.data)
-                    // for (let pitem of item.json.processList) {
                     item.processList[key].count = _.filter(res.data, {currentStatus: item.processList[key].id}).length
-                    // console.log('element.count', element.count)
-                    item.count += item.processList[key]
-                    // this.flowzList[inx].count = 5
-                    // }
+                    item.count += item.processList[key].count
                   }
                 }).catch(err => {
                   console.log('error', err)

@@ -88,13 +88,13 @@
       <!-- <Table height="690" border :columns="mainColumns()" :data="tableData"></Table> -->
       <Table :loading="tableLoading" v-if="schemaId !== null" height="590" border :columns="mainColumns()" :data="tableData"></Table>
       <Row style="margin-top: 4px; float: right">
-        <Page :total="total" :current="cpage" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+        <Page placement="top" :total="total" :current="cpage" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
       </Row>
     </div>
     <div v-show="columnview">
       <Table :loading="tableLoading" :row-class-name="rowClassName" :columns="colviewCols" height="590" :data="colviewData"></Table>
       <Row style="margin-top: 4px; float: right">
-        <Page :total="total" :current="cpage" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+        <Page placement="top" :total="total" :current="cpage" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
       </Row>
     </div>
     <!-- <Table v-if="schemaId !== null" height="690" border :columns="mainColumns()" :data="tableData"></Table> -->
@@ -111,6 +111,7 @@ import CellRender from '@/components/cellRender'
 import ConfigExpand from '@/components/configExpand'
 import _ from 'lodash'
 import moment from 'moment'
+import $ from 'jquery'
 
 export default {
   name: 'dashboard',
@@ -379,7 +380,22 @@ export default {
         render: (h, params) => {
           if (params.row.mainStatus === 'inprocess') {
             return h('div', [
-              h('span', params.row.id),
+              h('span', {
+                attrs: {
+                  title: 'Click to Copy',
+                  class: 'clickToCopy'
+                },
+                on: {
+                  click: () => {
+                    var $temp = $('<input>')
+                    $('body').append($temp)
+                    $temp.val(params.row.id).select()
+                    document.execCommand('copy')
+                    this.$Message.info('Copied to Clipboard')
+                    $temp.remove()
+                  }
+                }
+              }, params.row.id),
               h('span', {
                 props: {
                 },
@@ -391,7 +407,22 @@ export default {
             ])
           } else if (params.row.mainStatus === 'completed') {
             return h('div', [
-              h('span', params.row.id),
+              h('span', {
+                attrs: {
+                  title: 'Click to Copy',
+                  class: 'clickToCopy'
+                },
+                on: {
+                  click: () => {
+                    var $temp = $('<input>')
+                    $('body').append($temp)
+                    $temp.val(params.row.id).select()
+                    document.execCommand('copy')
+                    this.$Message.info('Copied to Clipboard')
+                    $temp.remove()
+                  }
+                }
+              }, params.row.id),
               h('span', {
                 props: {
                 },
@@ -403,7 +434,22 @@ export default {
             ])
           } else {
             return h('div', [
-              h('span', params.row.id),
+              h('span', {
+                attrs: {
+                  title: 'Click to Copy',
+                  class: 'clickToCopy'
+                },
+                on: {
+                  click: () => {
+                    var $temp = $('<input>')
+                    $('body').append($temp)
+                    $temp.val(params.row.id).select()
+                    document.execCommand('copy')
+                    this.$Message.info('Copied to Clipboard')
+                    $temp.remove()
+                  }
+                }
+              }, params.row.id),
               h('span', {
                 props: {
                 },
@@ -534,7 +580,22 @@ export default {
             if (params.row.hasOwnProperty('first')) {
               if (params.row.first) {
                 return h('div', [
-                  h('span', params.row.id),
+                  h('span', {
+                    attrs: {
+                      title: 'Click to Copy',
+                      class: 'clickToCopy'
+                    },
+                    on: {
+                      click: () => {
+                        var $temp = $('<input>')
+                        $('body').append($temp)
+                        $temp.val(params.row.id).select()
+                        document.execCommand('copy')
+                        this.$Message.info('Copied to Clipboard')
+                        $temp.remove()
+                      }
+                    }
+                  }, params.row.id),
                   h('span', {
                     attrs: {
                       class: 'btn btn-default btn-sm showHideBtn'
@@ -565,7 +626,22 @@ export default {
                 ])
               } else {
                 return h('div', [
-                  h('span', params.row.id),
+                  h('span', {
+                    attrs: {
+                      title: 'Click to Copy',
+                      class: 'clickToCopy'
+                    },
+                    on: {
+                      click: () => {
+                        var $temp = $('<input>')
+                        $('body').append($temp)
+                        $temp.val(params.row.id).select()
+                        document.execCommand('copy')
+                        this.$Message.info('Copied to Clipboard')
+                        $temp.remove()
+                      }
+                    }
+                  }, params.row.id),
                   h('span', {
                     attrs: {
                       class: 'btn btn-sm showHideBtn'
@@ -764,5 +840,9 @@ export default {
 
   .showHideBtn{
     float: right;
+  }
+
+  .clickToCopy{
+    cursor: pointer;
   }
 </style>  

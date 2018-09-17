@@ -48,27 +48,27 @@
         </div>
       </div>
     </div>
-    <div v-if="role === 'admin'">
+    <div v-if="datashow === 'dataA'">
       <Table @on-sort-change="sortTableData" highlight-row :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
       <div style="margin: 10px;overflow: hidden">
         <div style="float: right;">
-          <Page :total="total" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+          <Page placement="top" :total="total" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
         </div>
       </div>
     </div>
-    <div v-if="role === 'client'">
+    <div v-if="datashow === 'dataC'">
       <Table @on-sort-change="sortTableData" highlight-row :columns="setColumns2" :data="data" :border="config.border" :stripe="config.stripe"></Table>
       <div style="margin: 10px;overflow: hidden">
         <div style="float: right;">
-          <Page :total="total" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+          <Page placement="top" :total="total" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
         </div>
       </div>
     </div>
-    <div v-if="role === 'client_unclaim'">
+    <div v-if="datashow === 'dataU'">
       <Table @on-sort-change="sortTableData" highlight-row :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
       <div style="margin: 10px;overflow: hidden">
         <div style="float: right;">
-          <Page :total="total" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+          <Page placement="top" :total="total" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
         </div>
       </div>
     </div>
@@ -90,7 +90,7 @@
       'dataTotal': Number,
       'pageno': Number,
       'limit': Number,
-      'role': String
+      'datashow': String
     },
     data () {
       return {
@@ -158,7 +158,6 @@
                   },
                   on: {
                     'on-change': (value) => {
-                      // console.log('show', value)
                       this.configData[params.index].show = !this.configData[params.index].show
                     }
                   }
@@ -177,7 +176,6 @@
                   },
                   on: {
                     'on-change': (value) => {
-                      // console.log('sortable', value)
                       this.configData[params.index].sortable = !this.configData[params.index].sortable
                     }
                   }
@@ -200,7 +198,6 @@
                   },
                   on: {
                     'keyup': (event) => {
-                      // console.log('value', event.target.value, event.keyCode)
                       if (event.target.value && event.target.value !== null && event.keyCode === 13) {
                         if (event.target.value <= 0) {
                           this.configData[params.index].width = 150
@@ -257,13 +254,10 @@
                   on: {
                     'click': async () => {
                       this.$Loading.start()
-                      let indexFind = _.findIndex(this.instanceEntries, (o) => { return o.id === params.row.id })
-                      let currentObj = this.flowzData.processList[this.instanceEntries[indexFind].currentStatus]
                       let values = {
                         id: this.flowzData.schema,
-                        item: this.instanceEntries[indexFind],
-                        formName: currentObj.name,
-                        currentState: currentObj.id,
+                        item: params.row,
+                        currentState: params.row.currentStatus,
                         flowzData: this.flowzData,
                         formData: params.row.data
                       }
@@ -278,7 +272,25 @@
           cols.push({
             title: 'ID',
             key: 'iid',
-            width: 260
+            width: 260,
+            render: (h, params) => {
+              return h('span', {
+                attrs: {
+                  title: 'Click to Copy',
+                  class: 'clickToCopy'
+                },
+                on: {
+                  click: () => {
+                    var $temp = $('<input>')
+                    $('body').append($temp)
+                    $temp.val(params.row.id).select()
+                    document.execCommand('copy')
+                    this.$Message.info('Copied to Clipboard')
+                    $temp.remove()
+                  }
+                }
+              }, params.row.iid)
+            }
           })
         }
         if (this.dynamicData && this.$store.state.role === 2) {
@@ -310,7 +322,7 @@
                         formData: params.row.data
                       }
                       this.$Loading.finish()
-                      await this.$emit('setValues', values)
+                      this.$emit('setValues', values)
                     }
                   }
                 }, ''),
@@ -465,14 +477,6 @@
     mounted () {
       this.total = this.dataTotal
       this.mdata = this.data
-      $('.ivu-table td:nth-child(2) div span').mouseover(function () {
-        var valueOfTd = $(this).text()
-        $('.ivu-table td:nth-child(2) div span').attr('title', valueOfTd)
-      })
-      $('.ivu-table-cell div').mouseover(function () {
-        var valueOfTd = $(this).text()
-        $('.ivu-table-cell div').attr('title', valueOfTd)
-      })
     },
     methods: {
       clearSearchData () {
@@ -504,30 +508,6 @@
       handlePagesize (size) {
         this.$emit('on-handlepage', this.skip, this.limit, size)
       }
-    },
-    feathers: {
-      'finstance': {
-        created (data) {
-          // console.log('created called: ', data)
-          // let findIndex = _.findIndex(this.data, (o) => { return o.id })
-          // if (findIndex !== -1) {
-          //   this.data.push(data)
-          // }
-        },
-        updated (data) {
-          // console.log('updated called: ', data)
-          // if (this.$store.state.role === 1) {
-          //   if (this.$route.params.stateid !== data.currentStatus) {
-          //     let inx = _.findIndex(this.data, (o) => { return o.id === data.id })
-          //     console.log('inx: ', this.data[0], inx)
-          //     this.data.splice(inx, 1)
-          //     // _.remove(this.data, (o) => { return o.id === data.id })
-          //   }
-          // }
-        },
-        removed (data) {
-        }
-      }
     }
   }
 </script>
@@ -549,7 +529,7 @@
     margin: 5px 0;
   }
   .ivu-table-cell td div span{
-    width:200px !important;
+    /*width:200px !important;*/
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;

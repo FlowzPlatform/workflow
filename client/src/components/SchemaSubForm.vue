@@ -6,7 +6,7 @@
             <div v-for="(field,inx) in schemainstance.entity">
                 <template v-if="field.customtype">
                   <div v-if="schemainstance.hasOwnProperty('permission')">
-                    <div v-if="schemainstance.permission[field.name].show">
+                    <div v-if="schemainstance.permission[field.name].write || schemainstance.permission[field.name].read">
                       <div v-if="schemainstance.permission[field.name].write">
                         <Col :span="24" style="margin-bottom: 20px;" :id="field.name">
                           <FormItem :key="inx" style="margin-bottom:10px;">
@@ -73,7 +73,7 @@
                 </template>
                 <template v-else>
                   <div v-if="schemainstance.hasOwnProperty('permission')">
-                      <div v-if="schemainstance.permission[field.name].show">
+                      <div v-if="schemainstance.permission[field.name].write || schemainstance.permission[field.name].read">
                         <Col :span="12" style="padding:0px 20px 0px 2px" v-if="field.type !== 'file'">
                             <FormItem :key="inx" :rules="createRules(field)" style="margin-bottom:10px;">
                                 <Row>
@@ -116,7 +116,7 @@
                                 <Row>
                                   <div v-if="schemainstance.permission !== undefined">
                                     <!-- {{schemainstance.permission[field.name]}} -->
-                                    <div v-if="schemainstance.permission[field.name].show">
+                                    <div v-if="schemainstance.permission[field.name].write  || schemainstance.permission[field.name].read">
                                       <div v-if="schemainstance.permission[field.name].write">
                                         <Col :span="2">
                                             <b>{{field.name}}</b>

@@ -83,20 +83,17 @@ export default {
               for (let ent of schemaRes.data.entity) {
                 if (res.data.processList[proc].hasOwnProperty('permission') && res.data.processList[proc].permission[ent.name] !== undefined) {
                   mdata[ent.name] = {
-                    show: res.data.processList[proc].permission[ent.name].show,
                     read: res.data.processList[proc].permission[ent.name].read,
                     write: res.data.processList[proc].permission[ent.name].write
                   }
                 } else {
                   if (res.data.first === proc) {
                     mdata[ent.name] = {
-                      show: true,
                       read: true,
                       write: true
                     }
                   } else {
                     mdata[ent.name] = {
-                      show: true,
                       read: true,
                       write: false
                     }
@@ -118,108 +115,52 @@ export default {
                     title: params.row.state
                   }
                 }, [
-                  h('table', {
-                    style: {
-                      width: '100%'
-                    }
-                  }, [
-                    h('thead', [
-                      h('tr', [
-                        h('th', {
-                          style: {
-                            textAlign: 'center'
+                  h('Row', [
+                    h('Col', {
+                      props: {
+                        span: 12
+                      }
+                    }, [
+                      h('span', 'Read'),
+                      h('br'),
+                      h('Checkbox', {
+                        props: {
+                          value: params.row[ent.name].read
+                        },
+                        on: {
+                          'on-change': (value) => {
+                            if (value) {
+                              this.data[params.index][ent.name].read = value
+                            } else {
+                              this.data[params.index][ent.name].read = value
+                              this.data[params.index][ent.name].write = value
+                            }
                           }
-                        }, 'Show'),
-                        h('th', {
-                          style: {
-                            textAlign: 'center'
-                          }
-                        }, 'Read'),
-                        h('th', {
-                          style: {
-                            textAlign: 'center'
-                          }
-                        }, 'Write')
-                      ])
-                    ]),
-                    h('tbody', [
-                      h('tr', {
-                        style: {
-                          textAlign: 'center'
                         }
-                      }, [
-                        h('td', {
-                          style: {
-                            textAlign: 'center'
-                          }
-                        }, [
-                          h('Checkbox', {
-                            props: {
-                              value: params.row[ent.name].show
-                            },
-                            on: {
-                              'on-change': (value) => {
-                                this.tableLoading = true
-                                if (!value) {
-                                  this.data[params.index][ent.name].read = value
-                                  this.data[params.index][ent.name].write = value
-                                  this.data[params.index][ent.name].show = value
-                                } else {
-                                  this.data[params.index][ent.name].show = value
-                                }
-                                this.tableLoading = false
-                              }
+                      })
+                    ]),
+                    h('Col', {
+                      props: {
+                        span: 12
+                      }
+                    }, [
+                      h('span', 'Write'),
+                      h('br'),
+                      h('Checkbox', {
+                        props: {
+                          value: params.row[ent.name].write
+                        },
+                        on: {
+                          'on-change': (value) => {
+                            if (value) {
+                              this.data[params.index][ent.name].write = value
+                              this.data[params.index][ent.name].read = value
+                            } else {
+                              this.data[params.index][ent.name].write = value
                             }
-                          })
-                        ]),
-                        h('td', {
-                          style: {
-                            textAlign: 'center'
                           }
-                        }, [
-                          h('Checkbox', {
-                            props: {
-                              value: params.row[ent.name].read
-                            },
-                            on: {
-                              'on-change': (value) => {
-                                this.$Spin.show()
-                                if (value && !this.data[params.index][ent.name].show) {
-                                  this.data[params.index][ent.name].read = value
-                                  this.data[params.index][ent.name].show = value
-                                } else {
-                                  this.data[params.index][ent.name].read = value
-                                }
-                                this.$Spin.hide()
-                              }
-                            }
-                          })
-                        ]),
-                        h('td', {
-                          style: {
-                            textAlign: 'center'
-                          }
-                        }, [
-                          h('Checkbox', {
-                            props: {
-                              value: params.row[ent.name].write
-                            },
-                            on: {
-                              'on-change': (value) => {
-                                this.$Spin.show()
-                                if (value) {
-                                  this.data[params.index][ent.name].read = value
-                                  this.data[params.index][ent.name].write = value
-                                  this.data[params.index][ent.name].show = value
-                                } else {
-                                  this.data[params.index][ent.name].write = value
-                                }
-                                this.$Spin.hide()
-                              }
-                            }
-                          })
-                        ])
-                      ])
+                        }
+                      })
                     ])
                   ])
                 ])
