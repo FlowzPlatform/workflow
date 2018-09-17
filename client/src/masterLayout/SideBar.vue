@@ -161,22 +161,22 @@ export default {
       return text
     },
     async getModuleRoles (moduleId) {
-      if (this.roles[moduleId]) {
-        return this.roles[moduleId]
+      if (this.$store.state.registerRoles[moduleId]) {
+        return this.$store.state.registerRoles[moduleId]
       }
       let roles = await axios.get(config.subscriptionUrl + 'register-roles?module=workflow_' + moduleId)
       if (roles !== undefined) {
-        this.roles[moduleId] = roles
+        this.$store.state.registerRoles[moduleId] = roles
       }
       return roles
     },
     async getModuleResource (moduleId) {
-      if (this.resource[moduleId]) {
-        return this.resource[moduleId]
+      if (this.$store.state.registerResources[moduleId]) {
+        return this.$store.state.registerResources[moduleId]
       }
       let resource = await axios.get(config.subscriptionUrl + 'register-resource?module=workflow_' + moduleId)
       if (resource !== undefined) {
-        this.resource[moduleId] = resource
+        this.$store.state.registerResources[moduleId] = resource
       }
       return resource
     },
@@ -186,25 +186,11 @@ export default {
     async init () {
       if (this.$store.state.role === 1) {
         this.loading = true
-        // if (this.$store.state.flowz.length > 0) {
-        //   let flowZData = _.cloneDeep(this.$store.state.flowz)
-        //   this.flowzList = _.map(flowZData, (m) => {
-        //     m.count = 0
-        //     _.map(m.processList, (p) => {
-        //       p.count = 0
-        //       return p
-        //     })
-        //     return m
-        //   })
-        //   this.loading = false
-        //   this.setCounters()
-        // } else {
         flowzModal.get(null, {
           $paginate: false
         })
-        .then(async (response) => {
+        .then((response) => {
           this.loading = false
-          this.$store.state.flowz = _.cloneDeep(response.data)
           this.flowzList = _.map(response.data, (m) => {
             m.count = 0
             _.map(m.processList, (p) => {
@@ -221,10 +207,10 @@ export default {
           this.flowzList = []
           this.loading = false
         })
-        // }
       } else {
-        let modules = _.keysIn(this.$store.state.user.package[this.$store.state.subscription].role)
         let self = this
+        this.loading = true
+        let modules = _.keysIn(this.$store.state.user.package[this.$store.state.subscription].role)
         modules = _.map(modules, function (o) {
           let isModule = o.match(/workflow/i)
           if (isModule !== null && isModule.length > 0) {
@@ -236,24 +222,18 @@ export default {
           let fData = []
           for (let item of modules) {
             let id = item.value.split('_')[1]
-            // let finx = _.findIndex(this.$store.state.flowz, {id: id})
-            // if (finx !== -1) {
-            //   let mData = _.cloneDeep(this.$store.state.flowz[finx])
-            //   mData.role = item.role
-            //   fData.push(mData)
-            // } else {
             await flowzModal.get(id, null, {
               workflowid: 'workflow_' + id
             }).then(res => {
               res.data.role = item.role
               fData.push(res.data)
             })
-            // }
           }
           for (let item of fData) {
             let resource = await this.getModuleResource(item.id)
             let roles = await this.getModuleRoles(item.id)
             let permissions = await this.getModulePermissions(item.id)
+            // console.log('', {resource}, {roles}, {permissions})
             if (resource !== undefined && roles !== undefined && permissions !== undefined) {
               let role = item.role
               let fRoleIndex = _.findIndex(roles.data.data, {role: role})
@@ -279,25 +259,25 @@ export default {
                   }
                 }
               }
+              item.count = 0
               for (let proc in item.processList) {
+                item.processList[proc].count = 0
                 if (!item.processList[proc].hasOwnProperty('isaccess')) {
                   delete item.processList[proc]
                 }
               }
+              this.flowzList = fData
+              this.loading = false
+              this.setCounters()
+            } else {
+              this.loading = false
+              this.flowzList = []
             }
           }
-          this.flowzList = _.map(fData, (m) => {
-            m.count = 0
-            _.map(m.processList, (p) => {
-              p.count = 0
-              return p
-            })
-            return m
-          })
           this.loading = false
-          this.setCounters()
         } else {
           this.flowzList = []
+          this.loading = false
         }
       }
     },
@@ -458,60 +438,14 @@ export default {
     'flowz': {
       created (data) {
         if (this.$store.state.role === 1) {
-          // this.$store.state.flowz = []
-          // this.init()
           this.flowzList.push(data)
         }
-        // console.log('Created Data: ', data)
-        // this.$Notice.success({
-        //   title: 'Flowz Updated.',
-        //   duration: 10,
-        //   render: h => {
-        //     return h('Button', {
-        //       props: {
-        //         type: 'ghost'
-        //       },
-        //       on: {
-        //         'click': (value) => {
-        //           this.$store.state.flowz = []
-        //           this.init()
-        //           // window.location.reload()
-        //         }
-        //       }
-        //     }, 'Update View')
-        //   }
-        // })
       },
       updated (data) {
-        if (this.$store.state.role === 1) {
-          this.$store.state.flowz = []
-          this.init()
-          // let i = _.findIndex(this.flowzList, (o) => { return o.id === data.id })
-          // this.flowzList[i] = data
-        }
-        // console.log('Updated Data: ', data)
-        // this.$Notice.success({
-        //   title: 'Flowz Updated.',
-        //   duration: 10,
-        //   render: h => {
-        //     return h('Button', {
-        //       props: {
-        //         type: 'ghost'
-        //       },
-        //       on: {
-        //         'click': (value) => {
-        //           // window.location.reload()
-        //           this.$store.state.flowz = []
-        //           this.init()
-        //         }
-        //       }
-        //     }, 'Update View')
-        //   }
-        // })
-        // this.init()
+        this.init()
       },
       removed (data) {
-        console.log('Removed Data: ', data)
+        // console.log('Removed Data: ', data)
         if (this.$store.state.role === 1) {
           // this.$store.state.flowz = []
           // this.init()

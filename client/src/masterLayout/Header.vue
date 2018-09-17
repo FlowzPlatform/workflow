@@ -120,6 +120,10 @@
         this.$store.state.schema = []
         this.$store.state.Cache = null
         this.$store.state.Cache = {}
+        this.$store.state.registerRoles = null
+        this.$store.state.registerRoles = {}
+        this.$store.state.registerResources = null
+        this.$store.state.registerResources = {}
         window.location.reload()
       },
       gotoDashboard () {
