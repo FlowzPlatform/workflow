@@ -105,29 +105,29 @@ export default {
         return a.order - b.order
       })
     },
-    createInstance (item, subItemID) {
-      // console.log('item', item)
-      this.$Loading.start()
-      let fheaders = null
-      if (subItemID !== undefined) {
-        fheaders = {
-          workflowid: 'workflow_' + item.id,
-          stateid: subItemID
-        }
-      }
-      finstanceModal.post({fid: item.id}, null, fheaders).then(res => {
-        this.$Notice.success({title: 'Instance Generated'})
-        this.$Loading.finish()
-      }).catch(e => {
-        this.$Loading.error()
-        console.log('error', e.response)
-        if (e.response.data.message) {
-          this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
-        } else {
-          this.$Notice.error({title: 'Error', desc: 'Instace Not Generated'})
-        }
-      })
-    },
+    // createInstance (item, subItemID) {
+    //   // console.log('item', item)
+    //   this.$Loading.start()
+    //   let fheaders = null
+    //   if (subItemID !== undefined) {
+    //     fheaders = {
+    //       workflowid: 'workflow_' + item.id,
+    //       stateid: subItemID
+    //     }
+    //   }
+    //   finstanceModal.post({fid: item.id}, null, fheaders).then(res => {
+    //     this.$Notice.success({title: 'Instance Generated'})
+    //     this.$Loading.finish()
+    //   }).catch(e => {
+    //     this.$Loading.error()
+    //     console.log('error', e.response)
+    //     if (e.response.data.message) {
+    //       this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+    //     } else {
+    //       this.$Notice.error({title: 'Error', desc: 'Instace Not Generated'})
+    //     }
+    //   })
+    // },
     viewProgress (item) {
       // console.log('item: ', item)
       if (item.id === this.$route.params.id) {
