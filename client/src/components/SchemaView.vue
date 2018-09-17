@@ -1109,7 +1109,9 @@ export default {
 		/*line-height: 15px !important;*/
 	}
 
-
+  .clickToCopy{
+    cursor: pointer;
+  }
 </style>
 
 <style>
