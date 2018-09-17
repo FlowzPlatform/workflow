@@ -104,7 +104,7 @@ function beforeCreate (hook) {
 
   let stageDataObj = {
     stageRecordId: fdataid,
-    StageName: hook.data.currentState,
+    StageName: hook.data.currentStatus,
     createdAt: new Date().toISOString()
   }
 
@@ -154,7 +154,7 @@ function afterCreate (hook) {
       data: hook.params.data,
       iid: hook.result.id,
       fid: hook.result.fid,
-      state: hook.data.currentState
+      state: hook.data.currentStatus
     }).then(res => {
       return hook
     }).catch(err => {
