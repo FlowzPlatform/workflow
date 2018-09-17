@@ -48,7 +48,7 @@
         </div>
       </div>
     </div>
-    <div v-if="role === 'admin'">
+    <div v-if="datashow === 'dataA'">
       <Table @on-sort-change="sortTableData" highlight-row :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
       <div style="margin: 10px;overflow: hidden">
         <div style="float: right;">
@@ -56,7 +56,7 @@
         </div>
       </div>
     </div>
-    <div v-if="role === 'client'">
+    <div v-if="datashow === 'dataC'">
       <Table @on-sort-change="sortTableData" highlight-row :columns="setColumns2" :data="data" :border="config.border" :stripe="config.stripe"></Table>
       <div style="margin: 10px;overflow: hidden">
         <div style="float: right;">
@@ -64,7 +64,7 @@
         </div>
       </div>
     </div>
-    <div v-if="role === 'client_unclaim'">
+    <div v-if="datashow === 'dataU'">
       <Table @on-sort-change="sortTableData" highlight-row :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
       <div style="margin: 10px;overflow: hidden">
         <div style="float: right;">
@@ -90,7 +90,7 @@
       'dataTotal': Number,
       'pageno': Number,
       'limit': Number,
-      'role': String
+      'datashow': String
     },
     data () {
       return {
@@ -257,13 +257,13 @@
                   on: {
                     'click': async () => {
                       this.$Loading.start()
-                      let indexFind = _.findIndex(this.instanceEntries, (o) => { return o.id === params.row.id })
-                      let currentObj = this.flowzData.processList[this.instanceEntries[indexFind].currentStatus]
+                      // let indexFind = _.findIndex(this.instanceEntries, (o) => { return o.id === params.row.id })
+                      // let currentObj = this.flowzData.processList[this.instanceEntries[indexFind].currentStatus]
                       let values = {
                         id: this.flowzData.schema,
-                        item: this.instanceEntries[indexFind],
-                        formName: currentObj.name,
-                        currentState: currentObj.id,
+                        item: params.row,
+                        // formName: currentObj.name,
+                        currentState: params.row.currentStatus,
                         flowzData: this.flowzData,
                         formData: params.row.data
                       }
@@ -328,7 +328,7 @@
                         formData: params.row.data
                       }
                       this.$Loading.finish()
-                      await this.$emit('setValues', values)
+                      this.$emit('setValues', values)
                     }
                   }
                 }, ''),
@@ -567,7 +567,7 @@
     margin: 5px 0;
   }
   .ivu-table-cell td div span{
-    width:200px !important;
+    /*width:200px !important;*/
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;

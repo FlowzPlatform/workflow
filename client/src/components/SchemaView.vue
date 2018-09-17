@@ -72,9 +72,9 @@
         
         <div v-if="itsFirstState === false && instanceEntries.length !== 0">
           <tabs> 
-            <TabPane v-if="admin" :label="dataCount" icon="lock-combination">
-          <schemalist v-if="this.$store.state.role === 1" :schema="dataSchema" :pageno="pageno" :role="'admin'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
-          <schemalist v-if="this.$store.state.role === 2" :schema="dataSchema" :pageno="pageno" :role="'client_unclaim'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+            <TabPane v-if="this.$store.state.role === 1" :label="dataCount" icon="lock-combination">
+          <schemalist v-if="this.$store.state.role === 1" :schema="dataSchema" :pageno="pageno" :datashow="'dataA'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+          <schemalist v-if="this.$store.state.role === 2" :schema="dataSchema" :pageno="pageno" :datashow="'dataU'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
 
           <div style="padding: 10px">
             <div class="row" v-if="id != null">
@@ -210,8 +210,6 @@ export default {
   data () {
     return {
       check: 0,
-      client: false,
-      admin: true,
       dataClaim: [],
       loadEmail: false,
       skip: 0,
@@ -994,7 +992,7 @@ export default {
       this.id = values.id
       if (values.id !== null) {
         this.item = values.item
-        this.formTitle = values.formName
+        // this.formTitle = values.formName
         this.flowData = values.flowzData
         let targetObj = values.flowzData.processList[values.currentState]
         if (Object.keys(targetObj).length > 0) {
@@ -1067,6 +1065,7 @@ export default {
     },
 
     populateTables (schema) {
+      this.formTitle = this.flowzData.processList[this.$route.params.stateid].name
       this.itsFirstState = false
       this.dataLoading = true
       this.dataSchema = this.currentSchema
@@ -1124,6 +1123,7 @@ export default {
         $skip: this.skip,
         $limit: this.limit
       }).then(queryresp => {
+        console.log('queryresp: ', queryresp)
         this.isFlowzLoaded = true
         // let firstState = this.flowzData.first
         // if (firstState === this.$route.params.stateid) {
@@ -1185,12 +1185,6 @@ export default {
   },
   mounted () {
     this.init()
-    if (this.$store.state.role === 2) {
-      this.client = true
-    }
-    if (this.$store.state.role === 1) {
-      this.admin = true
-    }
   },
   computed: {
     dataCount () {
