@@ -131,8 +131,8 @@
           </div>
           </TabPane>
           <TabPane v-if="client" :label="'In Progress ('+ dataClaim.length + ')'" icon="lock-combination">
-          <schemalist :schema="dataSchema" :role="'client'" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataClaim" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
-        </TabPane>
+            <schemalist :schema="dataSchema" :role="'client'" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataClaim" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+          </TabPane>
           </Tabs>
         </div>
       </div>
