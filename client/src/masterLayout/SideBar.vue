@@ -210,6 +210,7 @@ export default {
       } else {
         let self = this
         this.loading = true
+        this.flowzList = []
         let modules = _.keysIn(this.$store.state.user.package[this.$store.state.subscription].role)
         modules = _.map(modules, function (o) {
           let isModule = o.match(/workflow/i)
@@ -266,15 +267,14 @@ export default {
                   delete item.processList[proc]
                 }
               }
-              this.flowzList = fData
-              this.loading = false
-              this.setCounters()
+              this.flowzList.push(item)
             } else {
               this.loading = false
               this.flowzList = []
             }
           }
           this.loading = false
+          this.setCounters()
         } else {
           this.flowzList = []
           this.loading = false
