@@ -41,9 +41,9 @@
                   <span>
                     <Badge :count="item.count"  class-name="demo-badge-alone"></Badge>
                   </span>
-                  <span v-if="$store.state.role === 1" style="float:right;" title="Create Instance" @click.prevent="createInstance(item)">
+                  <!-- <span v-if="$store.state.role === 1" style="float:right;" title="Create Instance" @click.prevent="createInstance(item)">
                     <i class="fa fa-plus"></i>
-                  </span>
+                  </span> -->
                   <span v-if="$store.state.role === 1" style="float:right;padding-right:5px;" title="Preview Progress" @click.prevent="viewProgress(item)">
                     <i class="fa fa-line-chart"></i>
                   </span>
@@ -61,9 +61,9 @@
                       <span style="float:right;">
                         <Badge :count="subItem.count"  class-name="demo-badge-alone"></Badge>
                       </span>
-                      <span v-if="subItem.isfirst" style="float:right;padding-right:5px;" title="Create Instance" @click.prevent="createInstance(item, subItem.id)">
+                      <!-- <span v-if="subItem.isfirst" style="float:right;padding-right:5px;" title="Create Instance" @click.prevent="createInstance(item, subItem.id)">
                         <i class="fa fa-plus"></i>
-                      </span>
+                      </span> -->
                   </div>
                 </Menu-item>
               </template>

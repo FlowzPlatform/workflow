@@ -66,7 +66,7 @@
           </div>
         </div>
 
-        <div v-if="instanceEntries.length === 0">
+        <div v-if="instanceEntries.length === 0 && itsFirstState === false">
           <p align="center">No Data</p>
         </div>
         
@@ -319,12 +319,12 @@ export default {
       this.skip = skip
       this.limit = limit
       this.pageno = page
-      this.init()
+      this.populateTables()
     },
     handlepage (skip, limit, size) {
       this.limit = size
       this.skip = 0
-      this.init()
+      this.populateTables()
     },
     info (item, index, button) {
       this.modalInfo.title = `Row index: ${index}`
@@ -501,11 +501,11 @@ export default {
       // await this.handleAdd()
 
       this.$Loading.finish()
-      // setTimeout(() => {
-      //   $('html, body').animate({
-      //     scrollTop: $('#top').offset().top
-      //   }, 500)
-      // }, 0)
+      setTimeout(() => {
+        $('html, body').animate({
+          scrollTop: $('#top').offset().top
+        }, 500)
+      }, 0)
 
       // },4000)
       // }
@@ -1375,10 +1375,14 @@ export default {
     display: none;
   }
   .demo-spin-container{
-    	display: inline-block;
-        width: 200px;
-        height: 100px;
-        position: relative;
-        border: 1px solid #eee;
-    }
+  	display: inline-block;
+    width: 200px;
+    height: 100px;
+    position: relative;
+    border: 1px solid #eee;
+  }
+
+  /*.ivu-tabs .ivu-tabs-tabpane {
+    margin-bottom: 20% !important;
+  }*/
 </style>
