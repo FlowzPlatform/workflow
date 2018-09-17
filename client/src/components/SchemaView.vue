@@ -985,6 +985,7 @@ export default {
     },
 
     setValues (values) {
+      console.log('this.formName: ', this.formTitle)
       this.validErr = []
       this.email = false
       this.schemabinding = false
@@ -994,7 +995,7 @@ export default {
       this.id = values.id
       if (values.id !== null) {
         this.item = values.item
-        this.formTitle = values.formName
+        // this.formTitle = values.formName
         this.flowData = values.flowzData
         let targetObj = values.flowzData.processList[values.currentState]
         if (Object.keys(targetObj).length > 0) {
@@ -1067,6 +1068,7 @@ export default {
     },
 
     populateTables (schema) {
+      this.formTitle = this.flowzData.processList[this.$route.params.stateid].name
       this.itsFirstState = false
       this.dataLoading = true
       this.dataSchema = this.currentSchema
@@ -1124,6 +1126,7 @@ export default {
         $skip: this.skip,
         $limit: this.limit
       }).then(queryresp => {
+        console.log('queryresp: ', queryresp)
         this.isFlowzLoaded = true
         // let firstState = this.flowzData.first
         // if (firstState === this.$route.params.stateid) {
@@ -1167,7 +1170,9 @@ export default {
       this.schemabinding = false
       this.email = false
       this.flowzData = await this.getFlowz()
+      console.log('FlowzData: ', this.flowzData)
       this.currentSchema = await this.getSchema()
+      console.log('currentSchema: ', this.currentSchema)
       if (this.flowzData.first === this.$route.params.stateid) {
         this.itsFirstState = true
         await this.fetch(this.currentSchema.id)

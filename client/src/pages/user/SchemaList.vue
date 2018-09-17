@@ -257,13 +257,14 @@
                   on: {
                     'click': async () => {
                       this.$Loading.start()
-                      let indexFind = _.findIndex(this.instanceEntries, (o) => { return o.id === params.row.id })
-                      let currentObj = this.flowzData.processList[this.instanceEntries[indexFind].currentStatus]
+                      console.log('Params id: ', params.row)
+                      // let indexFind = _.findIndex(this.instanceEntries, (o) => { return o.id === params.row.id })
+                      // let currentObj = this.flowzData.processList[this.instanceEntries[indexFind].currentStatus]
                       let values = {
                         id: this.flowzData.schema,
-                        item: this.instanceEntries[indexFind],
-                        formName: currentObj.name,
-                        currentState: currentObj.id,
+                        item: params.row,
+                        // formName: currentObj.name,
+                        currentState: params.row.currentStatus,
                         flowzData: this.flowzData,
                         formData: params.row.data
                       }
@@ -567,7 +568,7 @@
     margin: 5px 0;
   }
   .ivu-table-cell td div span{
-    width:200px !important;
+    /*width:200px !important;*/
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
