@@ -108,9 +108,11 @@ function beforeCreate (hook) {
     createdAt: new Date().toISOString()
   }
 
-  hook.data.stageReference = [stageDataObj]
+  // hook.data.stageReference = [stageDataObj]
+  hook.data.stageReference = []
 
   hook.data.createdAt = new Date().toISOString();
+  hook.data.modifiedAt = hook.data.createdAt
   // if (hook.data.fid) {
   //   return hook.app.service('flowz').get(hook.data.fid, hook.params).then(res => {
   //     if (res.startId.length > 0) {
@@ -148,14 +150,15 @@ function afterCreate (hook) {
   if (hook.params.hasOwnProperty('data')) {
     let id = hook.params.data.id
     delete hook.params.data.id   
+    console.log('^^^^^^^^^^^^^^^^^^^^^: ', hook.params)
     // console.log("hook.app.service('flowzdata'", hook.app.service('flowzdata').create({abc:'xyz'}))
-    return hook.app.service('flowzdata', hook.params).create({
+    return hook.app.service('flowzdata').create({
       id: id,
       data: hook.params.data,
       iid: hook.result.id,
       fid: hook.result.fid,
       state: hook.data.currentStatus
-    }).then(res => {
+    }, hook.params).then(res => {
       return hook
     }).catch(err => {
       console.log('err', err)

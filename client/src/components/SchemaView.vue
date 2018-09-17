@@ -522,7 +522,7 @@ export default {
       let saveObj = {
         fid: this.$route.params.id,
         currentStatus: this.$route.params.stateid,
-        data: this.formSchemaInstance.data
+        data: this.formSchemaInstance.data[0]
       }
       finstanceModal.post(saveObj, null, fheaders)
         .then(res => {
