@@ -72,9 +72,9 @@
         
         <div v-if="itsFirstState === false && instanceEntries.length !== 0">
           <tabs> 
-            <TabPane v-if="admin" :label="dataCount" icon="lock-combination">
-          <schemalist v-if="this.$store.state.role === 1" :schema="dataSchema" :pageno="pageno" :role="'admin'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
-          <schemalist v-if="this.$store.state.role === 2" :schema="dataSchema" :pageno="pageno" :role="'client_unclaim'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+            <TabPane v-if="table1" :label="dataCount" icon="lock-combination">
+          <schemalist v-if="this.$store.state.role === 1" :schema="dataSchema" :pageno="pageno" :datashow="'dataA'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+          <schemalist v-if="this.$store.state.role === 2" :schema="dataSchema" :pageno="pageno" :datashow="'dataU'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
 
           <div style="padding: 10px">
             <div class="row" v-if="id != null">
@@ -131,8 +131,8 @@
             </div>
           </div>
           </tabPane>
-          <TabPane v-if="client" :label="'Claim ('+ dataClaim.length + ')'" icon="lock-combination">
-          <schemalist :schema="dataSchema" :role="'client'" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataClaim" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+          <TabPane v-if="table2" :label="'Claim ('+ dataClaim.length + ')'" icon="lock-combination">
+          <schemalist :schema="dataSchema" :datashow="'dataC'" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataClaim" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
         </TabPane>
           </Tabs>
         </div>
@@ -210,8 +210,8 @@ export default {
   data () {
     return {
       check: 0,
-      client: false,
-      admin: true,
+      table2: false,
+      table1: true,
       dataClaim: [],
       loadEmail: false,
       skip: 0,
@@ -1186,10 +1186,10 @@ export default {
   mounted () {
     this.init()
     if (this.$store.state.role === 2) {
-      this.client = true
+      this.table2 = true
     }
     if (this.$store.state.role === 1) {
-      this.admin = true
+      this.table1 = true
     }
   },
   computed: {
