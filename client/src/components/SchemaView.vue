@@ -985,7 +985,6 @@ export default {
     },
 
     setValues (values) {
-      console.log('this.formName: ', this.formTitle)
       this.validErr = []
       this.email = false
       this.schemabinding = false
@@ -1170,9 +1169,7 @@ export default {
       this.schemabinding = false
       this.email = false
       this.flowzData = await this.getFlowz()
-      console.log('FlowzData: ', this.flowzData)
       this.currentSchema = await this.getSchema()
-      console.log('currentSchema: ', this.currentSchema)
       if (this.flowzData.first === this.$route.params.stateid) {
         this.itsFirstState = true
         await this.fetch(this.currentSchema.id)

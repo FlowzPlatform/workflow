@@ -257,7 +257,6 @@
                   on: {
                     'click': async () => {
                       this.$Loading.start()
-                      console.log('Params id: ', params.row)
                       // let indexFind = _.findIndex(this.instanceEntries, (o) => { return o.id === params.row.id })
                       // let currentObj = this.flowzData.processList[this.instanceEntries[indexFind].currentStatus]
                       let values = {
