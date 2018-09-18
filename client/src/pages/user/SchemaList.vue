@@ -48,7 +48,7 @@
         </div>
       </div>
     </div>
-    <div v-if="datashow === 'dataA'">\
+    <div v-if="datashow === 'dataA'">
       <Table @on-sort-change="sortTableData" highlight-row :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
       <div style="margin: 10px;overflow: hidden">
         <div style="float: right;">

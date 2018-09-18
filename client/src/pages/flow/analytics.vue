@@ -701,7 +701,8 @@ export default {
                     arr.push(h('Button', {
                       attrs: {
                         type: 'info',
-                        style: 'margin: 2px'
+                        style: 'margin: 2px',
+                        title: params.row[item.name][i].split('/').pop()
                       },
                       on: {
                         click: () => {
