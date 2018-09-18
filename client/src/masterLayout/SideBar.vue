@@ -101,9 +101,10 @@ export default {
       for (let key in array) {
         allProcess[array[key].order] = array[key]
       }
-      return allProcess.sort((a, b) => {
-        return a.order - b.order
-      })
+      return allProcess
+      // return allProcess.sort((a, b) => {
+      //   return a.order - b.order
+      // })
     },
     // createInstance (item, subItemID) {
     //   // console.log('item', item)
@@ -200,6 +201,7 @@ export default {
             return m
           })
           this.loading = false
+          // console.log('this.flowzList', this.flowzList)
           this.setCounters()
         })
         .catch(error => {
@@ -296,10 +298,10 @@ export default {
               pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
               sitem.count += pitem.count
             })
-            for (let pitem of sitem.json.processList) {
-              pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
-              sitem.count += pitem.count
-            }
+            // for (let pitem in sitem.processList) {
+            //   pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
+            //   sitem.count += pitem.count
+            // }
           }).catch(err => {
             console.log('error', err)
           })
@@ -336,6 +338,7 @@ export default {
       } else {
         for (let item of this.flowzList) {
           if (this.$store.state.role === 1) {
+            // item.count = 9
             finstanceModal.get(null, {
               $paginate: false,
               $select: ['currentStatus'],
@@ -343,6 +346,7 @@ export default {
               fid: item.id
             }).then(res => {
               if (res.data.length > 0) {
+                item.count = 0
                 _.map(item.processList, (pitem) => {
                   pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
                   item.count += pitem.count
