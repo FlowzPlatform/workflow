@@ -889,6 +889,7 @@ export default {
 
     getSchema () {
       return schemaModel.getAll(this.flowzData.schema).then(res => {
+        console.log(res)
         return res
       }).catch(err => {
         console.log('Error: ', err)
@@ -901,7 +902,11 @@ export default {
       this.formTitle = this.flowzData.processList[this.$route.params.stateid].name
       this.itsFirstState = false
       this.dataLoading = true
+      let currentStageP = this.$route.params.stateid
+      let currentStateP = this.flowzData.processList[currentStageP]
       this.dataSchema = this.currentSchema
+      this.dataSchema.permission = {}
+      this.dataSchema.permission = currentStateP.permission
       this.email = false
       this.htmlcontent = false
       this.id = null
