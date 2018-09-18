@@ -48,7 +48,7 @@
         </div>
       </div>
     </div>
-    <div v-if="datashow === 'dataA'">
+    <div v-if="datashow === 'dataA'">\
       <Table @on-sort-change="sortTableData" highlight-row :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
       <div style="margin: 10px;overflow: hidden">
         <div style="float: right;">
@@ -241,8 +241,9 @@
         if (this.dynamicData && this.$store.state.role === 1) {
           cols.push({
             title: 'Action',
-            width: 100,
+            width: 80,
             align: 'center',
+            fixed: 'left',
             render: (h, params) => {
               return h('div', [
                 h('Button', {
@@ -274,6 +275,7 @@
           cols.push({
             title: 'ID',
             key: 'iid',
+            fixed: 'left',
             width: 260,
             render: (h, params) => {
               return h('span', {
@@ -375,28 +377,97 @@
           }
           for (let item of this.dataConfig) {
             if (item.show) {
-              cols.push({
-                title: item.title,
-                key: item.key,
-                sortable: item.sortable,
-                width: item.width,
-                render: (h, params) => {
-                  return h('div', params.row.data[item.key])
-                }
-              })
+              if (item.type === 'file') {
+                cols.push({
+                  title: item.title,
+                  key: item.key,
+                  sortable: item.sortable,
+                  width: item.width,
+                  render: (h, params) => {
+                    let arr = []
+                    if (params.row.data[item.title]) {
+                      for (let i = 0; i < params.row.data[item.title].length; i++) {
+                        arr.push(h('Button', {
+                          attrs: {
+                            type: 'info',
+                            style: 'margin: 2px',
+                            title: params.row.data[item.title][i].split('/').pop()
+                          },
+                          on: {
+                            click: () => {
+                              window.open(params.row.data[item.title][i])
+                            }
+                          }
+                        }, [
+                          h('i', {
+                            attrs: {
+                              class: 'fa fa-link'
+                            }
+                          })
+                        ]))
+                      }
+                      return arr
+                    }
+                  }
+                })
+              } else {
+                cols.push({
+                  title: item.title,
+                  key: item.key,
+                  sortable: item.sortable,
+                  width: item.width,
+                  render: (h, params) => {
+                    return h('div', params.row.data[item.key])
+                  }
+                })
+              }
             }
           }
         } else {
           if (this.schema.hasOwnProperty('entity')) {
             for (let item of this.schema.entity) {
-              cols.push({
-                title: item.name,
-                key: item.name,
-                width: 150,
-                render: (h, params) => {
-                  return h('div', params.row.data[item.name])
-                }
-              })
+              if (item.type === 'file') {
+                cols.push({
+                  title: item.name,
+                  key: item.name,
+                  width: 150,
+                  render: (h, params) => {
+                    let arr = []
+                    if (params.row.data[item.title]) {
+                      for (let i = 0; i < params.row.data[item.title].length; i++) {
+                        arr.push(h('Button', {
+                          attrs: {
+                            type: 'info',
+                            style: 'margin: 2px',
+                            title: params.row.data[item.title][i].split('/').pop()
+                          },
+                          on: {
+                            click: () => {
+                              window.open(params.row.data[item.title][i])
+                            }
+                          }
+                        }, [
+                          h('i', {
+                            attrs: {
+                              class: 'fa fa-link'
+                            }
+                          })
+                        ]))
+                      }
+                      return arr
+                    }
+                  }
+                })
+              } else {
+                cols.push({
+                  title: item.name,
+                  key: item.name,
+                  width: 150,
+                  render: (h, params) => {
+                    return h('div', params.row.data[item.name])
+                  }
+                })
+              }
             }
           }
         }
@@ -448,28 +519,97 @@
           }
           for (let item of this.dataConfig) {
             if (item.show) {
-              cols.push({
-                title: item.title,
-                key: item.key,
-                sortable: item.sortable,
-                width: item.width,
-                render: (h, params) => {
-                  return h('div', params.row.data[item.key])
-                }
-              })
+              if (item.type === 'file') {
+                cols.push({
+                  title: item.title,
+                  key: item.key,
+                  sortable: item.sortable,
+                  width: item.width,
+                  render: (h, params) => {
+                    let arr = []
+                    if (params.row.data[item.title]) {
+                      for (let i = 0; i < params.row.data[item.title].length; i++) {
+                        arr.push(h('Button', {
+                          attrs: {
+                            type: 'info',
+                            style: 'margin: 2px',
+                            title: params.row.data[item.title][i].split('/').pop()
+                          },
+                          on: {
+                            click: () => {
+                              window.open(params.row.data[item.title][i])
+                            }
+                          }
+                        }, [
+                          h('i', {
+                            attrs: {
+                              class: 'fa fa-link'
+                            }
+                          })
+                        ]))
+                      }
+                      return arr
+                    }
+                  }
+                })
+              } else {
+                cols.push({
+                  title: item.title,
+                  key: item.key,
+                  sortable: item.sortable,
+                  width: item.width,
+                  render: (h, params) => {
+                    return h('div', params.row.data[item.key])
+                  }
+                })
+              }
             }
           }
         } else {
           if (this.schema.hasOwnProperty('entity')) {
             for (let item of this.schema.entity) {
-              cols.push({
-                title: item.name,
-                key: item.name,
-                width: 150,
-                render: (h, params) => {
-                  return h('div', params.row.data[item.name])
-                }
-              })
+              if (item.type === 'file') {
+                cols.push({
+                  title: item.name,
+                  key: item.name,
+                  width: 150,
+                  render: (h, params) => {
+                    let arr = []
+                    if (params.row.data[item.title]) {
+                      for (let i = 0; i < params.row.data[item.title].length; i++) {
+                        arr.push(h('Button', {
+                          attrs: {
+                            type: 'info',
+                            style: 'margin: 2px',
+                            title: params.row.data[item.title][i].split('/').pop()
+                          },
+                          on: {
+                            click: () => {
+                              window.open(params.row.data[item.title][i])
+                            }
+                          }
+                        }, [
+                          h('i', {
+                            attrs: {
+                              class: 'fa fa-link'
+                            }
+                          })
+                        ]))
+                      }
+                      return arr
+                    }
+                  }
+                })
+              } else {
+                cols.push({
+                  title: item.name,
+                  key: item.name,
+                  width: 150,
+                  render: (h, params) => {
+                    return h('div', params.row.data[item.name])
+                  }
+                })
+              }
             }
           }
         }
