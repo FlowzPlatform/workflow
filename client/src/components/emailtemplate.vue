@@ -24,6 +24,7 @@
 import Editor from '@tinymce/tinymce-vue'
 import saveemailTemplate from '@/api/emailtemplate'
 import _ from 'lodash'
+
 export default {
   data () {
     return {
