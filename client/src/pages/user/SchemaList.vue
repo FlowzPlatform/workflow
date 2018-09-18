@@ -483,7 +483,6 @@
       }
     },
     mounted () {
-      console.log(this.schema)
       this.total = this.dataTotal
       this.mdata = this.data
       // $('.ivu-table td:nth-child(2) div span').mouseover(function () {
