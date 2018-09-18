@@ -229,6 +229,7 @@
                 key: item.name,
                 show: isshow,
                 sortable: false,
+                type: item.type,
                 width: 150
               })
             }
