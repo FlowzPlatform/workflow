@@ -292,6 +292,12 @@ export default {
         this.dataTotal = res.data.total
         if (res.data.data.length > 0) {
           this.instanceEntries = res.data.data
+          // let currentStateP = this.flowzData.processList[currentStageP]
+          // if (currentStateP.hasOwnProperty('permission')) {
+          //   this.formSchemaInstance.permission = []
+          //   this.formSchemaInstance.permission = currentStateP.permission
+          // }
+          console.log('this.instanceEntries', this.instanceEntries)
           this.dataData = this.instanceEntries
           this.$Loading.finish()
           this.dataLoading = false
@@ -1055,7 +1061,9 @@ export default {
     },
 
     getSchema () {
+      console.log('this.flowzData.schema', this.flowzData.schema)
       return schemaModel.getAll(this.flowzData.schema).then(res => {
+        console.log(res)
         return res
       }).catch(err => {
         console.log('Error: ', err)
@@ -1067,7 +1075,11 @@ export default {
     populateTables (schema) {
       this.itsFirstState = false
       this.dataLoading = true
+      let currentStageP = this.$route.params.stateid
+      let currentStateP = this.flowzData.processList[currentStageP]
       this.dataSchema = this.currentSchema
+      this.dataSchema.permission = {}
+      this.dataSchema.permission = currentStateP.permission
       this.email = false
       this.htmlcontent = false
       this.id = null
