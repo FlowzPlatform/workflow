@@ -43,7 +43,6 @@ const vueFeathers = require('vue-feathers')
   // And plug it in]
 Vue.use(vueFeathers, feathers)
 
-
 /* IView */
 import iView from 'iview'
 import locale from 'iview/dist/locale/en-US'
