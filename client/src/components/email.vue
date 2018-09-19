@@ -3,7 +3,6 @@
     <div class="container">
           <p style="text-align: center;margin-bottom: 10px; font-size: 40px; text-decoration: underline"><b> Customer Proof</b></p>
           <schemasubform v-if="!flag" :schemainstance="formSchemaInstance"></schemasubform>
-          <!-- <schemasubform v-if="!flag" :is="componentLoader"></schemasubform> -->
           <div class="row" v-if="flag">
             <div class="col-md-6">
               <div class="form-group">
