@@ -13,6 +13,7 @@ class Service {
     this.app = app;
   }
   setTableName (params) {
+    this.service.options.name = params.headers.ftablename;
     this.service.table = this.rDB.table(params.headers.ftablename);
   }
 
