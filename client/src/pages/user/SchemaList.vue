@@ -219,19 +219,36 @@
         this.dataConfig = []
         if (this.schema.hasOwnProperty('entity')) {
           for (let item of this.schema.entity) {
-            if (this.schema.permission[item.name].read === true) {
-              let isshow = true
-              if (item.customtype) {
-                isshow = false
+            if (this.schema.hasOwnProperty('permission')) {
+              if (this.schema.permission !== undefined) {
+                if (this.schema.permission[item.name].read === true) {
+                  let isshow = true
+                  if (item.customtype) {
+                    isshow = false
+                  }
+                  this.dataConfig.push({
+                    title: item.name,
+                    key: item.name,
+                    show: isshow,
+                    sortable: false,
+                    type: item.type,
+                    width: 150
+                  })
+                }
+              } else {
+                let isshow = true
+                if (item.customtype) {
+                  isshow = false
+                }
+                this.dataConfig.push({
+                  title: item.name,
+                  key: item.name,
+                  show: isshow,
+                  sortable: false,
+                  type: item.type,
+                  width: 150
+                })
               }
-              this.dataConfig.push({
-                title: item.name,
-                key: item.name,
-                show: isshow,
-                sortable: false,
-                type: item.type,
-                width: 150
-              })
             }
           }
         }
