@@ -18,7 +18,7 @@ module.exports = function () {
 
   // Get our initialized service so that we can register hooks and filters
   const service = app.service('dflowzdata');
-
+  service.watch = false;
   service.hooks(hooks);
   // console.log('=======',Object.keys(app.services),'=========');
 };
