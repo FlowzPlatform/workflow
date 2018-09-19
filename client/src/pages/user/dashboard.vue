@@ -51,7 +51,6 @@ import viewSVG from './viewSVG'
 export default {
   name: 'dashboard',
   components: {
-    'viewSVG': viewSVG
   },
   data () {
     return {

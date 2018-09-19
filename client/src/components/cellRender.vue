@@ -75,7 +75,6 @@
 import moment from 'moment'
 import flowzdataModal from '@/api/flowzdata'
 import schemaModel from '@/api/schema'
-import SchemaSubFormView from './SchemaSubFormView'
 
 export default {
   name: 'CellRender',
@@ -93,7 +92,7 @@ export default {
     }
   },
   components: {
-    'schemasubformview': SchemaSubFormView
+    'schemasubformview': (resolve) => { require(['./SchemaSubFormView'], resolve) }
   },
   filters: {
     getAgoStatus (item) {

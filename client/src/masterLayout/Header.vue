@@ -81,11 +81,9 @@
 </template>
 <script>
   import psl from 'psl'
-  // import axios from 'axios'
-  import subscription from '@/components/subscription'
   export default {
     components: {
-      subscription
+      subscription: (resolve) => { require(['@/components/subscription'], resolve) }
     },
     computed: {
       getRole () {

@@ -204,9 +204,6 @@
 </template>
 <script>
 import $ from 'jquery'
-import SchemaSubForm from './SchemaSubForm'
-import SchemaSubFormView from './SchemaSubFormView'
-// import axios from 'axios'
 import moment from 'moment'
 import _ from 'lodash'
 import schemaModel from '@/api/schema'
@@ -230,8 +227,8 @@ export default {
     }
   },
   components: {
-    schemasubform: SchemaSubForm,
-    SchemaSubFormView: SchemaSubFormView
+    schemasubform: (resolve) => { require(['./SchemaSubForm'], resolve) },
+    SchemaSubFormView: (resolve) => { require(['./SchemaSubFormView'], resolve) }
   },
   methods: {
     async handleFileChange (e, index, fieldName) {

@@ -63,8 +63,6 @@
 
 <script>
 import schemaModel from '@/api/schema'
-import SchemaSubFormView from './SchemaSubFormView'
-// import axios from 'axios'
 
 var AWS = require('aws-sdk')
 AWS.config.update({
@@ -81,7 +79,7 @@ export default {
     }
   },
   components: {
-    'schemasubformView': SchemaSubFormView
+    'schemasubformView': (resolve) => { require(['./SchemaSubFormView'], resolve) }
   },
   methods: {
     getStyle (field) {

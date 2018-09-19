@@ -170,7 +170,7 @@ import finstanceModal from '@/api/finstance'
 import axios from 'axios'
 import viewSVG from './viewSVG'
 import psl from 'psl'
-import subscription from '@/components/subscription'
+// import subscription from '@/components/subscription'
 
 import config from '@/config'
 import expandRow2 from './assigned_invite_table-expand.vue'
@@ -184,9 +184,9 @@ import moment from 'moment'
 export default {
   name: 'Flowz',
   components: {
-    'viewSVG': viewSVG,
-    expandRow2,
-    subscription
+    'viewSVG': (resolve) => { require(['./viewSVG'], resolve) },
+    expandRow2: (resolve) => { require(['./assigned_invite_table-expand.vue'], resolve) },
+    subscription: (resolve) => { require(['@/components/subscription'], resolve) }
   },
   data () {
     return {

@@ -158,15 +158,8 @@
 import _ from 'lodash'
 import $ from 'jquery'
 
-import ListInstances from './ListInstances'
-import SchemaSubForm from './SchemaSubForm'
-import SchemaSubFormView from './SchemaSubFormView'
-import email from './email'
-
 import flowzdataModal from '@/api/flowzdata'
 import flowzModel from '@/api/flowz'
-
-import schemalist from '@/pages/user/SchemaList'
 import schemaModel from '@/api/schema'
 
 import finstanceModal from '@/api/finstance'
@@ -238,11 +231,11 @@ export default {
     }
   },
   components: {
-    'list-instances': ListInstances,
-    'schemasubform': SchemaSubForm,
-    'schemalist': schemalist,
-    'email': email,
-    'schemasubformview': SchemaSubFormView
+    'list-instances': (resolve) => { require(['./ListInstances'], resolve) },
+    'schemasubform': (resolve) => { require(['./SchemaSubForm'], resolve) },
+    'schemalist': (resolve) => { require(['@/pages/user/SchemaList'], resolve) },
+    'email': (resolve) => { require(['./email'], resolve) },
+    'schemasubformview': (resolve) => { require(['./SchemaSubFormView'], resolve) }
   },
   methods: {
     searchData (query) {
@@ -889,7 +882,6 @@ export default {
 
     getSchema () {
       return schemaModel.getAll(this.flowzData.schema).then(res => {
-        console.log(res)
         return res
       }).catch(err => {
         console.log('Error: ', err)
