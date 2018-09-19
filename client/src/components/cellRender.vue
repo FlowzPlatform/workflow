@@ -18,12 +18,12 @@
         <img src="http://placehold.it/20x20" style="margin-top: 20px;">
       </div>
     </div> -->
-    <span v-if="item.obj != null && item.isCompletedTask == true" :title="getAgoActualStatus(item.obj.createdAt)" style="display: block;">
+    <span v-if="item.obj != null && item.isCompletedTask == true" :title="getAgoActualStatus(item.obj.createdAt)" style="display: block;; width: 80% !important">
       <i class="fa fa-calendar fa-fw"></i>
       <small>{{getAgoStatus(item.obj.createdAt)}}</small>
     </span>
 
-    <span v-if="item.obj != null && item.isCompletedTask == false && item.isCurrentTask == true" :title="getAgoActualStatus(item.obj.completedAt)" style="display: block;">
+    <span v-if="item.obj != null && item.isCompletedTask == false && item.isCurrentTask == true" :title="getAgoActualStatus(item.obj.completedAt)" style="display: block; width: 80% !important">
       <i class="fa fa-calendar fa-fw"></i>
       <small>{{getAgoStatus(item.obj.completedAt)}}</small>
     </span>
