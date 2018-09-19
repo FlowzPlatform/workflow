@@ -142,7 +142,7 @@
                       }
                       for (let m of jsonXML[type]) {
                         // let obj = m
-  
+
                         m.type = type.toLowerCase()
                         allProcess.push(m)
                       }
@@ -222,7 +222,7 @@
 
                   let actionsObj = {}
                   for (let i = 0; i < actions.length; i++) {
-                    actionsObj[actions[i]] = this.permissions
+                    actionsObj[actions[i].toLowerCase()] = this.permissions
                   }
                   subscriptionNew.moduleResource.moduleName = 'workflow_' + this.$route.params.id
                   let registerAppModuleNew = actionsObj
