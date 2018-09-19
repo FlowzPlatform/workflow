@@ -2,7 +2,6 @@
   <div class="email">
     <div class="container">
           <p style="text-align: center;margin-bottom: 10px; font-size: 40px; text-decoration: underline"><b> Customer Proof</b></p>
-          <!-- {{formSchemaInstance.data}} -->
           <schemasubform v-if="!flag" :schemainstance="formSchemaInstance"></schemasubform>
           <div class="row" v-if="flag">
             <div class="col-md-6">
@@ -59,19 +58,20 @@
   </div>
 </template>
 <script>
-import Editor from '@tinymce/tinymce-vue'
 import sendmailModal from '@/api/sendmail'
 import config from '@/config'
 import schemaModel from '@/api/schema'
-import SchemaSubForm from './SchemaSubForm'
   /*eslint-disable*/
   export default {
     name: 'email',
     computed: {
+      // componentLoader () { 
+      //   return () => import('./${this.formSchemaInstance}')
+      // }
     },
     components: {
-      'editor': Editor,
-      'schemasubform': SchemaSubForm
+      'editor': function (resolve) { require(['@tinymce/tinymce-vue'], resolve)},
+      'schemasubform': function (resolve) { require(['./SchemaSubForm'], resolve)}
     },
     props: {
     'btnArr': Object,
