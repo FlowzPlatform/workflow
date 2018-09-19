@@ -187,6 +187,28 @@
                               </Row>
                           </FormItem>
                       </Col>
+                      <Col :span="24" style="padding:0px 20px 0px 2px" v-else>
+                        <FormItem :key="inx" :rules="createRules(field)" style="margin-bottom:10px;">
+                            <Row>
+                                <Col :span="2">
+                                    <b>{{field.name}}</b>
+                                </Col>
+                                <Col :span="21" >
+                                    <input class="form-control" type="file" v-if="field.type == 'file'" @change="handleFileChange($event, index, field.name)" :multiple="(field.property.isMultiple)? field.property.isMultiple: false"/>
+                                    <div v-if="schemainstance.data[index][field.name]" >
+                                      <Progress v-if="stratProgress"  v-bind:percent="fileUploadProgress" :success-percent="30" />
+                                      <div class="" v-for="(val, i) in schemainstance.data[index][field.name]">
+                                            <Row>
+                                                <Col :span="23"> <a :href="val" class="list-group-item" target="_blank" style="color:blue;padding:2px 2px;" >{{val}}</a></Col>
+                                                <Col :span="1"><a href="#" style="color:red;float:right"  @click="removeSection(i, schemainstance.data[index][field.name])">&#10005;&nbsp;</a></Col>
+                                            </Row>          
+                                        </div>
+                                    </div>
+                                </Col>
+                                <Col :span="1">&nbsp;&nbsp;{{fileNumber}} / {{fileSize}}</Col>
+                            </Row>
+                        </FormItem>
+                    </Col>
                     </div>
                 </template> 
             </div>
