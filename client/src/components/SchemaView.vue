@@ -227,7 +227,8 @@ export default {
       sendDataEmail: null,
       loadingEmail: true,
       currentSchema: null,
-      dataLoading: true
+      dataLoading: true,
+      entriesTotal: 10
     }
   },
   components: {
@@ -282,11 +283,13 @@ export default {
     pagination (skip, limit, page) {
       this.skip = skip
       this.limit = limit
+      this.entriesTotal = limit
       this.pageno = page
       this.populateTables()
     },
     handlepage (skip, limit, size) {
       this.limit = size
+      this.entriesTotal = size
       this.skip = 0
       this.populateTables()
     },
@@ -910,6 +913,7 @@ export default {
         $limit: this.limit
       }).then(queryresp => {
         // console.log('queryresp: ', queryresp)
+        // this.entriesTotal = queryresp.data.data.length
         this.isFlowzLoaded = true
         this.dataTotal = queryresp.data.total
         if (queryresp.data.data.length > 0) {
@@ -1010,7 +1014,29 @@ export default {
             //     console.log('err: ', err)
             //   })
             // }, 2000)
-            this.init()
+            // console.log('Length: ', this.instanceEntries.length)
+            // console.log('instanceEntries: ', this.instanceEntries.length, this.entriesTotal)
+            if (this.instanceEntries.length < this.entriesTotal) {
+              // console.log('Ready to push: ', this.instanceEntries.length)
+              // push to table
+              let instanceObj = data
+              // console.log('instanceObj: ', instanceObj)
+              let lastEntryId = data.stageReference[data.stageReference.length - 1].stageRecordId
+              // console.log('lastEntryId: ', lastEntryId)
+              if (lastEntryId !== undefined) {
+                flowzdataModal.get(lastEntryId).then(res => {
+                  // console.log('Response fdata: ', res)
+                  instanceObj['data'] = res.data.data
+                  instanceObj['iid'] = data.id
+                  this.instanceEntries.push(instanceObj)
+                  this.dataData.push(instanceObj)
+                  // console.log('Pushed data: ', this.instanceEntries, this.dataData)
+                })
+              }
+            } else {
+              // don't do anything
+            }
+            // this.init()
           } else if (this.$route.params.stateid === data.stageReference[(data.stageReference.length - 1)].StageName) {
             let inx = _.findIndex(this.instanceEntries, (o) => { return o.id === data.id })
             this.instanceEntries.splice(inx, 1)
