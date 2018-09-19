@@ -18,15 +18,12 @@
 </template>
 
 <script>
-import Header from './Header'
-import SideBar from './SideBar'
-import Footer from './Footer'
 export default {
   name: 'app',
   components: {
-    'f-sidebar': SideBar,
-    'f-header': Header,
-    'f-footer': Footer
+    'f-sidebar': (resolve) => { require(['./SideBar'], resolve) },
+    'f-header': (resolve) => { require(['./Header'], resolve) },
+    'f-footer': (resolve) => { require(['./Footer'], resolve) }
   },
   data () {
     return {}

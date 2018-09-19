@@ -70,8 +70,8 @@ import schemaModel from '@/api/schema'
       // }
     },
     components: {
-      'editor': function (resolve) { require(['@tinymce/tinymce-vue'], resolve)},
-      'schemasubform': function (resolve) { require(['./SchemaSubForm'], resolve)}
+      'editor': (resolve) => { require(['@tinymce/tinymce-vue'], resolve) },
+      'schemasubform': (resolve) => { require(['./SchemaSubForm'], resolve) }
     },
     props: {
     'btnArr': Object,

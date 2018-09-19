@@ -282,7 +282,6 @@ export default {
     }
   },
   components: {
-    CellRender
   },
   filters: {
     momentDate (date) {

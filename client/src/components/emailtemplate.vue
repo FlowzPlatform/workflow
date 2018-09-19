@@ -23,7 +23,6 @@
 </template>
 
 <script>
-import Editor from '@tinymce/tinymce-vue'
 import saveemailTemplate from '@/api/emailtemplate'
 import _ from 'lodash'
 
@@ -108,7 +107,7 @@ export default {
     }
   },
   components: {
-    'editor': Editor
+    'editor': (resolve) => { require(['@tinymce/tinymce-vue'], resolve) }
   },
   methods: {
     saveTemplate () {
