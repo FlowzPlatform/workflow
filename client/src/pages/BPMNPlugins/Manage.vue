@@ -26,7 +26,7 @@
                             </Input>
                         </FormItem>
                         <FormItem>
-                            <Button type="primary" size="small" @click="handleSubmit('fileJson')" style="margin-top: 43px; float: right;">Save</Button>
+                            <Button type="primary" size="small" @click="handleSubmit('fileJson')" style="margin-top: 43px; float: right;" :loading="loading">Save</Button>
                         </FormItem>
                     </Form>
                   <!-- </Panel> -->
@@ -62,6 +62,13 @@ export default {
           {
             required: true,
             message: 'Please enter Plugin type',
+            trigger: 'blur'
+          }
+        ],
+        image: [
+          {
+            required: true,
+            message: 'Please select image',
             trigger: 'blur'
           }
         ]
