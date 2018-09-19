@@ -920,7 +920,7 @@ export default {
         $skip: this.skip,
         $limit: this.limit
       }).then(queryresp => {
-        console.log('queryresp: ', queryresp)
+        // console.log('queryresp: ', queryresp)
         // this.entriesTotal = queryresp.data.data.length
         this.isFlowzLoaded = true
         this.dataTotal = queryresp.data.total
@@ -996,10 +996,8 @@ export default {
   feathers: {
     'finstance': {
       created (data) {
-        console.log('Data: ', data)
       },
       updated (data) {
-        console.log('Schema view Data: ', data)
         if (this.$store.state.role === 1) {
           if (data.currentStatus === this.$route.params.stateid) {
             // // data = data.data
@@ -1025,22 +1023,22 @@ export default {
             //   })
             // }, 2000)
             // console.log('Length: ', this.instanceEntries.length)
-            console.log('instanceEntries: ', this.instanceEntries.length, this.entriesTotal)
+            // console.log('instanceEntries: ', this.instanceEntries.length, this.entriesTotal)
             if (this.instanceEntries.length < this.entriesTotal) {
-              console.log('Ready to push: ', this.instanceEntries.length)
+              // console.log('Ready to push: ', this.instanceEntries.length)
               // push to table
               let instanceObj = data
               // console.log('instanceObj: ', instanceObj)
               let lastEntryId = data.stageReference[data.stageReference.length - 1].stageRecordId
-              console.log('lastEntryId: ', lastEntryId)
+              // console.log('lastEntryId: ', lastEntryId)
               if (lastEntryId !== undefined) {
                 flowzdataModal.get(lastEntryId).then(res => {
-                  console.log('Response fdata: ', res)
+                  // console.log('Response fdata: ', res)
                   instanceObj['data'] = res.data.data
                   instanceObj['iid'] = data.id
                   this.instanceEntries.push(instanceObj)
                   this.dataData.push(instanceObj)
-                  console.log('Pushed data: ', this.instanceEntries, this.dataData)
+                  // console.log('Pushed data: ', this.instanceEntries, this.dataData)
                 })
               }
             } else {
