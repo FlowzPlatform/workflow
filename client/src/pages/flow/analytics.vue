@@ -801,10 +801,12 @@ export default {
   .notfirst {
     display: none
   }
-
-
 </style>
 <style>
+  .ivu-table-cell{
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
   .ivu-modal-body{
     max-height: 550px !important;
     overflow-y: auto !important;
@@ -846,11 +848,6 @@ export default {
 
   .ivu-table td:first-child{
     padding-left: 10px;
-  }
-
-  .ivu-table-cell{
-    padding-left: 0 !important;
-    padding-right: 0 !important;
   }
 
   .searchQueries{

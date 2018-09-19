@@ -708,4 +708,6 @@
     overflow: hidden !important;
     text-overflow: ellipsis !important;
   }
+
+
 </style>

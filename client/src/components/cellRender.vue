@@ -30,6 +30,7 @@
 
     <span v-if="item.obj != null && item.isCompletedTask == true" title="Duration" style="display: block;">
       <i class="fa fa-clock-o fa-fw"></i>
+      <!-- <span>{{item.obj.createdAt}} : {{ item.obj.completedAt}}</span> -->
       <small>{{ getDuration(item.obj.createdAt, item.obj.completedAt) }}</small>
     </span>
 
@@ -123,17 +124,21 @@ export default {
       return moment(item).fromNow()
     },
     getDuration (x, y) {
-      if (x) {
-        let x1 = moment(x)
-        let y1 = moment(y)
-        let milliseconds = y1.diff(x1)
-        return this.msToTime(milliseconds)
+      // if (x) {
+      let x1 = moment(x)
+      let y1 = moment(y)
+      let milliseconds = y1.diff(x1)
+      if (milliseconds < 1000) {
+        return ((milliseconds / 1000) + 's')
       } else {
-        let x1 = moment(y)
-        let y1 = moment()
-        let milliseconds = y1.diff(x1)
         return this.msToTime(milliseconds)
       }
+      // } else {
+      //   let x1 = moment(y)
+      //   let y1 = moment()
+      //   let milliseconds = y1.diff(x1)
+      //   return this.msToTime(milliseconds)
+      // }
     },
     msToTime (duration) {
       // let milliseconds = parseInt((duration % 1000) / 100)
@@ -314,15 +319,5 @@ export default {
   border-radius: 50px; 
   width: 20px;
 }
-.ivu-table-cell{
-  padding-left: 0;
-  padding-right: 0;
-}
-</style>
 
-<style>
-  .ivu-table-cell{
-    padding-left: 0;
-    padding-right: 0;
-  }
 </style>
