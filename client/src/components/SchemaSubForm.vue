@@ -6,7 +6,7 @@
             <div v-for="(field,inx) in schemainstance.entity">
                 <template v-if="field.customtype">
                   <div v-if="schemainstance.hasOwnProperty('permission')">
-                    <div v-if="schemainstance.permission[field.name].show">
+                    <div v-if="schemainstance.permission[field.name].write || schemainstance.permission[field.name].read">
                       <div v-if="schemainstance.permission[field.name].write">
                         <Col :span="24" style="margin-bottom: 20px;" :id="field.name">
                           <FormItem :key="inx" style="margin-bottom:10px;">
@@ -73,7 +73,7 @@
                 </template>
                 <template v-else>
                   <div v-if="schemainstance.hasOwnProperty('permission')">
-                      <div v-if="schemainstance.permission[field.name].show">
+                      <div v-if="schemainstance.permission[field.name].write || schemainstance.permission[field.name].read">
                         <Col :span="12" style="padding:0px 20px 0px 2px" v-if="field.type !== 'file'">
                             <FormItem :key="inx" :rules="createRules(field)" style="margin-bottom:10px;">
                                 <Row>
@@ -116,7 +116,7 @@
                                 <Row>
                                   <div v-if="schemainstance.permission !== undefined">
                                     <!-- {{schemainstance.permission[field.name]}} -->
-                                    <div v-if="schemainstance.permission[field.name].show">
+                                    <div v-if="schemainstance.permission[field.name].write  || schemainstance.permission[field.name].read">
                                       <div v-if="schemainstance.permission[field.name].write">
                                         <Col :span="2">
                                             <b>{{field.name}}</b>
@@ -188,6 +188,28 @@
                               </Row>
                           </FormItem>
                       </Col>
+                      <Col :span="24" style="padding:0px 20px 0px 2px" v-else>
+                        <FormItem :key="inx" :rules="createRules(field)" style="margin-bottom:10px;">
+                            <Row>
+                                <Col :span="2">
+                                    <b>{{field.name}}</b>
+                                </Col>
+                                <Col :span="21" >
+                                    <input class="form-control" type="file" v-if="field.type == 'file'" @change="handleFileChange($event, index, field.name)" :multiple="(field.property.isMultiple)? field.property.isMultiple: false"/>
+                                    <div v-if="schemainstance.data[index][field.name]" >
+                                      <Progress v-if="stratProgress"  v-bind:percent="fileUploadProgress" :success-percent="30" />
+                                      <div class="" v-for="(val, i) in schemainstance.data[index][field.name]">
+                                            <Row>
+                                                <Col :span="23"> <a :href="val" class="list-group-item" target="_blank" style="color:blue;padding:2px 2px;" >{{val}}</a></Col>
+                                                <Col :span="1"><a href="#" style="color:red;float:right"  @click="removeSection(i, schemainstance.data[index][field.name])">&#10005;&nbsp;</a></Col>
+                                            </Row>          
+                                        </div>
+                                    </div>
+                                </Col>
+                                <Col :span="1">&nbsp;&nbsp;{{fileNumber}} / {{fileSize}}</Col>
+                            </Row>
+                        </FormItem>
+                    </Col>
                     </div>
                 </template> 
             </div>
@@ -205,9 +227,6 @@
 </template>
 <script>
 import $ from 'jquery'
-import SchemaSubForm from './SchemaSubForm'
-import SchemaSubFormView from './SchemaSubFormView'
-// import axios from 'axios'
 import moment from 'moment'
 import _ from 'lodash'
 import schemaModel from '@/api/schema'
@@ -231,8 +250,8 @@ export default {
     }
   },
   components: {
-    schemasubform: SchemaSubForm,
-    SchemaSubFormView: SchemaSubFormView
+    schemasubform: (resolve) => { require(['./SchemaSubForm'], resolve) },
+    SchemaSubFormView: (resolve) => { require(['./SchemaSubFormView'], resolve) }
   },
   methods: {
     async handleFileChange (e, index, fieldName) {

@@ -81,11 +81,9 @@
 </template>
 <script>
   import psl from 'psl'
-  // import axios from 'axios'
-  import subscription from '@/components/subscription'
   export default {
     components: {
-      subscription
+      subscription: (resolve) => { require(['@/components/subscription'], resolve) }
     },
     computed: {
       getRole () {
@@ -120,6 +118,10 @@
         this.$store.state.schema = []
         this.$store.state.Cache = null
         this.$store.state.Cache = {}
+        this.$store.state.registerRoles = null
+        this.$store.state.registerRoles = {}
+        this.$store.state.registerResources = null
+        this.$store.state.registerResources = {}
         window.location.reload()
       },
       gotoDashboard () {

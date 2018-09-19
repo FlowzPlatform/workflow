@@ -1,15 +1,16 @@
+
+
 module.exports = {
   before: {
     all: [],
     find: [],
     get: [],
-    create: [
-      hook => beforeCreate(hook)
-    ],
+    create: [],
     update: [],
     patch: [],
     remove: []
   },
+
   after: {
     all: [],
     find: [],
@@ -19,6 +20,7 @@ module.exports = {
     patch: [],
     remove: []
   },
+
   error: {
     all: [],
     find: [],
@@ -29,7 +31,3 @@ module.exports = {
     remove: []
   }
 };
-
-function beforeCreate (hook) {
-  hook.data['createdOn'] = new Date().toISOString()
-}

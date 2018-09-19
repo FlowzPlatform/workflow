@@ -18,12 +18,12 @@
         <img src="http://placehold.it/20x20" style="margin-top: 20px;">
       </div>
     </div> -->
-    <span v-if="item.obj != null && item.isCompletedTask == true" :title="getAgoActualStatus(item.obj.createdAt)" style="display: block;">
+    <span v-if="item.obj != null && item.isCompletedTask == true" :title="getAgoActualStatus(item.obj.createdAt)" style="display: block;; width: 80% !important">
       <i class="fa fa-calendar fa-fw"></i>
       <small>{{getAgoStatus(item.obj.createdAt)}}</small>
     </span>
 
-    <span v-if="item.obj != null && item.isCompletedTask == false && item.isCurrentTask == true" :title="getAgoActualStatus(item.obj.completedAt)" style="display: block;">
+    <span v-if="item.obj != null && item.isCompletedTask == false && item.isCurrentTask == true" :title="getAgoActualStatus(item.obj.completedAt)" style="display: block; width: 80% !important">
       <i class="fa fa-calendar fa-fw"></i>
       <small>{{getAgoStatus(item.obj.completedAt)}}</small>
     </span>
@@ -35,7 +35,8 @@
 
     <span v-if="item.obj != null && item.isCompletedTask == false" title="Duration" style="display: block;">
       <i class="fa fa-clock-o fa-fw"></i>
-      <small>{{ getDuration( undefined, item.obj.completedAt) }}</small>
+      <!-- <small>{{ getDuration( undefined, item.obj.completedAt) }}</small> -->
+      <small><em>Waiting</em></small>
     </span>
 
     <img v-if="item.obj != null && item.isCompletedTask == true" :title="getUserHoverDetails(item)" :src="getUserAvatar(item)" class="avatarImg" alt="User Avatar">
@@ -74,7 +75,6 @@
 import moment from 'moment'
 import flowzdataModal from '@/api/flowzdata'
 import schemaModel from '@/api/schema'
-import SchemaSubFormView from './SchemaSubFormView'
 
 export default {
   name: 'CellRender',
@@ -92,7 +92,7 @@ export default {
     }
   },
   components: {
-    'schemasubformview': SchemaSubFormView
+    'schemasubformview': (resolve) => { require(['./SchemaSubFormView'], resolve) }
   },
   filters: {
     getAgoStatus (item) {

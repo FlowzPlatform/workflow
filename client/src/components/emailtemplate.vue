@@ -6,7 +6,9 @@
     </div>
     <div class="editor" v-if="newTemplate">
       <h2 class="heading">Create Template</h2>
-      <editor v-model="GetHtmlOfEditor" api-key="ppzi01crrfo3pvd43s3do89pguwkhowrwajpjdqdkginzj7k" :toolbar="toolbar1" :plugins="plugins" :init="settings" :initial-value="gethtmlcontent"></editor>
+      <keep-alive>
+        <editor v-model="GetHtmlOfEditor" api-key="ppzi01crrfo3pvd43s3do89pguwkhowrwajpjdqdkginzj7k" :toolbar="toolbar1" :plugins="plugins" :init="settings" :initial-value="gethtmlcontent"></editor>
+      </keep-alive>
       <Input v-model="templateName" placeholder="Enter Template name" style="width: 300px" class="dataEnter"/>
       <Button type="primary" @click="saveTemplate" class="dataEnter">Save Template</Button>
     </div>
@@ -21,9 +23,9 @@
 </template>
 
 <script>
-import Editor from '@tinymce/tinymce-vue'
 import saveemailTemplate from '@/api/emailtemplate'
 import _ from 'lodash'
+
 export default {
   data () {
     return {
@@ -105,7 +107,7 @@ export default {
     }
   },
   components: {
-    'editor': Editor
+    'editor': (resolve) => { require(['@tinymce/tinymce-vue'], resolve) }
   },
   methods: {
     saveTemplate () {

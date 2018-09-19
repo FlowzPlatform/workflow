@@ -193,7 +193,6 @@ export default {
                         this.anotherBinding[i].firstColumn = false
                       }
                     }
-                    console.log('this.anotherBinding: ', this.anotherBinding)
                   }
                 }
               })
@@ -283,7 +282,6 @@ export default {
     }
   },
   components: {
-    CellRender
   },
   filters: {
     momentDate (date) {
@@ -690,11 +688,45 @@ export default {
       //   // let anyCustom = false
       for (let item of this.currentSchema.entity) {
         if (!item.customtype) {
-          this.colviewCols.push({
-            title: item.name,
-            key: item.name,
-            width: 150
-          })
+          if (item.type === 'file') {
+            this.colviewCols.push({
+              title: item.name,
+              key: item.name,
+              width: 150,
+              render: (h, params) => {
+                let arr = []
+                if (params.row[item.name]) {
+                  for (let i = 0; i < params.row[item.name].length; i++) {
+                    arr.push(h('Button', {
+                      attrs: {
+                        type: 'info',
+                        style: 'margin: 2px',
+                        title: params.row[item.name][i].split('/').pop()
+                      },
+                      on: {
+                        click: () => {
+                          window.open(params.row[item.name][i])
+                        }
+                      }
+                    }, [
+                      h('i', {
+                        attrs: {
+                          class: 'fa fa-link'
+                        }
+                      })
+                    ]))
+                  }
+                  return arr
+                }
+              }
+            })
+          } else {
+            this.colviewCols.push({
+              title: item.name,
+              key: item.name,
+              width: 150
+            })
+          }
         } else {
           // anyCustom = true
         }

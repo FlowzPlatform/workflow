@@ -136,7 +136,7 @@ const mroutes = [
         ]
       },
       { // SchemaView
-        path: 'schemaview/:id/:stateid',
+        path: 'view/:id/:stateid',
         name: 'schemaview',
         component: SchemaView,
         props: {
@@ -159,7 +159,7 @@ const mroutes = [
         name: 'userDashboard'
       },
       {
-        path: '/schemaview/:id/:stateid',
+        path: '/view/:id/:stateid',
         name: 'userSchemaview',
         component: SchemaView,
         props: {

@@ -17,7 +17,7 @@
           </tr>
         </thead>
         <tbody>
-            <tr v-for="(item, inx) in instanceEntries">
+            <tr v-for="(item, inx) in instanceEntries" :key="inx">
               <td>{{item.id}}</td>
               <td>
                 <Tag color="blue" type="border" class="uppercase">{{item.mainStatus}}</Tag>
