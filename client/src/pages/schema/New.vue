@@ -280,13 +280,13 @@
 </template>
 
 <script>
-import InputTag from 'vue-input-tag'
+// import InputTag from 'vue-input-tag'
 import schemaModal from '@/api/schema'
 import _ from 'lodash'
 
 export default {
   name: 'schema',
-  components: {'input-tag': InputTag},
+  components: {'input-tag': (resolve) => { require(['vue-input-tag'], resolve) }},
   data () {
     const validateTitle = async(rule, value, callback) => {
       let isexist = _.findIndex(this.cutomtypes, {label: value})
@@ -606,7 +606,9 @@ export default {
         'boolean': ['defaultValue', 'placeholder', 'optional'],
         'date': ['defaultValue', 'mindate', 'maxdate', 'placeholder', 'optional'],
         'dropdown': ['options', 'defaultValue', 'placeholder', 'optional'],
-        'file': ['optional', 'isMultiple']
+        'file': ['optional', 'isMultiple'],
+        'currentuser': ['optional'],
+        'currenttime': ['optional']
 
       }
       if (typePropertys[this.formSchema.entity[index].type] === undefined) {

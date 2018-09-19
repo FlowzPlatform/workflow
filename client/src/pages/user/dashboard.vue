@@ -1,6 +1,6 @@
 <template>
   <div>
-    Dashboard
+    <!-- Dashboard -->
     <!-- <Table border :loading="loading" :columns="columns" :data="flowzList.data" @on-row-click="handleRowClick"></Table>
     <div style="margin: 10px;overflow: hidden">
       <div style="float: right;"> 
@@ -51,7 +51,6 @@ import viewSVG from './viewSVG'
 export default {
   name: 'dashboard',
   components: {
-    'viewSVG': viewSVG
   },
   data () {
     return {

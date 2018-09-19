@@ -33,6 +33,10 @@ export default {
       updated (data) {
         this.$store.state.Cache = null
         this.$store.state.Cache = {}
+        this.$store.state.registerRoles = null
+        this.$store.state.registerRoles = {}
+        this.$store.state.registerResources = null
+        this.$store.state.registerResources = {}
       },
       removed (data) {
         this.$store.state.Cache = null

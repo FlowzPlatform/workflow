@@ -42,7 +42,7 @@
                                 </div>
                                 <div style="display: block; width: 49%;">
                                     <label type="file" v-if="field.type == 'file'"/>
-                                      <div v-for="(val,i) in schemainstance.data[index][field.name].slice(1)">
+                                      <div v-for="(val,i) in schemainstance.data[index][field.name]">
                                           <ul>
                                             <li>
                                               <a :href="val" target="_blank" style="color:black;padding:2px">Attachment - {{i+1}}</a>
@@ -63,8 +63,6 @@
 
 <script>
 import schemaModel from '@/api/schema'
-import SchemaSubFormView from './SchemaSubFormView'
-// import axios from 'axios'
 
 var AWS = require('aws-sdk')
 AWS.config.update({
@@ -81,7 +79,7 @@ export default {
     }
   },
   components: {
-    'schemasubformView': SchemaSubFormView
+    'schemasubformView': (resolve) => { require(['./SchemaSubFormView'], resolve) }
   },
   methods: {
     getStyle (field) {

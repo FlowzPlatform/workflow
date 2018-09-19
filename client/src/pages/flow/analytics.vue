@@ -87,9 +87,15 @@
     <div v-show="rowview">
       <!-- <Table height="690" border :columns="mainColumns()" :data="tableData"></Table> -->
       <Table :loading="tableLoading" v-if="schemaId !== null" height="590" border :columns="mainColumns()" :data="tableData"></Table>
+      <Row style="margin-top: 4px; float: right">
+        <Page placement="top" :total="total" :current="cpage" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+      </Row>
     </div>
     <div v-show="columnview">
       <Table :loading="tableLoading" :row-class-name="rowClassName" :columns="colviewCols" height="590" :data="colviewData"></Table>
+      <Row style="margin-top: 4px; float: right">
+        <Page placement="top" :total="total" :current="cpage" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+      </Row>
     </div>
     <!-- <Table v-if="schemaId !== null" height="690" border :columns="mainColumns()" :data="tableData"></Table> -->
 
@@ -105,6 +111,7 @@ import CellRender from '@/components/cellRender'
 import ConfigExpand from '@/components/configExpand'
 import _ from 'lodash'
 import moment from 'moment'
+import $ from 'jquery'
 
 export default {
   name: 'dashboard',
@@ -186,7 +193,6 @@ export default {
                         this.anotherBinding[i].firstColumn = false
                       }
                     }
-                    console.log('this.anotherBinding: ', this.anotherBinding)
                   }
                 }
               })
@@ -268,11 +274,14 @@ export default {
       selectedSortBy: null,
       enteredDateRange: null,
       currentSchema: null,
-      tableLoading: false
+      tableLoading: false,
+      limit: 10,
+      cpage: 1,
+      skip: 0,
+      total: 0
     }
   },
   components: {
-    CellRender
   },
   filters: {
     momentDate (date) {
@@ -280,6 +289,16 @@ export default {
     }
   },
   methods: {
+    handlePage (page) {
+      this.cpage = page
+      this.skip = (page * this.limit) - this.limit
+      this.init()
+    },
+    handlePagesize (size) {
+      this.limit = size
+      this.skip = 0
+      this.init()
+    },
     rowClassName (row, index) {
       return row.className
     },
@@ -325,6 +344,7 @@ export default {
             isCompletedTask: true
           }
           if (obj) {
+            obj['createdAt'] = params.row.createdAt
             finalValue.isCurrentTask = false
             finalValue.isCompletedTask = true
           } else {
@@ -358,7 +378,22 @@ export default {
         render: (h, params) => {
           if (params.row.mainStatus === 'inprocess') {
             return h('div', [
-              h('span', params.row.id),
+              h('span', {
+                attrs: {
+                  title: 'Click to Copy',
+                  class: 'clickToCopy'
+                },
+                on: {
+                  click: () => {
+                    var $temp = $('<input>')
+                    $('body').append($temp)
+                    $temp.val(params.row.id).select()
+                    document.execCommand('copy')
+                    this.$Message.info('Copied to Clipboard')
+                    $temp.remove()
+                  }
+                }
+              }, params.row.id),
               h('span', {
                 props: {
                 },
@@ -370,7 +405,22 @@ export default {
             ])
           } else if (params.row.mainStatus === 'completed') {
             return h('div', [
-              h('span', params.row.id),
+              h('span', {
+                attrs: {
+                  title: 'Click to Copy',
+                  class: 'clickToCopy'
+                },
+                on: {
+                  click: () => {
+                    var $temp = $('<input>')
+                    $('body').append($temp)
+                    $temp.val(params.row.id).select()
+                    document.execCommand('copy')
+                    this.$Message.info('Copied to Clipboard')
+                    $temp.remove()
+                  }
+                }
+              }, params.row.id),
               h('span', {
                 props: {
                 },
@@ -382,7 +432,22 @@ export default {
             ])
           } else {
             return h('div', [
-              h('span', params.row.id),
+              h('span', {
+                attrs: {
+                  title: 'Click to Copy',
+                  class: 'clickToCopy'
+                },
+                on: {
+                  click: () => {
+                    var $temp = $('<input>')
+                    $('body').append($temp)
+                    $temp.val(params.row.id).select()
+                    document.execCommand('copy')
+                    this.$Message.info('Copied to Clipboard')
+                    $temp.remove()
+                  }
+                }
+              }, params.row.id),
               h('span', {
                 props: {
                 },
@@ -449,11 +514,13 @@ export default {
       dataQueryModel.get(null, {
         $all: true,
         fid: this.fid,
-        $paginate: false
+        $skip: this.skip,
+        $limit: this.limit
       }).then(queryresp => {
         // this.$Spin.hide()
-        this.tableData = queryresp.data
-        colviewData = queryresp.data
+        this.tableData = queryresp.data.data
+        colviewData = queryresp.data.data
+        this.total = queryresp.data.total
         let listing = this.getByOrder(this.flowzData.processList)
         for (let item of colviewData) {
           let isfirst = false
@@ -511,7 +578,22 @@ export default {
             if (params.row.hasOwnProperty('first')) {
               if (params.row.first) {
                 return h('div', [
-                  h('span', params.row.id),
+                  h('span', {
+                    attrs: {
+                      title: 'Click to Copy',
+                      class: 'clickToCopy'
+                    },
+                    on: {
+                      click: () => {
+                        var $temp = $('<input>')
+                        $('body').append($temp)
+                        $temp.val(params.row.id).select()
+                        document.execCommand('copy')
+                        this.$Message.info('Copied to Clipboard')
+                        $temp.remove()
+                      }
+                    }
+                  }, params.row.id),
                   h('span', {
                     attrs: {
                       class: 'btn btn-default btn-sm showHideBtn'
@@ -542,7 +624,22 @@ export default {
                 ])
               } else {
                 return h('div', [
-                  h('span', params.row.id),
+                  h('span', {
+                    attrs: {
+                      title: 'Click to Copy',
+                      class: 'clickToCopy'
+                    },
+                    on: {
+                      click: () => {
+                        var $temp = $('<input>')
+                        $('body').append($temp)
+                        $temp.val(params.row.id).select()
+                        document.execCommand('copy')
+                        this.$Message.info('Copied to Clipboard')
+                        $temp.remove()
+                      }
+                    }
+                  }, params.row.id),
                   h('span', {
                     attrs: {
                       class: 'btn btn-sm showHideBtn'
@@ -591,11 +688,45 @@ export default {
       //   // let anyCustom = false
       for (let item of this.currentSchema.entity) {
         if (!item.customtype) {
-          this.colviewCols.push({
-            title: item.name,
-            key: item.name,
-            width: 150
-          })
+          if (item.type === 'file') {
+            this.colviewCols.push({
+              title: item.name,
+              key: item.name,
+              width: 150,
+              render: (h, params) => {
+                let arr = []
+                if (params.row[item.name]) {
+                  for (let i = 0; i < params.row[item.name].length; i++) {
+                    arr.push(h('Button', {
+                      attrs: {
+                        type: 'info',
+                        style: 'margin: 2px',
+                        title: params.row[item.name][i].split('/').pop()
+                      },
+                      on: {
+                        click: () => {
+                          window.open(params.row[item.name][i])
+                        }
+                      }
+                    }, [
+                      h('i', {
+                        attrs: {
+                          class: 'fa fa-link'
+                        }
+                      })
+                    ]))
+                  }
+                  return arr
+                }
+              }
+            })
+          } else {
+            this.colviewCols.push({
+              title: item.name,
+              key: item.name,
+              width: 150
+            })
+          }
         } else {
           // anyCustom = true
         }
@@ -612,6 +743,9 @@ export default {
   },
   watch: {
     '$route.params.id': function (newValue, oldValue) {
+      this.init()
+    },
+    '$store.state.updateView': function (newValue, oldValue) {
       this.init()
     }
   }
@@ -714,8 +848,8 @@ export default {
   }
 
   .ivu-table-cell{
-    padding-left: 0;
-    padding-right: 0;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
   }
 
   .searchQueries{
@@ -738,5 +872,9 @@ export default {
 
   .showHideBtn{
     float: right;
+  }
+
+  .clickToCopy{
+    cursor: pointer;
   }
 </style>  

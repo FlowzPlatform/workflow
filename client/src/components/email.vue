@@ -2,7 +2,6 @@
   <div class="email">
     <div class="container">
           <p style="text-align: center;margin-bottom: 10px; font-size: 40px; text-decoration: underline"><b> Customer Proof</b></p>
-          <!-- {{formSchemaInstance.data}} -->
           <schemasubform v-if="!flag" :schemainstance="formSchemaInstance"></schemasubform>
           <div class="row" v-if="flag">
             <div class="col-md-6">
@@ -54,25 +53,25 @@
             <label for="exampleInputFile">File input</label>
             <input type="file" class="form-control-file" id="exampleInputFile" aria-describedby="fileHelp">
           </div> -->
-          <button @click="sendEmail" type="submit" class="btn btn-primary">Submit</button>
+          <Button @click="sendEmail" type="primary" :loading="loading">Submit</Button>
       </div>
-    
   </div>
 </template>
 <script>
-import Editor from '@tinymce/tinymce-vue'
 import sendmailModal from '@/api/sendmail'
 import config from '@/config'
 import schemaModel from '@/api/schema'
-import SchemaSubForm from './SchemaSubForm'
   /*eslint-disable*/
   export default {
     name: 'email',
     computed: {
+      // componentLoader () { 
+      //   return () => import('./${this.formSchemaInstance}')
+      // }
     },
     components: {
-      'editor': Editor,
-      'schemasubform': SchemaSubForm
+      'editor': (resolve) => { require(['@tinymce/tinymce-vue'], resolve) },
+      'schemasubform': (resolve) => { require(['./SchemaSubForm'], resolve) }
     },
     props: {
     'btnArr': Object,
@@ -112,6 +111,7 @@ import SchemaSubForm from './SchemaSubForm'
     },
     data () {
       return {
+        loading: false,
         emailForm: {
           cc: '',
           bcc: '',
@@ -127,9 +127,8 @@ import SchemaSubForm from './SchemaSubForm'
           entity: []
         },
         btn:'',
-        plugins: 'font print preview searchreplace fullscreen image link media template codesample table char6map hr pagebreak anchor toc insertdatetime lists textcolor imagetools mediaembed  linkchecker contextmenu colorpicker',
+        plugins: 'print preview searchreplace fullscreen image link media template codesample table char6map hr pagebreak anchor toc insertdatetime lists textcolor imagetools linkchecker contextmenu colorpicker',
         GetHtmlOfEditor: '',
-        loading: false,
         tinyMCEcontent: ''
       }
     },
@@ -253,6 +252,7 @@ import SchemaSubForm from './SchemaSubForm'
         return res
       },
       sendEmail() {
+        this.loading = true
         let htmlContent;
         if(this.GetHtmlOfEditor === ''){
           htmlContent = this.sendDataEmail
@@ -273,10 +273,12 @@ import SchemaSubForm from './SchemaSubForm'
               <strong>Local Fax:<strong> 716-773-2332</h4></div></body></html>`
           sendmailModal.post(this.emailForm)
           .then((res)=>{
+            this.loading = false
             this.$emit('on-done', true)
             this.$Message.success('Proof mail send successfully')
           })
           .catch((err)=>{
+            this.loading = false
             console.log(err)
             this.$Message.error('Proof mail send error')
           })
@@ -295,10 +297,12 @@ import SchemaSubForm from './SchemaSubForm'
               console.log('this.formSchemaInstance.data', this.formSchemaInstance.data)
           sendmailModal.post(this.formSchemaInstance.data[0])
           .then((res)=>{
+            this.loading = false
             this.$emit('on-done', true)
             this.$Message.success('Proof mail send successfully')
           })
           .catch((err)=>{
+            this.loading = false
             console.log(err)
             this.$Message.error('Proof mail send error')
           })

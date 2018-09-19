@@ -43,24 +43,12 @@ const vueFeathers = require('vue-feathers')
   // And plug it in]
 Vue.use(vueFeathers, feathers)
 
-/* vueTinymce */
-import vueTinymce from '@deveodk/vue-tinymce'
-// You need a specific loader for CSS files like https://github.com/webpack/css-loader
-// import '@deveodk/vue-tinymce/dist/@deveodk/vue-tinymce.css'
-Vue.use(vueTinymce)
-  /* vueTinymce */
-
 /* IView */
 import iView from 'iview'
 import locale from 'iview/dist/locale/en-US'
 import 'iview/dist/styles/iview.css' // CSS
 
 Vue.use(iView, { locale })
-
-import VueCodeMirror from 'vue-codemirror'
-Vue.use(VueCodeMirror)
-
-/* jquery-ui */
 
 import VueParticles from 'vue-particles'
 Vue.use(VueParticles)
@@ -69,12 +57,8 @@ Vue.use(VueParticles)
 
 import 'animate.css/animate.css'
 
-/* IView */
-// import 'bootstrap/dist/css/bootstrap.css'
-// import 'bootstrap-vue/dist/bootstrap-vue.css'
-
-import AsyncComputed from 'vue-async-computed'
-Vue.use(AsyncComputed)
+// import AsyncComputed from 'vue-async-computed'
+// Vue.use(AsyncComputed)
 
 /* vue-split-panel */
 import VueSplit from 'vue-split-panel'

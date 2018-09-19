@@ -154,16 +154,23 @@ export default {
             let location = psl.parse(window.location.hostname)    // get parent domain
             location = location.domain === null ? location.input : location.domain
             this.$cookie.set('auth_token', auth.logintoken, {expires: 1, domain: location})    // Store in cookie
+            this.$store.state.flowz = []
+            this.$store.state.schema = []
+            this.$store.state.Cache = null
+            this.$store.state.Cache = {}
             let userData = await this.$store.dispatch('authenticate', auth.logintoken)
+            console.log('User Data: ', userData)
             this.$store.commit('SET_ROLE', 2)
             if (userData.hasOwnProperty('package')) {
-              if (this.$store.state.subscription !== '' && this.$store.state.subscription !== undefined) {
+              console.log('this.$store.state.subscription: ', this.$store.state.subscription)
+              if (this.$store.state.subscription !== '' && this.$store.state.subscription !== undefined && userData.package[this.$store.state.subscription] !== undefined) {
                 if (userData.package[this.$store.state.subscription].role === 'admin') {
                   this.$store.commit('SET_ROLE', 1)
                 }
               } else {
                 if (userData.hasOwnProperty('defaultSubscriptionId')) {
                   this.$store.state.subscription = userData.defaultSubscriptionId
+                  // console.log('this.$store.state.subscription: ', this.$store.state.subscription)
                   if (userData.package[this.$store.state.subscription].role === 'admin') {
                     this.$store.commit('SET_ROLE', 1)
                   }
