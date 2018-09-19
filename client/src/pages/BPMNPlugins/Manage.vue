@@ -7,31 +7,33 @@
               <Button type='primary' size='small'  style='margin-bottom: 4px' icon='plus'>Add</Button>
             </router-link>
           </Row> -->
-          <Collapse>
+          <Collapse v-model="value1">
             <Panel name='1'>
                 Add
                 <div slot='content'>
-                  <Form :model="fileJson" ref="fileJson" :rules="ruleValidate" inline>
-                      <FormItem label="Title" prop="title">
-                          <Input type="text" v-model.trim="fileJson.title">
-                          </Input>
-                      </FormItem>
-                      <FormItem label="PluginType" prop="pluginType">
-                          <Input type="text" v-model="fileJson.pluginType">
-                          </Input>
-                      </FormItem>
-                      <FormItem label="Image" prop="image">
-                          <Input type="text" v-model="fileJson.image">
-                          </Input>
-                      </FormItem>
-                      <FormItem>
-                          <Button type="primary" @click="handleSubmit('fileJson')" style="margin-top: 22px; float:right;">Save</Button>
-                      </FormItem>
-                  </Form>
+                  <!-- <Panel name='2'> -->
+                    <Form :model="fileJson" ref="fileJson" :rules="ruleValidate" inline>
+                        <FormItem label="Title" prop="title" style="width: 25%">
+                            <Input type="text" v-model.trim="fileJson.title">
+                            </Input>
+                        </FormItem>
+                        <FormItem label="PluginType" prop="pluginType" style="width: 25%">
+                            <Input type="text" v-model.trim="fileJson.pluginType">
+                            </Input>
+                        </FormItem>
+                        <FormItem label="Image" prop="image" style="width: 25%">
+                            <Input type="text" v-model.trim="fileJson.image">
+                            </Input>
+                        </FormItem>
+                        <FormItem>
+                            <Button type="primary" size="small" @click="handleSubmit('fileJson')" style="margin-top: 43px; float: right;">Save</Button>
+                        </FormItem>
+                    </Form>
+                  <!-- </Panel> -->
                 </div>
             </Panel>
         </Collapse>
-          <Table size='small' :loading='logingPluginList' border ref='selection' :columns='columns' :data='plugins' stripe></Table>
+          <Table size='small' :loading='logingPluginList' style="margin-top: 10px;" border ref='selection' :columns='columns' :data='plugins' stripe></Table>
           <!-- <Table size='small' :loading='logingPluginList' border ref='selection' :columns='columns2' :data='plugins' stripe></Table> -->
         </Col>
       </Row>
@@ -47,6 +49,7 @@ import _ from 'lodash'
 export default {
   data () {
     return {
+      value1: '',
       ruleValidate: {
         title: [
           {
@@ -380,6 +383,7 @@ export default {
               this.loadingFormPlugin = false
               this.$refs[name].resetFields()
               this.formPlugin.type = 'url'
+              this.value1 = ''
             })
             .catch(error => {
               this.$Notice.error({
@@ -388,9 +392,9 @@ export default {
               })
               this.loadingFormPlugin = false
             })
-        } else {
-          this.$Message.error('Validation failed!')
-          this.loadingFormPlugin = false
+      //   } else {
+      //     this.$Message.error('Validation failed!')
+      //     this.loadingFormPlugin = false
         }
       })
     },
