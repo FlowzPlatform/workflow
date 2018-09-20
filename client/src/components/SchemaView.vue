@@ -291,6 +291,7 @@ export default {
       this.entriesTotal = limit
       this.pageno = page
       this.populateTables()
+      this.skip = 0
     },
     handlepage (skip, limit, size) {
       this.limit = size
