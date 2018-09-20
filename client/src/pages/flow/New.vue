@@ -78,7 +78,8 @@
           xml: '',
           svg: '',
           first: ''
-        }
+        },
+        oldFlow: {}
       }
     },
     methods: {
@@ -229,22 +230,36 @@
                   subscriptionNew.moduleResource.registerAppModule = registerAppModuleNew
                   subscriptionNew.moduleResource.appRoles = userRolesArr
                   subscriptionNew.registeredAppModulesRole().then(resp => {
-                    let result = null
+                    // let result = null
                     if (this.$route.params.id !== undefined) {
-                      result = flowz.put(this.$route.params.id, this.flowObject)
+                      // if (this.flowObject.schema === this.oldFlow.schema) {
+                      //   console.log('...........')
+                      // } else {
+                      //   this.$Notice.warning({title: 'You\'ve change schema of <b>' + this.flowObject.name + '</b>', desc: '<a>Click Here</a> Set permissions', duration: 0})
+                      // }
+                      // this.btnLoading = false
+                      flowz.put(this.$route.params.id, this.flowObject).then(response => {
+                        this.$Notice.success({title: 'Success..!', desc: 'Flow Updated..'})
+                        this.$router.push({name: 'flow/list'})
+                        localStorage.removeItem('BPMNXml')
+                        this.btnLoading = false
+                      }).catch(error => {
+                        console.log(error)
+                        this.$Notice.error({title: 'Error..!', desc: 'Flow Not Updated...'})
+                        this.btnLoading = false
+                      })
                     } else {
-                      result = flowz.post(this.flowObject)
+                      flowz.post(this.flowObject).then(response => {
+                        this.$Notice.success({title: 'Success..!', desc: 'Flow Saved..'})
+                        this.$router.push({name: 'flow/list'})
+                        localStorage.removeItem('BPMNXml')
+                        this.btnLoading = false
+                      }).catch(error => {
+                        console.log(error)
+                        this.$Notice.error({title: 'Error..!', desc: 'Flow Not Saved...'})
+                        this.btnLoading = false
+                      })
                     }
-                    result.then(response => {
-                      this.$Notice.success({title: 'Success..!', desc: 'Flow Saved..'})
-                      this.$router.push({name: 'flow/list'})
-                      localStorage.removeItem('BPMNXml')
-                      this.btnLoading = false
-                    }).catch(error => {
-                      console.log(error)
-                      this.$Notice.error({title: 'Error..!', desc: 'Flow Not Saved...'})
-                      this.btnLoading = false
-                    })
                   }).catch(err => {
                     this.$Notice.error({title: 'Error..!', desc: 'Flow Not Saved. Try again.'})
                     console.log('Error: ', err)
@@ -387,8 +402,9 @@
         Promise.all(this.processVar).then(async (response) => {
           if (this.$route.params.id !== undefined) {
             this.bpmnXML = flowz.get(this.$route.params.id).then(async (result) => {
+              this.oldFlow = result.data
               this.bpmnXML = result.data.xml
-              await this.initBPMN({
+              this.initBPMN({
                 userId: this.$store.state.user._id,
                 emailTemplate: tempVar,
                 cdata: result.data,
@@ -405,7 +421,7 @@
               }) // Create bpmn
             })
           } else {
-            await this.initBPMN({
+            this.initBPMN({
               userId: this.$store.state.user._id,
               emailTemplate: tempVar,
               schema: response[0],
