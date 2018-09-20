@@ -2,16 +2,10 @@
     <div>
       <Row>
         <Col>
-          <!-- <Row type='flex' justify='end'>
-            <router-link :to='{name:'bpmn-plugin/new'}'>
-              <Button type='primary' size='small'  style='margin-bottom: 4px' icon='plus'>Add</Button>
-            </router-link>
-          </Row> -->
           <Collapse v-model="value1">
             <Panel name='1'>
                 Add
                 <div slot='content'>
-                  <!-- <Panel name='2'> -->
                     <Form :model="fileJson" ref="fileJson" :rules="ruleValidate" inline>
                         <FormItem label="Title" prop="title" style="width: 25%">
                             <Input type="text" v-model.trim="fileJson.title">
@@ -29,12 +23,10 @@
                             <Button type="primary" size="small" @click="handleSubmit('fileJson')" style="margin-top: 43px; float: right;" :loading="loading">Save</Button>
                         </FormItem>
                     </Form>
-                  <!-- </Panel> -->
                 </div>
             </Panel>
         </Collapse>
           <Table size='small' :loading='logingPluginList' style="margin-top: 10px;" border ref='selection' :columns='columns' :data='plugins' stripe></Table>
-          <!-- <Table size='small' :loading='logingPluginList' border ref='selection' :columns='columns2' :data='plugins' stripe></Table> -->
         </Col>
       </Row>
     </div>
@@ -93,97 +85,6 @@ export default {
         }
       },
       columns: [
-        // {
-        //   type: 'expand',
-        //   width: 50,
-        //   render: (h, params) => {
-        //     // var self = this
-        //     return h('Row', [
-        //       h('Col', [
-        //         h('codemirror', {
-        //           props: {
-        //             options: {
-        //               tabSize: 2,
-        //               mode: params.row.worker.type, // 'text/javascript',
-        //               // theme: 'base16-light',
-        //               lineNumbers: true,
-        //               line: true,
-        //               // keyMap: 'sublime',
-        //               extraKeys: { 'Ctrl': 'autocomplete' },
-        //               foldGutter: true,
-        //               gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
-        //               styleSelectedText: true,
-        //               highlightSelectionMatches: { showToken: /\w/, annotateScrollbar: true }
-        //             },
-        //             code: params.row.worker.src
-        //           },
-        //           on: {
-        //             change: function (newCode) {
-        //               params.row.worker.src = newCode
-        //             }
-        //           }
-        //         })
-        //       ]),
-        //       h('Col', [
-        //         h('div', {
-        //           style: {
-        //             marginTop: '5px',
-        //             marginLeft: '30px'
-        //           }
-        //         }, [
-        //           h('Button', {
-        //             props: {
-        //               type: 'primary',
-        //               size: 'small'
-        //             },
-        //             style: {
-        //               marginRight: '5px'
-        //             },
-        //             on: {
-        //               click: () => {
-        //                 this.$Modal.confirm({
-        //                   title: 'Confirm',
-        //                   content: '<p>Are you sure you want to Update?</p>',
-        //                   loading: true,
-        //                   onOk: async () => {
-        //                     var response = await this.handleEnableDisable(params.row)
-        //                     if (response.status === 'success') {
-        //                       var form = new FormData()
-        //                       form.append('jobtype', params.row.pluginType.toLowerCase() + '_worker')
-        //                       form.append('jobprocess', params.row.worker.src)
-        //                       axios.post(config.workerRegisterURL + '/upload-worker-process', form, {headers: {'Content-Type': 'application/x-www-form-urlencoded'}}).then(response => {
-        //                         this.plugins[params.index].worker.src = params.row.worker.src
-        //                         this.$Message.success('Update successfully!')
-        //                         this.$Modal.remove()
-        //                       }).catch(error => {
-        //                         this.$Message.error(error.message)
-        //                         this.$Modal.remove()
-        //                       })
-        //                     } else {
-        //                       this.$Message.error(response.message)
-        //                       this.$Modal.remove()
-        //                     }
-        //                   }
-        //                 })
-        //               }
-        //             }
-        //           }, 'Update'),
-        //           h('Button', {
-        //             props: {
-        //               type: 'ghost',
-        //               size: 'small'
-        //             },
-        //             on: {
-        //               click: () => {
-        //                 params.row.worker.src = this.plugins[params.index].worker.src
-        //               }
-        //             }
-        //           }, 'Reset')
-        //         ])
-        //       ])
-        //     ])
-        //   }
-        // },
         {
           title: ' ',
           key: 'imgurl',
@@ -380,10 +281,6 @@ export default {
       this.loadingFormPlugin = true
       this.$refs[name].validate((valid) => {
         if (valid) {
-          // if (this.formPlugin.type === 'url') {
-          //   let filecontent = await axios.get(this.formPlugin.url.link)
-          //   this.fileJson = filecontent.data
-          // }
           ModelBpmnplugin.create(this.fileJson)
             .then(response => {
               this.$Message.success('Plugin install successfully!')
@@ -399,9 +296,6 @@ export default {
               })
               this.loadingFormPlugin = false
             })
-      //   } else {
-      //     this.$Message.error('Validation failed!')
-      //     this.loadingFormPlugin = false
         }
       })
     },
