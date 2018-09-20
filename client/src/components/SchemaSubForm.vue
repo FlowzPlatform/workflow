@@ -128,7 +128,7 @@
                                               <div class="" v-for="(val, i) in schemainstance.data[index][field.name]">
                                                     <Row>
                                                         <Col :span="23"> <a :href="val" class="list-group-item" target="_blank" style="color:blue;padding:2px 2px;" >{{val}}</a></Col>
-                                                        <Col :span="1"><a href="#" style="color:red;float:right"  @click="removeSection(i, schemainstance.data[index][field.name])">&#10005;&nbsp;</a></Col>
+                                                        <Col :span="1"  v-if="i >= oldFiles"><a href="#" style="color:red;float:right"  @click="removeSection(i, schemainstance.data[index][field.name])">&#10005;&nbsp;</a></Col>
                                                     </Row>          
                                               </div>
                                             </div>
@@ -201,7 +201,7 @@
                                       <div class="" v-for="(val, i) in schemainstance.data[index][field.name]">
                                             <Row>
                                                 <Col :span="23"> <a :href="val" class="list-group-item" target="_blank" style="color:blue;padding:2px 2px;" >{{val}}</a></Col>
-                                                <Col :span="1"><a href="#" style="color:red;float:right"  @click="removeSection(i, schemainstance.data[index][field.name])">&#10005;&nbsp;</a></Col>
+                                                <Col :span="1" v-if="i >= oldFiles"><a href="#" style="color:red;float:right"  @click="removeSection(i, schemainstance.data[index][field.name])">&#10005;&nbsp;</a></Col>
                                             </Row>          
                                         </div>
                                     </div>
@@ -246,7 +246,8 @@ export default {
       fileSize: 0,
       fileUploadProgress: 0,
       stratProgress: false,
-      jumperLinks: []
+      jumperLinks: [],
+      oldFiles: 0
     }
   },
   components: {
@@ -512,6 +513,8 @@ export default {
     }
   },
   mounted () {
+    console.log('--------------------------------', this.schemainstance.data[0].Fileattachment)
+    this.oldFiles = this.schemainstance.data[0].Fileattachment.length
   },
   created () {}
 }
