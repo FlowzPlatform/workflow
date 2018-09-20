@@ -12,10 +12,12 @@ module.exports = function () {
 
   subscription.moduleResource.moduleName = 'workflow';
   let registerAppModule = {
-    'flowz': ['create','update', 'patch'],
-    'finstance': ['create','update'],
+    'flowz': ['create','update', 'patch', 'remove'],
+    'finstance': ['create','update', 'patch', 'remove'],
     'flowzdata': ['update', 'patch'],
-    'schema': ['create','update', 'patch', 'remove']
+    'schema': ['create','update', 'patch', 'remove'],
+    'bpmnplugins': ['create','update', 'patch', 'remove'],
+    'emailtemplate': ['create','update', 'patch', 'remove']
   };
 
   subscription.moduleResource.registerAppModule = registerAppModule;
