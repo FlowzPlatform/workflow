@@ -65,11 +65,11 @@
           </div>
         </div>
 
-        <div v-if="instanceEntries.length === 0 && itsFirstState === false">
+        <!-- <div v-if="instanceEntries.length === 0 && itsFirstState === false">
           <p align="center">No Data</p>
-        </div>
+        </div> -->
         
-        <div v-if="itsFirstState === false && instanceEntries.length !== 0">
+        <div v-if="itsFirstState === false">
           <tabs> 
           <TabPane v-if="this.$store.state.role === 1" :label="dataCount" icon="lock-combination">
           <schemalist v-if="this.$store.state.role === 1" :schema="dataSchema" :pageno="pageno" :datashow="'dataA'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
@@ -255,12 +255,12 @@ export default {
         'id[$search]': '^' + query.text
       }).then(res => {
         this.isFlowzLoaded = true
-        let firstState = this.flowzData.first
-        if (firstState === this.$route.params.stateid) {
-          this.itsFirstState = true
-        } else {
-          this.itsFirstState = false
-        }
+        // let firstState = this.flowzData.first
+        // if (firstState === this.$route.params.stateid) {
+        //   this.itsFirstState = true
+        // } else {
+        //   this.itsFirstState = false
+        // }
         this.dataTotal = res.data.total
         if (res.data.data.length > 0) {
           this.instanceEntries = res.data.data
@@ -270,7 +270,7 @@ export default {
         } else {
           this.instanceEntries = []
           this.dataData = []
-          this.itsFirstState = true
+          // this.itsFirstState = true
           this.dataLoading = false
           // this.$Spin.hide()
           this.$Loading.finish()
@@ -291,6 +291,7 @@ export default {
       this.entriesTotal = limit
       this.pageno = page
       this.populateTables()
+      this.skip = 0
     },
     handlepage (skip, limit, size) {
       this.limit = size
@@ -337,7 +338,33 @@ export default {
             } else if (v.type === 'currentuser') {
               obj[v.name] = this.$store.state.user.fullname || this.$store.state.user.email
             } else if (v.type === 'currenttime') {
-              obj[v.name] = new Date()
+              if (v.property.hasOwnProperty('dateformatselect')) {
+                let fullDate = new Date()
+                const year = fullDate.getFullYear()
+                const month = fullDate.getMonth()
+                const date = fullDate.getDate()
+                const hour = fullDate.getHours()
+                const minute = fullDate.getMinutes()
+                const second = fullDate.getSeconds()
+                if (v.property.dateformatselect === 'A') {
+                  obj[v.name] = date + '/' + month + '/' + year + ' ' + hour + ':' + minute
+                }
+                if (v.property.dateformatselect === 'B') {
+                  obj[v.name] = year + '/' + month + '/' + date + ' ' + hour + ':' + minute
+                }
+                if (v.property.dateformatselect === 'C') {
+                  obj[v.name] = year + '/' + month + '/' + date + ' ' + hour + ':' + minute + ':' + second
+                }
+                if (v.property.dateformatselect === 'D') {
+                  obj[v.name] = date + '/' + month + '/' + year + ' ' + hour + ':' + minute + ':' + second
+                }
+                if (v.property.dateformatselect === 'E') {
+                  obj[v.name] = date + '/' + month + '/' + year
+                }
+                if (v.property.dateformatselect === 'F') {
+                  obj[v.name] = year + '/' + month + '/' + date
+                }
+              }
             } else if (v.type === 'boolean') {
               if (v.property.defaultValue !== '' || v.property.defaultValue === 'true') {
                 obj[v.name] = true
@@ -463,7 +490,33 @@ export default {
             } else if (v.type === 'currentuser') {
               obj[v.name] = this.$store.state.user.fullname || this.$store.state.user.email
             } else if (v.type === 'currenttime') {
-              obj[v.name] = new Date()
+              if (v.property.hasOwnProperty('dateformatselect')) {
+                let fullDate = new Date()
+                const year = fullDate.getFullYear()
+                const month = fullDate.getMonth()
+                const date = fullDate.getDate()
+                const hour = fullDate.getHours()
+                const minute = fullDate.getMinutes()
+                const second = fullDate.getSeconds()
+                if (v.property.dateformatselect === 'A') {
+                  obj[v.name] = date + '/' + month + '/' + year + ' ' + hour + ':' + minute
+                }
+                if (v.property.dateformatselect === 'B') {
+                  obj[v.name] = year + '/' + month + '/' + date + ' ' + hour + ':' + minute
+                }
+                if (v.property.dateformatselect === 'C') {
+                  obj[v.name] = year + '/' + month + '/' + date + ' ' + hour + ':' + minute + ':' + second
+                }
+                if (v.property.dateformatselect === 'D') {
+                  obj[v.name] = date + '/' + month + '/' + year + ' ' + hour + ':' + minute + ':' + second
+                }
+                if (v.property.dateformatselect === 'E') {
+                  obj[v.name] = date + '/' + month + '/' + year
+                }
+                if (v.property.dateformatselect === 'F') {
+                  obj[v.name] = year + '/' + month + '/' + date
+                }
+              }
             } else if (v.type === 'boolean') {
               if (v.property.defaultValue !== '' || v.property.defaultValue === 'true') {
                 obj[v.name] = true
@@ -1159,9 +1212,15 @@ export default {
   .clickToCopy{
     cursor: pointer;
   }
+
+
 </style>
 
 <style>
+.ivu-table-tip table td{
+    text-align: left;
+    padding-left: 20px;
+  }
   .ivu-modal-body{
     max-height: 550px !important;
     overflow-y: auto !important;

@@ -269,7 +269,7 @@ export default {
                 props: {
                   type: 'text',
                   size: 'large',
-                  icon: 'settings'
+                  icon: 'key'
                 },
                 domProps: {
                   title: 'Set Permission'
@@ -313,6 +313,9 @@ export default {
                   size: 'large',
                   icon: 'ios-personadd'
                 },
+                domProps: {
+                  title: 'Invite User'
+                },
                 style: {
                   marginRight: '3px',
                   padding: '0px',
@@ -329,6 +332,9 @@ export default {
                 props: {
                   type: 'text',
                   size: 'large'
+                },
+                domProps: {
+                  title: 'Field Permissions'
                 },
                 style: {
                   marginRight: '3px',
