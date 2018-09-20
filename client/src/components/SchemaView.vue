@@ -924,7 +924,6 @@ export default {
         if (queryresp.data.data.length > 0) {
           this.instanceEntries = queryresp.data.data
           if (this.$store.state.role === 2) {
-            console.log(this.instanceEntries)
             this.dataClaim = _.filter(this.instanceEntries, function (o) { return o.claimUser === '' })
             this.dataData2 = _.filter(this.instanceEntries, function (o) { return o.claimUser !== '' })
           } else {
