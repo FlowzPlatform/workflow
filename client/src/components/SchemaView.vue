@@ -71,9 +71,9 @@
         
         <div v-if="itsFirstState === false && instanceEntries.length !== 0">
           <tabs> 
-            <TabPane v-if="this.$store.state.role === 1" :label="dataCount" icon="lock-combination">
+          <TabPane v-if="this.$store.state.role === 1" :label="dataCount" icon="lock-combination">
           <schemalist v-if="this.$store.state.role === 1" :schema="dataSchema" :pageno="pageno" :datashow="'dataA'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
-          <schemalist v-if="this.$store.state.role === 2" :schema="dataSchema" :pageno="pageno" :datashow="'dataU'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+          <!-- <schemalist v-if="this.$store.state.role === 2" :schema="dataSchema" :pageno="pageno" :datashow="'dataU'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist> -->
 
           <div style="padding: 10px">
             <div class="row" v-if="id != null">
@@ -130,8 +130,11 @@
             </div>
           </div>
           </TabPane>
+          <TabPane v-if="this.$store.state.role === 2" :label="'Data ('+ dataData2.length + ')'" icon="lock-combination">
+            <schemalist :schema="dataSchema" :datashow="'dataU'" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+          </TabPane>
           <TabPane v-if="this.$store.state.role === 2" :label="'In Progress ('+ dataClaim.length + ')'" icon="lock-combination">
-            <schemalist :schema="dataSchema" :role="'client'" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataClaim" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+            <schemalist v-if="this.$store.state.role === 2" :schema="dataSchema" :pageno="pageno" :datashow="'dataC'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataClaim" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
           </TabPane>
           </Tabs>
         </div>
@@ -165,6 +168,7 @@ import schemaModel from '@/api/schema'
 import finstanceModal from '@/api/finstance'
 import dataQuerymodel from '@/api/dataquery'
 import saveemailTemplate from '@/api/emailtemplate'
+import schemalist from '@/pages/user/SchemaList'
 
 export default {
   name: 'SchemaView',
@@ -234,7 +238,8 @@ export default {
   components: {
     'list-instances': (resolve) => { require(['./ListInstances'], resolve) },
     'schemasubform': (resolve) => { require(['./SchemaSubForm'], resolve) },
-    'schemalist': (resolve) => { require(['@/pages/user/SchemaList'], resolve) },
+    // 'schemalist': (resolve) => { require(['@/pages/user/SchemaList'], resolve) },
+    'schemalist': schemalist,
     'email': (resolve) => { require(['./email'], resolve) },
     'schemasubformview': (resolve) => { require(['./SchemaSubFormView'], resolve) }
   },
@@ -919,8 +924,8 @@ export default {
         if (queryresp.data.data.length > 0) {
           this.instanceEntries = queryresp.data.data
           if (this.$store.state.role === 2) {
-            this.dataClaim = _.filter(this.instanceEntries, function (o) { return o.claimuser === '' })
-            this.dataData2 = _.filter(this.instanceEntries, function (o) { return o.claimuser !== '' })
+            this.dataClaim = _.filter(this.instanceEntries, function (o) { return o.claimUser === '' })
+            this.dataData2 = _.filter(this.instanceEntries, function (o) { return o.claimUser !== '' })
           } else {
             this.dataData = this.instanceEntries
           }
