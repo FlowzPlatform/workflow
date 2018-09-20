@@ -364,7 +364,7 @@
                   },
                   on: {
                     'click': async () => {
-                      finstanceModal.patch(params.row.id, {claimuser: ''})
+                      finstanceModal.patch(params.row.id, {claimUser: ''})
                       .then((res) => {
                         this.data.splice(params.index, 1)
                         this.$Notice.success({title: 'Successfully Unclaim'})
@@ -506,7 +506,7 @@
                   },
                   on: {
                     'click': async () => {
-                      finstanceModal.patch(params.row.id, {claimuser: this.$store.state.user._id})
+                      finstanceModal.patch(params.row.id, {claimUser: this.$store.state.user._id})
                       .then((res) => {
                         this.data.splice(params.index, 1)
                         this.$Notice.success({title: 'Successfully Claim'})
@@ -697,15 +697,11 @@
 </style>
 
 <style>
-.ivu-table td:nth-child(2) div span{
-  width:200px !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
 .ivu-table-cell div{
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
   }
+
+
 </style>

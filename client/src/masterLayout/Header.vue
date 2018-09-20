@@ -145,6 +145,8 @@
         this.$router.push('/login')
       },
       handleChange (value) {
+        this.$store.state.Cache = null
+        this.$store.state.Cache = {}
         this.$store.state.subscription = value
         if (this.$store.state.user.package) {
           if (this.$store.state.user.package[value] && this.$store.state.user.package[value].role === 'admin') {

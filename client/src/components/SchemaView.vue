@@ -71,9 +71,9 @@
         
         <div v-if="itsFirstState === false && instanceEntries.length !== 0">
           <tabs> 
-            <TabPane v-if="this.$store.state.role === 1" :label="dataCount" icon="lock-combination">
+          <TabPane v-if="this.$store.state.role === 1" :label="dataCount" icon="lock-combination">
           <schemalist v-if="this.$store.state.role === 1" :schema="dataSchema" :pageno="pageno" :datashow="'dataA'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
-          <schemalist v-if="this.$store.state.role === 2" :schema="dataSchema" :pageno="pageno" :datashow="'dataU'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+          <!-- <schemalist v-if="this.$store.state.role === 2" :schema="dataSchema" :pageno="pageno" :datashow="'dataU'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist> -->
 
           <div style="padding: 10px">
             <div class="row" v-if="id != null">
@@ -130,8 +130,11 @@
             </div>
           </div>
           </TabPane>
+          <TabPane v-if="this.$store.state.role === 2" :label="'Data ('+ dataData2.length + ')'" icon="lock-combination">
+            <schemalist :schema="dataSchema" :datashow="'dataU'" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+          </TabPane>
           <TabPane v-if="this.$store.state.role === 2" :label="'In Progress ('+ dataClaim.length + ')'" icon="lock-combination">
-            <schemalist :schema="dataSchema" :role="'client'" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataClaim" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+            <schemalist v-if="this.$store.state.role === 2" :schema="dataSchema" :pageno="pageno" :datashow="'dataC'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataClaim" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
           </TabPane>
           </Tabs>
         </div>
@@ -165,6 +168,7 @@ import schemaModel from '@/api/schema'
 import finstanceModal from '@/api/finstance'
 import dataQuerymodel from '@/api/dataquery'
 import saveemailTemplate from '@/api/emailtemplate'
+import schemalist from '@/pages/user/SchemaList'
 
 export default {
   name: 'SchemaView',
@@ -227,13 +231,15 @@ export default {
       sendDataEmail: null,
       loadingEmail: true,
       currentSchema: null,
-      dataLoading: true
+      dataLoading: true,
+      entriesTotal: 10
     }
   },
   components: {
     'list-instances': (resolve) => { require(['./ListInstances'], resolve) },
     'schemasubform': (resolve) => { require(['./SchemaSubForm'], resolve) },
-    'schemalist': (resolve) => { require(['@/pages/user/SchemaList'], resolve) },
+    // 'schemalist': (resolve) => { require(['@/pages/user/SchemaList'], resolve) },
+    'schemalist': schemalist,
     'email': (resolve) => { require(['./email'], resolve) },
     'schemasubformview': (resolve) => { require(['./SchemaSubFormView'], resolve) }
   },
@@ -282,11 +288,13 @@ export default {
     pagination (skip, limit, page) {
       this.skip = skip
       this.limit = limit
+      this.entriesTotal = limit
       this.pageno = page
       this.populateTables()
     },
     handlepage (skip, limit, size) {
       this.limit = size
+      this.entriesTotal = size
       this.skip = 0
       this.populateTables()
     },
@@ -910,13 +918,14 @@ export default {
         $limit: this.limit
       }).then(queryresp => {
         // console.log('queryresp: ', queryresp)
+        // this.entriesTotal = queryresp.data.data.length
         this.isFlowzLoaded = true
         this.dataTotal = queryresp.data.total
         if (queryresp.data.data.length > 0) {
           this.instanceEntries = queryresp.data.data
           if (this.$store.state.role === 2) {
-            this.dataClaim = _.filter(this.instanceEntries, function (o) { return o.claimuser === '' })
-            this.dataData2 = _.filter(this.instanceEntries, function (o) { return o.claimuser !== '' })
+            this.dataClaim = _.filter(this.instanceEntries, function (o) { return o.claimUser === '' })
+            this.dataData2 = _.filter(this.instanceEntries, function (o) { return o.claimUser !== '' })
           } else {
             this.dataData = this.instanceEntries
           }
@@ -1010,7 +1019,29 @@ export default {
             //     console.log('err: ', err)
             //   })
             // }, 2000)
-            this.init()
+            // console.log('Length: ', this.instanceEntries.length)
+            // console.log('instanceEntries: ', this.instanceEntries.length, this.entriesTotal)
+            if (this.instanceEntries.length < this.entriesTotal) {
+              // console.log('Ready to push: ', this.instanceEntries.length)
+              // push to table
+              let instanceObj = data
+              // console.log('instanceObj: ', instanceObj)
+              let lastEntryId = data.stageReference[data.stageReference.length - 1].stageRecordId
+              // console.log('lastEntryId: ', lastEntryId)
+              if (lastEntryId !== undefined) {
+                flowzdataModal.get(lastEntryId).then(res => {
+                  // console.log('Response fdata: ', res)
+                  instanceObj['data'] = res.data.data
+                  instanceObj['iid'] = data.id
+                  this.instanceEntries.push(instanceObj)
+                  this.dataData.push(instanceObj)
+                  // console.log('Pushed data: ', this.instanceEntries, this.dataData)
+                })
+              }
+            } else {
+              // don't do anything
+            }
+            // this.init()
           } else if (this.$route.params.stateid === data.stageReference[(data.stageReference.length - 1)].StageName) {
             let inx = _.findIndex(this.instanceEntries, (o) => { return o.id === data.id })
             this.instanceEntries.splice(inx, 1)
