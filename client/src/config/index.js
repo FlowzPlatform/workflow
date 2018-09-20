@@ -1,6 +1,4 @@
 var temp = {
-  // serverURI: 'http://localhost:3030', // 'http://172.16.230.86:3030'
-  // socketURI: 'http://localhost:4033',
   serverURI: 'https://api.' + process.env.domainKey + '/eng',
   socketURI: 'wss://ws.' + process.env.domainKey + ':4033',
   workerRegisterURL: 'http://localhost:4001',
