@@ -1,3 +1,14 @@
+<style>
+  d {
+    /* display: none; */
+    font-weight: normal;
+  }
+  @media only screen and (max-width: 1500px) {
+		  d {
+        display: none;
+      }
+  }
+</style>
 <template>
     <Menu mode="horizontal" :theme="'primary'">
         <Row type="flex">
@@ -26,19 +37,19 @@
                     <Menu-item name="4" v-if="getRole == 1">
                         <router-link to="/admin/emailtemplate">
                             <Icon type="email" :size="14"></Icon>
-                            Email Template
+                            <d>Email Template</d>
                         </router-link>
                     </Menu-item>
                     <Menu-item name="2" v-if="getRole == 1">
                         <router-link to="/admin/schema">
                             <Icon type="filing" :size="14"></Icon>
-                            Schema
+                            <d>Schema</d>
                         </router-link>
                     </Menu-item>
                     <Menu-item name="3" v-if="getRole == 1">
                         <router-link to="/admin/flow">
                             <Icon type="network" :size="14"></Icon>
-                            Flow
+                            <d>Flow</d>
                         </router-link>
                     </Menu-item>
                     <!-- <Menu-item name="4" v-if="getRole == 1">
