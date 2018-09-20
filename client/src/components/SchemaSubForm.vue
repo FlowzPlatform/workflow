@@ -335,7 +335,33 @@ export default {
               } else if (v.type === 'currentuser') {
                 obj[v.name] = this.$store.state.user.fullname || this.$store.state.user.email
               } else if (v.type === 'currenttime') {
-                obj[v.name] = new Date()
+                if (v.property.hasOwnProperty('dateformatselect')) {
+                  let fullDate = new Date()
+                  const year = fullDate.getFullYear()
+                  const month = fullDate.getMonth()
+                  const date = fullDate.getDate()
+                  const hour = fullDate.getHours()
+                  const minute = fullDate.getMinutes()
+                  const second = fullDate.getSeconds()
+                  if (v.property.dateformatselect === 'A') {
+                    obj[v.name] = date + '/' + month + '/' + year + ' ' + hour + ':' + minute
+                  }
+                  if (v.property.dateformatselect === 'B') {
+                    obj[v.name] = year + '/' + month + '/' + date + ' ' + hour + ':' + minute
+                  }
+                  if (v.property.dateformatselect === 'C') {
+                    obj[v.name] = year + '/' + month + '/' + date + ' ' + hour + ':' + minute + ':' + second
+                  }
+                  if (v.property.dateformatselect === 'D') {
+                    obj[v.name] = date + '/' + month + '/' + year + ' ' + hour + ':' + minute + ':' + second
+                  }
+                  if (v.property.dateformatselect === 'E') {
+                    obj[v.name] = date + '/' + month + '/' + year
+                  }
+                  if (v.property.dateformatselect === 'F') {
+                    obj[v.name] = year + '/' + month + '/' + date
+                  }
+                }
               } else if (v.type === 'boolean') {
                 if (
                   v.property.defaultValue !== '' ||
@@ -408,7 +434,33 @@ export default {
           } else if (v.type === 'currentuser') {
             obj[v.name] = this.$store.state.user.fullname || this.$store.state.user.email
           } else if (v.type === 'currenttime') {
-            obj[v.name] = new Date()
+            if (v.property.hasOwnProperty('dateformatselect')) {
+              let fullDate = new Date()
+              const year = fullDate.getFullYear()
+              const month = fullDate.getMonth()
+              const date = fullDate.getDate()
+              const hour = fullDate.getHours()
+              const minute = fullDate.getMinutes()
+              const second = fullDate.getSeconds()
+              if (v.property.dateformatselect === 'A') {
+                obj[v.name] = date + '/' + month + '/' + year + ' ' + hour + ':' + minute
+              }
+              if (v.property.dateformatselect === 'B') {
+                obj[v.name] = year + '/' + month + '/' + date + ' ' + hour + ':' + minute
+              }
+              if (v.property.dateformatselect === 'C') {
+                obj[v.name] = year + '/' + month + '/' + date + ' ' + hour + ':' + minute + ':' + second
+              }
+              if (v.property.dateformatselect === 'D') {
+                obj[v.name] = date + '/' + month + '/' + year + ' ' + hour + ':' + minute + ':' + second
+              }
+              if (v.property.dateformatselect === 'E') {
+                obj[v.name] = date + '/' + month + '/' + year
+              }
+              if (v.property.dateformatselect === 'F') {
+                obj[v.name] = year + '/' + month + '/' + date
+              }
+            }
           } else if (v.type === 'boolean') {
             if (
               v.property.defaultValue !== '' ||
@@ -512,7 +564,6 @@ export default {
     }
   },
   mounted () {
-    console.log('--------------------------------', this.schemainstance.data[0].Fileattachment)
     this.oldFiles = this.schemainstance.data[0].Fileattachment.length
   },
   created () {}
