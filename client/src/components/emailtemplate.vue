@@ -6,13 +6,15 @@
     </div>
     <div class="editor" v-if="newTemplate">
       <h2 class="heading">Create Template</h2>
-      <editor v-model="GetHtmlOfEditor" :toolbar="toolbar1" :plugins="plugins" :init="settings" :initial-value="gethtmlcontent"></editor>
+      <keep-alive>
+        <editor v-model="GetHtmlOfEditor" api-key="ppzi01crrfo3pvd43s3do89pguwkhowrwajpjdqdkginzj7k" :toolbar="toolbar1" :plugins="plugins" :init="settings" :initial-value="gethtmlcontent"></editor>
+      </keep-alive>
       <Input v-model="templateName" placeholder="Enter Template name" style="width: 300px" class="dataEnter"/>
       <Button type="primary" @click="saveTemplate" class="dataEnter">Save Template</Button>
     </div>
     <div class="editor" v-else>
       <h2 class="heading">View Template</h2>
-      <editor v-model="GetHtmlOfEditor" :initial-value="GetHtmlContent"></editor>
+      <editor v-model="GetHtmlOfEditor" api-key="ppzi01crrfo3pvd43s3do89pguwkhowrwajpjdqdkginzj7k" :initial-value="GetHtmlContent"></editor>
       <Input v-model="templateName" placeholder="Enter Template name" style="width: 300px" class="dataEnter"/>
       <Button type="primary" @click="updateTemplate" class="dataEnter">Update Template</Button>
       <Button type="error" @click="cancelUpdateTemplate" class="dataEnter">Cancel</Button>
@@ -21,9 +23,9 @@
 </template>
 
 <script>
-import Editor from '@tinymce/tinymce-vue'
 import saveemailTemplate from '@/api/emailtemplate'
 import _ from 'lodash'
+
 export default {
   data () {
     return {
@@ -32,7 +34,7 @@ export default {
       templateName: '',
       GetHtmlOfEditor: '',
       gethtmlcontent: '<p>Hello!</p>',
-      plugins: 'font print preview searchreplace fullscreen image link media template codesample table char6map hr pagebreak anchor toc insertdatetime lists textcolor imagetools mediaembed  linkchecker contextmenu colorpicker',
+      plugins: 'print preview searchreplace fullscreen image link media template codesample table hr pagebreak anchor toc insertdatetime lists textcolor imagetools contextmenu colorpicker',
       toolbar1: 'formatselect | bold italic strikethrough forecolor backcolor | link | alignleft aligncenter alignright alignjustify  | numlist bullist outdent indent  | removeformat',
       settings: {
         templates: [
@@ -105,7 +107,7 @@ export default {
     }
   },
   components: {
-    'editor': Editor
+    'editor': (resolve) => { require(['@tinymce/tinymce-vue'], resolve) }
   },
   methods: {
     saveTemplate () {
@@ -173,7 +175,6 @@ export default {
     }
   },
   mounted () {
-    console.log('editor', Editor)
     saveemailTemplate.get(null, {
       'user': this.$store.state.user._id
     })
@@ -232,6 +233,19 @@ export default {
   overflow-y: auto;
   overflow-x: hidden
 }
+
+.mce-widget.mce-notification.mce-notification-warning.mce-has-close.mce-in{
+  display: none !important;
+  z-index: -999999 !important;
+}
 </style>
+
+<style>
+
+.mce-widget.mce-notification.mce-notification-warning.mce-has-close.mce-in{
+  display: none !important;
+}
+</style>
+
 
 

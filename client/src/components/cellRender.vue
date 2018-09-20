@@ -18,25 +18,26 @@
         <img src="http://placehold.it/20x20" style="margin-top: 20px;">
       </div>
     </div> -->
-    <span v-if="item.obj != null && item.isCompletedTask == true" :title="getAgoActualStatus(item.obj.createdAt)" style="display: block;">
+    <span v-if="item.obj != null && item.isCompletedTask == true" :title="getAgoActualStatus(item.obj.createdAt)" style="display: block;; width: 80% !important">
       <i class="fa fa-calendar fa-fw"></i>
       <small>{{getAgoStatus(item.obj.createdAt)}}</small>
     </span>
 
-    <span v-if="item.obj != null && item.isCompletedTask == false && item.isCurrentTask == true" :title="getAgoActualStatus(item.obj.completedAt)" style="display: block;">
+    <span v-if="item.obj != null && item.isCompletedTask == false && item.isCurrentTask == true" :title="getAgoActualStatus(item.obj.completedAt)" style="display: block; width: 80% !important">
       <i class="fa fa-calendar fa-fw"></i>
-      <!-- {{item.obj}} -->
       <small>{{getAgoStatus(item.obj.completedAt)}}</small>
     </span>
 
     <span v-if="item.obj != null && item.isCompletedTask == true" title="Duration" style="display: block;">
       <i class="fa fa-clock-o fa-fw"></i>
-      <small>{{ getDuration(item.obj.createdAt, item.obj.completedAt) }} Hours</small>
+      <!-- <span>{{item.obj.createdAt}} : {{ item.obj.completedAt}}</span> -->
+      <small>{{ getDuration(item.obj.createdAt, item.obj.completedAt) }}</small>
     </span>
 
     <span v-if="item.obj != null && item.isCompletedTask == false" title="Duration" style="display: block;">
       <i class="fa fa-clock-o fa-fw"></i>
-      <small>{{ getDuration(item.obj.completedAt) }} Hours</small>
+      <!-- <small>{{ getDuration( undefined, item.obj.completedAt) }}</small> -->
+      <small><em>Waiting</em></small>
     </span>
 
     <img v-if="item.obj != null && item.isCompletedTask == true" :title="getUserHoverDetails(item)" :src="getUserAvatar(item)" class="avatarImg" alt="User Avatar">
@@ -75,7 +76,6 @@
 import moment from 'moment'
 import flowzdataModal from '@/api/flowzdata'
 import schemaModel from '@/api/schema'
-import SchemaSubFormView from './SchemaSubFormView'
 
 export default {
   name: 'CellRender',
@@ -93,7 +93,7 @@ export default {
     }
   },
   components: {
-    'schemasubformview': SchemaSubFormView
+    'schemasubformview': (resolve) => { require(['./SchemaSubFormView'], resolve) }
   },
   filters: {
     getAgoStatus (item) {
@@ -123,15 +123,47 @@ export default {
       return moment(item).fromNow()
     },
     getDuration (x, y) {
-      if (y) {
-        let x1 = moment(x)
-        let y1 = moment(y)
-        return y1.diff(x1, 'hours')
+      // if (x) {
+      let x1 = moment(x)
+      let y1 = moment(y)
+      let milliseconds = y1.diff(x1)
+      if (milliseconds < 1000) {
+        return ((milliseconds / 1000) + 's')
       } else {
-        let x1 = moment(x)
-        let y1 = moment()
-        return y1.diff(x1, 'hours')
+        return this.msToTime(milliseconds)
       }
+      // } else {
+      //   let x1 = moment(y)
+      //   let y1 = moment()
+      //   let milliseconds = y1.diff(x1)
+      //   return this.msToTime(milliseconds)
+      // }
+    },
+    msToTime (duration) {
+      // let milliseconds = parseInt((duration % 1000) / 100)
+      let seconds = parseInt((duration / 1000) % 60)
+      let minutes = parseInt((duration / (1000 * 60)) % 60)
+      let hours = parseInt((duration / (1000 * 60 * 60)) % 24)
+      let days = parseInt(Math.floor(hours / 24))
+
+      days = (days > 0) ? ((days > 1) ? days + ' days' : days + ' day') : ''
+      hours = (hours > 0) ? ((hours > 1) ? hours + ' hours' : hours + ' hour') : ''
+      minutes = (minutes > 0) ? ((minutes > 1) ? minutes + ' minutes' : minutes + ' minute') : ''
+      seconds = (seconds > 0) ? ((seconds > 1) ? seconds + ' seconds' : seconds + ' second') : ''
+
+      // hours = (hours < 10) ? '0' + hours : hours
+      // minutes = (minutes < 10) ? '0' + minutes : minutes
+      // seconds = (seconds < 10) ? '0' + seconds : seconds
+      if (days !== '') {
+        return days
+      } else if (hours !== '') {
+        return hours
+      } else if (minutes !== '') {
+        return minutes
+      } else if (seconds !== '') {
+        return seconds
+      }
+      // return days + hours + minutes + seconds
     },
     getUserAvatar (item) {
       if (item.obj.user.avatar) {
@@ -232,7 +264,7 @@ export default {
   display: block;
   position: relative;
   min-width: 100%;
-  min-height: 40px;
+  min-height: 48px;
   background-color: #FFC5CF;
   /*margin-top: 2px;*/
 }
@@ -241,7 +273,7 @@ export default {
   display: block;
   position: relative;
   min-width: 100%;
-  min-height: 40px;
+  min-height: 48px;
   background-color: #BCEDC7;
   /*margin-top: 2px;*/
   /*margin-left: 11px;*/
@@ -253,7 +285,7 @@ export default {
   display: block;
   position: relative;
   min-width: 100%;
-  min-height: 40px;
+  min-height: 48px;
   background-color: #B7D9FD;
   /*margin-top: 2px; */
 }
@@ -272,6 +304,7 @@ export default {
 
 .stageTuple {
   position: relative;
+  padding: 5px 10px;
 } 
 
 .stageTuple:hover > .showData i{
@@ -285,4 +318,5 @@ export default {
   border-radius: 50px; 
   width: 20px;
 }
+
 </style>

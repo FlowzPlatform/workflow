@@ -34,10 +34,6 @@
                                     <template v-for="(field,fieldNumber) in fields[moduleName]">
                                         <td v-if="fieldNumber ==0" style="padding:10px;font-weight:bold;border-right: 3px solid #cdd0d4;">
                                             {{selectedFlowObject.processList[titleCase(item.service)].name}}
-                                            <!-- {{item.service}}
-                                            <br>
-                                            <br>
-                                            {{selectedFlowObject.processList[titleCase(item.service)]}} -->
                                         </td>
                                         <td v-else>
                                             <table class="table-bordered" style="width:100%">
@@ -124,7 +120,33 @@
         </div>
         </div>
     </Modal>
-
+    <Modal
+        v-model="permissionModel"
+        title="Permission Model"
+        @on-ok="ok"
+        @on-cancel="cancel" width='1000'>
+        <div>
+          <table class="table table-striped table-border">
+            <thead></thead>
+            <tbody>
+              <tr>
+                <td></td>
+                <td v-for="item in 'item'">
+                  {{item}}
+                </td>
+              </tr>
+              <tr v-for="i in 'schemaname'">
+                <td>
+                  {{i}}
+                </td>
+                <td v-for="items in 'item'">
+                  <Switch v-model="hideShow" @on-change="change" />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+    </Modal>
 
     <Row type="flex" justify="end">
       <Button type="primary" size="small" style="margin-bottom: 2px;" @click="addNewFlow" icon="plus"> Add</Button>
@@ -140,11 +162,11 @@
 <script>
 import flowz from '@/api/flowz'
 import _ from 'lodash'
-import finstanceModal from '@/api/finstance'
+// import finstanceModal from '@/api/finstance'
 import axios from 'axios'
 import viewSVG from './viewSVG'
 import psl from 'psl'
-import subscription from '@/components/subscription'
+// import subscription from '@/components/subscription'
 
 import config from '@/config'
 import expandRow2 from './assigned_invite_table-expand.vue'
@@ -158,12 +180,14 @@ import moment from 'moment'
 export default {
   name: 'Flowz',
   components: {
-    'viewSVG': viewSVG,
-    expandRow2,
-    subscription
+    viewSVG: (resolve) => { require(['./viewSVG'], resolve) },
+    expandRow2: (resolve) => { require(['./assigned_invite_table-expand.vue'], resolve) },
+    subscription: (resolve) => { require(['@/components/subscription'], resolve) }
   },
   data () {
     return {
+      hideShow: false,
+      permissionModel: false,
       showTable: false,
       isDone: 'abc',
       loadingPermisions: true,
@@ -220,32 +244,32 @@ export default {
           align: 'center',
           render: (h, params) => {
             return h('div', [
+              // h('Button', {
+              //   props: {
+              //     type: 'text',
+              //     size: 'large',
+              //     icon: 'arrow-right-b'
+              //   },
+              //   domProps: {
+              //     title: 'Start Instance'
+              //   },
+              //   style: {
+              //     marginRight: '3px',
+              //     padding: '0px',
+              //     fontSize: '20px',
+              //     color: '#2411c5'
+              //   },
+              //   on: {
+              //     click: () => {
+              //       this.createNewInstance(params.row.id)
+              //     }
+              //   }
+              // }, ''),
               h('Button', {
                 props: {
                   type: 'text',
                   size: 'large',
-                  icon: 'arrow-right-b'
-                },
-                domProps: {
-                  title: 'Start Instance'
-                },
-                style: {
-                  marginRight: '3px',
-                  padding: '0px',
-                  fontSize: '20px',
-                  color: '#2411c5'
-                },
-                on: {
-                  click: () => {
-                    this.createNewInstance(params.row.id)
-                  }
-                }
-              }, ''),
-              h('Button', {
-                props: {
-                  type: 'text',
-                  size: 'large',
-                  icon: 'settings'
+                  icon: 'key'
                 },
                 domProps: {
                   title: 'Set Permission'
@@ -289,6 +313,9 @@ export default {
                   size: 'large',
                   icon: 'ios-personadd'
                 },
+                domProps: {
+                  title: 'Invite User'
+                },
                 style: {
                   marginRight: '3px',
                   padding: '0px',
@@ -301,6 +328,38 @@ export default {
                   }
                 }
               }, ''),
+              h('Button', {
+                props: {
+                  type: 'text',
+                  size: 'large'
+                },
+                domProps: {
+                  title: 'Field Permissions'
+                },
+                style: {
+                  marginRight: '3px',
+                  padding: '0px',
+                  fontSize: '20px',
+                  color: '#703636'
+                },
+                on: {
+                  click: () => {
+                    this.showPermissionDialog(params)
+                  }
+                }
+              }, [
+                h('i', {
+                  attrs: {
+                    class: 'fa fa-lock'
+                  },
+                  style: {
+                    marginRight: '3px',
+                    padding: '0px',
+                    fontSize: '20px',
+                    color: '#808080'
+                  }
+                })
+              ]),
               h('Button', {
                 props: {
                   type: 'text',
@@ -532,6 +591,14 @@ export default {
         })
       this.modal1 = true
     },
+
+    showPermissionDialog (query) {
+      // this.permissionModel = true
+      this.$router.push('/admin/permission/' + query.row.id)
+    },
+    change () {
+      console.log('change')
+    },
     capitalize (str) {
       str = str[0].toUpperCase() + str.slice(1)
       return str
@@ -658,22 +725,22 @@ export default {
         console.log(error)
       })
     },
-    createNewInstance (item) {
-      this.$Loading.start()
-      let fheaders = null
-      finstanceModal.post({fid: item.id}, null, fheaders).then(res => {
-        this.$Notice.success({title: 'Instance Generated'})
-        this.$Loading.finish()
-      }).catch(e => {
-        this.$Loading.error()
-        console.log('error', e.response)
-        if (e.response.data.message) {
-          this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
-        } else {
-          this.$Notice.error({title: 'Error', desc: 'Instace Not Generated'})
-        }
-      })
-    },
+    // createNewInstance (item) {
+    //   this.$Loading.start()
+    //   let fheaders = null
+    //   finstanceModal.post({fid: item.id}, null, fheaders).then(res => {
+    //     this.$Notice.success({title: 'Instance Generated'})
+    //     this.$Loading.finish()
+    //   }).catch(e => {
+    //     this.$Loading.error()
+    //     console.log('error', e.response)
+    //     if (e.response.data.message) {
+    //       this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+    //     } else {
+    //       this.$Notice.error({title: 'Error', desc: 'Instace Not Generated'})
+    //     }
+    //   })
+    // },
     addNewFlow () {
       this.$store.dispatch('removeXMLtoLocalStorage')
       this.$router.push({name: 'flow/new'})
@@ -685,7 +752,6 @@ export default {
         onOk: () => {
           flowz.delete(id)
           .then(response => {
-            // console.log('response.data', response.data)
             this.$Notice.success({title: 'Success!!', desc: 'Flowz Deleted...'})
             this.flowzList.splice(inx, 1)
           })

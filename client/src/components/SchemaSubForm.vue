@@ -5,6 +5,38 @@
         <Row class="ui-card">
             <div v-for="(field,inx) in schemainstance.entity">
                 <template v-if="field.customtype">
+                  <div v-if="schemainstance.hasOwnProperty('permission')">
+                    <div v-if="schemainstance.permission[field.name].write || schemainstance.permission[field.name].read">
+                      <div v-if="schemainstance.permission[field.name].write">
+                        <Col :span="24" style="margin-bottom: 20px;" :id="field.name">
+                          <FormItem :key="inx" style="margin-bottom:10px;">
+                              <Row style="font-size:16px">
+                                  <span class="card-title">{{field.name}}</span>
+                                  
+                              </Row>
+                              <Row v-if="field.property.IsArray">
+                                  <schemasubform :schemainstance="getObject(inx, index, field.name, field.type)"></schemasubform>
+                                  <Button class="btnAdd" @click="handleAdd(inx, index, schemainstance.entity[inx].entity[0], schemainstance.data[index][field.name], field.name)" icon="plus"> Add ({{field.name}})</Button>
+                              </Row>
+                              <Row v-else>
+                                  <SchemaSubFormView :schemainstance="getObject(inx, index, field.name, field.type)"></SchemaSubFormView>
+                              </Row>
+                          </FormItem>
+                        </Col>
+                      </div>
+                      <div v-else>
+                        <Col :span="24" style="margin-bottom: 20px;" :id="field.name">
+                          <FormItem :key="inx" style="margin-bottom:10px;">
+                              <Row style="font-size:16px">
+                                  <span class="card-title">{{field.name}}</span>
+                              </Row>
+                              <SchemaSubFormView :schemainstance="getObject(inx, index, field.name, field.type)"></SchemaSubFormView>
+                          </FormItem>
+                        </Col>
+                      </div>
+                    </div>
+                  </div>
+                  <div v-else>
                     <Col :span="24" style="margin-bottom: 20px;" :id="field.name">
                         <FormItem :key="inx" style="margin-bottom:10px;">
                             <Row style="font-size:16px">
@@ -20,11 +52,119 @@
                             </Row>
                         </FormItem>
                     </Col>
+                  </div>
+                  <!-- <div v-if="schemainstance.permission === null">
+                    <Col :span="24" style="margin-bottom: 20px;" :id="field.name">
+                        <FormItem :key="inx" style="margin-bottom:10px;">
+                            <Row style="font-size:16px">
+                                <span class="card-title">{{field.name}}</span>
+                            </Row>
+                            <Row v-if="field.property.IsArray">
+                                <schemasubform :schemainstance="getObject(inx, index, field.name, field.type)"></schemasubform>
+                                <Button class="btnAdd" @click="handleAdd(inx, index, schemainstance.entity[inx].entity[0], schemainstance.data[index][field.name], field.name)" icon="plus"> Add ({{field.name}})</Button>
+                            </Row>
+                            <Row v-else>
+                                <schemasubform :schemainstance="getObject(inx, index, field.name, field.type)"></schemasubform>
+                                
+                            </Row>
+                        </FormItem>
+                    </Col>
+                  </div> -->
                 </template>
                 <template v-else>
+                  <div v-if="schemainstance.hasOwnProperty('permission')">
+                      <div v-if="schemainstance.permission[field.name].write || schemainstance.permission[field.name].read">
+                        <Col :span="12" style="padding:0px 20px 0px 2px" v-if="field.type !== 'file'">
+                            <FormItem :key="inx" :rules="createRules(field)" style="margin-bottom:10px;">
+                                <Row>
+                                  <div v-if="schemainstance.permission[field.name].write">
+                                    <Col :span="8" style="text-align: right; padding-right: 10px; padding-top: 10px;">
+                                        <b class="field-label">{{field.name}}</b>
+                                        <!-- {{schemainstance.permission[field.name]}} -->
+                                    </Col>
+                                    <Col :span="16" style="padding-top: 10px;">
+                                        <Input v-if="field.type == 'textarea'" v-model="schemainstance.data[index][field.name]" type="textarea" :rows="schemainstance.data[index][field.numberoflines]" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name" :max="(field.property.max > 0)?field.property.max : Infinity"/>
+                                        <Input v-if="field.type == 'text' || field.type == 'email' || field.type == 'phone'" v-model="schemainstance.data[index][field.name]" type="text" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name" :max="(field.property.max > 0)?field.property.max : Infinity"></Input>
+                                        <Input v-if="field.type == 'currentuser'" v-model="schemainstance.data[index][field.name]" type="text" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name" :max="(field.property.max > 0)?field.property.max : Infinity"></Input>
+                                        <Input v-if="field.type == 'currenttime'" v-model="schemainstance.data[index][field.name]" type="text" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name" :max="(field.property.max > 0)?field.property.max : Infinity"></Input>
+                                        
+                                        <InputNumber v-if="field.type == 'number'" :min="(field.property.min > 0)?field.property.min : -Infinity" :max="(field.property.max > 0)?field.property.max : Infinity" v-model="schemainstance.data[index][field.name]" :type="field.type" :placeholder="field.name"></InputNumber>
+                                        
+                                        <DatePicker v-if="field.type == 'date'" type="date" v-model="schemainstance.data[index][field.name]" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name"></DatePicker>
+                                      
+                                        <Select v-if="field.type == 'dropdown'" v-model="schemainstance.data[index][field.name]" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name">
+                                            <Option v-for="dpd in field.property.options" :value="dpd" :key="dpd">{{ dpd }}</Option>
+                                        </Select>
+
+                                        <Checkbox v-if="field.type == 'boolean'" v-model="schemainstance.data[index][field.name]"></Checkbox>
+                                        <!-- <dynamicinput :type="(field.type) ? field.type : null" :bindmodel="(schemainstance.data[index][field.name]) ? schemainstance.data[index][field.name] : null " :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name" :min="(field.property.min > 0) ? field.property.min : -Infinity" :max="(field.property.max > 0) ? field.property.max : Infinity" :options="(field.property.options) ? field.property.options : null" :field="field"></dynamicinput> -->
+                                    </Col>
+                                  </div>
+                                  <div v-else>
+                                    <Col :span="8" style="text-align: right; padding-right: 10px; padding-top: 10px;">
+                                        <b class="field-label">{{field.name}}</b>
+                                    </Col>
+                                    <Col :span="16" style="padding-top: 10px;">
+                                      {{schemainstance.data[index][field.name]}}
+                                    </col>
+                                  </div>
+                                 </Row>
+                            </FormItem>
+                        </Col>
+                        <Col :span="24" style="padding:0px 20px 0px 2px" v-else>
+                            <FormItem :key="inx" :rules="createRules(field)" style="margin-bottom:10px;">
+                                <Row>
+                                  <div v-if="schemainstance.permission !== undefined">
+                                    <!-- {{schemainstance.permission[field.name]}} -->
+                                    <div v-if="schemainstance.permission[field.name].write  || schemainstance.permission[field.name].read">
+                                      <div v-if="schemainstance.permission[field.name].write">
+                                        <Col :span="2">
+                                            <b>{{field.name}}</b>
+                                        </Col>
+                                        <Col :span="21" >
+                                            <input class="form-control" type="file" v-if="field.type == 'file'" @change="handleFileChange($event, index, field.name)" :multiple="(field.property.isMultiple)? field.property.isMultiple: false"/>
+                                            <div v-if="schemainstance.data[index][field.name]" >
+                                              <Progress v-if="stratProgress"  v-bind:percent="fileUploadProgress" :success-percent="30" />
+                                              <div class="" v-for="(val, i) in schemainstance.data[index][field.name]">
+                                                    <Row>
+                                                        <Col :span="23"> <a :href="val" class="list-group-item" target="_blank" style="color:blue;padding:2px 2px;" >{{val}}</a></Col>
+                                                        <Col :span="1"  v-if="i >= oldFiles"><a href="#" style="color:red;float:right"  @click="removeSection(i, schemainstance.data[index][field.name])">&#10005;&nbsp;</a></Col>
+                                                    </Row>          
+                                              </div>
+                                            </div>
+                                        </Col>
+                                        <Col :span="1">&nbsp;&nbsp;{{fileNumber}} / {{fileSize}}</Col>
+                                      </div>
+                                      <div v-else>
+                                        <Col :span="2">
+                                            <b>{{field.name}}</b>
+                                        </Col>
+                                        <Col :span="21" >
+                                            <input class="form-control" type="file" v-if="field.type == 'file'" @change="handleFileChange($event, index, field.name)" :multiple="(field.property.isMultiple)? field.property.isMultiple: false"/>
+                                            <div v-if="schemainstance.data[index][field.name]" >
+                                              <Progress v-if="stratProgress"  v-bind:percent="fileUploadProgress" :success-percent="30" />
+                                              <div class="" v-for="(val, i) in schemainstance.data[index][field.name]">
+                                                    {{schemainstance.data[index][field.name].length}}
+                                                    <Row>
+                                                        <Col :span="23"> <a :href="val" class="list-group-item" target="_blank" style="color:blue;padding:2px 2px;" >{{val}}</a></Col>
+                                                        <!-- <Col :span="1"><a href="#" style="color:red;float:right"  @click="removeSection(i, schemainstance.data[index][field.name])">&#10005;&nbsp;</a></Col> -->
+                                                    </Row>          
+                                                </div>
+                                            </div>
+                                        </Col>
+                                        <Col :span="1">&nbsp;&nbsp;{{fileNumber}} / {{fileSize}}</Col>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </Row>
+                            </FormItem>
+                        </Col>
+                      </div>
+                  </div>
+                  <div v-else>
                     <Col :span="12" style="padding:0px 20px 0px 2px" v-if="field.type !== 'file'">
-                        <FormItem :key="inx" :rules="createRules(field)" style="margin-bottom:10px;">
-                            <Row>
+                          <FormItem :key="inx" :rules="createRules(field)" style="margin-bottom:10px;">
+                              <Row>
                                 <Col :span="8" style="text-align: right; padding-right: 10px; padding-top: 10px;">
                                     <b class="field-label">{{field.name}}</b>
                                 </Col>
@@ -43,13 +183,12 @@
                                     </Select>
 
                                     <Checkbox v-if="field.type == 'boolean'" v-model="schemainstance.data[index][field.name]"></Checkbox>
-
                                     <!-- <dynamicinput :type="(field.type) ? field.type : null" :bindmodel="(schemainstance.data[index][field.name]) ? schemainstance.data[index][field.name] : null " :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name" :min="(field.property.min > 0) ? field.property.min : -Infinity" :max="(field.property.max > 0) ? field.property.max : Infinity" :options="(field.property.options) ? field.property.options : null" :field="field"></dynamicinput> -->
                                 </Col>
-                            </Row>
-                        </FormItem>
-                    </Col>
-                    <Col :span="24" style="padding:0px 20px 0px 2px" v-else>
+                              </Row>
+                          </FormItem>
+                      </Col>
+                      <Col :span="24" style="padding:0px 20px 0px 2px" v-else>
                         <FormItem :key="inx" :rules="createRules(field)" style="margin-bottom:10px;">
                             <Row>
                                 <Col :span="2">
@@ -62,7 +201,7 @@
                                       <div class="" v-for="(val, i) in schemainstance.data[index][field.name]">
                                             <Row>
                                                 <Col :span="23"> <a :href="val" class="list-group-item" target="_blank" style="color:blue;padding:2px 2px;" >{{val}}</a></Col>
-                                                <Col :span="1"><a href="#" style="color:red;float:right"  @click="removeSection(i, schemainstance.data[index][field.name])">&#10005;&nbsp;</a></Col>
+                                                <Col :span="1" v-if="i >= oldFiles"><a href="#" style="color:red;float:right"  @click="removeSection(i, schemainstance.data[index][field.name])">&#10005;&nbsp;</a></Col>
                                             </Row>          
                                         </div>
                                     </div>
@@ -71,6 +210,7 @@
                             </Row>
                         </FormItem>
                     </Col>
+                    </div>
                 </template> 
             </div>
 
@@ -87,8 +227,6 @@
 </template>
 <script>
 import $ from 'jquery'
-import SchemaSubForm from './SchemaSubForm'
-// import axios from 'axios'
 import moment from 'moment'
 import _ from 'lodash'
 import schemaModel from '@/api/schema'
@@ -108,11 +246,13 @@ export default {
       fileSize: 0,
       fileUploadProgress: 0,
       stratProgress: false,
-      jumperLinks: []
+      jumperLinks: [],
+      oldFiles: 0
     }
   },
   components: {
-    schemasubform: SchemaSubForm
+    schemasubform: (resolve) => { require(['./SchemaSubForm'], resolve) },
+    SchemaSubFormView: (resolve) => { require(['./SchemaSubFormView'], resolve) }
   },
   methods: {
     async handleFileChange (e, index, fieldName) {
@@ -127,7 +267,7 @@ export default {
           allFiles.push(abc)
         }
       }
-      self.schemainstance.data[index][fieldName] = _.uniq(self.schemainstance.data[index][fieldName], allFiles)
+      self.schemainstance.data[index][fieldName] = _.concat(self.schemainstance.data[index][fieldName], allFiles)
     },
     uploadToAWS (file, i) {
       let self = this
@@ -158,7 +298,6 @@ export default {
               self.fileNumber = i + 1
               self.fileUploadProgress = 0
               self.stratProgress = false
-              console.log('data.Location', data.Location)
               resolve(data.Location)
             }
           })
@@ -197,7 +336,33 @@ export default {
               } else if (v.type === 'currentuser') {
                 obj[v.name] = this.$store.state.user.fullname || this.$store.state.user.email
               } else if (v.type === 'currenttime') {
-                obj[v.name] = new Date()
+                if (v.property.hasOwnProperty('dateformatselect')) {
+                  let fullDate = new Date()
+                  const year = fullDate.getFullYear()
+                  const month = fullDate.getMonth()
+                  const date = fullDate.getDate()
+                  const hour = fullDate.getHours()
+                  const minute = fullDate.getMinutes()
+                  const second = fullDate.getSeconds()
+                  if (v.property.dateformatselect === 'A') {
+                    obj[v.name] = date + '/' + month + '/' + year + ' ' + hour + ':' + minute
+                  }
+                  if (v.property.dateformatselect === 'B') {
+                    obj[v.name] = year + '/' + month + '/' + date + ' ' + hour + ':' + minute
+                  }
+                  if (v.property.dateformatselect === 'C') {
+                    obj[v.name] = year + '/' + month + '/' + date + ' ' + hour + ':' + minute + ':' + second
+                  }
+                  if (v.property.dateformatselect === 'D') {
+                    obj[v.name] = date + '/' + month + '/' + year + ' ' + hour + ':' + minute + ':' + second
+                  }
+                  if (v.property.dateformatselect === 'E') {
+                    obj[v.name] = date + '/' + month + '/' + year
+                  }
+                  if (v.property.dateformatselect === 'F') {
+                    obj[v.name] = year + '/' + month + '/' + date
+                  }
+                }
               } else if (v.type === 'boolean') {
                 if (
                   v.property.defaultValue !== '' ||
@@ -270,7 +435,33 @@ export default {
           } else if (v.type === 'currentuser') {
             obj[v.name] = this.$store.state.user.fullname || this.$store.state.user.email
           } else if (v.type === 'currenttime') {
-            obj[v.name] = new Date()
+            if (v.property.hasOwnProperty('dateformatselect')) {
+              let fullDate = new Date()
+              const year = fullDate.getFullYear()
+              const month = fullDate.getMonth()
+              const date = fullDate.getDate()
+              const hour = fullDate.getHours()
+              const minute = fullDate.getMinutes()
+              const second = fullDate.getSeconds()
+              if (v.property.dateformatselect === 'A') {
+                obj[v.name] = date + '/' + month + '/' + year + ' ' + hour + ':' + minute
+              }
+              if (v.property.dateformatselect === 'B') {
+                obj[v.name] = year + '/' + month + '/' + date + ' ' + hour + ':' + minute
+              }
+              if (v.property.dateformatselect === 'C') {
+                obj[v.name] = year + '/' + month + '/' + date + ' ' + hour + ':' + minute + ':' + second
+              }
+              if (v.property.dateformatselect === 'D') {
+                obj[v.name] = date + '/' + month + '/' + year + ' ' + hour + ':' + minute + ':' + second
+              }
+              if (v.property.dateformatselect === 'E') {
+                obj[v.name] = date + '/' + month + '/' + year
+              }
+              if (v.property.dateformatselect === 'F') {
+                obj[v.name] = year + '/' + month + '/' + date
+              }
+            }
           } else if (v.type === 'boolean') {
             if (
               v.property.defaultValue !== '' ||
@@ -373,7 +564,9 @@ export default {
       })
     }
   },
-  mounted () {},
+  mounted () {
+    this.oldFiles = this.schemainstance.data[0].Fileattachment.length
+  },
   created () {}
 }
 </script>

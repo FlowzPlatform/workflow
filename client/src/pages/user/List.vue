@@ -7,7 +7,6 @@
   </div>
 </template>
 <script>
-  import schemalist from './SchemaList'
   import schemaModel from '@/api/schema'
   // const deepstream = require('deepstream.io-client-js')
   // const client = deepstream('ws://204.48.26.167:6020').login()
@@ -15,7 +14,7 @@
   export default {
     name: 'listview',
     components: {
-      'schemalist': schemalist
+      'schemalist': (resolve) => { require(['./SchemaList'], resolve) },
     },
     data () {
       return {
@@ -34,8 +33,6 @@
     },
     methods: {
       listChanged (entries) {
-        console.log('callback-------')
-        console.log('entries', entries)
         this.mdata = []
         // for (let i of entries) {
         //   let recordObj = client.record.getRecord(i)

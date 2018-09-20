@@ -17,7 +17,7 @@
           </tr>
         </thead>
         <tbody>
-            <tr v-for="(item, inx) in instanceEntries">
+            <tr v-for="(item, inx) in instanceEntries" :key="inx">
               <td>{{item.id}}</td>
               <td>
                 <Tag color="blue" type="border" class="uppercase">{{item.mainStatus}}</Tag>
@@ -101,7 +101,7 @@ export default {
   methods: {
     async getRecord (item) {
       let currentObj = this.flowzData.processList[item.currentStatus]
-      console.log('currentObj: ', currentObj)
+      // console.log('currentObj: ', currentObj)
       let values = {
         id: this.flowzData.schema,
         item: item,

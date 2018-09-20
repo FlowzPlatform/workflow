@@ -38,6 +38,10 @@ module.exports = {
 };
 
 function beforeCreate (hook) {
+  // console.log('_______________________________________________________________: ')
+  // console.log('Hook: ', hook)
+  // console.log('_______________________________________________________________: ')
+
   hook.data.createdAt = new Date().toISOString();
   hook.params.isdone = true;
   if (hook.data.hasOwnProperty('nextTarget')) {
@@ -57,8 +61,10 @@ function afterCreate (hook) {
     return hook.app.service('flowz').get(hook.data.fid, {query}).then(res => {
       // let cuurentObj = _.find(res.json.processList, {id: hook.data.state});
       let cuurentObj = res.processList[hook.data.state];
+      console.log('________________________________________________cuurentObj', cuurentObj)
       // let nextTargetObj = getNextTarget(res.json.processList, cuurentObj.target[0].id);
       let nextTargetObj = res.processList[cuurentObj.target[0].id];
+      console.log('________________________________________________nextTargetObj', nextTargetObj)
       return hook.app.service('finstance').get(hook.data.iid).then(finstRes => {
         let mdata = {
           currentStatus: nextTargetObj.id,
@@ -73,6 +79,7 @@ function afterCreate (hook) {
         //   mdata.stageReference[mdata.stageReference.length - 1].completedAt = new Date().toISOString()
         //   // }
         // }
+        // console.log('&&&&&&&&&&&&&&&&&&%%%%%%%%%%%%%%%%: ', finstRes)
         let referenceObj = {
           StageName: finstRes.currentStatus,
           stageRecordId: hook.result.id,

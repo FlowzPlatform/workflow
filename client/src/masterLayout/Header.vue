@@ -1,3 +1,14 @@
+<style>
+  span.text {
+    /* display: none; */
+    font-weight: normal;
+  }
+  @media only screen and (max-width: 1500px) {
+		  span.text {
+        display: none;
+      }
+  }
+</style>
 <template>
     <Menu mode="horizontal" :theme="'primary'">
         <Row type="flex">
@@ -25,20 +36,27 @@
                     </Menu-item> -->
                     <Menu-item name="4" v-if="getRole == 1">
                         <router-link to="/admin/emailtemplate">
+                          <Tooltip content="Email Template">
                             <Icon type="email" :size="14"></Icon>
-                            Email Template
+                          </Tooltip>
+                            
+                            <span class="text">Email Template</span>
                         </router-link>
                     </Menu-item>
                     <Menu-item name="2" v-if="getRole == 1">
                         <router-link to="/admin/schema">
+                          <Tooltip content="Schema">
                             <Icon type="filing" :size="14"></Icon>
-                            Schema
+                          </Tooltip>
+                            <span class="text">Schema</span>
                         </router-link>
                     </Menu-item>
                     <Menu-item name="3" v-if="getRole == 1">
                         <router-link to="/admin/flow">
+                          <Tooltip content="Flow">
                             <Icon type="network" :size="14"></Icon>
-                            Flow
+                          </Tooltip>
+                            <span class="text">Flow</span>
                         </router-link>
                     </Menu-item>
                     <!-- <Menu-item name="4" v-if="getRole == 1">
@@ -70,6 +88,9 @@
                         </Menu-item>
                     </Submenu>
                     </Menu-item>
+                    <Menu-item name="5">
+                      <i @click="hardRefresh" class="fa fa-refresh" aria-hidden="true" title="hard refresh"></i>
+                    </Menu-item>
                 </div>
                 </Row>
         </i-col>
@@ -78,11 +99,9 @@
 </template>
 <script>
   import psl from 'psl'
-  // import axios from 'axios'
-  import subscription from '@/components/subscription'
   export default {
     components: {
-      subscription
+      subscription: (resolve) => { require(['@/components/subscription'], resolve) }
     },
     computed: {
       getRole () {
@@ -112,6 +131,17 @@
       }
     },
     methods: {
+      hardRefresh () {
+        this.$store.state.flowz = []
+        this.$store.state.schema = []
+        this.$store.state.Cache = null
+        this.$store.state.Cache = {}
+        this.$store.state.registerRoles = null
+        this.$store.state.registerRoles = {}
+        this.$store.state.registerResources = null
+        this.$store.state.registerResources = {}
+        window.location.reload()
+      },
       gotoDashboard () {
         if (this.$store.state.role === 1) {
           this.$router.push('/admin/dashboard')
@@ -126,9 +156,15 @@
         this.$store.commit('SET_TOKEN', null)
         this.$store.commit('SET_USER', null)
         this.$store.commit('SET_ROLE', null)
+        this.$store.state.flowz = []
+        this.$store.state.schema = []
+        this.$store.state.Cache = null
+        this.$store.state.Cache = {}
         this.$router.push('/login')
       },
       handleChange (value) {
+        this.$store.state.Cache = null
+        this.$store.state.Cache = {}
         this.$store.state.subscription = value
         if (this.$store.state.user.package) {
           if (this.$store.state.user.package[value] && this.$store.state.user.package[value].role === 'admin') {

@@ -12,5 +12,7 @@ export default {
   isLoggedIn: false,
   limitPage: 5,
   subscription: '',
-  updateView: ''
+  updateView: '',
+  registerResources: {},
+  registerRoles: {}
 }
