@@ -1,3 +1,14 @@
+<style>
+  span.text {
+    /* display: none; */
+    font-weight: normal;
+  }
+  @media only screen and (max-width: 1500px) {
+		  span.text {
+        display: none;
+      }
+  }
+</style>
 <template>
     <Menu mode="horizontal" :theme="'primary'">
         <Row type="flex">
@@ -25,20 +36,27 @@
                     </Menu-item> -->
                     <Menu-item name="4" v-if="getRole == 1">
                         <router-link to="/admin/emailtemplate">
+                          <Tooltip content="Email Template">
                             <Icon type="email" :size="14"></Icon>
-                            Email Template
+                          </Tooltip>
+                            
+                            <span class="text">Email Template</span>
                         </router-link>
                     </Menu-item>
                     <Menu-item name="2" v-if="getRole == 1">
                         <router-link to="/admin/schema">
+                          <Tooltip content="Schema">
                             <Icon type="filing" :size="14"></Icon>
-                            Schema
+                          </Tooltip>
+                            <span class="text">Schema</span>
                         </router-link>
                     </Menu-item>
                     <Menu-item name="3" v-if="getRole == 1">
                         <router-link to="/admin/flow">
+                          <Tooltip content="Flow">
                             <Icon type="network" :size="14"></Icon>
-                            Flow
+                          </Tooltip>
+                            <span class="text">Flow</span>
                         </router-link>
                     </Menu-item>
                     <!-- <Menu-item name="4" v-if="getRole == 1">

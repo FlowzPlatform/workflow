@@ -158,7 +158,7 @@
                                             <DatePicker type="date" placeholder="Select date"  v-model="item.property.maxdate"></DatePicker>
                                           </Form-item>
                                           <Form-item v-if="activatedProperty(index,'allowedValue')" label="Allowed Value" :label-width="80" class="no-margin">
-                                            <input-tag  :tags="item.property.allowedValue"></input-tag>
+                                            <input-tag :tags="item.property.allowedValue"></input-tag>
                                           </Form-item>
                                           <Form-item v-if="activatedProperty(index,'options')" label="Options" :label-width="80" class="no-margin">
                                             <input-tag :tags="item.property.options"></input-tag>
@@ -180,6 +180,11 @@
                                           </Form-item>
                                           <Form-item v-if="activatedProperty(index,'optional')" label="" :label-width="80" class="no-margin">
                                             <Checkbox v-model="item.property.optional">Optional</Checkbox>
+                                          </Form-item>
+                                          <Form-item v-if="activatedProperty(index,'dateformat')" label="Date" :label-width="80" class="no-margin">
+                                            <Select v-model="item.property.dateformatselect" style="width:200px; height: 150px">
+                                                <Option v-for="item in dateList" :value="item.value" :key="item.value">{{ item.label }}</Option>
+                                            </Select>
                                           </Form-item>
                                         </div>
                                       </Poptip>
@@ -311,6 +316,33 @@ export default {
       }
     }
     return {
+      dateList: [
+        {
+          value: 'A',
+          label: 'dd/mm/yyyy hh:mm'
+        },
+        {
+          value: 'B',
+          label: 'yyyy/mm/dd hh:mm'
+        },
+        {
+          value: 'C',
+          label: 'yyyy/mm/dd hh:mm:s'
+        },
+        {
+          value: 'D',
+          label: 'dd/mm/yyyy hh:mm:s'
+        },
+        {
+          value: 'E',
+          label: 'dd/mm/yyyy'
+        },
+        {
+          value: 'F',
+          label: 'yyyy/mm/dd'
+        }
+      ],
+      model1: '',
       loading: false,
       formSchema: {
         title: '',
@@ -332,7 +364,8 @@ export default {
               optional: true,
               options: [],
               IsArray: false,
-              isMultiple: true
+              isMultiple: true,
+              dateformatselect: ''
             },
             notes: ''
           }
@@ -455,7 +488,8 @@ export default {
                 optional: true,
                 options: [],
                 IsArray: false,
-                isMultiple: true
+                isMultiple: true,
+                dateformatselect: ''
               },
               notes: ''
             }
@@ -551,7 +585,8 @@ export default {
               optional: true,
               options: [],
               IsArray: false,
-              isMultiple: true
+              isMultiple: true,
+              dateformatselect: ''
             },
             notes: ''
           }
@@ -580,7 +615,8 @@ export default {
           optional: true,
           options: [],
           IsArray: '',
-          isMultiple: true
+          isMultiple: true,
+          dateformatselect: ''
         },
         notes: ''
       })
@@ -608,7 +644,7 @@ export default {
         'dropdown': ['options', 'defaultValue', 'placeholder', 'optional'],
         'file': ['optional', 'isMultiple'],
         'currentuser': ['optional'],
-        'currenttime': ['optional']
+        'currenttime': ['optional', 'dateformat']
 
       }
       if (typePropertys[this.formSchema.entity[index].type] === undefined) {
