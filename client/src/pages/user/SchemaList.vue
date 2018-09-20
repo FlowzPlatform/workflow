@@ -697,12 +697,12 @@
 </style>
 
 <style>
-.ivu-table td:nth-child(2) div span{
+/*.ivu-table td:nth-child(2) div span{
   width:200px !important;
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
-}
+}*/
 .ivu-table-cell div{
     white-space: nowrap !important;
     overflow: hidden !important;

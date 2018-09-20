@@ -65,11 +65,11 @@
           </div>
         </div>
 
-        <div v-if="instanceEntries.length === 0 && itsFirstState === false">
+        <!-- <div v-if="instanceEntries.length === 0 && itsFirstState === false">
           <p align="center">No Data</p>
-        </div>
+        </div> -->
         
-        <div v-if="itsFirstState === false && instanceEntries.length !== 0">
+        <div v-if="itsFirstState === false">
           <tabs> 
             <TabPane v-if="this.$store.state.role === 1" :label="dataCount" icon="lock-combination">
           <schemalist v-if="this.$store.state.role === 1" :schema="dataSchema" :pageno="pageno" :datashow="'dataA'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
@@ -250,12 +250,12 @@ export default {
         'id[$search]': '^' + query.text
       }).then(res => {
         this.isFlowzLoaded = true
-        let firstState = this.flowzData.first
-        if (firstState === this.$route.params.stateid) {
-          this.itsFirstState = true
-        } else {
-          this.itsFirstState = false
-        }
+        // let firstState = this.flowzData.first
+        // if (firstState === this.$route.params.stateid) {
+        //   this.itsFirstState = true
+        // } else {
+        //   this.itsFirstState = false
+        // }
         this.dataTotal = res.data.total
         if (res.data.data.length > 0) {
           this.instanceEntries = res.data.data
@@ -265,7 +265,7 @@ export default {
         } else {
           this.instanceEntries = []
           this.dataData = []
-          this.itsFirstState = true
+          // this.itsFirstState = true
           this.dataLoading = false
           // this.$Spin.hide()
           this.$Loading.finish()
@@ -1154,9 +1154,15 @@ export default {
   .clickToCopy{
     cursor: pointer;
   }
+
+
 </style>
 
 <style>
+.ivu-table-tip table td{
+    text-align: left;
+    padding-left: 20px;
+  }
   .ivu-modal-body{
     max-height: 550px !important;
     overflow-y: auto !important;
