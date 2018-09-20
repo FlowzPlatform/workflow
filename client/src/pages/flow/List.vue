@@ -34,10 +34,6 @@
                                     <template v-for="(field,fieldNumber) in fields[moduleName]">
                                         <td v-if="fieldNumber ==0" style="padding:10px;font-weight:bold;border-right: 3px solid #cdd0d4;">
                                             {{selectedFlowObject.processList[titleCase(item.service)].name}}
-                                            <!-- {{item.service}}
-                                            <br>
-                                            <br>
-                                            {{selectedFlowObject.processList[titleCase(item.service)]}} -->
                                         </td>
                                         <td v-else>
                                             <table class="table-bordered" style="width:100%">
@@ -166,7 +162,7 @@
 <script>
 import flowz from '@/api/flowz'
 import _ from 'lodash'
-import finstanceModal from '@/api/finstance'
+// import finstanceModal from '@/api/finstance'
 import axios from 'axios'
 import viewSVG from './viewSVG'
 import psl from 'psl'
@@ -184,7 +180,7 @@ import moment from 'moment'
 export default {
   name: 'Flowz',
   components: {
-    'viewSVG': (resolve) => { require(['./viewSVG'], resolve) },
+    viewSVG: (resolve) => { require(['./viewSVG'], resolve) },
     expandRow2: (resolve) => { require(['./assigned_invite_table-expand.vue'], resolve) },
     subscription: (resolve) => { require(['@/components/subscription'], resolve) }
   },
@@ -248,27 +244,27 @@ export default {
           align: 'center',
           render: (h, params) => {
             return h('div', [
-              h('Button', {
-                props: {
-                  type: 'text',
-                  size: 'large',
-                  icon: 'arrow-right-b'
-                },
-                domProps: {
-                  title: 'Start Instance'
-                },
-                style: {
-                  marginRight: '3px',
-                  padding: '0px',
-                  fontSize: '20px',
-                  color: '#2411c5'
-                },
-                on: {
-                  click: () => {
-                    this.createNewInstance(params.row.id)
-                  }
-                }
-              }, ''),
+              // h('Button', {
+              //   props: {
+              //     type: 'text',
+              //     size: 'large',
+              //     icon: 'arrow-right-b'
+              //   },
+              //   domProps: {
+              //     title: 'Start Instance'
+              //   },
+              //   style: {
+              //     marginRight: '3px',
+              //     padding: '0px',
+              //     fontSize: '20px',
+              //     color: '#2411c5'
+              //   },
+              //   on: {
+              //     click: () => {
+              //       this.createNewInstance(params.row.id)
+              //     }
+              //   }
+              // }, ''),
               h('Button', {
                 props: {
                   type: 'text',
@@ -723,22 +719,22 @@ export default {
         console.log(error)
       })
     },
-    createNewInstance (item) {
-      this.$Loading.start()
-      let fheaders = null
-      finstanceModal.post({fid: item.id}, null, fheaders).then(res => {
-        this.$Notice.success({title: 'Instance Generated'})
-        this.$Loading.finish()
-      }).catch(e => {
-        this.$Loading.error()
-        console.log('error', e.response)
-        if (e.response.data.message) {
-          this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
-        } else {
-          this.$Notice.error({title: 'Error', desc: 'Instace Not Generated'})
-        }
-      })
-    },
+    // createNewInstance (item) {
+    //   this.$Loading.start()
+    //   let fheaders = null
+    //   finstanceModal.post({fid: item.id}, null, fheaders).then(res => {
+    //     this.$Notice.success({title: 'Instance Generated'})
+    //     this.$Loading.finish()
+    //   }).catch(e => {
+    //     this.$Loading.error()
+    //     console.log('error', e.response)
+    //     if (e.response.data.message) {
+    //       this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+    //     } else {
+    //       this.$Notice.error({title: 'Error', desc: 'Instace Not Generated'})
+    //     }
+    //   })
+    // },
     addNewFlow () {
       this.$store.dispatch('removeXMLtoLocalStorage')
       this.$router.push({name: 'flow/new'})
@@ -750,7 +746,6 @@ export default {
         onOk: () => {
           flowz.delete(id)
           .then(response => {
-            // console.log('response.data', response.data)
             this.$Notice.success({title: 'Success!!', desc: 'Flowz Deleted...'})
             this.flowzList.splice(inx, 1)
           })
