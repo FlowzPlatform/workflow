@@ -719,7 +719,7 @@ export default {
       })
       .catch(error => {
         this.loading = false
-        this.$Notice({duration: '3', title: 'Network Error', desc: ''})
+        this.$Notice.error({duration: '3', title: error.message, desc: ''})
         console.log(error)
       })
     },

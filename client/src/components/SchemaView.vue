@@ -605,7 +605,7 @@ export default {
             if (e.response.data.message) {
               this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
             } else {
-              this.$Notice.error({title: 'Error', desc: 'Instace Not Generated'})
+              this.$Notice.error({title: 'Error', desc: e.message})
             }
           })
       } else {
@@ -655,11 +655,11 @@ export default {
                 }, 1000)
               })
               .catch((err) => {
+                this.$Notice.error({duration: '3', title: err.message, desc: ''})
                 setTimeout(() => {
                   this.sendDataEmail = this.$refs.schemasubformview.$el.outerHTML
                   this.email = true
                   this.loadEmail = false
-                  console.log(err)
                 }, 1000)
               })
             } else {
@@ -769,7 +769,7 @@ export default {
         this.validErr = []
         this.isEmailDone = false
       }).catch(err => {
-        console.log('Error', err)
+        this.$Notice.error({duration: '3', title: err.message, desc: ''})
         this.$Loading.finish()
         this.bLoading = false
         this.email = false
@@ -934,7 +934,7 @@ export default {
       .then((res) => {
         return (res.data.data[0])
       }).catch(err => {
-        console.log('Error: ', err)
+        this.$Notice.error({duration: '3', title: err.message, desc: ''})
         this.dataLoading = false
         return
       })
@@ -944,7 +944,7 @@ export default {
       return schemaModel.getAll(this.flowzData.schema).then(res => {
         return res
       }).catch(err => {
-        console.log('Error: ', err)
+        this.$Notice.error({duration: '3', title: err.message, desc: ''})
         this.dataLoading = false
         return
       })
@@ -990,7 +990,7 @@ export default {
           this.$Loading.finish()
         }
       }).catch(err => {
-        console.error('Error: ', err)
+        this.$Notice.error({duration: '3', title: err.message, desc: ''})
         this.$Loading.error()
         this.dataLoading = false
       })
