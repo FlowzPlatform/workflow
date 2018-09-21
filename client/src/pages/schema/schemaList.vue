@@ -193,6 +193,7 @@
           return res.data.data
         }).catch(err => {
           console.log(err)
+          this.$Notice.error({duration: '3', title: err.message, desc: ''})
           this.loading = false
           return []
         }))

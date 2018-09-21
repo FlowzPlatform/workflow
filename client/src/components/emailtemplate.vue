@@ -4,7 +4,7 @@
       <h2 class="heading">Templates</h2>
       <Table border highlight-row :columns="columns7" class="tableCss" :data="data6"></Table>
     </div>
-    <div class="editor" v-if="newTemplate">
+    <div class="editor" v-if="newTemplate && flag">
       <h2 class="heading">Create Template</h2>
       <keep-alive>
         <editor v-model="GetHtmlOfEditor" api-key="ppzi01crrfo3pvd43s3do89pguwkhowrwajpjdqdkginzj7k" :toolbar="toolbar1" :plugins="plugins" :init="settings" :initial-value="gethtmlcontent"></editor>
@@ -29,6 +29,7 @@ import _ from 'lodash'
 export default {
   data () {
     return {
+      flag: false,
       updateTemplateid: '',
       newTemplate: true,
       templateName: '',
@@ -179,10 +180,12 @@ export default {
       'user': this.$store.state.user._id
     })
     .then((res) => {
+      this.flag = true
       this.data6 = res.data.data
     })
     .catch((err) => {
       console.log(err)
+      this.$Notice.error({duration: '3', title: err.message, desc: ''})
     })
   },
   feathers: {

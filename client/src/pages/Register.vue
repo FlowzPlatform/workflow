@@ -99,8 +99,8 @@ export default {
             }
           })
           .catch(e => {
-            this.$Message.error(e.response.data)
             this.loading = false
+            this.$Message.error(e.message)
           })
         } else {
           this.$Message.error('Form validation failed!')
