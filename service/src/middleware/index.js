@@ -13,7 +13,7 @@ module.exports = function () {
   subscription.moduleResource.moduleName = 'workflow';
   let registerAppModule = {
     'flowz': ['create','update', 'patch', 'remove'],
-    'finstance': ['create','update', 'patch', 'remove'],
+    'finstance': ['create','update', 'remove'],
     'flowzdata': ['update', 'patch'],
     'schema': ['create','update', 'patch', 'remove'],
     'bpmnplugins': ['create','update', 'patch', 'remove'],
