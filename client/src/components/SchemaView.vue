@@ -794,7 +794,7 @@ export default {
         }
       }
       if (fheaders !== null) {
-        finstanceModal.post(saveObj, null, fheaders)
+        flowzdataModal.post(saveObj, null, fheaders)
         .then(res => {
           this.id = null
           this.$Loading.finish()
@@ -816,7 +816,7 @@ export default {
           }
         })
       } else {
-        finstanceModal.post(saveObj)
+        flowzdataModal.post(saveObj)
         .then(res => {
           this.$Loading.finish()
           this.$Notice.success({title: 'Saved Successfully'})
