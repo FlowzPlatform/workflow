@@ -364,14 +364,21 @@
                   },
                   on: {
                     'click': async () => {
-                      finstanceModal.patch(params.row.id, {claimUser: ''})
+                      let fheaders = {
+                        workflowid: 'workflow_' + this.$route.params.id,
+                        stateid: this.$route.params.stateid
+                      }
+                      finstanceModal.patch(params.row.id, {claimUser: ''}, null, fheaders)
                       .then((res) => {
                         this.data.splice(params.index, 1)
                         this.$Notice.success({title: 'Successfully Unclaim'})
                       })
                       .catch((err) => {
-                        console.log(err)
-                        this.$Notice.error({title: 'Unclaim error'})
+                        if (err.response) {
+                          this.$Notice.error({title: err.response.data.message})
+                        } else {
+                          this.$Message.error(err.message)
+                        }
                       })
                     }
                   }
@@ -506,14 +513,21 @@
                   },
                   on: {
                     'click': async () => {
-                      finstanceModal.patch(params.row.id, {claimUser: this.$store.state.user._id})
+                      let fheaders = {
+                        workflowid: 'workflow_' + this.$route.params.id,
+                        stateid: this.$route.params.stateid
+                      }
+                      finstanceModal.patch(params.row.id, {claimUser: this.$store.state.user._id}, null, fheaders)
                       .then((res) => {
                         this.data.splice(params.index, 1)
                         this.$Notice.success({title: 'Successfully Claim'})
                       })
                       .catch((err) => {
-                        console.log(err)
-                        this.$Notice.error({title: 'claim error'})
+                        if (err.response) {
+                          this.$Notice.error({title: err.response.data.message})
+                        } else {
+                          this.$Message.error(err.message)
+                        }
                       })
                     }
                   }

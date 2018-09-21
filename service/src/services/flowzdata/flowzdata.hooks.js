@@ -104,9 +104,12 @@ function afterCreate (hook) {
         if (nextTargetObj.type === 'endevent') {
           mdata.mainStatus = 'completed';
         }
+        console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',
+          hook.params)
         return hook.app.service('finstance').patch(hook.data.iid, mdata, hook.params).then(pRes => {
           return hook;
         }).catch(err => {
+          console.log('_________________________________________________________________________________________________________', err.message)
           throw new errors.BadRequest('Error', {
             errors: { message: err.message }
           });

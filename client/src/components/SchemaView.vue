@@ -132,6 +132,60 @@
           </TabPane>
           <TabPane v-if="this.$store.state.role === 2" :label="'Work Pool ('+ dataData2.length + ')'" icon="lock-combination">
             <schemalist :schema="dataSchema" :datashow="'dataU'" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+            <div style="padding: 10px">
+            <div class="row" v-if="id != null">
+              <div class="col-md-12" id="top">
+                <div class="row" style="margin-top: 15px;">
+                  <div class="col-md-12">
+                    <div class="ui-card">
+                      <h3 class="formTitle">{{formTitle}}<span style="font-size:12px">&nbsp;&nbsp;({{item.id}})</span></h3>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-12">
+                    <schemasubform v-on:upadteJumperList="updateJumperList" :schemainstance="formSchemaInstance"></schemasubform>
+                    <div v-if="isMultiple">
+                    <div class="row" style="margin-top: 15px;">
+                      <div class="col-md-12">
+                        <div class="ui-card">
+                          <Row>
+                            <Col :span="4">
+                              <b class="field-label">Target</b>
+                            </Col>
+                            <Col :span="20">
+                              <Select v-model="nextTarget.value" placeholder="Choose Target">
+                                <Option v-for="dpd in nextTarget.options" :value="dpd.value" :key="dpd.value">{{ dpd.label }}</Option>
+                              </Select>
+                            </Col>
+                          </Row>
+                        </div>
+                      </div>
+                    </div>
+                    </div>
+                    <div style="padding: 5px 0 5px 0">
+                        <Button type="primary" @click="handleSubmit('formSchemaInstance')" :loading="bLoading">{{ savebutton }}</Button>
+                    </div>
+
+                    <div v-if="validErr.length != 0" style="color: #a94442;background-color: #f2dede;border:1px solid #ebccd1;padding: 5px">
+                        <div v-for="item in validErr">
+                            <i class="fa fa-exclamation-triangle"></i>
+                            {{item.name}} -- {{item.errmsg}}
+                        </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- <div class="col-md-1 fixed-div">
+                <strong>Jump To:</strong>
+                <ul class="jumper-links">
+                  <a href="#top" class="btn btn-info btn-block btnJumperLink"><li>Top</li></a>
+                  <a :href="'#' + item" v-for="item in jumperLinks" class="btn btn-info btn-block btnJumperLink"><li>{{item}}</li></a>
+                </ul>
+              </div> -->
+            </div>
+          </div>
           </TabPane>
           <TabPane v-if="this.$store.state.role === 2" :label="'In Progress ('+ dataClaim.length + ')'" icon="lock-combination">
             <schemalist v-if="this.$store.state.role === 2" :schema="dataSchema" :pageno="pageno" :datashow="'dataC'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataClaim" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
@@ -578,17 +632,19 @@ export default {
       if (this.check === -1) {
         this.$Loading.start()
         let fheaders = null
-        fheaders = {
-          workflowid: 'workflow_' + this.flowzData.id,
-          stateid: this.$route.params.stateid
-        }
-
         let saveObj = {
           fid: this.$route.params.id,
           currentStatus: this.$route.params.stateid,
           data: this.formSchemaInstance.data[0]
         }
-        finstanceModal.post(saveObj, null, fheaders)
+        if (this.$store.state.role === 2) {
+          fheaders = {
+            workflowid: 'workflow_' + this.flowzData.id,
+            stateid: this.$route.params.stateid
+          }
+        }
+        if (fheaders !== null) {
+          finstanceModal.post(saveObj, null, fheaders)
           .then(res => {
             this.$Loading.finish()
             this.$Notice.success({title: 'Saved Successfully'})
@@ -606,9 +662,32 @@ export default {
             if (e.response.data.message) {
               this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
             } else {
-              this.$Notice.error({title: 'Error', desc: 'Instace Not Generated'})
+              this.$Notice.error({duration: '3', title: e.message, desc: ''})
             }
           })
+        } else {
+          finstanceModal.post(saveObj)
+          .then(res => {
+            this.$Loading.finish()
+            this.$Notice.success({title: 'Saved Successfully'})
+            this.bLoading = false
+            setTimeout(() => {
+              $('html, body').animate({
+                scrollTop: $('#top').offset().top
+              }, 500)
+            }, 0)
+            this.init()
+          }).catch(e => {
+            this.$Loading.error()
+            console.log('error', e)
+            this.bLoading = false
+            if (e.response.data.message) {
+              this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+            } else {
+              this.$Notice.error({title: 'Error', desc: e.message})
+            }
+          })
+        }
       } else {
         this.validErr = _.uniqBy(this.validErr, 'name')
         this.$Notice.error({title: 'Validation Error!'})
@@ -650,17 +729,23 @@ export default {
               saveemailTemplate.get(nextTargetId.emailtemplate)
               .then((res) => {
                 setTimeout(() => {
-                  this.sendDataEmail = res.data.template + this.$refs.schemasubformview.$el.outerHTML
-                  this.email = true
-                  this.loadEmail = false
+                  if (res.data.template === undefined) {
+                    this.sendDataEmail = this.$refs.schemasubformview.$el.outerHTML
+                    this.email = true
+                    this.loadEmail = false
+                  } else {
+                    this.sendDataEmail = res.data.template + this.$refs.schemasubformview.$el.outerHTML
+                    this.email = true
+                    this.loadEmail = false
+                  }
                 }, 1000)
               })
               .catch((err) => {
+                this.$Notice.error({duration: '3', title: err.message, desc: ''})
                 setTimeout(() => {
                   this.sendDataEmail = this.$refs.schemasubformview.$el.outerHTML
                   this.email = true
                   this.loadEmail = false
-                  console.log(err)
                 }, 1000)
               })
             } else {
@@ -751,6 +836,7 @@ export default {
       this.$Loading.start()
       let mergeData = this.mergeFileList(obj.data, obj)
       obj.data = mergeData
+      let fheaders = null
       let saveObj = {
         fid: this.item.fid,
         iid: this.item.id,
@@ -761,22 +847,57 @@ export default {
         saveObj.nextTarget = this.nextTarget.value
       }
       this.bLoading = true
-      flowzdataModal.post(saveObj).then(res => {
-        this.id = null
-        this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
-        this.$Loading.finish()
-        this.bLoading = false
-        this.email = false
-        this.validErr = []
-        this.isEmailDone = false
-      }).catch(err => {
-        console.log('Error', err)
-        this.$Loading.finish()
-        this.bLoading = false
-        this.email = false
-        this.isEmailDone = false
-        this.$Notice.error({title: 'Not Saved!'})
-      })
+      if (this.$store.state.role === 2) {
+        fheaders = {
+          workflowid: 'workflow_' + this.flowzData.id,
+          stateid: this.$route.params.stateid
+        }
+      }
+      if (fheaders !== null) {
+        flowzdataModal.post(saveObj, null, fheaders)
+        .then(res => {
+          this.id = null
+          this.$Loading.finish()
+          this.$Notice.success({title: 'Saved Successfully'})
+          this.bLoading = false
+          this.email = false
+          this.validErr = []
+          this.isEmailDone = false
+        }).catch(e => {
+          this.$Loading.error()
+          console.log('error', e)
+          this.bLoading = false
+          this.email = false
+          this.isEmailDone = false
+          if (e.response.data.message) {
+            this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+          } else {
+            this.$Notice.error({duration: '3', title: e.message, desc: ''})
+          }
+        })
+      } else {
+        flowzdataModal.post(saveObj)
+        .then(res => {
+          this.$Loading.finish()
+          this.$Notice.success({title: 'Saved Successfully'})
+          this.bLoading = false
+          setTimeout(() => {
+            $('html, body').animate({
+              scrollTop: $('#top').offset().top
+            }, 500)
+          }, 0)
+          this.init()
+        }).catch(e => {
+          this.$Loading.error()
+          console.log('error', e)
+          this.bLoading = false
+          if (e.response.data.message) {
+            this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+          } else {
+            this.$Notice.error({duration: '3', title: e.message, desc: ''})
+          }
+        })
+      }
     },
     checkValidation (data, ent) {
       let self = this
@@ -935,7 +1056,7 @@ export default {
       .then((res) => {
         return (res.data.data[0])
       }).catch(err => {
-        console.log('Error: ', err)
+        this.$Notice.error({duration: '3', title: err.message, desc: ''})
         this.dataLoading = false
         return
       })
@@ -945,7 +1066,7 @@ export default {
       return schemaModel.getAll(this.flowzData.schema).then(res => {
         return res
       }).catch(err => {
-        console.log('Error: ', err)
+        this.$Notice.error({duration: '3', title: err.message, desc: ''})
         this.dataLoading = false
         return
       })
@@ -991,7 +1112,7 @@ export default {
           this.$Loading.finish()
         }
       }).catch(err => {
-        console.error('Error: ', err)
+        this.$Notice.error({duration: '3', title: err.message, desc: ''})
         this.$Loading.error()
         this.dataLoading = false
       })
