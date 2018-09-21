@@ -127,7 +127,7 @@ import schemaModel from '@/api/schema'
           entity: []
         },
         btn:'',
-        plugins: 'print preview searchreplace fullscreen image link media template codesample table char6map hr pagebreak anchor toc insertdatetime lists textcolor imagetools linkchecker contextmenu colorpicker',
+        plugins: 'print preview searchreplace fullscreen image link media template codesample table hr pagebreak anchor toc insertdatetime lists textcolor imagetools linkchecker contextmenu colorpicker',
         GetHtmlOfEditor: '',
         tinyMCEcontent: ''
       }
