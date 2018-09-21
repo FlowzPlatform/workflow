@@ -132,6 +132,60 @@
           </TabPane>
           <TabPane v-if="this.$store.state.role === 2" :label="'Work Pool ('+ dataData2.length + ')'" icon="lock-combination">
             <schemalist :schema="dataSchema" :datashow="'dataU'" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+            <div style="padding: 10px">
+            <div class="row" v-if="id != null">
+              <div class="col-md-12" id="top">
+                <div class="row" style="margin-top: 15px;">
+                  <div class="col-md-12">
+                    <div class="ui-card">
+                      <h3 class="formTitle">{{formTitle}}<span style="font-size:12px">&nbsp;&nbsp;({{item.id}})</span></h3>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-12">
+                    <schemasubform v-on:upadteJumperList="updateJumperList" :schemainstance="formSchemaInstance"></schemasubform>
+                    <div v-if="isMultiple">
+                    <div class="row" style="margin-top: 15px;">
+                      <div class="col-md-12">
+                        <div class="ui-card">
+                          <Row>
+                            <Col :span="4">
+                              <b class="field-label">Target</b>
+                            </Col>
+                            <Col :span="20">
+                              <Select v-model="nextTarget.value" placeholder="Choose Target">
+                                <Option v-for="dpd in nextTarget.options" :value="dpd.value" :key="dpd.value">{{ dpd.label }}</Option>
+                              </Select>
+                            </Col>
+                          </Row>
+                        </div>
+                      </div>
+                    </div>
+                    </div>
+                    <div style="padding: 5px 0 5px 0">
+                        <Button type="primary" @click="handleSubmit('formSchemaInstance')" :loading="bLoading">{{ savebutton }}</Button>
+                    </div>
+
+                    <div v-if="validErr.length != 0" style="color: #a94442;background-color: #f2dede;border:1px solid #ebccd1;padding: 5px">
+                        <div v-for="item in validErr">
+                            <i class="fa fa-exclamation-triangle"></i>
+                            {{item.name}} -- {{item.errmsg}}
+                        </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- <div class="col-md-1 fixed-div">
+                <strong>Jump To:</strong>
+                <ul class="jumper-links">
+                  <a href="#top" class="btn btn-info btn-block btnJumperLink"><li>Top</li></a>
+                  <a :href="'#' + item" v-for="item in jumperLinks" class="btn btn-info btn-block btnJumperLink"><li>{{item}}</li></a>
+                </ul>
+              </div> -->
+            </div>
+          </div>
           </TabPane>
           <TabPane v-if="this.$store.state.role === 2" :label="'In Progress ('+ dataClaim.length + ')'" icon="lock-combination">
             <schemalist v-if="this.$store.state.role === 2" :schema="dataSchema" :pageno="pageno" :datashow="'dataC'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataClaim" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
