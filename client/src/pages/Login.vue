@@ -145,7 +145,7 @@ export default {
             if (error.response) {
               this.$Message.error(error.response.data)
             } else {
-              this.$Message.error('Fail login.')
+              this.$Message.error(error.message)
             }
             return
           })
