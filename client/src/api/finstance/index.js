@@ -14,13 +14,13 @@ export default {
   post: (data, params = null, headers) => {
     return api.request('post', '/' + model, data, params, headers)
   },
-  put: (id, data) => {
-    return api.request('put', '/' + model + '/' + id, data)
+  put: (id, data, params = null, headers) => {
+    return api.request('put', '/' + model + '/' + id, data, params, headers)
   },
-  patch: (id, data) => {
-    return api.request('patch', '/' + model + '/' + id, data)
+  patch: (id, data, params = null, headers) => {
+    return api.request('patch', '/' + model + '/' + id, data, params, headers)
   },
-  delete: (id) => {
-    return api.request('delete', '/' + model + '/' + id)
+  delete: (id, params = null, headers) => {
+    return api.request('delete', '/' + model + '/' + id, params, headers)
   }
 }
