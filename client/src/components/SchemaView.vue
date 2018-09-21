@@ -1108,6 +1108,7 @@ export default {
         } else {
           this.instanceEntries = []
           this.dataData = []
+          this.dataData2 = []
           this.dataLoading = false
           this.$Loading.finish()
         }
