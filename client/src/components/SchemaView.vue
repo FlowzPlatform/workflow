@@ -578,17 +578,19 @@ export default {
       if (this.check === -1) {
         this.$Loading.start()
         let fheaders = null
-        fheaders = {
-          workflowid: 'workflow_' + this.flowzData.id,
-          stateid: this.$route.params.stateid
-        }
-
         let saveObj = {
           fid: this.$route.params.id,
           currentStatus: this.$route.params.stateid,
           data: this.formSchemaInstance.data[0]
         }
-        finstanceModal.post(saveObj, null, fheaders)
+        if (this.$store.state.role === 2) {
+          fheaders = {
+            workflowid: 'workflow_' + this.flowzData.id,
+            stateid: this.$route.params.stateid
+          }
+        }
+        if (fheaders !== null) {
+          finstanceModal.post(saveObj, null, fheaders)
           .then(res => {
             this.$Loading.finish()
             this.$Notice.success({title: 'Saved Successfully'})
@@ -609,6 +611,29 @@ export default {
               this.$Notice.error({title: 'Error', desc: 'Instace Not Generated'})
             }
           })
+        } else {
+          finstanceModal.post(saveObj)
+          .then(res => {
+            this.$Loading.finish()
+            this.$Notice.success({title: 'Saved Successfully'})
+            this.bLoading = false
+            setTimeout(() => {
+              $('html, body').animate({
+                scrollTop: $('#top').offset().top
+              }, 500)
+            }, 0)
+            this.init()
+          }).catch(e => {
+            this.$Loading.error()
+            console.log('error', e)
+            this.bLoading = false
+            if (e.response.data.message) {
+              this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+            } else {
+              this.$Notice.error({title: 'Error', desc: 'Instace Not Generated'})
+            }
+          })
+        }
       } else {
         this.validErr = _.uniqBy(this.validErr, 'name')
         this.$Notice.error({title: 'Validation Error!'})
@@ -751,6 +776,7 @@ export default {
       this.$Loading.start()
       let mergeData = this.mergeFileList(obj.data, obj)
       obj.data = mergeData
+      let fheaders = null
       let saveObj = {
         fid: this.item.fid,
         iid: this.item.id,
@@ -761,22 +787,57 @@ export default {
         saveObj.nextTarget = this.nextTarget.value
       }
       this.bLoading = true
-      flowzdataModal.post(saveObj).then(res => {
-        this.id = null
-        this.$Notice.success({title: 'success!', desc: 'Instance saved...'})
-        this.$Loading.finish()
-        this.bLoading = false
-        this.email = false
-        this.validErr = []
-        this.isEmailDone = false
-      }).catch(err => {
-        console.log('Error', err)
-        this.$Loading.finish()
-        this.bLoading = false
-        this.email = false
-        this.isEmailDone = false
-        this.$Notice.error({title: 'Not Saved!'})
-      })
+      if (this.$store.state.role === 2) {
+        fheaders = {
+          workflowid: 'workflow_' + this.flowzData.id,
+          stateid: this.$route.params.stateid
+        }
+      }
+      if (fheaders !== null) {
+        finstanceModal.post(saveObj, null, fheaders)
+        .then(res => {
+          this.id = null
+          this.$Loading.finish()
+          this.$Notice.success({title: 'Saved Successfully'})
+          this.bLoading = false
+          this.email = false
+          this.validErr = []
+          this.isEmailDone = false
+        }).catch(e => {
+          this.$Loading.error()
+          console.log('error', e)
+          this.bLoading = false
+          this.email = false
+          this.isEmailDone = false
+          if (e.response.data.message) {
+            this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+          } else {
+            this.$Notice.error({title: 'Error', desc: 'Instace Not Generated'})
+          }
+        })
+      } else {
+        finstanceModal.post(saveObj)
+        .then(res => {
+          this.$Loading.finish()
+          this.$Notice.success({title: 'Saved Successfully'})
+          this.bLoading = false
+          setTimeout(() => {
+            $('html, body').animate({
+              scrollTop: $('#top').offset().top
+            }, 500)
+          }, 0)
+          this.init()
+        }).catch(e => {
+          this.$Loading.error()
+          console.log('error', e)
+          this.bLoading = false
+          if (e.response.data.message) {
+            this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+          } else {
+            this.$Notice.error({title: 'Error', desc: 'Instace Not Generated'})
+          }
+        })
+      }
     },
     checkValidation (data, ent) {
       let self = this
