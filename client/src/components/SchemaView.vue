@@ -649,9 +649,15 @@ export default {
               saveemailTemplate.get(nextTargetId.emailtemplate)
               .then((res) => {
                 setTimeout(() => {
-                  this.sendDataEmail = res.data.template + this.$refs.schemasubformview.$el.outerHTML
-                  this.email = true
-                  this.loadEmail = false
+                  if (res.data.template === undefined) {
+                    this.sendDataEmail = this.$refs.schemasubformview.$el.outerHTML
+                    this.email = true
+                    this.loadEmail = false
+                  } else {
+                    this.sendDataEmail = res.data.template + this.$refs.schemasubformview.$el.outerHTML
+                    this.email = true
+                    this.loadEmail = false
+                  }
                 }, 1000)
               })
               .catch((err) => {
