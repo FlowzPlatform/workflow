@@ -225,13 +225,14 @@
                   for (let i = 0; i < actions.length; i++) {
                     actionsObj[actions[i].toLowerCase()] = this.permissions
                   }
-                  subscriptionNew.moduleResource.moduleName = 'workflow_' + this.$route.params.id
-                  let registerAppModuleNew = actionsObj
-                  subscriptionNew.moduleResource.registerAppModule = registerAppModuleNew
-                  subscriptionNew.moduleResource.appRoles = userRolesArr
-                  subscriptionNew.registeredAppModulesRole().then(resp => {
-                    // let result = null
-                    if (this.$route.params.id !== undefined) {
+
+                  if (this.$route.params.id !== undefined) {
+                    subscriptionNew.moduleResource.moduleName = 'workflow_' + this.$route.params.id
+                    let registerAppModuleNew = actionsObj
+                    subscriptionNew.moduleResource.registerAppModule = registerAppModuleNew
+                    subscriptionNew.moduleResource.appRoles = userRolesArr
+                    subscriptionNew.registeredAppModulesRole().then(resp => {
+                      // let result = null
                       // if (this.flowObject.schema === this.oldFlow.schema) {
                       //   console.log('...........')
                       // } else {
@@ -248,28 +249,28 @@
                         this.$Notice.error({title: 'Error..!', desc: 'Flow Not Updated...'})
                         this.btnLoading = false
                       })
-                    } else {
-                      flowz.post(this.flowObject).then(response => {
-                        subscriptionNew.moduleResource.moduleName = 'workflow_' + response.data.id
-                        let registerAppModuleNew = actionsObj
-                        subscriptionNew.moduleResource.registerAppModule = registerAppModuleNew
-                        subscriptionNew.moduleResource.appRoles = userRolesArr
-                        subscriptionNew.registeredAppModulesRole()
-                        this.$Notice.success({title: 'Success..!', desc: 'Flow Saved..'})
-                        this.$router.push({name: 'flow/list'})
-                        localStorage.removeItem('BPMNXml')
-                        this.btnLoading = false
-                      }).catch(error => {
-                        console.log(error)
-                        this.$Notice.error({title: 'Error..!', desc: 'Flow Not Saved...'})
-                        this.btnLoading = false
-                      })
-                    }
-                  }).catch(err => {
-                    this.$Notice.error({title: 'Error..!', desc: 'Flow Not Saved. Try again.'})
-                    console.log('Error: ', err)
-                    this.btnLoading = false
-                  })
+                    }).catch(err => {
+                      this.$Notice.error({title: 'Error..!', desc: 'Flow Not Saved. Try again.'})
+                      console.log('Error: ', err)
+                      this.btnLoading = false
+                    })
+                  } else {
+                    flowz.post(this.flowObject).then(response => {
+                      subscriptionNew.moduleResource.moduleName = 'workflow_' + response.data.id
+                      let registerAppModuleNew = actionsObj
+                      subscriptionNew.moduleResource.registerAppModule = registerAppModuleNew
+                      subscriptionNew.moduleResource.appRoles = userRolesArr
+                      subscriptionNew.registeredAppModulesRole()
+                      this.$Notice.success({title: 'Success..!', desc: 'Flow Saved..'})
+                      this.$router.push({name: 'flow/list'})
+                      localStorage.removeItem('BPMNXml')
+                      this.btnLoading = false
+                    }).catch(error => {
+                      console.log(error)
+                      this.$Notice.error({title: 'Error..!', desc: 'Flow Not Saved...'})
+                      this.btnLoading = false
+                    })
+                  }
                 } else {
                   this.$Message.error('Nothing to Save !')
                   this.btnLoading = false
