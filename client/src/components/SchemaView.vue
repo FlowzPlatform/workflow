@@ -1098,8 +1098,9 @@ export default {
         if (queryresp.data.data.length > 0) {
           this.instanceEntries = queryresp.data.data
           if (this.$store.state.role === 2) {
+            const currentUser = this.$store.state.user._id
             this.dataClaim = _.filter(this.instanceEntries, function (o) { return o.claimUser === '' })
-            this.dataData2 = _.filter(this.instanceEntries, function (o) { return o.claimUser !== '' })
+            this.dataData2 = _.filter(this.instanceEntries, function (o) { return o.claimUser === currentUser })
           } else {
             this.dataData = this.instanceEntries
           }
@@ -1200,7 +1201,12 @@ export default {
               // console.log('Ready to push: ', this.instanceEntries.length)
               // push to table
               let instanceObj = data
-              // console.log('instanceObj: ', instanceObj)
+              // console.log(data)
+              let inx = _.findIndex(this.dataData, (o) => { return o.id === data.id })
+              // console.log(inx)
+              // this.instanceEntries[inx] = data
+              // this.dataData[inx] = data
+              // console.log('data obj', this.dataData)
               let lastEntryId = data.stageReference[data.stageReference.length - 1].stageRecordId
               // console.log('lastEntryId: ', lastEntryId)
               if (lastEntryId !== undefined) {
@@ -1208,7 +1214,8 @@ export default {
                   // console.log('Response fdata: ', res)
                   instanceObj['data'] = res.data.data
                   instanceObj['iid'] = data.id
-                  this.instanceEntries.push(instanceObj)
+                  // this.instanceEntries.push(instanceObj)
+                  this.dataData.splice(inx, 1)
                   this.dataData.push(instanceObj)
                   // console.log('Pushed data: ', this.instanceEntries, this.dataData)
                 })
