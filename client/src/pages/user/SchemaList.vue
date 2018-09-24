@@ -18,46 +18,66 @@
       <div class="col-md-12">
         <div class="card">
           <div class="row">
-            <div class="col-md-6">
-              <Input search enter-button placeholder="Search..." v-model="searchQuery"/>
-            </div>
-            <div class="col-md-4">
-              <div class="row">
-                <div class="col-md-12">
-                  <Select style="width: 100%" v-model="selectedFilterBy" clearable placeholder="Filter By">
-                    <Option v-for="item in filterBy" :value="item.value" :key="item.value">{{ item.label }}</Option>
-                  </Select>
-                  <br>
-                  <DatePicker v-if="selectedFilterBy === 'customRange'" type="daterange" split-panels placeholder="Select date" style="width: 100%; margin: 5px 0;" v-model="enteredDateRange"></DatePicker>
+            <div><b>Select Action</b></div> 
+            <Select v-model="action" label="Select Action" style="width:200px">
+              <Option v-for="item in dataAction" :value="item.value" :key="item.value">{{ item.label }}</Option>
+            </Select>
+            <div v-if="action === 'search'" style="margin-top: 10px">
+              <div class="col-md-6">
+                <Input search enter-button placeholder="Search..." v-model="searchQuery"/>
+              </div>
+              <div class="col-md-4">
+                <div class="row">
+                  <div class="col-md-12">
+                    <Select style="width: 100%" v-model="selectedFilterBy" clearable placeholder="Filter By">
+                      <Option v-for="item in filterBy" :value="item.value" :key="item.value">{{ item.label }}</Option>
+                    </Select>
+                    <br>
+                    <DatePicker v-if="selectedFilterBy === 'customRange'" type="daterange" split-panels placeholder="Select date" style="width: 100%; margin: 5px 0;" v-model="enteredDateRange"></DatePicker>
+                  </div>
+                  <!-- <div class="col-md-6">
+                    <Select style="width: 100%" v-model="selectedSortBy" clearable placeholder="Sort By">
+                      <Option v-for="item in sortBy" :value="item.value" :key="item.value">{{ item.label }}</Option>
+                    </Select>    
+                  </div> -->
                 </div>
-                <!-- <div class="col-md-6">
-                  <Select style="width: 100%" v-model="selectedSortBy" clearable placeholder="Sort By">
-                    <Option v-for="item in sortBy" :value="item.value" :key="item.value">{{ item.label }}</Option>
-                  </Select>    
-                </div> -->
+              </div>
+              <div class="col-md-2">
+                <Button icon="search" type="primary" @click="searchData">Search</Button>
+                <Tooltip content="Clear Search" style="float: right;">
+                  <Button icon="ios-trash" type="error" @click="clearSearchData"></Button>  
+                </Tooltip>
+                
               </div>
             </div>
-            <div class="col-md-2">
-              <Button icon="search" type="primary" @click="searchData">Search</Button>
-              <Tooltip content="Clear Search" style="float: right;">
-                <Button icon="ios-trash" type="error" @click="clearSearchData"></Button>  
-              </Tooltip>
-              
+            <div v-if="action === 'filter'" style="margin-top: 10px">
+              <div class="col-md-2">
+                <Select v-model="selectedAssignUser" style="width:200px">
+                  <Option v-for="item in stageClaimUsers" :value="item.value" :key="item.value">{{ item.label }}</Option>
+                </Select>
+              </div>
+              <div class="col-md-2">
+                <Button type="primary" @click="unAssignUsers">Assign</Button>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
     <div v-if="datashow === 'dataA'">
-      <Table @on-sort-change="sortTableData" highlight-row :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
+      <Table ref="selection" @on-selection-change="AddRows" @on-sort-change="sortTableData" highlight-row :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
       <div style="margin: 10px;overflow: hidden">
-        <div style="float: right;">
+        <div style="display: inline-block">
+          <Button @click="handleSelectAll(true)">Set all selected</Button>
+          <Button @click="handleSelectAll(false)">Cancel all selected</Button>
+        </div>
+        <div style="float: right; display: inline-block">
           <Page placement="top" :total="total" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
         </div>
       </div>
     </div>
     <div v-if="datashow === 'dataC'">
-      <Table @on-sort-change="sortTableData" highlight-row :columns="setColumns2" :data="data" :border="config.border" :stripe="config.stripe"></Table>
+      <Table ref="selection" @on-sort-change="sortTableData" highlight-row :columns="setColumns2" :data="data" :border="config.border" :stripe="config.stripe"></Table>
       <div style="margin: 10px;overflow: hidden">
         <div style="float: right;">
           <Page placement="top" :total="total" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
@@ -65,7 +85,7 @@
       </div>
     </div>
     <div v-if="datashow === 'dataU'">
-      <Table @on-sort-change="sortTableData" highlight-row :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
+      <Table ref="selection" @on-sort-change="sortTableData" highlight-row :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
       <div style="margin: 10px;overflow: hidden">
         <div style="float: right;">
           <Page placement="top" :total="total" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
@@ -78,6 +98,10 @@
   import _ from 'lodash'
   import $ from 'jquery'
   import finstanceModal from '@/api/finstance'
+  import config from '../../config/index.js'
+  // import getuserdetails from '@/api/getuserdetails'
+  // import usermodulerole from '@/api/usermodulerole'
+  import axios from 'axios'
   export default {
     name: 'schemalist',
     props: {
@@ -94,6 +118,17 @@
     },
     data () {
       return {
+        action: 'search',
+        dataAction: [{
+          value: 'search',
+          label: 'SEARCH'
+        }, {
+          value: 'filter',
+          label: 'FILTER'
+        }],
+        selectedRows: [],
+        selectedAssignUser: 'noValue',
+        stageClaimUsers: [],
         dataClaim: [],
         skip: 0,
         total: 0,
@@ -258,6 +293,12 @@
         const cols = []
         if (this.dynamicData && this.$store.state.role === 1) {
           cols.push({
+            type: 'selection',
+            width: 60,
+            align: 'center',
+            fixed: 'left'
+          })
+          cols.push({
             title: 'Action',
             width: 80,
             align: 'center',
@@ -288,6 +329,17 @@
                   }
                 }, '')
               ])
+            }
+          })
+          cols.push({
+            title: 'Assigned To',
+            key: 'claim',
+            fixed: 'left',
+            width: 200,
+            render: (h, params) => {
+              return h('span',
+              this.selectOption(params),
+              )
             }
           })
           cols.push({
@@ -651,8 +703,82 @@
     mounted () {
       this.total = this.dataTotal
       this.mdata = this.data
+      axios.get(config.usermodulerole)
+      // usermodulerole.get()
+      .then((res) => {
+        let module = 'workflow_' + this.$route.params.id
+        let users = _.filter(res.data.data, {'module': module})
+        this.stageClaimUsers.push({value: 'noValue', label: '-- Unassign User --'})
+        for (let i = 0; i < users.length; i++) {
+          axios.get(config.userdetails + users[i].userId)
+          .then((response) => {
+            this.stageClaimUsers.push({value: users[i].userId, label: response.data.data[0].fullname})
+          })
+          .catch((error) => {
+            console.log(error)
+          })
+        }
+      })
+      .catch((err) => {
+        console.log(err)
+      })
     },
     methods: {
+      unAssignUsers () {
+        if (this.selectedAssignUser === '') {
+          this.$Notice.error({title: 'Please first select user'})
+        } else if (this.selectedRows.length === 0) {
+          this.$Notice.error({title: 'Please first select Rows'})
+        } else {
+          for (let i = 0; i < this.selectedRows.length; i++) {
+            let fheaders = {
+              workflowid: 'workflow_' + this.$route.params.id,
+              stateid: this.$route.params.stateid
+            }
+            if (this.selectedAssignUser !== 'noValue') {
+              finstanceModal.patch(this.selectedRows[i].id, {claimUser: this.selectedAssignUser}, null, fheaders)
+              .then((res) => {
+                this.$Notice.success({title: 'Successfully Assign'})
+              })
+              .catch((err) => {
+                if (err.response) {
+                  this.$Notice.error({title: err.response.data.message})
+                } else {
+                  this.$Message.error(err.message)
+                }
+              })
+            } else {
+              finstanceModal.patch(this.selectedRows[i].id, {claimUser: ''}, null, fheaders)
+              .then((res) => {
+                this.$Notice.success({title: 'Successfully Assign'})
+              })
+              .catch((err) => {
+                if (err.response) {
+                  this.$Notice.error({title: err.response.data.message})
+                } else {
+                  this.$Message.error(err.message)
+                }
+              })
+            }
+          }
+        }
+      },
+      AddRows (selection) {
+        this.selectedRows = []
+        this.selectedRows = selection
+      },
+      handleSelectAll (status) {
+        this.$refs.selection.selectAll(status)
+      },
+      selectOption (params) {
+        if (params.row.claimUser !== '') {
+          let obj = _.find(this.stageClaimUsers, {value: params.row.claimUser})
+          if (obj !== undefined) {
+            this.data[params.index].claim = obj.value
+            return obj.label
+          }
+        }
+      },
       clearSearchData () {
         this.searchQuery = ''
         this.selectedFilterBy = ''
