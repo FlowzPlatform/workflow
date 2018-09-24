@@ -11,7 +11,8 @@ const timeout = {
   '/dataquery': 0,
   '/flowzdata': 0,
   '/receiveform': 0,
-  '/sendmail': 0
+  '/sendmail': 0,
+  '/dflowzdata': 0
 }
 
 export default {

@@ -49,7 +49,7 @@
       </div>
     </div>
     <div v-if="datashow === 'dataA'">
-      <Table @on-sort-change="sortTableData" highlight-row :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
+      <Table @on-sort-change="sortTableData" highlight-row :columns="setColumns" :data="instanceEntries" :border="config.border" :stripe="config.stripe"></Table>
       <div style="margin: 10px;overflow: hidden">
         <div style="float: right;">
           <Page placement="top" :total="total" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
@@ -57,7 +57,7 @@
       </div>
     </div>
     <div v-if="datashow === 'dataC'">
-      <Table @on-sort-change="sortTableData" highlight-row :columns="setColumns2" :data="data" :border="config.border" :stripe="config.stripe"></Table>
+      <Table @on-sort-change="sortTableData" highlight-row :columns="setColumns2" :data="instanceEntries" :border="config.border" :stripe="config.stripe"></Table>
       <div style="margin: 10px;overflow: hidden">
         <div style="float: right;">
           <Page placement="top" :total="total" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
@@ -65,7 +65,7 @@
       </div>
     </div>
     <div v-if="datashow === 'dataU'">
-      <Table @on-sort-change="sortTableData" highlight-row :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
+      <Table @on-sort-change="sortTableData" highlight-row :columns="setColumns" :data="instanceEntries" :border="config.border" :stripe="config.stripe"></Table>
       <div style="margin: 10px;overflow: hidden">
         <div style="float: right;">
           <Page placement="top" :total="total" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
@@ -75,14 +75,13 @@
   </div>
 </template>
 <script>
-  import _ from 'lodash'
+  // import _ from 'lodash'
   import $ from 'jquery'
   import finstanceModal from '@/api/finstance'
   export default {
     name: 'schemalist',
     props: {
       'schema': Object,
-      'data': Array,
       'configuration': Boolean,
       'dynamicData': Boolean,
       'flowzData': Object,
@@ -278,9 +277,9 @@
                       let values = {
                         id: this.flowzData.schema,
                         item: params.row,
-                        currentState: params.row.currentStatus,
+                        currentState: params.row._state,
                         flowzData: this.flowzData,
-                        formData: params.row.data
+                        formData: params.row
                       }
                       this.$Loading.finish()
                       await this.$emit('setValues', values)
@@ -292,7 +291,7 @@
           })
           cols.push({
             title: 'ID',
-            key: 'iid',
+            key: 'id',
             fixed: 'left',
             width: 260,
             render: (h, params) => {
@@ -311,7 +310,7 @@
                     $temp.remove()
                   }
                 }
-              }, params.row.iid)
+              }, params.row.id)
             }
           })
         }
@@ -333,15 +332,15 @@
                   on: {
                     'click': async () => {
                       this.$Loading.start()
-                      let indexFind = _.findIndex(this.instanceEntries, (o) => { return o.id === params.row.id })
-                      let currentObj = this.flowzData.processList[this.instanceEntries[indexFind].currentStatus]
+                      // let indexFind = _.findIndex(this.instanceEntries, (o) => { return o.id === params.row.id })
+                      // let currentObj = this.flowzData.processList[this.instanceEntries[indexFind].currentStatus]
                       let values = {
                         id: this.flowzData.schema,
-                        item: this.instanceEntries[indexFind],
-                        formName: currentObj.name,
-                        currentState: currentObj.id,
+                        item: params.row,
+                        formName: params.row.name,
+                        currentState: params.row._currentStatus,
                         flowzData: this.flowzData,
-                        formData: params.row.data
+                        formData: params.row
                       }
                       this.$Loading.finish()
                       this.$emit('setValues', values)
@@ -370,7 +369,7 @@
                       }
                       finstanceModal.patch(params.row.id, {claimUser: ''}, null, fheaders)
                       .then((res) => {
-                        this.data.splice(params.index, 1)
+                        this.instanceEntries.splice(params.index, 1)
                         this.$Notice.success({title: 'Successfully Unclaim'})
                       })
                       .catch((err) => {
@@ -388,7 +387,7 @@
           })
           cols.push({
             title: 'ID',
-            key: 'iid',
+            key: 'id',
             width: 260
           })
         }
@@ -410,17 +409,17 @@
                   width: item.width,
                   render: (h, params) => {
                     let arr = []
-                    if (params.row.data[item.title]) {
-                      for (let i = 0; i < params.row.data[item.title].length; i++) {
+                    if (params.row[item.title]) {
+                      for (let i = 0; i < params.row[item.title].length; i++) {
                         arr.push(h('Button', {
                           attrs: {
                             type: 'info',
                             style: 'margin: 2px',
-                            title: params.row.data[item.title][i].split('/').pop()
+                            title: params.row[item.title][i].split('/').pop()
                           },
                           on: {
                             click: () => {
-                              window.open(params.row.data[item.title][i])
+                              window.open(params.row[item.title][i])
                             }
                           }
                         }, [
@@ -442,7 +441,7 @@
                   sortable: item.sortable,
                   width: item.width,
                   render: (h, params) => {
-                    return h('div', params.row.data[item.key])
+                    return h('div', params.row[item.key])
                   }
                 })
               }
@@ -458,17 +457,17 @@
                   width: 150,
                   render: (h, params) => {
                     let arr = []
-                    if (params.row.data[item.title]) {
-                      for (let i = 0; i < params.row.data[item.title].length; i++) {
+                    if (params.row[item.title]) {
+                      for (let i = 0; i < params.row[item.title].length; i++) {
                         arr.push(h('Button', {
                           attrs: {
                             type: 'info',
                             style: 'margin: 2px',
-                            title: params.row.data[item.title][i].split('/').pop()
+                            title: params.row[item.title][i].split('/').pop()
                           },
                           on: {
                             click: () => {
-                              window.open(params.row.data[item.title][i])
+                              window.open(params.row[item.title][i])
                             }
                           }
                         }, [
@@ -489,7 +488,7 @@
                   key: item.name,
                   width: 150,
                   render: (h, params) => {
-                    return h('div', params.row.data[item.name])
+                    return h('div', params.row[item.name])
                   }
                 })
               }
@@ -537,7 +536,7 @@
           })
           cols.push({
             title: 'ID',
-            key: 'iid',
+            key: 'id',
             width: 260
           })
         }
@@ -559,17 +558,17 @@
                   width: item.width,
                   render: (h, params) => {
                     let arr = []
-                    if (params.row.data[item.title]) {
-                      for (let i = 0; i < params.row.data[item.title].length; i++) {
+                    if (params.row[item.title]) {
+                      for (let i = 0; i < params.row[item.title].length; i++) {
                         arr.push(h('Button', {
                           attrs: {
                             type: 'info',
                             style: 'margin: 2px',
-                            title: params.row.data[item.title][i].split('/').pop()
+                            title: params.row[item.title][i].split('/').pop()
                           },
                           on: {
                             click: () => {
-                              window.open(params.row.data[item.title][i])
+                              window.open(params.row[item.title][i])
                             }
                           }
                         }, [
@@ -591,7 +590,7 @@
                   sortable: item.sortable,
                   width: item.width,
                   render: (h, params) => {
-                    return h('div', params.row.data[item.key])
+                    return h('div', params.row[item.key])
                   }
                 })
               }
@@ -607,17 +606,17 @@
                   width: 150,
                   render: (h, params) => {
                     let arr = []
-                    if (params.row.data[item.title]) {
-                      for (let i = 0; i < params.row.data[item.title].length; i++) {
+                    if (params.row[item.title]) {
+                      for (let i = 0; i < params.row[item.title].length; i++) {
                         arr.push(h('Button', {
                           attrs: {
                             type: 'info',
                             style: 'margin: 2px',
-                            title: params.row.data[item.title][i].split('/').pop()
+                            title: params.row[item.title][i].split('/').pop()
                           },
                           on: {
                             click: () => {
-                              window.open(params.row.data[item.title][i])
+                              window.open(params.row[item.title][i])
                             }
                           }
                         }, [
@@ -638,7 +637,7 @@
                   key: item.name,
                   width: 150,
                   render: (h, params) => {
-                    return h('div', params.row.data[item.name])
+                    return h('div', params.row[item.name])
                   }
                 })
               }
@@ -650,7 +649,7 @@
     },
     mounted () {
       this.total = this.dataTotal
-      this.mdata = this.data
+      // this.mdata = this.data
     },
     methods: {
       clearSearchData () {
