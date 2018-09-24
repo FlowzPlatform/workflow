@@ -1202,7 +1202,7 @@ export default {
               // push to table
               let instanceObj = data
               // console.log(data)
-              //let inx = _.findIndex(this.dataData, (o) => { return o.id === data.id })
+              let inx = _.findIndex(this.dataData, (o) => { return o.id === data.id })
               // console.log(inx)
               // this.instanceEntries[inx] = data
               // this.dataData[inx] = data
@@ -1215,7 +1215,7 @@ export default {
                   instanceObj['data'] = res.data.data
                   instanceObj['iid'] = data.id
                   // this.instanceEntries.push(instanceObj)
-                  // this.dataData.splice(inx, 1)
+                  this.dataData.splice(inx, 1)
                   this.dataData.push(instanceObj)
                   // console.log('Pushed data: ', this.instanceEntries, this.dataData)
                 })
