@@ -8,26 +8,31 @@ var is = require('bpmn-js/lib/util/ModelUtil').is;
 var processProps = require('../bpmn/parts/ProcessProps'),
   eventProps = require('../bpmn/parts/EventProps'),
   linkProps = require('../bpmn/parts/LinkProps'),
-  documentationProps = require('../bpmn/parts/DocumentationProps'),
+  // documentationProps = require('../bpmn/parts/DocumentationProps'),
   idProps = require('../bpmn/parts/IdProps'),
-  nameProps = require('../bpmn/parts/NameProps'),
-  executableProps = require('../bpmn/parts/ExecutableProps');
+  nameProps = require('../bpmn/parts/NameProps');
+  // executableProps = require('../bpmn/parts/ExecutableProps')
 // camunda properties
 var serviceTaskDelegateProps = require('./parts/ServiceTaskDelegateProps'),
   userTaskProps = require('./parts/UserTaskProps'),
-  asynchronousContinuationProps = require('./parts/AsynchronousContinuationProps'),
+  // asynchronousContinuationProps = require('./parts/AsynchronousContinuationProps'),
   callActivityProps = require('./parts/CallActivityProps'),
   multiInstanceProps = require('./parts/MultiInstanceLoopProps'),
   sequenceFlowProps = require('./parts/SequenceFlowProps'),
   scriptProps = require('./parts/ScriptTaskProps'),
   formProps = require('./parts/FormProps'),
-  myInputProps = require('./parts/MyInputProps'),
+  // myInputProps = require('./parts/MyInputProps'),
   myPropertiesIOProps = require('./parts/myPropertiesIOProps'),
+  schemaProps = require('./parts/schemaProps'),
+  emailProps = require('./parts/emailTemplate'),
   myOutputProps = require('./parts/myOutputProps'),
-  myConfigProps = require('./parts/MyConfigProps'),
+  // myConfigProps = require('./parts/MyConfigProps'),
+  mySMTPProps = require('./parts/MySMTPProps'),
+  // myRoles = require('./parts/MyRoles'),
   capacityProps = require('./parts/CapacityProps'),
   startEventInitiator = require('./parts/StartEventInitiator'),
   variableMapping = require('./parts/VariableMappingProps'),
+  AddRoles = require('./parts/AddRoles'),
   versionTag = require('./parts/VersionTagProps');
 var listenerProps = require('./parts/ListenerProps'),
   listenerDetails = require('./parts/ListenerDetailProps'),
@@ -44,11 +49,11 @@ var connectorDetails = require('./parts/ConnectorDetailProps'),
 // properties
 var properties = require('./parts/PropertiesProps');
 // job configuration
-var jobConfiguration = require('./parts/JobConfigurationProps');
+// var jobConfiguration = require('./parts/JobConfigurationProps');
 // history time to live
-var historyTimeToLive = require('./parts/HistoryTimeToLiveProps');
+// var historyTimeToLive = require('./parts/HistoryTimeToLiveProps');
 // external task configuration
-var externalTaskConfiguration = require('./parts/ExternalTaskConfigurationProps');
+// var externalTaskConfiguration = require('./parts/ExternalTaskConfigurationProps');
 // field injection
 var fieldInjections = require('./parts/FieldInjectionProps');
 var getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject,
@@ -101,7 +106,7 @@ var getListenerLabel = function (param, translate) {
   return '';
 };
 
-function createGeneralTabGroups(element, bpmnFactory, elementRegistry, elementTemplates, translate) {
+function createGeneralTabGroups(element, bpmnFactory, elementRegistry, elementTemplates, translate, options) {
   var generalGroup = {
     id: 'general',
     label: translate('General'),
@@ -109,10 +114,12 @@ function createGeneralTabGroups(element, bpmnFactory, elementRegistry, elementTe
   };
   idProps(generalGroup, element, translate);
   nameProps(generalGroup, element, translate);
+  schemaProps(generalGroup, element, bpmnFactory, translate, options);
+  emailProps(generalGroup, element, bpmnFactory, translate, options);
   capacityProps(generalGroup, element, translate);
   processProps(generalGroup, element, translate);
   versionTag(generalGroup, element, translate);
-  executableProps(generalGroup, element, translate);
+  // executableProps(generalGroup, element, translate);
   elementTemplateChooserProps(generalGroup, element, elementTemplates, translate);
   var customFieldsGroup = {
     id: 'customField',
@@ -139,48 +146,48 @@ function createGeneralTabGroups(element, bpmnFactory, elementRegistry, elementTe
     entries: []
   };
   multiInstanceProps(multiInstanceGroup, element, bpmnFactory, translate);
-  var asyncGroup = {
-    id: 'async',
-    label: translate('Asynchronous Continuations'),
-    entries: []
-  };
-  asynchronousContinuationProps(asyncGroup, element, bpmnFactory, translate);
-  var jobConfigurationGroup = {
-    id: 'jobConfiguration',
-    label: translate('Job Configuration'),
-    entries: [],
-    enabled: isJobConfigEnabled
-  };
-  jobConfiguration(jobConfigurationGroup, element, bpmnFactory, translate);
-  var externalTaskGroup = {
-    id: 'externalTaskConfiguration',
-    label: translate('External Task Configuration'),
-    entries: [],
-    enabled: isExternalTaskPriorityEnabled
-  };
-  externalTaskConfiguration(externalTaskGroup, element, bpmnFactory, translate);
-  var documentationGroup = {
-    id: 'documentation',
-    label: translate('Documentation'),
-    entries: []
-  };
-  documentationProps(documentationGroup, element, bpmnFactory, translate);
-  var historyTimeToLiveGroup = {
-    id: 'historyConfiguration',
-    label: translate('History Configuration'),
-    entries: []
-  };
-  historyTimeToLive(historyTimeToLiveGroup, element, bpmnFactory, translate);
+  // var asyncGroup = {
+  //   id: 'async',
+  //   label: translate('Asynchronous Continuations'),
+  //   entries: []
+  // };
+  // asynchronousContinuationProps(asyncGroup, element, bpmnFactory, translate);
+  // var jobConfigurationGroup = {
+  //   id: 'jobConfiguration',
+  //   label: translate('Job Configuration'),
+  //   entries: [],
+  //   enabled: isJobConfigEnabled
+  // };
+  // jobConfiguration(jobConfigurationGroup, element, bpmnFactory, translate);
+  // var externalTaskGroup = {
+  //   id: 'externalTaskConfiguration',
+  //   label: translate('External Task Configuration'),
+  //   entries: [],
+  //   enabled: isExternalTaskPriorityEnabled
+  // };
+  // externalTaskConfiguration(externalTaskGroup, element, bpmnFactory, translate);
+  // var documentationGroup = {
+  //   id: 'documentation',
+  //   label: translate('Documentation'),
+  //   entries: []
+  // };
+  // documentationProps(documentationGroup, element, bpmnFactory, translate);
+  // var historyTimeToLiveGroup = {
+  //   id: 'historyConfiguration',
+  //   label: translate('History Configuration'),
+  //   entries: []
+  // };
+  // historyTimeToLive(historyTimeToLiveGroup, element, bpmnFactory, translate);
   return [
     generalGroup,
     customFieldsGroup,
     detailsGroup,
-    externalTaskGroup,
+    // externalTaskGroup,
     multiInstanceGroup,
-    asyncGroup,
-    jobConfigurationGroup,
-    documentationGroup,
-    historyTimeToLiveGroup
+    // asyncGroup,
+    // jobConfigurationGroup,
+    // documentationGroup,
+    // historyTimeToLiveGroup
   ];
 }
 
@@ -209,35 +216,35 @@ function createFormsTabGroups(element, bpmnFactory, elementRegistry, translate) 
 }
 var options = null
 
-function createMyPropertiesTabGroups(element, bpmnFactory, elementRegistry, translate, data) {
-  if (data != undefined) {
-    options = data
-  }
-  var inputGroup = {
-    id: 'Input',
-    label: translate('Input'),
-    entries: []
-  };
-  myInputProps(inputGroup, element, bpmnFactory, translate, options);
-  return [
-    inputGroup
-  ];
-}
+// function createMyPropertiesTabGroups(element, bpmnFactory, elementRegistry, translate, data) {
+//   if (data != undefined) {
+//     options = data
+//   }
+//   var inputGroup = {
+//     id: 'Input',
+//     label: translate('Input'),
+//     entries: []
+//   };
+//   myInputProps(inputGroup, element, bpmnFactory, translate, options);
+//   return [
+//     inputGroup
+//   ];
+// }
 
-function createIOMappingGroups(element, bpmnFactory, elementRegistry, translate, data) {
-  if (data != undefined) {
-    options = data
-  }
-  var propertiesGroup = {
-    id: 'ioMapping',
-    label: translate('IO Mapping'),
-    entries: []
-  };
-  myPropertiesIOProps(propertiesGroup, element, bpmnFactory, translate, options);
-  return [
-    propertiesGroup
-  ];
-}
+// function createIOMappingGroups(element, bpmnFactory, elementRegistry, translate, data) {
+//   if (data != undefined) {
+//     options = data
+//   }
+//   var propertiesGroup = {
+//     id: 'ioMapping',
+//     label: translate('IO Mapping'),
+//     entries: []
+//   };
+//   myPropertiesIOProps(propertiesGroup, element, bpmnFactory, translate, options);
+//   return [
+//     propertiesGroup
+//   ];
+// }
 
 function createOutputGroups(element, bpmnFactory, elementRegistry, translate, data) {
   if (data != undefined) {
@@ -254,17 +261,60 @@ function createOutputGroups(element, bpmnFactory, elementRegistry, translate, da
   ];
 }
 
-function createConfigGroups(element, bpmnFactory, elementRegistry, translate, data) {
+function createAddRolesTabGroups(element, bpmnFactory, elementRegistry, translate) {
+  var generalGroup = {
+    id: 'addroles',
+    label: translate('add Roles'),
+    entries: []
+  };
+  AddRoles(generalGroup, element, translate, options);
+  // var configGroup = {
+  //   id: 'configs',
+  //   label: translate('Config'),
+  //   entries: []
+  // }
+  // myConfigProps(configGroup, element, bpmnFactory, translate)
+  return [
+    // configGroup,
+    generalGroup
+  ];
+}
+
+// function createConfigGroups(element, bpmnFactory, elementRegistry, translate, data) {
+//   var configGroup = {
+//     id: 'configs',
+//     label: translate('Config'),
+//     entries: []
+//   }
+//   myConfigProps(configGroup, element, bpmnFactory, translate)
+//   return [
+//     configGroup
+//   ]
+// }
+
+function createsmtpConfig(element, bpmnFactory, elementRegistry, translate, data) {
   var configGroup = {
-    id: 'configs',
-    label: translate('Config'),
+    id: 'smtp',
+    label: translate('SMTP config'),
     entries: []
   }
-  myConfigProps(configGroup, element, bpmnFactory, translate)
+  mySMTPProps(configGroup, element, translate)
   return [
     configGroup
   ]
 }
+
+// function createRoles(element, bpmnFactory, elementRegistry, translate, data) {
+//   var rolesGroup = {
+//     id: 'roles',
+//     label: translate('Roles'),
+//     entries: []
+//   }
+//   myRoles(rolesGroup, element, bpmnFactory, translate)
+//   return [
+//     rolesGroup
+//   ]
+// }
 
 function createListenersTabGroups(element, bpmnFactory, elementRegistry, translate) {
   var listenersGroup = {
@@ -301,30 +351,30 @@ function createListenersTabGroups(element, bpmnFactory, elementRegistry, transla
   ];
 }
 
-function createInputOutputTabGroups(element, bpmnFactory, elementRegistry, translate) {
-  var inputOutputGroup = {
-    id: 'input-output',
-    label: translate('Parameters'),
-    entries: []
-  };
-  var options = inputOutput(inputOutputGroup, element, bpmnFactory, translate);
-  var inputOutputParameterGroup = {
-    id: 'input-output-parameter',
-    entries: [],
-    enabled: function (element, node) {
-      return options.getSelectedParameter(element, node);
-    },
-    label: function (element, node) {
-      var param = options.getSelectedParameter(element, node);
-      return getInputOutputParameterLabel(param, translate);
-    }
-  };
-  inputOutputParameter(inputOutputParameterGroup, element, bpmnFactory, options, translate);
-  return [
-    inputOutputGroup,
-    inputOutputParameterGroup
-  ];
-}
+// function createInputOutputTabGroups(element, bpmnFactory, elementRegistry, translate) {
+//   var inputOutputGroup = {
+//     id: 'input-output',
+//     label: translate('Parameters'),
+//     entries: []
+//   };
+//   var options = inputOutput(inputOutputGroup, element, bpmnFactory, translate);
+//   var inputOutputParameterGroup = {
+//     id: 'input-output-parameter',
+//     entries: [],
+//     enabled: function (element, node) {
+//       return options.getSelectedParameter(element, node);
+//     },
+//     label: function (element, node) {
+//       var param = options.getSelectedParameter(element, node);
+//       return getInputOutputParameterLabel(param, translate);
+//     }
+//   };
+//   inputOutputParameter(inputOutputParameterGroup, element, bpmnFactory, options, translate);
+//   return [
+//     inputOutputGroup,
+//     inputOutputParameterGroup
+//   ];
+// }
 
 function createConnectorTabGroups(element, bpmnFactory, elementRegistry, translate) {
   var connectorDetailsGroup = {
@@ -395,23 +445,34 @@ function CamundaPropertiesProvider(eventBus, bpmnFactory, elementRegistry, eleme
   };
   PropertiesActivator.call(this, eventBus);
   this.getTabs = function (element, data) {
+    // console.log('CamundaPropertiesProvider-------', data)
     var generalTab = {
       id: 'general',
       label: translate('General'),
       groups: createGeneralTabGroups(
-        element, bpmnFactory,
-        elementRegistry, elementTemplates, translate)
+        element,
+        bpmnFactory,
+        elementRegistry,
+        elementTemplates,
+        translate,
+        data
+      )
     };
-    var ioMapping = {
-      id: 'IOMapping',
-      label: translate('I/O Mapping'),
-      groups: createIOMappingGroups(element, bpmnFactory, elementRegistry, translate)
-    };
-    var propertiesTab = {
-      id: 'Input',
-      label: translate('Input'),
-      groups: createMyPropertiesTabGroups(element, bpmnFactory, elementRegistry, translate, data)
-    };
+    // var roles = {
+    //   id: 'Roles',
+    //   label: translate('Roles'),
+    //   groups: createRoles(element, bpmnFactory, elementRegistry, translate)
+    // };
+    // var ioMapping = {
+    //   id: 'IOMapping',
+    //   label: translate('I/O Mapping'),
+    //   groups: createIOMappingGroups(element, bpmnFactory, elementRegistry, translate)
+    // };
+    // var propertiesTab = {
+    //   id: 'Input',
+    //   label: translate('Input'),
+    //   groups: createMyPropertiesTabGroups(element, bpmnFactory, elementRegistry, translate, data)
+    // };
     var variablesTab = {
       id: 'variables',
       label: translate('Variables'),
@@ -432,11 +493,11 @@ function CamundaPropertiesProvider(eventBus, bpmnFactory, elementRegistry, eleme
             eventDefinitionHelper.getLinkEventDefinition(element));
       }
     };
-    var inputOutputTab = {
-      id: 'input-output',
-      label: translate('Input/Output'),
-      groups: createInputOutputTabGroups(element, bpmnFactory, elementRegistry, translate)
-    };
+    // var inputOutputTab = {
+    //   id: 'input-output',
+    //   label: translate('Input/Output'),
+    //   groups: createInputOutputTabGroups(element, bpmnFactory, elementRegistry, translate)
+    // };
     var connectorTab = {
       id: 'connector',
       label: translate('Connector'),
@@ -456,24 +517,37 @@ function CamundaPropertiesProvider(eventBus, bpmnFactory, elementRegistry, eleme
       label: translate('Extensions'),
       groups: createExtensionElementsGroups(element, bpmnFactory, elementRegistry, translate)
     };
-    var outputTab = {
-      id: 'Output',
-      label: translate('Output'),
-      groups: createOutputGroups(element, bpmnFactory, elementRegistry, translate)
+    // var outputTab = {
+    //   id: 'Output',
+    //   label: translate('Output'),
+    //   groups: createOutputGroups(element, bpmnFactory, elementRegistry, translate)
+    // };
+    var addRoles = {
+      id: 'addRoles',
+      label: translate('Add Roles'),
+      groups: createAddRolesTabGroups(element, bpmnFactory,elementRegistry, translate)
     };
-    var configTab = {
-      id: 'Configuration',
-      label: translate('Config'),
-      groups: createConfigGroups(element, bpmnFactory, elementRegistry, translate)
+    // var configTab = {
+    //   id: 'Configuration',
+    //   label: translate('Config'),
+    //   groups: createConfigGroups(element, bpmnFactory, elementRegistry, translate)
+    // }
+    var smtpTab = {
+      id: 'ConfigurationSMTP',
+      label: translate('smtp'),
+      groups: createsmtpConfig(element, bpmnFactory, elementRegistry, translate)
     }
     return [
       generalTab,
-      ioMapping,
+      // ioMapping,
+      // roles,
+      addRoles,
       // variablesTab,
       // connectorTab,
-      propertiesTab,
-      outputTab,
-      configTab
+      // propertiesTab,
+      // outputTab,
+      // configTab,
+      smtpTab
       // formsTab,
       // listenersTab,
       // inputOutputTab,
