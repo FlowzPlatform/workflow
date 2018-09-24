@@ -4,7 +4,9 @@ const uuidv4 = require('uuid/v4');
 module.exports = {
   before: {
     all: [],
-    find: [],
+    find: [
+      hook => beforeFind(hook)
+    ],
     get: [],
     create: [
       hook => beforeCreate(hook)
@@ -40,6 +42,17 @@ module.exports = {
     remove: []
   }
 };
+
+let beforeFind = function (hook) {
+  const query = hook.params.query
+  if (query._currentStatus != undefined) {
+    if (hook.params.query._currentStatus == 'true') {
+      hook.params.query._currentStatus = true
+    } else if (hook.params.query._currentStatus == 'false') {
+      hook.params.query._currentStatus = false
+    }
+  }
+}
 
 function beforeCreate (hook) {
   try {

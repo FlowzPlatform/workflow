@@ -72,7 +72,7 @@
         <div v-if="itsFirstState === false">
           <tabs> 
           <TabPane v-if="this.$store.state.role === 1" :label="dataCount" icon="lock-combination">
-          <schemalist v-if="this.$store.state.role === 1" :schema="dataSchema" :pageno="pageno" :datashow="'dataA'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+          <schemalist v-if="this.$store.state.role === 1" :schema="dataSchema" :pageno="pageno" :datashow="'dataA'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
           <!-- <schemalist v-if="this.$store.state.role === 2" :schema="dataSchema" :pageno="pageno" :datashow="'dataU'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist> -->
 
           <div style="padding: 10px">
@@ -219,8 +219,10 @@ import flowzdataModal from '@/api/flowzdata'
 import flowzModel from '@/api/flowz'
 import schemaModel from '@/api/schema'
 
+import dflowzdata from '@/api/dflowzdata'
+
 import finstanceModal from '@/api/finstance'
-import dataQuerymodel from '@/api/dataquery'
+// import dataQuerymodel from '@/api/dataquery'
 import saveemailTemplate from '@/api/emailtemplate'
 import schemalist from '@/pages/user/SchemaList'
 
@@ -286,7 +288,8 @@ export default {
       loadingEmail: true,
       currentSchema: null,
       dataLoading: true,
-      entriesTotal: 10
+      entriesTotal: 10,
+      currentFlowzId: ''
     }
   },
   components: {
@@ -300,38 +303,76 @@ export default {
   methods: {
     searchData (query) {
       this.dataLoading = true
-      dataQuerymodel.get(null, {
-        $last: true,
-        fid: this.$route.params.id,
-        currentStatus: this.$route.params.stateid,
+
+      // New Custom Dynamic FLowz Data call
+      let heads = {
+        ftablename: this.currentFlowzId
+      }
+      dflowzdata.get(null, {
         $skip: this.skip,
         $limit: this.limit,
+        '_currentStatus': true,
+        '_state': this.$route.params.stateid,
         'id[$search]': '^' + query.text
-      }).then(res => {
+      }, heads)
+      .then(res => {
         this.isFlowzLoaded = true
-        // let firstState = this.flowzData.first
-        // if (firstState === this.$route.params.stateid) {
-        //   this.itsFirstState = true
-        // } else {
-        //   this.itsFirstState = false
-        // }
         this.dataTotal = res.data.total
         if (res.data.data.length > 0) {
           this.instanceEntries = res.data.data
-          this.dataData = this.instanceEntries
           this.$Loading.finish()
           this.dataLoading = false
         } else {
           this.instanceEntries = []
-          this.dataData = []
+          // this.dataData = []
           // this.itsFirstState = true
           this.dataLoading = false
           // this.$Spin.hide()
           this.$Loading.finish()
         }
-      }).catch(err => {
-        console.log('Error: ', err)
+      }).catch(e => {
+        this.$Loading.error()
+        this.dataLoading = false
+        console.log('error', e)
+        this.bLoading = false
+        if (e.response.data.message) {
+          this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+        } else {
+          this.$Notice.error({title: 'Error', desc: e.message})
+        }
       })
+      // dataQuerymodel.get(null, {
+      //   $last: true,
+      //   fid: this.$route.params.id,
+      //   currentStatus: this.$route.params.stateid,
+      //   $skip: this.skip,
+      //   $limit: this.limit,
+      //   'id[$search]': '^' + query.text
+      // }).then(res => {
+      //   this.isFlowzLoaded = true
+      //   // let firstState = this.flowzData.first
+      //   // if (firstState === this.$route.params.stateid) {
+      //   //   this.itsFirstState = true
+      //   // } else {
+      //   //   this.itsFirstState = false
+      //   // }
+      //   this.dataTotal = res.data.total
+      //   if (res.data.data.length > 0) {
+      //     this.instanceEntries = res.data.data
+      //     this.dataData = this.instanceEntries
+      //     this.$Loading.finish()
+      //     this.dataLoading = false
+      //   } else {
+      //     this.instanceEntries = []
+      //     this.dataData = []
+      //     // this.itsFirstState = true
+      //     this.dataLoading = false
+      //     // this.$Spin.hide()
+      //     this.$Loading.finish()
+      //   }
+      // }).catch(err => {
+      //   console.log('Error: ', err)
+      // })
     },
     sortData (object) {
     },
@@ -644,6 +685,7 @@ export default {
           }
         }
         if (fheaders !== null) {
+          // replace with new dynamic table API
           finstanceModal.post(saveObj, null, fheaders)
           .then(res => {
             this.$Loading.finish()
@@ -666,7 +708,10 @@ export default {
             }
           })
         } else {
-          finstanceModal.post(saveObj)
+          let heads = {
+            ftablename: this.currentFlowzId
+          }
+          dflowzdata.post(this.formSchemaInstance.data[0], null, heads)
           .then(res => {
             this.$Loading.finish()
             this.$Notice.success({title: 'Saved Successfully'})
@@ -687,6 +732,27 @@ export default {
               this.$Notice.error({title: 'Error', desc: e.message})
             }
           })
+          // finstanceModal.post(saveObj)
+          // .then(res => {
+          //   this.$Loading.finish()
+          //   this.$Notice.success({title: 'Saved Successfully'})
+          //   this.bLoading = false
+          //   setTimeout(() => {
+          //     $('html, body').animate({
+          //       scrollTop: $('#top').offset().top
+          //     }, 500)
+          //   }, 0)
+          //   this.init()
+          // }).catch(e => {
+          //   this.$Loading.error()
+          //   console.log('error', e)
+          //   this.bLoading = false
+          //   if (e.response.data.message) {
+          //     this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+          //   } else {
+          //     this.$Notice.error({title: 'Error', desc: e.message})
+          //   }
+          // })
         }
       } else {
         this.validErr = _.uniqBy(this.validErr, 'name')
@@ -710,6 +776,7 @@ export default {
         if (this.isMultiple) {
           nextTargetId = this.flowData.processList[this.nextTarget.value]
         } else {
+          console.log('else condition: ')
           nextTargetId = this.flowData.processList[currentStageObject.target[0].id]
         }
         if (nextTargetId.type === 'sendproofmail') {
@@ -876,6 +943,32 @@ export default {
           }
         })
       } else {
+        // New API call
+        // let heads = {
+        //   ftablename: this.currentFlowzId
+        // }
+        // dflowzdata.post(obj.data[0], null, heads)
+        // .then(res => {
+        //   this.$Loading.finish()
+        //   this.$Notice.success({title: 'Saved Successfully'})
+        //   this.bLoading = false
+        //   setTimeout(() => {
+        //     $('html, body').animate({
+        //       scrollTop: $('#top').offset().top
+        //     }, 500)
+        //   }, 0)
+        //   this.init()
+        // }).catch(e => {
+        //   this.$Loading.error()
+        //   console.log('error', e)
+        //   this.bLoading = false
+        //   if (e.response.data.message) {
+        //     this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+        //   } else {
+        //     this.$Notice.error({duration: '3', title: e.message, desc: ''})
+        //   }
+        // })
+
         flowzdataModal.post(saveObj)
         .then(res => {
           this.$Loading.finish()
@@ -1006,13 +1099,13 @@ export default {
       this.id = values.id
       if (values.id !== null) {
         this.item = values.item
-        this.flowData = values.flowzData
-        let targetObj = values.flowzData.processList[values.currentState]
+        this.flowData = this.flowzData
+        let targetObj = this.flowzData.processList[values.currentState]
         if (Object.keys(targetObj).length > 0) {
           if (targetObj.target.length > 1) {
             let opts = []
             for (let m of targetObj.target) {
-              let label = values.flowzData.processList[m.id].name
+              let label = this.flowzData.processList[m.id].name
               opts.push({
                 label: label,
                 value: m.id
@@ -1084,25 +1177,22 @@ export default {
       this.email = false
       this.htmlcontent = false
       this.id = null
-      dataQuerymodel.get(null, {
-        $last: true,
-        fid: this.$route.params.id,
-        currentStatus: this.$route.params.stateid,
+
+      // New Custom Dynamic FLowz Data call
+      let heads = {
+        ftablename: this.currentFlowzId
+      }
+      dflowzdata.get(null, {
         $skip: this.skip,
-        $limit: this.limit
-      }).then(queryresp => {
-        // console.log('queryresp: ', queryresp)
-        // this.entriesTotal = queryresp.data.data.length
+        $limit: this.limit,
+        '_currentStatus': true,
+        '_state': this.$route.params.stateid
+      }, heads)
+      .then(res => {
         this.isFlowzLoaded = true
-        this.dataTotal = queryresp.data.total
-        if (queryresp.data.data.length > 0) {
-          this.instanceEntries = queryresp.data.data
-          if (this.$store.state.role === 2) {
-            this.dataClaim = _.filter(this.instanceEntries, function (o) { return o.claimUser === '' })
-            this.dataData2 = _.filter(this.instanceEntries, function (o) { return o.claimUser !== '' })
-          } else {
-            this.dataData = this.instanceEntries
-          }
+        this.dataTotal = res.data.total
+        if (res.data.data.length > 0) {
+          this.instanceEntries = res.data.data
           this.$Loading.finish()
           this.dataLoading = false
         } else {
@@ -1112,14 +1202,54 @@ export default {
           this.dataLoading = false
           this.$Loading.finish()
         }
-      }).catch(err => {
-        this.$Notice.error({duration: '3', title: err.message, desc: ''})
+      }).catch(e => {
         this.$Loading.error()
-        this.dataLoading = false
+        console.log('error', e)
+        this.bLoading = false
+        if (e.response.data.message) {
+          this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+        } else {
+          this.$Notice.error({title: 'Error', desc: e.message})
+        }
       })
+
+      // dataQuerymodel.get(null, {
+      //   $last: true,
+      //   fid: this.$route.params.id,
+      //   currentStatus: this.$route.params.stateid,
+      //   $skip: this.skip,
+      //   $limit: this.limit
+      // }).then(queryresp => {
+      //   // console.log('queryresp: ', queryresp)
+      //   // this.entriesTotal = queryresp.data.data.length
+      //   this.isFlowzLoaded = true
+      //   this.dataTotal = queryresp.data.total
+      //   if (queryresp.data.data.length > 0) {
+      //     this.instanceEntries = queryresp.data.data
+      //     if (this.$store.state.role === 2) {
+      //       this.dataClaim = _.filter(this.instanceEntries, function (o) { return o.claimUser === '' })
+      //       this.dataData2 = _.filter(this.instanceEntries, function (o) { return o.claimUser !== '' })
+      //     } else {
+      //       this.dataData = this.instanceEntries
+      //     }
+      //     this.$Loading.finish()
+      //     this.dataLoading = false
+      //   } else {
+      //     this.instanceEntries = []
+      //     this.dataData = []
+      //     this.dataData2 = []
+      //     this.dataLoading = false
+      //     this.$Loading.finish()
+      //   }
+      // }).catch(err => {
+      //   this.$Notice.error({duration: '3', title: err.message, desc: ''})
+      //   this.$Loading.error()
+      //   this.dataLoading = false
+      // })
     },
 
     async init () {
+      this.currentFlowzId = this.$route.params.id.replace(/-/g, '_')
       this.dataLoading = true
       this.instanceEntries = []
       this.isFlowzLoaded = false

@@ -35,6 +35,7 @@ export default {
       templateName: '',
       GetHtmlOfEditor: '',
       gethtmlcontent: '<p>Hello!</p>',
+      GetHtmlContent: '',
       plugins: 'print preview searchreplace fullscreen image link media template codesample table hr pagebreak anchor toc insertdatetime lists textcolor imagetools contextmenu colorpicker',
       toolbar1: 'formatselect | bold italic strikethrough forecolor backcolor | link | alignleft aligncenter alignright alignjustify  | numlist bullist outdent indent  | removeformat',
       settings: {
