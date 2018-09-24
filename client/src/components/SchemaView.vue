@@ -1215,7 +1215,7 @@ export default {
                   instanceObj['data'] = res.data.data
                   instanceObj['iid'] = data.id
                   // this.instanceEntries.push(instanceObj)
-                  this.dataData.splice(inx, 1)
+                  // this.dataData.splice(inx, 1)
                   this.dataData.push(instanceObj)
                   // console.log('Pushed data: ', this.instanceEntries, this.dataData)
                 })
