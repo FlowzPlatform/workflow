@@ -98,6 +98,7 @@
   import _ from 'lodash'
   import $ from 'jquery'
   import finstanceModal from '@/api/finstance'
+  import config from '../../config/index.js'
   // import getuserdetails from '@/api/getuserdetails'
   // import usermodulerole from '@/api/usermodulerole'
   import axios from 'axios'
@@ -702,14 +703,14 @@
     mounted () {
       this.total = this.dataTotal
       this.mdata = this.data
-      axios.get('https://api.flowzcluster.tk/subscription/user-module-role')
+      axios.get(config.usermodulerole)
       // usermodulerole.get()
       .then((res) => {
         let module = 'workflow_' + this.$route.params.id
         let users = _.filter(res.data.data, {'module': module})
         this.stageClaimUsers.push({value: 'noValue', label: '-- Unassign User --'})
         for (let i = 0; i < users.length; i++) {
-          axios.get('https://api.flowzcluster.tk/user/getuserdetails/' + users[i].userId)
+          axios.get(config.userdetails + users[i].userId)
           .then((response) => {
             this.stageClaimUsers.push({value: users[i].userId, label: response.data.data[0].fullname})
           })
