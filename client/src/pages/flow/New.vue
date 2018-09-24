@@ -250,6 +250,11 @@
                       })
                     } else {
                       flowz.post(this.flowObject).then(response => {
+                        subscriptionNew.moduleResource.moduleName = 'workflow_' + response.data.id
+                        let registerAppModuleNew = actionsObj
+                        subscriptionNew.moduleResource.registerAppModule = registerAppModuleNew
+                        subscriptionNew.moduleResource.appRoles = userRolesArr
+                        subscriptionNew.registeredAppModulesRole()
                         this.$Notice.success({title: 'Success..!', desc: 'Flow Saved..'})
                         this.$router.push({name: 'flow/list'})
                         localStorage.removeItem('BPMNXml')

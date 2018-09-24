@@ -851,7 +851,6 @@ export default {
         }
       }).then(async function (response) {
         let arrResources = await _.groupBy(response.data.data, 'module')
-        console.log('arrResources: ', arrResources)
         // self.tableData = arrResources
         // self.tableData = ['hi']
         self.tableData = await _.extend(self.tableData, arrResources)
