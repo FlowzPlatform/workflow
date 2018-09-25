@@ -80,7 +80,7 @@
       <Table ref="selection" @on-sort-change="sortTableData" highlight-row :columns="setColumns2" :data="data" :border="config.border" :stripe="config.stripe"></Table>
       <div style="margin: 10px;overflow: hidden">
         <div style="float: right;">
-          <Page placement="top" :total="total" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+          <Page placement="top" :total="dataTotalClaim" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage2" @on-page-size-change="handlePagesize2"></Page>
         </div>
       </div>
     </div>
@@ -88,7 +88,7 @@
       <Table ref="selection" @on-sort-change="sortTableData" highlight-row :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
       <div style="margin: 10px;overflow: hidden">
         <div style="float: right;">
-          <Page placement="top" :total="total" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+          <Page placement="top" :total="dataTotalUnclaim" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
         </div>
       </div>
     </div>
@@ -112,6 +112,8 @@
       'flowzData': Object,
       'instanceEntries': Array,
       'dataTotal': Number,
+      'dataTotalClaim': Number,
+      'dataTotalUnclaim': Number,
       'pageno': Number,
       'limit': Number,
       'datashow': String
@@ -807,6 +809,13 @@
       },
       handlePagesize (size) {
         this.$emit('on-handlepage', this.skip, this.limit, size)
+      },
+      handlePage2 (page) {
+        this.skip = (page * this.limit) - this.limit
+        this.$emit('on-paginate2', this.skip, this.limit, page)
+      },
+      handlePagesize2 (size) {
+        this.$emit('on-handlepage2', this.skip, this.limit, size)
       }
     }
   }
