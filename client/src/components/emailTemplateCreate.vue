@@ -6,6 +6,7 @@
       </keep-alive>
       <Input v-model="templateName" placeholder="Enter Template name" style="width: 300px" class="dataEnter"/>
       <Button type="primary" @click="saveTemplate" class="dataEnter">Save Template</Button>
+      <Button type="error" @click="cancelUpdateTemplate" class="dataEnter">Cancel</Button>
   </div>
 </template>
 
@@ -54,6 +55,9 @@ export default {
         this.$Message.error('Template Save Error!')
         console.log(err)
       })
+    },
+    cancelUpdateTemplate () {
+      this.$router.push({name: 'emailtemplate'})
     }
   },
   mounted () {

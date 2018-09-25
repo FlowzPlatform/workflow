@@ -58,6 +58,17 @@ export default {
     cancelUpdateTemplate () {
       this.$router.push({name: 'emailtemplate'})
     }
+  },
+  mounted () {
+    saveemailTemplate.get(this.id)
+    .then((res) => {
+      this.GetHtmlOfEditor = res.data.template
+      this.templateName = res.data.templateName
+    })
+    .catch((err) => {
+      console.log(err)
+      this.$Notice.error({duration: '3', title: err.message, desc: ''})
+    })
   }
 }
 </script>
