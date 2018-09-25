@@ -96,17 +96,14 @@
     </div>
 
     <div class="loginfooter">
-        <p>© 2017. Flowz technology. All Rights Reserved.</p>
+        <p>© 2018. Flowz technology. All Rights Reserved.</p>
     </div>
 
   </div>
 </template>
 
 <script>
-/*eslint-disable*/
-// import axios from 'axios'
 import modelAuthentication from '@/api/authentication'
-import modelUser from '@/api/user'
 import config from '@/config'
 import psl from 'psl'
 export default {
@@ -127,16 +124,16 @@ export default {
           { required: true, message: 'Please fill in the password.', trigger: 'blur' }
         ]
       },
-      facebookSuccessCallbackUrl : config.facebookSuccessCallbackUrl,
-      googleSuccessCallbackUrl : config.googleSuccessCallbackUrl,
-      loginWithFacebookUrl : config.loginWithFacebookUrl,
-      loginWithGoogleUrl : config.loginWithGoogleUrl,
-      twitterSuccessCallbackUrl : config.twitterSuccessCallbackUrl,
-      loginWithTwitterUrl : config.loginWithTwitterUrl,
-      linkedinSuccessCallbackUrl : config.linkedinSuccessCallbackUrl,
-      loginWithLinkedinUrl : config.loginWithLinkedinUrl,
-      githubSuccessCallbackUrl : config.githubSuccessCallbackUrl,
-      loginWithGithubUrl : config.loginWithGithubUrl
+      facebookSuccessCallbackUrl: config.facebookSuccessCallbackUrl,
+      googleSuccessCallbackUrl: config.googleSuccessCallbackUrl,
+      loginWithFacebookUrl: config.loginWithFacebookUrl,
+      loginWithGoogleUrl: config.loginWithGoogleUrl,
+      twitterSuccessCallbackUrl: config.twitterSuccessCallbackUrl,
+      loginWithTwitterUrl: config.loginWithTwitterUrl,
+      linkedinSuccessCallbackUrl: config.linkedinSuccessCallbackUrl,
+      loginWithLinkedinUrl: config.loginWithLinkedinUrl,
+      githubSuccessCallbackUrl: config.githubSuccessCallbackUrl,
+      loginWithGithubUrl: config.loginWithGithubUrl
     }
   },
   methods: {
@@ -145,16 +142,41 @@ export default {
         if (valid) {
           this.loading = true
           var auth = await modelAuthentication.login(this.formLogin).catch(error => {
-						this.$Message.error(error.response.data)
+            if (error.response) {
+              this.$Message.error(error.response.data)
+            } else {
+              this.$Message.error(error.message)
+            }
             return
           })
           if (auth) {
-            this.$store.commit('SET_TOKEN', auth.logintoken)
-						// Token Store in cookie
-						let location = psl.parse(window.location.hostname)    // get parent domain
-						location = location.domain === null ? location.input : location.domain
-						this.$cookie.set('auth_token', auth.logintoken, {expires: 1, domain: location})    // Store in cookie
-						this.$store.commit('SET_ROLE', null)
+            this.$store.commit('SET_TOKEN', auth.logintoken) // Token Store in cookie
+            let location = psl.parse(window.location.hostname)    // get parent domain
+            location = location.domain === null ? location.input : location.domain
+            this.$cookie.set('auth_token', auth.logintoken, {expires: 1, domain: location})    // Store in cookie
+            this.$store.state.flowz = []
+            this.$store.state.schema = []
+            this.$store.state.Cache = null
+            this.$store.state.Cache = {}
+            let userData = await this.$store.dispatch('authenticate', auth.logintoken)
+            console.log('User Data: ', userData)
+            this.$store.commit('SET_ROLE', 2)
+            if (userData.hasOwnProperty('package')) {
+              console.log('this.$store.state.subscription: ', this.$store.state.subscription)
+              if (this.$store.state.subscription !== '' && this.$store.state.subscription !== undefined && userData.package[this.$store.state.subscription] !== undefined) {
+                if (userData.package[this.$store.state.subscription].role === 'admin') {
+                  this.$store.commit('SET_ROLE', 1)
+                }
+              } else {
+                if (userData.hasOwnProperty('defaultSubscriptionId')) {
+                  this.$store.state.subscription = userData.defaultSubscriptionId
+                  // console.log('this.$store.state.subscription: ', this.$store.state.subscription)
+                  if (userData.package[this.$store.state.subscription].role === 'admin') {
+                    this.$store.commit('SET_ROLE', 1)
+                  }
+                }
+              }
+            }
             this.$router.push({path: '/'}) // Redirect to dashbord
           }
           this.loading = false
@@ -164,11 +186,9 @@ export default {
       })
     },
     handleFacebook () {
-      console.log('connect facebook')
       document.getElementById('form-facebook').submit()
     },
     handleGoogle () {
-      console.log('connect google')
       document.getElementById('form-google').submit()
     },
     handleTwitter () {
@@ -185,7 +205,7 @@ export default {
     var mainDiv = document.getElementById('main-panel')
     let self = this
     mainDiv.onkeypress = function (e) {
-      if (e.key == 'Enter') self.handleSubmit('formLogin')
+      if (e.key === 'Enter') self.handleSubmit('formLogin')
     }
   }
 }
