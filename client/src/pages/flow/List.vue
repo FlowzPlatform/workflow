@@ -715,6 +715,7 @@ export default {
       this.init()
     },
     init () {
+      this.loading = true
       // var string = '?$skip=' + this.skip + '&$limit=' + this.limit
       flowz.get(null, {
         $skip: this.skip,
