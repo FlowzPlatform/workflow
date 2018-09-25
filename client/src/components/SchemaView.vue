@@ -711,6 +711,7 @@ export default {
           let heads = {
             ftablename: this.currentFlowzId
           }
+          this.formSchemaInstance.data[0]._state = this.$route.params.stateid
           dflowzdata.post(this.formSchemaInstance.data[0], null, heads)
           .then(res => {
             this.$Loading.finish()
@@ -903,15 +904,20 @@ export default {
       this.$Loading.start()
       let mergeData = this.mergeFileList(obj.data, obj)
       obj.data = mergeData
-      let fheaders = null
-      let saveObj = {
-        fid: this.item.fid,
-        iid: this.item.id,
-        state: this.item.currentStatus,
-        data: obj.data[0]
+      let fheaders = {
+        ftablename: this.currentFlowzId
       }
+      // let saveObj = {
+      //   fid: this.item.fid,
+      //   iid: this.item.id,
+      //   state: this.item.currentStatus,
+      //   data: obj.data[0]
+      // }
+      let saveObj = obj.data[0]
+      saveObj._state = this.$route.params.stateid
+      console.log('this.item.currentStatus', this.item.currentStatus)
       if (this.isMultiple) {
-        saveObj.nextTarget = this.nextTarget.value
+        saveObj._nextTarget = this.nextTarget.value
       }
       this.bLoading = true
       if (this.$store.state.role === 2) {
@@ -920,29 +926,30 @@ export default {
           stateid: this.$route.params.stateid
         }
       }
-      if (fheaders !== null) {
-        flowzdataModal.post(saveObj, null, fheaders)
-        .then(res => {
-          this.id = null
-          this.$Loading.finish()
-          this.$Notice.success({title: 'Saved Successfully'})
-          this.bLoading = false
-          this.email = false
-          this.validErr = []
-          this.isEmailDone = false
-        }).catch(e => {
-          this.$Loading.error()
-          console.log('error', e)
-          this.bLoading = false
-          this.email = false
-          this.isEmailDone = false
-          if (e.response.data.message) {
-            this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
-          } else {
-            this.$Notice.error({duration: '3', title: e.message, desc: ''})
-          }
-        })
-      } else {
+      // if (fheaders !== null) {
+      console.log('saveObj', saveObj)
+      dflowzdata.patch(saveObj.id, saveObj, null, fheaders)
+      .then(res => {
+        this.id = null
+        this.$Loading.finish()
+        this.$Notice.success({title: 'Saved Successfully'})
+        this.bLoading = false
+        this.email = false
+        this.validErr = []
+        this.isEmailDone = false
+      }).catch(e => {
+        this.$Loading.error()
+        console.log('error', e)
+        this.bLoading = false
+        this.email = false
+        this.isEmailDone = false
+        if (e.response.data.message) {
+          this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+        } else {
+          this.$Notice.error({duration: '3', title: e.message, desc: ''})
+        }
+      })
+      // } else {
         // New API call
         // let heads = {
         //   ftablename: this.currentFlowzId
@@ -968,29 +975,29 @@ export default {
         //     this.$Notice.error({duration: '3', title: e.message, desc: ''})
         //   }
         // })
-
-        flowzdataModal.post(saveObj)
-        .then(res => {
-          this.$Loading.finish()
-          this.$Notice.success({title: 'Saved Successfully'})
-          this.bLoading = false
-          setTimeout(() => {
-            $('html, body').animate({
-              scrollTop: $('#top').offset().top
-            }, 500)
-          }, 0)
-          this.init()
-        }).catch(e => {
-          this.$Loading.error()
-          console.log('error', e)
-          this.bLoading = false
-          if (e.response.data.message) {
-            this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
-          } else {
-            this.$Notice.error({duration: '3', title: e.message, desc: ''})
-          }
-        })
-      }
+      //   console.log('saveObj', saveObj)
+      //   dflowzdata.patch(saveObj.id, saveObj)
+      //   .then(res => {
+      //     this.$Loading.finish()
+      //     this.$Notice.success({title: 'Saved Successfully'})
+      //     this.bLoading = false
+      //     setTimeout(() => {
+      //       $('html, body').animate({
+      //         scrollTop: $('#top').offset().top
+      //       }, 500)
+      //     }, 0)
+      //     this.init()
+      //   }).catch(e => {
+      //     this.$Loading.error()
+      //     console.log('error', e)
+      //     this.bLoading = false
+      //     if (e.response.data.message) {
+      //       this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+      //     } else {
+      //       this.$Notice.error({duration: '3', title: e.message, desc: ''})
+      //     }
+      //   })
+      // }
     },
     checkValidation (data, ent) {
       let self = this

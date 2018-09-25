@@ -45,10 +45,10 @@ module.exports = {
 
 let beforeFind = function (hook) {
   const query = hook.params.query
-  if (query._currentStatus != undefined) {
-    if (hook.params.query._currentStatus == 'true') {
+  if (query._currentStatus !== undefined) {
+    if (hook.params.query._currentStatus === 'true') {
       hook.params.query._currentStatus = true
-    } else if (hook.params.query._currentStatus == 'false') {
+    } else if (hook.params.query._currentStatus === 'false') {
       hook.params.query._currentStatus = false
     }
   }
