@@ -79,8 +79,6 @@ module.exports = function (generalGroup, element, bpmnFactory, translate, option
     return;
   }
   if (options !== undefined) {
-    emailTemplateData = {id: '', templateName: "--Select Template--"}
-    console.log(emailTemplateData)
     emailTemplateData = options.emailTemplate.map(f => ({ value: f.id, name: f.templateName }))
   }
   if (is(element, 'camunda:Sendproofmail')) {
