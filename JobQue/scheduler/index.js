@@ -22,13 +22,11 @@ module.exports = function (options) {
     if (options.logs.console == false) PINO_C_OPTION.level = 'silent'
     if (options.logs.db == false) {
       PINO_DB_OPTION.level = 'silent'
-    }
-    else {
+    } else {
       const SYSTEM_LOGS_TABLE = options.logs.table ? options.logs.table : app.system_logs_table
       enableWatcher(logs_table)
     }
-  }
-  else {
+  } else {
     enableWatcher(app.system_logs_table)
   }
 
@@ -37,48 +35,47 @@ module.exports = function (options) {
     const CHOKIDAR_OPTION = app.chokidar
     var watcher = chokidar.watch('./logs', CHOKIDAR_OPTION)
 
-    watcher.on('change', path =>
-      fs.readFile('./logs','utf8', function (err, data) {
-        if (err) throw err
-        let parsedData = JSON.parse(data)
-        rdash.table(SYSTEM_LOGS_TABLE).insert(parsedData).run(function (err , result) {
-          if (err) {
-            pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).error({},err)
-            pino(PINO_C_OPTION).error({},err)
-          }
-        })
-      })
-    )
+    // watcher.on('change', path =>
+    //   // fs.readFile('./logs','utf8', function (err, data) {
+    //   //   if (err) throw err
+    //   //   let parsedData = JSON.parse(data)
+    //   //   rdash.table(SYSTEM_LOGS_TABLE).insert(parsedData).run(function (err , result) {
+    //   //     if (err) {
+    //   //       pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).error({},err)
+    //   //       pino(PINO_C_OPTION).error({},err)
+    //   //     }
+    //   //   })
+    //   // })
+    // )
   }
 
   const func = new scheduler_functions(options, PINO_DB_OPTION, PINO_C_OPTION)
 
-  q.process(async (job, next) => {
+  q.process(async(job, next) => {
+
     try {
 
       const fId = job.data.fId
-      const flowInstance = await func.getFlowInstance(fId) //get flow instance from db
-      // pino(PINO_C_OPTION).info(job.data)
+      const flowInstance = await func.getFlowInstance(fId).catch(err => {throw err}); //get flow instance from db
+        // pino(PINO_C_OPTION).info(job.data)
       if (job.data.processNotification) {
         //the condition will be satisfied if the job is created by some process worker as a part
         //of notifying schcduler that the process completed succesfully a that particular worker
 
-        func.notificationACK(flowInstance, fId, job.data, next, cxnOptions, qOptions)
-      }
-      else if (job.data.isExternalInput) {
+        func.notificationACK(flowInstance, fId, job.data, next, cxnOptions, qOptions).catch(err => {throw err});
+      } else if (job.data.isExternalInput) {
         //the condition will be satisfied if the job is created in
         //order to provide external input to certain process
 
-        await func.performExternalOperation(flowInstance, job.data, fId, next)
-      }
-      else {
+        await func.performExternalOperation(flowInstance, job.data, fId, next).catch(err => {throw err});
+      } else {
         //i.e. the job in scheduler was created as a result of a new flowz instance
-        await func.newInstance(flowInstance, fId, next)
+        await func.newInstance(flowInstance, fId, next).catch(err => {throw err});
       }
     } catch (err) {
-      pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).error({},'... error in process\n'+err)
-      pino(PINO_C_OPTION).error({},'... error in process '+err)
-      return next(err)
+      pino(PINO_DB_OPTION, fs.createWriteStream('./logs')).error({}, '... error in process\n' + err)
+      pino(PINO_C_OPTION).error({}, '... error in process ' + err)
+      return next(new Error(err.message),null)
     }
   })
 }

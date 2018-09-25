@@ -37,7 +37,7 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
         if (numberOfExternalSchema != 0 && !externalCheck) {
 
           let sourceCounts = targetJob.data.sourceCount ? Object.values(targetJob.data.sourceCount) : []
-          
+
           if (sourceCounts.length < numberOfExternalSchema || (capacity && Math.min(...sourceCounts) != capacity)) {
             await this.updateProcess(targetJob, 'created')
             await this.updateLog(targetJob, 'created', false)
@@ -568,6 +568,7 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
   this.constructor.prototype.newInstance = async function (flowInstance, fId, next) {
     return new Promise (async (resolve, reject) => {
       try{
+
         for (let i=0; i<flowInstance.start_states.length; i++) {
 
           let startStateId = flowInstance.start_states[i]
@@ -695,16 +696,16 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
               if (inputAvailability) {
                 //if all inputs are available, update the latest mapping done and begin the process
                 //i.e. change status of the job for that process in it's respective worker queue to `waiting`
-                pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).info({'fId': jobData.fId, 'job': targetSchema.id, 'jobId': targetJobs[0].id}, 'next job')
-                pino(PINO_C_OPTION).info({'fId': jobData.fId, 'job': targetSchema.id, 'jobId': targetJobs[0].id}, 'next job')
+                //pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).info({'fId': jobData.fId, 'job': targetSchema.id, 'jobId': targetJobs[0].id}, 'next job')
+                //pino(PINO_C_OPTION).info({'fId': jobData.fId, 'job': targetSchema.id, 'jobId': targetJobs[0].id}, 'next job')
                 // await this.beginProcess(targetJobs[i])
                 await this.beginProcess(targetJobs[0])
               }
               else {
                 //i.e. all inputs are still not available so just update the latest mapping done
                 //(it's status in it's respective worker queue will not be changed)
-                pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).warn({'fId': jobData.fId, 'job': targetSchema.id, 'jobId': targetJobs[0].id}, 'all inputs not available')
-                pino(PINO_C_OPTION).warn({'fId': jobData.fId, 'job': targetSchema.id, 'jobId': targetJobs[0].id}, 'all inputs not available')
+                //pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).warn({'fId': jobData.fId, 'job': targetSchema.id, 'jobId': targetJobs[0].id}, 'all inputs not available')
+                //pino(PINO_C_OPTION).warn({'fId': jobData.fId, 'job': targetSchema.id, 'jobId': targetJobs[0].id}, 'all inputs not available')
                 // let tmp = await this.updateProcess(targetJobs[i])
               }
             // }
@@ -796,8 +797,8 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
             if (inputAvailability) {
               //if all inputs are available, update the latest mapping done and begin the process
               //i.e. change status of the job for that process in it's respective worker queue to `waiting`
-              pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).info({'fId': fId, 'jobId': targetId}, 'next job')
-              pino(PINO_C_OPTION).info({'fId': fId, 'jobId': targetId}, 'next job')
+              //pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).info({'fId': fId, 'jobId': targetId}, 'next job')
+              //pino(PINO_C_OPTION).info({'fId': fId, 'jobId': targetId}, 'next job')
               await this.beginProcess(targetJobs[i])
             }
             else {
@@ -805,12 +806,12 @@ module.exports = function (options, PINO_DB_OPTION, PINO_C_OPTION) {
               //(it's status in it's respective worker queue will not be changed)
               var mappingRequired = capacity ? false : this.externalMappingRequired(targetJobs[i])
               if (mappingRequired) {
-                pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).warn({'fId': fId, 'jobId': targetId}, 'mapping required')
-                pino(PINO_C_OPTION).warn({'fId': fId, 'jobId': targetId}, 'mapping required')
+                //pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).warn({'fId': fId, 'jobId': targetId}, 'mapping required')
+                //pino(PINO_C_OPTION).warn({'fId': fId, 'jobId': targetId}, 'mapping required')
               }
               else {
-                pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).warn({'fId': fId, 'job': targetId, 'jobId': targetJobs[i].id}, 'all inputs not available')
-                pino(PINO_C_OPTION).warn({'fId': fId, 'job': targetId, 'jobId': targetJobs[i].id}, 'all inputs not available')
+                //pino(PINO_DB_OPTION,fs.createWriteStream('./logs')).warn({'fId': fId, 'job': targetId, 'jobId': targetJobs[i].id}, 'all inputs not available')
+                //pino(PINO_C_OPTION).warn({'fId': fId, 'job': targetId, 'jobId': targetJobs[i].id}, 'all inputs not available')
               }
               // let tmp = await this.updateProcess(targetJobs[i])
             }

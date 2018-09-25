@@ -1,7 +1,6 @@
 // Initializes the `bpmnplugins` service on path `/bpmnplugins`
 const createService = require('feathers-rethinkdb');
 const hooks = require('./bpmnplugins.hooks');
-const filters = require('./bpmnplugins.filters');
 
 module.exports = function () {
   const app = this;
@@ -21,8 +20,4 @@ module.exports = function () {
   const service = app.service('bpmnplugins');
 
   service.hooks(hooks);
-
-  if (service.filter) {
-    service.filter(filters);
-  }
 };
