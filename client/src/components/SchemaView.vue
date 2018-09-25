@@ -353,7 +353,6 @@ export default {
       this.limit = size
       this.entriesTotal = size
       this.skip = 0
-      console.log(skip, limit, size)
       this.populateTables()
     },
     pagination2 (skip, limit, page) {
@@ -368,7 +367,6 @@ export default {
       this.limit = size
       this.entriesTotal = size
       this.skip = 0
-      console.log(skip, limit, size)
       this.populateTables()
     },
     info (item, index, button) {
