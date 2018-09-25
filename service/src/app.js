@@ -19,6 +19,7 @@ const services = require('./services');
 const appHooks = require('./app.hooks');
 
 const rethinkdb = require('./rethinkdb');
+const subscription = require('flowz-subscription');
 
 const app = feathers();
 
@@ -28,11 +29,17 @@ app.configure(configuration());
 app.use(cors());
 app.use(helmet());
 app.use(compress());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json({ limit: '100mb' }));
+app.use(bodyParser.urlencoded({ limit: '100mb', extended: true }));
 app.use(favicon(path.join(app.get('public'), 'favicon.ico')));
 // Host the public folder
 app.use('/', feathers.static(app.get('public')));
+// app.use('/', express.static(app.get('public')));
+
+app.use(function(req, res, next) {
+  this.apiHeaders = req.headers ;
+  next();
+ });
 
 // Set up Plugins and providers
 app.configure(hooks());
@@ -44,10 +51,12 @@ app.configure(socketio(4033, {
   origin: '*.flowz.com:*'
 }));
 
-// Configure other middleware (see `middleware/index.js`)
-app.configure(middleware);
+app.use(subscription.featherSubscription)
+
 // Set up our services (see `services/index.js`)
 app.configure(services);
+// Configure other middleware (see `middleware/index.js`)
+app.configure(middleware);
 // Configure a middleware for 404s and the error handler
 app.use(notFound());
 app.use(handler());

@@ -50,7 +50,7 @@
     </div>
 
     <div class="registerfooter">
-        <p>© 2017. Flowz technology. All Rights Reserved.</p>
+        <p>© 2018. Flowz technology. All Rights Reserved.</p>
     </div>
   </div>
   </div>
@@ -58,7 +58,7 @@
 
 <script>
 import modelAuthentication from '@/api/authentication'
-import modelUser from '@/api/user'
+// import modelUser from '@/api/user'
 export default {
   name: 'Register',
   data () {
@@ -93,20 +93,14 @@ export default {
           this.loading = true
           modelAuthentication.register(this.formRegister).then(response => {
             if (response) {
-              modelUser.post(this.formRegister).then(response => {
-                if (response) {
-                  this.loading = false
-                }
-              }).catch(e => {
-                this.loading = false
-              })
+              this.$router.push('/login')
             } else {
               this.loading = false
             }
           })
           .catch(e => {
-            this.$Message.error(e.response.data)
             this.loading = false
+            this.$Message.error(e.message)
           })
         } else {
           this.$Message.error('Form validation failed!')

@@ -36,7 +36,7 @@
     </div>
 
     <div class="loginfooter">
-        <p>© 2017. Flowz technology. All Rights Reserved.</p>
+        <p>© 2018. Flowz technology. All Rights Reserved.</p>
     </div>
 
   </div>
@@ -71,12 +71,10 @@ export default {
       this.$refs[name].validate(async (valid) => {
         if (valid) {
           this.loading = true
-          console.log(this.formLogin)
           var auth = await modelAuthentication.social(this.formLogin).catch(error => {
 						this.$Message.error(error.response.data)
             return
           })
-          console.log(auth)
           if (auth) {
             let userInfo = {
               email: this.formLogin.email,
