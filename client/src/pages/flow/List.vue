@@ -375,6 +375,7 @@ export default {
                 },
                 on: {
                   click: () => {
+                    // console.log(this.flowzList[params.index].id)
                     this.deleteFlow(this.flowzList[params.index].id, params.index)
                   }
                 }
@@ -522,15 +523,22 @@ export default {
     this.getDataOfSubscriptionUser()
   },
   feathers: {
-    'flowz-instance': {
-      created (data) { // update status using socket
-        flowz.get()
-        .then(response => {
-          this.flowzList = response.data.data
-        })
-        .catch(error => {
-          console.log(error)
-        })
+    'flowz': {
+      created (data) {
+        console.log('data', data)
+        this.flowzList.push(data)
+      },
+      updated (data) {
+        this.init()
+      },
+      removed (data) {
+        // console.log('Removed Data: ', data)
+        if (this.$store.state.role === 1) {
+          // this.$store.state.flowz = []
+          // this.init()
+          let i = _.findIndex(this.flowzList, (o) => { return o.id === data.id })
+          this.flowzList.splice(i, 1)
+        }
       }
     }
   },
@@ -748,9 +756,10 @@ export default {
         title: 'Confirm',
         content: '<p>Are you sure you want to delete?</p>',
         onOk: () => {
+          // console.log(id)
           flowz.delete(id)
           .then(response => {
-            // console.log('response.data', response.data)
+            console.log('response.data', response.data)
             this.$Notice.success({title: 'Success!!', desc: 'Flowz Deleted...'})
             this.flowzList.splice(inx, 1)
           })
