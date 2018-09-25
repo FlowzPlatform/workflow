@@ -16,17 +16,22 @@
 
     <div class="row">
       <div class="col-md-12">
-        <div class="card">
+        <div class="card" style="padding-bottom:15px">
           <div class="row">
-            <div><b>Select Action</b></div> 
-            <Select v-model="action" label="Select Action" style="width:200px">
-              <Option v-for="item in dataAction" :value="item.value" :key="item.value">{{ item.label }}</Option>
-            </Select>
-            <div v-if="action === 'search'" style="margin-top: 10px">
-              <div class="col-md-6">
+            <div class="col-md-12">
+              <span><b>Select Action</b></span>
+              <Select v-if="this.$store.state.role === 1" v-model="action" label="Select Action" style="width:200px">
+                <Option v-for="item in dataActionRole1" :value="item.value" :key="item.value">{{ item.label }}</Option>
+              </Select>
+              <Select v-if="this.$store.state.role === 2" v-model="action" label="Select Action" style="width:200px">
+                <Option v-for="item in dataActionRole2" :value="item.value" :key="item.value">{{ item.label }}</Option>
+              </Select>
+            </div>
+            <div v-if="action === 'search'" style="margin-top: 20px;">
+              <div class="col-md-6" style="margin-top: 20px;">
                 <Input search enter-button placeholder="Search..." v-model="searchQuery"/>
               </div>
-              <div class="col-md-4">
+              <div class="col-md-4" style="margin-top: 20px;">
                 <div class="row">
                   <div class="col-md-12">
                     <Select style="width: 100%" v-model="selectedFilterBy" clearable placeholder="Filter By">
@@ -42,7 +47,7 @@
                   </div> -->
                 </div>
               </div>
-              <div class="col-md-2">
+              <div class="col-md-2" style="margin-top: 20px;">
                 <Button icon="search" type="primary" @click="searchData">Search</Button>
                 <Tooltip content="Clear Search" style="float: right;">
                   <Button icon="ios-trash" type="error" @click="clearSearchData"></Button>  
@@ -50,13 +55,13 @@
                 
               </div>
             </div>
-            <div v-if="action === 'filter'" style="margin-top: 10px">
-              <div class="col-md-2">
+            <div v-if="action === 'filter'" style="margin-top: 10px;">
+              <div class="col-md-2" style="margin-top: 20px;">
                 <Select v-model="selectedAssignUser" style="width:200px">
                   <Option v-for="item in stageClaimUsers" :value="item.value" :key="item.value">{{ item.label }}</Option>
                 </Select>
               </div>
-              <div class="col-md-2">
+              <div class="col-md-2" style="margin-top: 20px;">
                 <Button type="primary" @click="unAssignUsers">Assign</Button>
               </div>
             </div>
@@ -121,12 +126,16 @@
     data () {
       return {
         action: 'search',
-        dataAction: [{
+        dataActionRole1: [{
           value: 'search',
           label: 'SEARCH'
         }, {
           value: 'filter',
           label: 'FILTER'
+        }],
+        dataActionRole2: [{
+          value: 'search',
+          label: 'SEARCH'
         }],
         selectedRows: [],
         selectedAssignUser: 'noValue',
