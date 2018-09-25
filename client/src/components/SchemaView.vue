@@ -697,6 +697,7 @@ export default {
 
     saveInstanceData () {
       let currentStateId = this.$route.params.stateid
+      console.log(this.schema)
       if (this.schema.hasOwnProperty('emailSchema')) {
         if (this.schema.emailSchema.action === true) {
           this.emailSchemaId = this.schema.emailSchema.schemaId
