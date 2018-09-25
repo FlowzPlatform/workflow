@@ -71,7 +71,7 @@
         
         <div v-if="itsFirstState === false">
           <tabs> 
-          <TabPane v-if="this.$store.state.role === 1" :label="dataCount" icon="lock-combination">
+          <TabPane v-if="this.$store.state.role === 1" :label="'Data ('+ dataTotal + ')'" icon="lock-combination">
           <schemalist v-if="this.$store.state.role === 1" :schema="dataSchema" :pageno="pageno" :datashow="'dataA'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
           <!-- <schemalist v-if="this.$store.state.role === 2" :schema="dataSchema" :pageno="pageno" :datashow="'dataU'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist> -->
 
@@ -130,7 +130,7 @@
             </div>
           </div>
           </TabPane>
-          <TabPane v-if="this.$store.state.role === 2" :label="'Work Pool ('+ dataData2.length + ')'" icon="lock-combination">
+          <TabPane v-if="this.$store.state.role === 2" :label="'Work Pool ('+ dataTotalUnclaim + ')'" icon="lock-combination">
             <schemalist :schema="dataSchema" :datashow="'dataU'" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotalUnclaim" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
             <div style="padding: 10px">
             <div class="row" v-if="id != null">
@@ -187,7 +187,7 @@
             </div>
           </div>
           </TabPane>
-          <TabPane v-if="this.$store.state.role === 2" :label="'In Progress ('+ dataClaim.length + ')'" icon="lock-combination">
+          <TabPane v-if="this.$store.state.role === 2" :label="'In Progress ('+ dataTotalClaim + ')'" icon="lock-combination">
             <schemalist v-if="this.$store.state.role === 2" :schema="dataSchema" :pageno="pageno" :datashow="'dataC'" v-on:on-paginate2="pagination2" v-on:on-handlepage2="handlepage2" :limit="limit" :skip="skip" :dataTotalClaim="dataTotalClaim" :data="dataClaim" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
           </TabPane>
           </Tabs>
