@@ -850,7 +850,18 @@ export default {
           'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
         }
       }).then(async function (response) {
-        let arrResources = await _.groupBy(response.data.data, 'module')
+        // console.log('Response: ', response.data.data)
+        let actionsArray = response.data.data
+        // console.log('processList: ', self.selectedFlowObject.processList)
+        let processListArray = self.selectedFlowObject.processList
+        let sortedArray = []
+        for (let item of actionsArray) {
+          // console.log('Item: ', item, processListArray[self.titleCase(item.service)])
+          item['order'] = processListArray[self.titleCase(item.service)].order
+          sortedArray.push(item)
+        }
+        sortedArray = _.sortBy(sortedArray, [function (o) { return o.order }])
+        let arrResources = await _.groupBy(sortedArray, 'module')
         // self.tableData = arrResources
         // self.tableData = ['hi']
         self.tableData = await _.extend(self.tableData, arrResources)

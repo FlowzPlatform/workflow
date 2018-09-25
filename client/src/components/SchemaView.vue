@@ -1256,7 +1256,7 @@ export default {
     },
 
     async init () {
-      this.currentFlowzId = this.$route.params.id.replace(/-/g, '_')
+      this.currentFlowzId = this.$route.params.id
       this.dataLoading = true
       this.instanceEntries = []
       this.isFlowzLoaded = false
