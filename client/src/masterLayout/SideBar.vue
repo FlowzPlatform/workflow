@@ -82,6 +82,17 @@ import dflowzdataModal from '@/api/dflowzdata'
 import _ from 'lodash'
 import config from '@/config'
 import axios from 'axios'
+const io = require('socket.io-client')
+const socket = io(config.socketURI)
+socket.on('5a6e2e8b_cfeb_4060_b420_6ca95184b884_created', data => {
+  // console.log('===d8finstance created==', data)
+})
+socket.on('5a6e2e8b_cfeb_4060_b420_6ca95184b884_updated', data => {
+  // console.log('===d6finstance updated==', data)
+})
+socket.on('5a6e2e8b_cfeb_4060_b420_6ca95184b884_removed', data => {
+  // console.log('===d6finstance removed==', data)
+})
 export default {
   data () {
     return {
@@ -254,111 +265,112 @@ export default {
       }
     },
     setCounters (sitem) {
-      if (sitem) {
+      // if (sitem) {
+      //   if (this.$store.state.role === 1) {
+      //     dflowzdataModal.get(null, {
+      //       $paginate: false,
+      //       $select: ['_state'],
+      //       _currentStatus: true
+      //     }, {
+      //       ftablename: sitem.id.replace(/-/g, '_')
+      //     }).then(res => {
+      //       console.log('res count', res.data)
+      //       sitem.count = 0
+      //       _.map(sitem.processList, (pitem) => {
+      //         pitem.count = _.filter(res.data, {_state: pitem.id}).length
+      //         sitem.count += pitem.count
+      //       })
+      //       // for (let pitem in sitem.processList) {
+      //       //   pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
+      //       //   sitem.count += pitem.count
+      //       // }
+      //     }).catch(err => {
+      //       console.log('error', err)
+      //     })
+      //   } else {
+      //     let once = false
+      //     let mdata = []
+      //     sitem.count = 0
+      //     for (let pitem in sitem.processList) {
+      //       if (!once) {
+      //         dflowzdataModal.get(null, {
+      //           $paginate: false,
+      //           $select: ['_state'],
+      //           _currentStatus: true
+      //         }, {
+      //           workflowid: 'workflow_' + sitem.id,
+      //           stateid: sitem.processList[pitem].id,
+      //           ftablename: sitem.id.replace(/-/g, '_')
+      //         }).then(res => {
+      //           if (res.data.length > 0) {
+      //             once = true
+      //             mdata = res.data
+      //             sitem.processList[pitem].count = _.filter(res.data, {_state: sitem.processList[pitem].id}).length
+      //             sitem.count += sitem.processList[pitem].count
+      //           }
+      //         }).catch(err => {
+      //           console.log('error', err)
+      //         })
+      //       } else {
+      //         sitem.processList[pitem].count = _.filter(mdata, {_state: sitem.processList[pitem].id}).length
+      //         sitem.count += sitem.processList[pitem].count
+      //       }
+      //     }
+      //   }
+      // } else {
+      for (let item of this.flowzList) {
         if (this.$store.state.role === 1) {
+            // item.count = 9
           dflowzdataModal.get(null, {
             $paginate: false,
             $select: ['_state'],
             _currentStatus: true
           }, {
-            ftablename: this.$route.params.id.replace(/-/g, '_')
+            ftablename: item.id.replace(/-/g, '_')
           }).then(res => {
-            console.log('res count', res.data)
-            sitem.count = 0
-            _.map(sitem.processList, (pitem) => {
-              pitem.count = _.filter(res.data, {_state: pitem.id}).length
-              sitem.count += pitem.count
-            })
-            // for (let pitem in sitem.processList) {
-            //   pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
-            //   sitem.count += pitem.count
-            // }
+            if (res.data.length > 0) {
+              item.count = 0
+              _.map(item.processList, (pitem) => {
+                  // console.log('_.filter(res.data, {_state: pitem.id}).length', _.filter(res.data, {_state: pitem.id}).length)
+                pitem.count = _.filter(res.data, {_state: pitem.id}).length
+                item.count += pitem.count
+              })
+            }
           }).catch(err => {
             console.log('error', err)
           })
         } else {
-          let once = false
-          let mdata = []
-          sitem.count = 0
-          for (let pitem in sitem.processList) {
-            if (!once) {
+          let isonce = false
+          let pdata = []
+          for (let key in item.processList) {
+              // console.log('item', item)
+            if (!isonce) {
               dflowzdataModal.get(null, {
                 $paginate: false,
                 $select: ['_state'],
                 _currentStatus: true
               }, {
-                workflowid: 'workflow_' + sitem.id,
-                stateid: sitem.processList[pitem].id,
-                ftablename: this.$route.params.id.replace(/-/g, '_')
+                workflowid: 'workflow_' + item.id,
+                stateid: item.processList[key].id,
+                ftablename: item.id.replace(/-/g, '_')
               }).then(res => {
                 if (res.data.length > 0) {
-                  once = true
-                  mdata = res.data
-                  sitem.processList[pitem].count = _.filter(res.data, {_state: sitem.processList[pitem].id}).length
-                  sitem.count += sitem.processList[pitem].count
+                  isonce = true
+                  pdata = res.data
+                  item.processList[key].count = _.filter(res.data, {_state: item.processList[key].id}).length
+                  item.count += item.processList[key].count
                 }
               }).catch(err => {
                 console.log('error', err)
               })
             } else {
-              sitem.processList[pitem].count = _.filter(mdata, {_state: sitem.processList[pitem].id}).length
-              sitem.count += sitem.processList[pitem].count
-            }
-          }
-        }
-      } else {
-        for (let item of this.flowzList) {
-          if (this.$store.state.role === 1) {
-            // item.count = 9
-            dflowzdataModal.get(null, {
-              $paginate: false,
-              $select: ['_state'],
-              _currentStatus: true
-            }, {
-              ftablename: this.$route.params.id.replace(/-/g, '_')
-            }).then(res => {
-              if (res.data.length > 0) {
-                item.count = 0
-                _.map(item.processList, (pitem) => {
-                  pitem.count = _.filter(res.data, {_state: pitem.id}).length
-                  item.count += pitem.count
-                })
-              }
-            }).catch(err => {
-              console.log('error', err)
-            })
-          } else {
-            let isonce = false
-            let pdata = []
-            for (let key in item.processList) {
-              // console.log('item', item)
-              if (!isonce) {
-                dflowzdataModal.get(null, {
-                  $paginate: false,
-                  $select: ['_state'],
-                  _currentStatus: true
-                }, {
-                  workflowid: 'workflow_' + item.id,
-                  stateid: item.processList[key].id,
-                  ftablename: this.$route.params.id.replace(/-/g, '_')
-                }).then(res => {
-                  if (res.data.length > 0) {
-                    isonce = true
-                    pdata = res.data
-                    item.processList[key].count = _.filter(res.data, {_state: item.processList[key].id}).length
-                    item.count += item.processList[key].count
-                  }
-                }).catch(err => {
-                  console.log('error', err)
-                })
-              } else {
-                item.processList[key].count = _.filter(pdata, {_state: item.processList[key].id}).length
-                item.count += item.processList[key].count
-              }
+              item.processList[key].count = _.filter(pdata, {_state: item.processList[key].id}).length
+              item.count += item.processList[key].count
             }
           }
         }
       }
+      // }
     }
   },
   computed: {
@@ -383,13 +395,18 @@ export default {
   },
   mounted () {
     // this.activeFlow(this.$store.state.activeFlow)
-    console.log('this.$feathers', this.$feathers)
+    // console.log('this.$feathers', this.$feathers)
     this.init()
   },
   feathers: {
+    '5a6e2e8b_cfeb_4060_b420_6ca95184b884_created': {
+      created (data) {
+        console.log('>>>>>>>>>>', data)
+      }
+    },
     'dflowzdata': {
       created (data) {
-        console.log('data')
+        // console.log('created', data)
         // let finx = _.findIndex(this.flowzList, {id: data.fid})
         // if (finx !== -1) {
         //   // this.flowzList[finx].count += 1

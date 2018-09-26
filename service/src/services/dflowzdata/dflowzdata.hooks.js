@@ -52,6 +52,14 @@ let beforeFind = function (hook) {
       hook.params.query._currentStatus = false
     }
   }
+  if (query.$group !== undefined) {
+    hook.service.service.options.name = hook.params.headers.ftablename;
+    hook.service.service.table = hook.service.rDB.table(hook.params.headers.ftablename);
+    let value = hook.params.query.$group
+    delete hook.params.query.$group
+    const query = hook.service.service.createQuery(hook.params.query);
+    hook.params.rethinkdb = query.group(value)
+  }
 }
 
 function beforeCreate (hook) {
