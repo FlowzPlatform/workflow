@@ -19,7 +19,7 @@ class Service {
       this.app.io.emit(this.service.options.name+'_updated', data);
     });
     this.on('patched',(data) => {
-      this.app.io.emit(this.service.options.name+'_updated', data);
+      this.app.io.emit(this.service.options.name+'_patched', data);
     });
     this.on('removed',(data) => {
       this.app.io.emit(this.service.options.name+'_removed', data);

@@ -17,7 +17,8 @@ module.exports = function () {
     'flowzdata': ['update', 'patch'],
     'schema': ['create','update', 'patch', 'remove'],
     'bpmnplugins': ['create','update', 'patch', 'remove'],
-    'emailtemplate': ['create','update', 'patch', 'remove']
+    'emailtemplate': ['create','update', 'patch', 'remove'],
+    'dflowzdata': ['create','update', 'patch', 'remove']
   };
 
   subscription.moduleResource.registerAppModule = registerAppModule;
