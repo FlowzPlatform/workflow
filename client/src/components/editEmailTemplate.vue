@@ -6,7 +6,7 @@
     <div class="editor">
       <editor v-model="GetHtmlOfEditor" api-key="ppzi01crrfo3pvd43s3do89pguwkhowrwajpjdqdkginzj7k" :initial-value="GetHtmlContent"></editor>
       <Input v-model="templateName" placeholder="Enter Template name" style="width: 300px" class="dataEnter"/>
-      <Button type="primary" @click="updateTemplate" class="dataEnter">Update Template</Button>
+      <Button type="primary" @click="updateTemplate" class="dataEnter" :loading="loading">Update Template</Button>
       <Button type="error" @click="cancelUpdateTemplate" class="dataEnter">Cancel</Button>
     </div>
   </div>
@@ -19,6 +19,7 @@ export default {
   props: ['id', 'name'],
   data () {
     return {
+      loading: false,
       flag: false,
       updateTemplateid: '',
       newTemplate: true,
@@ -39,6 +40,7 @@ export default {
   },
   methods: {
     updateTemplate () {
+      this.loading = true
       let saveemailTemplateObj = {
         user: this.$store.state.user._id,
         template: this.GetHtmlOfEditor,
@@ -47,10 +49,13 @@ export default {
       }
       saveemailTemplate.patch(this.id, saveemailTemplateObj)
       .then((res) => {
+        this.loading = false
         this.$Message.success('Template updated.')
         this.GetHtmlOfEditor = ''
+        this.$router.push({name: 'emailtemplate'})
       })
       .catch((err) => {
+        this.loading = false
         this.$Message.error('Template Updation Error!')
         console.log(err)
       })

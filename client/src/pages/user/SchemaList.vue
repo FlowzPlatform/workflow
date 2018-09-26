@@ -77,7 +77,7 @@
           <Button @click="handleSelectAll(false)">Cancel all selected</Button>
         </div>
         <div style="float: right; display: inline-block">
-          <Page placement="top" :total="total" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+          <Page placement="top" :total="dataTotal" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
         </div>
       </div>
     </div>
@@ -712,7 +712,6 @@
       }
     },
     mounted () {
-      this.total = this.dataTotal
       this.mdata = this.data
       axios.get(config.usermodulerole)
       // usermodulerole.get()
