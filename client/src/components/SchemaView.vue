@@ -313,7 +313,8 @@ export default {
         $limit: this.limit,
         '_currentStatus': true,
         '_state': this.$route.params.stateid,
-        'id[$search]': '^' + query.text
+        // 'id[$search]': '^' + query.text
+        '$search': query.text
       }, heads)
       .then(res => {
         this.isFlowzLoaded = true
@@ -375,6 +376,7 @@ export default {
       // })
     },
     sortData (object) {
+      // console.log('object')
     },
     emailService (item) {
       this.isEmailDone = true
