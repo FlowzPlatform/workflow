@@ -914,11 +914,9 @@ export default {
       //   data: obj.data[0]
       // }
       let saveObj = obj.data[0]
-      console.log('Save Object: ', saveObj)
       delete saveObj['_index']
       delete saveObj['_rowKey']
       saveObj._state = this.$route.params.stateid
-      console.log('this.item.currentStatus', this.item.currentStatus)
       if (this.isMultiple) {
         saveObj._nextTarget = this.nextTarget.value
       }
@@ -930,7 +928,6 @@ export default {
         }
       }
       // if (fheaders !== null) {
-      console.log('saveObj', saveObj)
       dflowzdata.patch(saveObj.id, saveObj, null, fheaders)
       .then(res => {
         this.id = null

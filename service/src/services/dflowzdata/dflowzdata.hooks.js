@@ -64,7 +64,7 @@ let beforeFind = function (hook) {
 
 function beforeCreate (hook) {
   try {
-    // console.log('before create ================================', hook.data, hook.params)
+    console.log('before create ================================', hook.params)
     hook.params.done = true
     if (hook.params.headers.ftablename !== undefined && hook.data._state !== undefined) {
       let regex = /_/g

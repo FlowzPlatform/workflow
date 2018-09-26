@@ -84,15 +84,24 @@ import config from '@/config'
 import axios from 'axios'
 const io = require('socket.io-client')
 const socket = io(config.socketURI)
-socket.on('5a6e2e8b_cfeb_4060_b420_6ca95184b884_created', data => {
-  // console.log('===d8finstance created==', data)
-})
-socket.on('5a6e2e8b_cfeb_4060_b420_6ca95184b884_updated', data => {
-  // console.log('===d6finstance updated==', data)
-})
-socket.on('5a6e2e8b_cfeb_4060_b420_6ca95184b884_removed', data => {
-  // console.log('===d6finstance removed==', data)
-})
+// socket.on('5a6e2e8b_cfeb_4060_b420_6ca95184b884_created', data => {
+//   console.log('===d8finstance created==', data)
+//   if (data._currentStatus) {
+//     console.log('data._currentStatus', data._currentStatus, this.flowzList)
+//     let finx = _.findIndex(this.flowzList, {id: '5a6e2e8b_cfeb_4060_b420_6ca95184b884'.replace(/_/g, '-')})
+//     if (finx !== -1) {
+//       console.log('Index', finx)
+//       // this.flowzList[finx].count += 1
+//       this.flowzList[finx].processList[data._state].count++
+//     }
+//   }
+// })
+// socket.on('5a6e2e8b_cfeb_4060_b420_6ca95184b884_updated', data => {
+//   console.log('===d6finstance updated==', data)
+// })
+// socket.on('5a6e2e8b_cfeb_4060_b420_6ca95184b884_removed', data => {
+//   console.log('===d6finstance removed==', data)
+// })
 export default {
   data () {
     return {
@@ -105,6 +114,11 @@ export default {
     }
   },
   created () {
+    // console.log('created', socket._callbacks)
+  },
+  beforeDestroy () {
+    // alert('beforeDestroy')
+    // console.log(socket, socket.disconnected)
   },
   methods: {
     getByOrder (array) {
@@ -179,6 +193,44 @@ export default {
               p.count = 0
               return p
             })
+            if (socket._callbacks['$' + m.id.replace(/-/g, '_') + '_created'] === undefined) {
+              socket.on(m.id.replace(/-/g, '_') + '_created', (data) => {
+                // console.log('===created==', data)
+                if (data._currentStatus) {
+                  let finx = _.findIndex(this.flowzList, {id: m.id})
+                  if (finx !== -1) {
+                    this.flowzList[finx].processList[data._state].count++
+                    this.flowzList[finx].count++
+                  }
+                }
+              })
+            }
+            if (socket._callbacks['$' + m.id.replace(/-/g, '_') + '_patched'] === undefined) {
+              socket.on(m.id.replace(/-/g, '_') + '_patched', (data) => {
+                // console.log('===patched==', data)
+                let finx = _.findIndex(this.flowzList, {id: m.id})
+                if (finx !== -1 && !data._currentStatus && data._next === null) {
+                  if (this.flowzList[finx].processList[data._state].count > 0) {
+                    this.flowzList[finx].processList[data._state].count--
+                  }
+                  if (this.flowzList[finx].count > 0) {
+                    this.flowzList[finx].count--
+                  }
+                }
+              })
+            }
+            if (socket._callbacks['$' + m.id.replace(/-/g, '_') + '_removed'] === undefined) {
+              socket.on(m.id.replace(/-/g, '_') + '_removed', (data) => {
+                // console.log('===removed==', data)
+                if (data._currentStatus) {
+                  let finx = _.findIndex(this.flowzList, {id: m.id})
+                  if (finx !== -1) {
+                    this.flowzList[finx].processList[data._state].count--
+                    this.flowzList[finx].count--
+                  }
+                }
+              })
+            }
             return m
           })
           this.loading = false
@@ -399,37 +451,6 @@ export default {
     this.init()
   },
   feathers: {
-    '5a6e2e8b_cfeb_4060_b420_6ca95184b884_created': {
-      created (data) {
-        console.log('>>>>>>>>>>', data)
-      }
-    },
-    'dflowzdata': {
-      created (data) {
-        // console.log('created', data)
-        // let finx = _.findIndex(this.flowzList, {id: data.fid})
-        // if (finx !== -1) {
-        //   // this.flowzList[finx].count += 1
-        //   this.setCounters(this.flowzList[finx])
-        // }
-      },
-      updated (data) {
-        console.log('updated', data)
-        // let finx = _.findIndex(this.flowzList, {id: data.fid})
-        // if (finx !== -1) {
-        //   // this.flowzList[finx].count += 1
-        //   this.setCounters(this.flowzList[finx])
-        // }
-      },
-      removed (data) {
-        console.log('removed', data)
-        // let finx = _.findIndex(this.flowzList, {id: data.fid})
-        // if (finx !== -1) {
-        //   // this.flowzList[finx].count += 1
-        //   this.setCounters(this.flowzList[finx])
-        // }
-      }
-    },
     'flowz': {
       created (data) {
         if (this.$store.state.role === 1) {
