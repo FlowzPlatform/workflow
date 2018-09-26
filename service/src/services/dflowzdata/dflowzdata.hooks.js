@@ -60,11 +60,23 @@ let beforeFind = function (hook) {
     const query = hook.service.service.createQuery(hook.params.query);
     hook.params.rethinkdb = query.group(value)
   }
+  if (query.$search !== undefined) {
+    hook.service.service.options.name = hook.params.headers.ftablename;
+    hook.service.service.table = hook.service.rDB.table(hook.params.headers.ftablename);
+    let value = hook.params.query.$search
+    delete hook.params.query.$search
+    const query = hook.service.service.createQuery(hook.params.query);
+    // hook.params.rethinkdb = query.group(value)
+    hook.params.rethinkdb = query.filter(function(doc) {
+      return doc.coerceTo('string').match('(?i)' + value);
+    })
+    // console.log('hook.params.rethinkdb', hook.params.rethinkdb)
+  }
 }
 
 function beforeCreate (hook) {
   try {
-    console.log('before create ================================', hook.params)
+    // console.log('before create ================================', hook.params)
     hook.params.done = true
     if (hook.params.headers.ftablename !== undefined && hook.data._state !== undefined) {
       let regex = /_/g
