@@ -1,5 +1,8 @@
 <template>
   <div id="emailtemplate">
+      <Row type="flex" justify="end">
+        <Button type="primary" size="small" style="margin-bottom: 2px;position: absolute;right: 10px;" @click="emailTemplateList" icon="ivu-icon ivu-icon-ios-arrow-back"> back</Button>
+      </Row>
       <h2 class="heading">Create New Template</h2>
       <keep-alive>
         <editor v-model="GetHtmlOfEditor" api-key="ppzi01crrfo3pvd43s3do89pguwkhowrwajpjdqdkginzj7k" :toolbar="toolbar1" :plugins="plugins" :init="settings" :initial-value="gethtmlcontent"></editor>
@@ -61,6 +64,9 @@ export default {
       })
     },
     cancelUpdateTemplate () {
+      this.$router.push({name: 'emailtemplate'})
+    },
+    emailTemplateList () {
       this.$router.push({name: 'emailtemplate'})
     }
   },

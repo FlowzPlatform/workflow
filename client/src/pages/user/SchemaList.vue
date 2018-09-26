@@ -28,7 +28,7 @@
               </Select>
             </div>
             <div v-if="action === 'search'" style="margin-top: 20px;">
-              <div class="col-md-6" style="margin-top: 20px;">
+              <div class="col-md-4" style="margin-top: 20px;">
                 <Input search enter-button placeholder="Search..." v-model="searchQuery"/>
               </div>
               <div class="col-md-4" style="margin-top: 20px;">
@@ -61,7 +61,7 @@
                   <Option v-for="item in stageClaimUsers" :value="item.value" :key="item.value">{{ item.label }}</Option>
                 </Select>
               </div>
-              <div class="col-md-2" style="margin-top: 20px;">
+              <div class="col-md-2 buttonAssign" style="margin-top: 20px;">
                 <Button type="primary" @click="unAssignUsers">Assign</Button>
               </div>
             </div>
@@ -851,6 +851,29 @@
     overflow: hidden !important;
     text-overflow: ellipsis !important;
   }
+
+  @media only screen and (max-width: 1600px ) and (min-width: 1400px) {
+      .buttonAssign {
+        margin-left: 30px !important
+      }
+  }
+   @media only screen and (min-width: 900px) and (max-width: 1400px) {
+     .buttonAssign {
+        margin-left: 100px !important
+      }
+   }
+
+  /* @media only screen and (min-width: 1500px) {
+      .buttonAssign {
+        margin-left: 50px !important
+      }
+  }
+
+  @media only screen and (min-width: 950px) {
+      .buttonAssign {
+        margin-left: 100px !important
+      }
+  } */
 </style>
 
 <style>

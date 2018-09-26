@@ -1,5 +1,8 @@
 <template>
   <div id="emailtemplate">
+    <Row type="flex" justify="end">
+      <Button type="primary" size="small" style="margin-bottom: 2px;position: absolute;right: 10px;" @click="emailTemplateList" icon="ivu-icon ivu-icon-ios-arrow-back"> back</Button>
+    </Row>
     <div>
       <h2 class="heading">Template Edit</h2>
     </div>
@@ -61,6 +64,9 @@ export default {
       })
     },
     cancelUpdateTemplate () {
+      this.$router.push({name: 'emailtemplate'})
+    },
+    emailTemplateList () {
       this.$router.push({name: 'emailtemplate'})
     }
   },
