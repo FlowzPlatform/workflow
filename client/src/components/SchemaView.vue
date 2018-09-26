@@ -71,7 +71,7 @@
         
         <div v-if="itsFirstState === false">
           <tabs> 
-          <TabPane v-if="this.$store.state.role === 1" :label="dataCount" icon="lock-combination">
+          <TabPane v-if="this.$store.state.role === 1" :label="'Data ('+ dataTotal + ')'" icon="lock-combination">
           <schemalist v-if="this.$store.state.role === 1" :schema="dataSchema" :pageno="pageno" :datashow="'dataA'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
           <!-- <schemalist v-if="this.$store.state.role === 2" :schema="dataSchema" :pageno="pageno" :datashow="'dataU'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist> -->
 
@@ -130,8 +130,8 @@
             </div>
           </div>
           </TabPane>
-          <TabPane v-if="this.$store.state.role === 2" :label="'Work Pool ('+ dataData2.length + ')'" icon="lock-combination">
-            <schemalist :schema="dataSchema" :datashow="'dataU'" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+          <TabPane v-if="this.$store.state.role === 2" :label="'Work Pool ('+ dataTotalUnclaim + ')'" icon="lock-combination">
+            <schemalist :schema="dataSchema" :datashow="'dataU'" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotalUnclaim="dataTotalUnclaim" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
             <div style="padding: 10px">
             <div class="row" v-if="id != null">
               <div class="col-md-12" id="top">
@@ -187,8 +187,8 @@
             </div>
           </div>
           </TabPane>
-          <TabPane v-if="this.$store.state.role === 2" :label="'In Progress ('+ dataClaim.length + ')'" icon="lock-combination">
-            <schemalist v-if="this.$store.state.role === 2" :schema="dataSchema" :pageno="pageno" :datashow="'dataC'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataClaim" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+          <TabPane v-if="this.$store.state.role === 2" :label="'In Progress ('+ dataTotalClaim + ')'" icon="lock-combination">
+            <schemalist v-if="this.$store.state.role === 2" :schema="dataSchema" :pageno="pageno" :datashow="'dataC'" v-on:on-paginate2="pagination2" v-on:on-handlepage2="handlepage2" :limit="limit" :skip="skip" :dataTotalClaim="dataTotalClaim" :data="dataClaim" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
           </TabPane>
           </Tabs>
         </div>
@@ -212,6 +212,7 @@
 </template>
 
 <script>
+/*eslint-disable */
 import _ from 'lodash'
 import $ from 'jquery'
 
@@ -239,6 +240,8 @@ export default {
       skip: 0,
       limit: 10,
       dataTotal: 0,
+      dataTotalUnclaim: 0,
+      dataTotalClaim: 0,
       pageno: 1,
       isFlowzLoaded: false,
       htmlcontent: false,
@@ -348,6 +351,20 @@ export default {
       this.skip = 0
     },
     handlepage (skip, limit, size) {
+      this.limit = size
+      this.entriesTotal = size
+      this.skip = 0
+      this.populateTables()
+    },
+    pagination2 (skip, limit, page) {
+      this.skip = skip
+      this.limit = limit
+      this.entriesTotal = limit
+      this.pageno = page
+      this.populateTables()
+      this.skip = 0
+    },
+    handlepage2 (skip, limit, size) {
       this.limit = size
       this.entriesTotal = size
       this.skip = 0
@@ -734,9 +751,17 @@ export default {
                     this.email = true
                     this.loadEmail = false
                   } else {
-                    this.sendDataEmail = res.data.template + this.$refs.schemasubformview.$el.outerHTML
-                    this.email = true
-                    this.loadEmail = false
+                    console.log(res.data.template)
+                    let OrderData = res.data.template.split('{{OrderData}}')
+                    if (OrderData == res.data.template) {
+                      this.sendDataEmail = res.data.template + this.$refs.schemasubformview.$el.outerHTML
+                      this.email = true
+                      this.loadEmail = false
+                    } else {
+                      this.sendDataEmail = OrderData[0] + this.$refs.schemasubformview.$el.outerHTML + OrderData[1]
+                      this.email = true
+                      this.loadEmail = false
+                    }
                   }
                 }, 1000)
               })
@@ -1084,39 +1109,92 @@ export default {
       this.email = false
       this.htmlcontent = false
       this.id = null
-      dataQuerymodel.get(null, {
-        $last: true,
-        fid: this.$route.params.id,
-        currentStatus: this.$route.params.stateid,
-        $skip: this.skip,
-        $limit: this.limit
-      }).then(queryresp => {
-        // console.log('queryresp: ', queryresp)
-        // this.entriesTotal = queryresp.data.data.length
-        this.isFlowzLoaded = true
-        this.dataTotal = queryresp.data.total
-        if (queryresp.data.data.length > 0) {
-          this.instanceEntries = queryresp.data.data
-          if (this.$store.state.role === 2) {
-            this.dataClaim = _.filter(this.instanceEntries, function (o) { return o.claimUser === '' })
-            this.dataData2 = _.filter(this.instanceEntries, function (o) { return o.claimUser !== '' })
-          } else {
+      if (this.$store.state.role === 1) {
+        dataQuerymodel.get(null, {
+          $last: true,
+          fid: this.$route.params.id,
+          currentStatus: this.$route.params.stateid,
+          $skip: this.skip,
+          $limit: this.limit
+        }).then(queryresp => {
+          // console.log('queryresp: ', queryresp)
+          // this.entriesTotal = queryresp.data.data.length
+          this.isFlowzLoaded = true
+          this.dataTotal = queryresp.data.total
+          if (queryresp.data.data.length > 0) {
+            this.instanceEntries = queryresp.data.data
             this.dataData = this.instanceEntries
+            this.$Loading.finish()
+            this.dataLoading = false
+          } else {
+            this.instanceEntries = []
+            this.dataData = []
+            this.dataData2 = []
+            this.dataLoading = false
+            this.$Loading.finish()
           }
-          this.$Loading.finish()
+        }).catch(err => {
+          this.$Notice.error({duration: '3', title: err.message, desc: ''})
+          this.$Loading.error()
           this.dataLoading = false
-        } else {
-          this.instanceEntries = []
-          this.dataData = []
-          this.dataData2 = []
+        })
+      }
+      if (this.$store.state.role === 2) {
+        dataQuerymodel.get(null, {
+          $last: true,
+          fid: this.$route.params.id,
+          currentStatus: this.$route.params.stateid,
+          claimUser: '',
+          $skip: this.skip,
+          $limit: this.limit
+        }).then(queryresp => {
+          this.isFlowzLoaded = true
+          if (queryresp.data.data.length > 0) {
+            this.instanceEntries = queryresp.data.data
+            this.dataTotalClaim = queryresp.data.total
+            this.dataClaim = queryresp.data.data
+            this.$Loading.finish()
+            this.dataLoading = false
+          } else {
+            this.instanceEntries = []
+            this.dataData = []
+            this.dataData2 = []
+            this.dataLoading = false
+            this.$Loading.finish()
+          }
+        }).catch(err => {
+          this.$Notice.error({duration: '3', title: err.message, desc: ''})
+          this.$Loading.error()
           this.dataLoading = false
-          this.$Loading.finish()
-        }
-      }).catch(err => {
-        this.$Notice.error({duration: '3', title: err.message, desc: ''})
-        this.$Loading.error()
-        this.dataLoading = false
-      })
+        })
+        dataQuerymodel.get(null, {
+          $last: true,
+          fid: this.$route.params.id,
+          currentStatus: this.$route.params.stateid,
+          claimUser: this.$store.state.user._id,
+          $skip: this.skip,
+          $limit: this.limit
+        }).then(queryresp => {
+          this.isFlowzLoaded = true
+          if (queryresp.data.data.length > 0) {
+            this.instanceEntries = queryresp.data.data
+            this.dataTotalUnclaim = queryresp.data.total
+            this.dataData2 = queryresp.data.data
+            this.$Loading.finish()
+            this.dataLoading = false
+          } else {
+            this.instanceEntries = []
+            this.dataData = []
+            this.dataData2 = []
+            this.dataLoading = false
+            this.$Loading.finish()
+          }
+        }).catch(err => {
+          this.$Notice.error({duration: '3', title: err.message, desc: ''})
+          this.$Loading.error()
+          this.dataLoading = false
+        })
+      }
     },
 
     async init () {
@@ -1170,45 +1248,22 @@ export default {
       created (data) {
       },
       updated (data) {
+        console.log(data)
+        this.pageno = 1
         if (this.$store.state.role === 1) {
           if (data.currentStatus === this.$route.params.stateid) {
-            // // data = data.data
-            // // data.data['iid'] = data.id
-            // // this.instanceEntries.push(data)
-            // // this.dataData.push(data.data)
-            // let StageName = data.stageReference[(data.stageReference.length - 1)].StageName
-
-            // setTimeout(() => {
-            //   flowzdataModal.get(null, {
-            //     iid: data.id,
-            //     state: StageName
-            //   }).then((resData) => {
-            //     // console.log('Form Data: ', resData)
-            //     data.data = resData.data[0].data
-            //     data.data['iid'] = data.id
-
-            //     console.log('Data: ', data)
-            //     this.instanceEntries.push(data)
-            //     this.dataData.push(data.data)
-            //   }).catch((err) => {
-            //     console.log('err: ', err)
-            //   })
-            // }, 2000)
-            // console.log('Length: ', this.instanceEntries.length)
-            // console.log('instanceEntries: ', this.instanceEntries.length, this.entriesTotal)
             if (this.instanceEntries.length < this.entriesTotal) {
-              // console.log('Ready to push: ', this.instanceEntries.length)
-              // push to table
               let instanceObj = data
-              // console.log('instanceObj: ', instanceObj)
+              let inx = _.findIndex(this.dataData, (o) => { return o.id === data.id })
+              this.populateTables()
               let lastEntryId = data.stageReference[data.stageReference.length - 1].stageRecordId
-              // console.log('lastEntryId: ', lastEntryId)
               if (lastEntryId !== undefined) {
                 flowzdataModal.get(lastEntryId).then(res => {
                   // console.log('Response fdata: ', res)
                   instanceObj['data'] = res.data.data
                   instanceObj['iid'] = data.id
-                  this.instanceEntries.push(instanceObj)
+                  // this.instanceEntries.push(instanceObj)
+                  this.dataData.splice(inx, 1)
                   this.dataData.push(instanceObj)
                   // console.log('Pushed data: ', this.instanceEntries, this.dataData)
                 })
@@ -1226,10 +1281,10 @@ export default {
         if (this.$store.state.role === 2) {
           if (data.claimuser === '') {
             this.dataClaim.push(data)
-            this.init()
+            this.populateTables()
           } else {
             this.dataData2.push(data)
-            this.init()
+            this.populateTables()
           }
         }
       },
