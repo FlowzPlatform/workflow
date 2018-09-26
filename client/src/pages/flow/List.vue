@@ -710,6 +710,7 @@ export default {
     },
     init () {
       // var string = '?$skip=' + this.skip + '&$limit=' + this.limit
+      this.loading = true
       flowz.get(null, {
         $skip: this.skip,
         $limit: this.limit
