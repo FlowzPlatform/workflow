@@ -729,6 +729,7 @@ export default {
         } else {
           nextTargetId = this.flowData.processList[currentStageObject.target[0].id]
         }
+        console.log('target type', nextTargetId.type)
         if (nextTargetId.type === 'sendproofmail') {
           this.validFlag = true
           this.validErr = []
@@ -751,16 +752,19 @@ export default {
                     this.email = true
                     this.loadEmail = false
                   } else {
-                    let OrderData = res.data.template.split('{{OrderData}}')
-                    if (OrderData == res.data.template) {
-                      this.sendDataEmail = res.data.template + this.$refs.schemasubformview.$el.outerHTML
-                      this.email = true
-                      this.loadEmail = false
-                    } else {
-                      this.sendDataEmail = OrderData[0] + this.$refs.schemasubformview.$el.outerHTML + OrderData[1]
-                      this.email = true
-                      this.loadEmail = false
-                    }
+                    this.sendDataEmail = res.data.template.replace(/{{OrderData}}/g, this.$refs.schemasubformview.$el.outerHTML)
+                    this.email = true
+                    this.loadEmail = false
+                    // let OrderData = res.data.template.split('{{OrderData}}')
+                    // if (OrderData == res.data.template) {
+                    //   this.sendDataEmail = res.data.template + this.$refs.schemasubformview.$el.outerHTML
+                    //   this.email = true
+                    //   this.loadEmail = false
+                    // } else {
+                    //   this.sendDataEmail = OrderData[0] + this.$refs.schemasubformview.$el.outerHTML + OrderData[1]
+                    //   this.email = true
+                    //   this.loadEmail = false
+                    // }
                   }
                 }, 1000)
               })
