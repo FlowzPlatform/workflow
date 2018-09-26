@@ -53,11 +53,12 @@ let beforeFind = function (hook) {
     }
   }
   if (query.$group !== undefined) {
-    hook.service.options.name = hook.params.headers.ftablename;
-    hook.service.table = hook.service.rDB.table(hook.params.headers.ftablename);
-    console.log('hook', hook.service.table)
-    // const query = hook.service.table.createQuery(hook.params.query);
-    hook.params.rethinkdb = hook.service.table.orderBy('_createdAt').group('_uuid')
+    hook.service.service.options.name = hook.params.headers.ftablename;
+    hook.service.service.table = hook.service.rDB.table(hook.params.headers.ftablename);
+    let value = hook.params.query.$group
+    delete hook.params.query.$group
+    const query = hook.service.service.createQuery(hook.params.query);
+    hook.params.rethinkdb = query.group(value)
   }
 }
 
