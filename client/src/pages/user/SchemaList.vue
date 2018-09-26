@@ -47,9 +47,9 @@
                   </div> -->
                 </div>
               </div>
-              <div class="col-md-2" style="margin-top: 20px;">
+              <div class="col-md-3" style="margin-top: 20px;">
                 <Button icon="search" type="primary" @click="searchData">Search</Button>
-                <Tooltip content="Clear Search" style="float: right;">
+                <Tooltip content="Clear Search">
                   <Button icon="ios-trash" type="error" @click="clearSearchData"></Button>  
                 </Tooltip>
                 

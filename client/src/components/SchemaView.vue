@@ -751,17 +751,9 @@ export default {
                     this.email = true
                     this.loadEmail = false
                   } else {
-                    console.log(res.data.template)
-                    let OrderData = res.data.template.split('{{OrderData}}')
-                    if (OrderData == res.data.template) {
-                      this.sendDataEmail = res.data.template + this.$refs.schemasubformview.$el.outerHTML
-                      this.email = true
-                      this.loadEmail = false
-                    } else {
-                      this.sendDataEmail = OrderData[0] + this.$refs.schemasubformview.$el.outerHTML + OrderData[1]
-                      this.email = true
-                      this.loadEmail = false
-                    }
+                    this.sendDataEmail = res.data.template.replace(/{{OrderData}}/g, this.$refs.schemasubformview.$el.outerHTML)
+                    this.email = true
+                    this.loadEmail = false
                   }
                 }, 1000)
               })
@@ -1248,7 +1240,6 @@ export default {
       created (data) {
       },
       updated (data) {
-        console.log(data)
         this.pageno = 1
         if (this.$store.state.role === 1) {
           if (data.currentStatus === this.$route.params.stateid) {
