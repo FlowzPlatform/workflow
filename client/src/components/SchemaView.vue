@@ -914,6 +914,9 @@ export default {
       //   data: obj.data[0]
       // }
       let saveObj = obj.data[0]
+      console.log('Save Object: ', saveObj)
+      delete saveObj['_index']
+      delete saveObj['_rowKey']
       saveObj._state = this.$route.params.stateid
       console.log('this.item.currentStatus', this.item.currentStatus)
       if (this.isMultiple) {
@@ -1256,7 +1259,7 @@ export default {
     },
 
     async init () {
-      this.currentFlowzId = this.$route.params.id
+      this.currentFlowzId = this.$route.params.id.replace(/-/g, '_')
       this.dataLoading = true
       this.instanceEntries = []
       this.isFlowzLoaded = false
