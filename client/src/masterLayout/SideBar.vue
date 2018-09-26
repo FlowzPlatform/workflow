@@ -77,7 +77,8 @@
 
 <script>
 import flowzModal from '@/api/flowz'
-import finstanceModal from '@/api/finstance'
+// import finstanceModal from '@/api/finstance'
+import dflowzdataModal from '@/api/dflowzdata'
 import _ from 'lodash'
 import config from '@/config'
 import axios from 'axios'
@@ -93,7 +94,6 @@ export default {
     }
   },
   created () {
-    // console.log('this.$store.state.activeFlow', this.$store.state.activeFlow)
   },
   methods: {
     getByOrder (array) {
@@ -102,35 +102,8 @@ export default {
         allProcess[array[key].order] = array[key]
       }
       return allProcess
-      // return allProcess.sort((a, b) => {
-      //   return a.order - b.order
-      // })
     },
-    // createInstance (item, subItemID) {
-    //   // console.log('item', item)
-    //   this.$Loading.start()
-    //   let fheaders = null
-    //   if (subItemID !== undefined) {
-    //     fheaders = {
-    //       workflowid: 'workflow_' + item.id,
-    //       stateid: subItemID
-    //     }
-    //   }
-    //   finstanceModal.post({fid: item.id}, null, fheaders).then(res => {
-    //     this.$Notice.success({title: 'Instance Generated'})
-    //     this.$Loading.finish()
-    //   }).catch(e => {
-    //     this.$Loading.error()
-    //     console.log('error', e.response)
-    //     if (e.response.data.message) {
-    //       this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
-    //     } else {
-    //       this.$Notice.error({title: 'Error', desc: 'Instace Not Generated'})
-    //     }
-    //   })
-    // },
     viewProgress (item) {
-      // console.log('item: ', item)
       if (item.id === this.$route.params.id) {
         let randomStr = this.makeid()
         this.$store.state.updateView = randomStr
@@ -148,17 +121,14 @@ export default {
         } else {
           this.$router.push({name: 'schemaview', params: {id: node[0], stateid: node[1]}})
         }
-        // this.$router.push('/admin/schemaview/' + node[0] + '/' + node[1])
       } else {
         this.$router.push('/view/' + node[0] + '/' + node[1])
       }
     },
     makeid () {
-      var text = ''
-      var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-
-      for (var i = 0; i < 8; i++) { text += possible.charAt(Math.floor(Math.random() * possible.length)) }
-
+      let text = ''
+      let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+      for (let i = 0; i < 8; i++) { text += possible.charAt(Math.floor(Math.random() * possible.length)) }
       return text
     },
     async getModuleRoles (moduleId) {
@@ -286,16 +256,17 @@ export default {
     setCounters (sitem) {
       if (sitem) {
         if (this.$store.state.role === 1) {
-          finstanceModal.get(null, {
+          dflowzdataModal.get(null, {
             $paginate: false,
-            $select: ['currentStatus'],
-            mainStatus: 'inprocess',
-            fid: sitem.id
+            $select: ['_state'],
+            _currentStatus: true
+          }, {
+            ftablename: this.$route.params.id.replace(/-/g, '_')
           }).then(res => {
-            // console.log('res count', res.data)
+            console.log('res count', res.data)
             sitem.count = 0
             _.map(sitem.processList, (pitem) => {
-              pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
+              pitem.count = _.filter(res.data, {_state: pitem.id}).length
               sitem.count += pitem.count
             })
             // for (let pitem in sitem.processList) {
@@ -311,26 +282,26 @@ export default {
           sitem.count = 0
           for (let pitem in sitem.processList) {
             if (!once) {
-              finstanceModal.get(null, {
+              dflowzdataModal.get(null, {
                 $paginate: false,
-                $select: ['currentStatus'],
-                mainStatus: 'inprocess',
-                fid: sitem.id
+                $select: ['_state'],
+                _currentStatus: true
               }, {
                 workflowid: 'workflow_' + sitem.id,
-                stateid: sitem.processList[pitem].id
+                stateid: sitem.processList[pitem].id,
+                ftablename: this.$route.params.id.replace(/-/g, '_')
               }).then(res => {
                 if (res.data.length > 0) {
                   once = true
                   mdata = res.data
-                  sitem.processList[pitem].count = _.filter(res.data, {currentStatus: sitem.processList[pitem].id}).length
+                  sitem.processList[pitem].count = _.filter(res.data, {_state: sitem.processList[pitem].id}).length
                   sitem.count += sitem.processList[pitem].count
                 }
               }).catch(err => {
                 console.log('error', err)
               })
             } else {
-              sitem.processList[pitem].count = _.filter(mdata, {currentStatus: sitem.processList[pitem].id}).length
+              sitem.processList[pitem].count = _.filter(mdata, {_state: sitem.processList[pitem].id}).length
               sitem.count += sitem.processList[pitem].count
             }
           }
@@ -339,16 +310,17 @@ export default {
         for (let item of this.flowzList) {
           if (this.$store.state.role === 1) {
             // item.count = 9
-            finstanceModal.get(null, {
+            dflowzdataModal.get(null, {
               $paginate: false,
-              $select: ['currentStatus'],
-              mainStatus: 'inprocess',
-              fid: item.id
+              $select: ['_state'],
+              _currentStatus: true
+            }, {
+              ftablename: this.$route.params.id.replace(/-/g, '_')
             }).then(res => {
               if (res.data.length > 0) {
                 item.count = 0
                 _.map(item.processList, (pitem) => {
-                  pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
+                  pitem.count = _.filter(res.data, {_state: pitem.id}).length
                   item.count += pitem.count
                 })
               }
@@ -361,26 +333,26 @@ export default {
             for (let key in item.processList) {
               // console.log('item', item)
               if (!isonce) {
-                finstanceModal.get(null, {
+                dflowzdataModal.get(null, {
                   $paginate: false,
-                  $select: ['currentStatus'],
-                  mainStatus: 'inprocess',
-                  fid: item.id
+                  $select: ['_state'],
+                  _currentStatus: true
                 }, {
                   workflowid: 'workflow_' + item.id,
-                  stateid: item.processList[key].id
+                  stateid: item.processList[key].id,
+                  ftablename: this.$route.params.id.replace(/-/g, '_')
                 }).then(res => {
                   if (res.data.length > 0) {
                     isonce = true
                     pdata = res.data
-                    item.processList[key].count = _.filter(res.data, {currentStatus: item.processList[key].id}).length
+                    item.processList[key].count = _.filter(res.data, {_state: item.processList[key].id}).length
                     item.count += item.processList[key].count
                   }
                 }).catch(err => {
                   console.log('error', err)
                 })
               } else {
-                item.processList[key].count = _.filter(pdata, {currentStatus: item.processList[key].id}).length
+                item.processList[key].count = _.filter(pdata, {_state: item.processList[key].id}).length
                 item.count += item.processList[key].count
               }
             }
@@ -411,32 +383,34 @@ export default {
   },
   mounted () {
     // this.activeFlow(this.$store.state.activeFlow)
+    console.log('this.$feathers', this.$feathers)
     this.init()
   },
   feathers: {
-    'finstance': {
+    'dflowzdata': {
       created (data) {
-        let finx = _.findIndex(this.flowzList, {id: data.fid})
-        if (finx !== -1) {
-          // this.flowzList[finx].count += 1
-          this.setCounters(this.flowzList[finx])
-        }
+        console.log('data')
+        // let finx = _.findIndex(this.flowzList, {id: data.fid})
+        // if (finx !== -1) {
+        //   // this.flowzList[finx].count += 1
+        //   this.setCounters(this.flowzList[finx])
+        // }
       },
       updated (data) {
-        // console.log('updated', data)
-        let finx = _.findIndex(this.flowzList, {id: data.fid})
-        if (finx !== -1) {
-          // this.flowzList[finx].count += 1
-          this.setCounters(this.flowzList[finx])
-        }
+        console.log('updated', data)
+        // let finx = _.findIndex(this.flowzList, {id: data.fid})
+        // if (finx !== -1) {
+        //   // this.flowzList[finx].count += 1
+        //   this.setCounters(this.flowzList[finx])
+        // }
       },
       removed (data) {
-        // console.log('removed', data)
-        let finx = _.findIndex(this.flowzList, {id: data.fid})
-        if (finx !== -1) {
-          // this.flowzList[finx].count += 1
-          this.setCounters(this.flowzList[finx])
-        }
+        console.log('removed', data)
+        // let finx = _.findIndex(this.flowzList, {id: data.fid})
+        // if (finx !== -1) {
+        //   // this.flowzList[finx].count += 1
+        //   this.setCounters(this.flowzList[finx])
+        // }
       }
     },
     'flowz': {
