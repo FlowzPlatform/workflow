@@ -18,6 +18,18 @@ ID = "Develop-I"
 #  status = 301
 #  force = true
 [[redirects]]
+  from = "/:page/:page/:page/:page"
+  to = "/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/:page/:page/:page"
+  to = "/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/:page/:page"
   to = "/index.html"
   status = 200
