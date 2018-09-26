@@ -124,7 +124,7 @@ export default {
       tableData: [],
       isModel: false,
       anotherBinding: [],
-      // colviewCols: [],
+      colviewCols: [],
       colviewData: [],
       configCols: [
         {
@@ -551,7 +551,16 @@ export default {
         // }
         // console.log('tableGroupedArray: ', tableGroupedArray)
         this.tableData = tableDataArr
-        this.colviewData = tableDataArr
+        // this.colviewData = tableDataArr
+        for (let inst in tableDataArr) {
+          for (let items in tableDataArr[inst]) {
+            if (items === 'states') {
+              for (let item of tableDataArr[inst][items]) {
+                this.colviewData.push(item)
+              }
+            }
+          }
+        }
         this.tableLoading = false
       }).catch(e => {
         this.tableLoading = false
@@ -622,118 +631,118 @@ export default {
     },
     async init () {
       this.tableLoading = true
-      // this.colviewCols = [
-      //   {
-      //     title: 'ID',
-      //     key: '_uuid',
-      //     fixed: 'left',
-      //     width: 280
-      //     // render: (h, params) => {
-      //     //   if (params.row.hasOwnProperty('first')) {
-      //     //     if (params.row.first) {
-      //     //       console.log('Id: ', params.row.id)
-      //     //       return h('div', [
-      //     //         h('span', {
-      //     //           attrs: {
-      //     //             title: 'Click to Copy',
-      //     //             class: 'clickToCopy'
-      //     //           },
-      //     //           on: {
-      //     //             click: () => {
-      //     //               var $temp = $('<input>')
-      //     //               $('body').append($temp)
-      //     //               $temp.val(params.row.id).select()
-      //     //               document.execCommand('copy')
-      //     //               this.$Message.info('Copied to Clipboard')
-      //     //               $temp.remove()
-      //     //             }
-      //     //           }
-      //     //         }, params.row.id),
-      //     //         h('span', {
-      //     //           attrs: {
-      //     //             class: 'btn btn-default btn-sm showHideBtn'
-      //     //           },
-      //     //           on: {
-      //     //             click: () => {
-      //     //               for (let [inx, item] of this.colviewData.entries()) {
-      //     //                 if (item.id === params.row.id && params.index !== inx) {
-      //     //                   if (!params.row.first) {
-      //     //                     item.className = ''
-      //     //                   } else {
-      //     //                     item.className = 'notfirst'
-      //     //                   }
-      //     //                 }
-      //     //                 if (params.index === inx) {
-      //     //                   item.first = !item.first
-      //     //                 }
-      //     //               }
-      //     //             }
-      //     //           }
-      //     //         }, [
-      //     //           h('i', {
-      //     //             attrs: {
-      //     //               class: 'fa fa-angle-up'
-      //     //             }
-      //     //           })
-      //     //         ])
-      //     //       ])
-      //     //     } else {
-      //     //       console.log('Id: ', params.row.id)
-      //     //       return h('div', [
-      //     //         h('span', {
-      //     //           attrs: {
-      //     //             title: 'Click to Copy',
-      //     //             class: 'clickToCopy'
-      //     //           },
-      //     //           on: {
-      //     //             click: () => {
-      //     //               var $temp = $('<input>')
-      //     //               $('body').append($temp)
-      //     //               $temp.val(params.row.id).select()
-      //     //               document.execCommand('copy')
-      //     //               this.$Message.info('Copied to Clipboard')
-      //     //               $temp.remove()
-      //     //             }
-      //     //           }
-      //     //         }, params.row.id),
-      //     //         h('span', {
-      //     //           attrs: {
-      //     //             class: 'btn btn-sm showHideBtn'
-      //     //           },
-      //     //           on: {
-      //     //             click: () => {
-      //     //               for (let [inx, item] of this.colviewData.entries()) {
-      //     //                 if (item.id === params.row.id && params.index !== inx) {
-      //     //                   if (!params.row.first) {
-      //     //                     item.className = ''
-      //     //                   } else {
-      //     //                     item.className = 'notfirst'
-      //     //                   }
-      //     //                 }
-      //     //                 if (params.index === inx) {
-      //     //                   item.first = !item.first
-      //     //                 }
-      //     //               }
-      //     //             }
-      //     //           }
-      //     //         }, [
-      //     //           h('i', {
-      //     //             attrs: {
-      //     //               class: 'fa fa-angle-down'
-      //     //             }
-      //     //           })
-      //     //         ])
-      //     //       ])
-      //     //     }
-      //     //   }
-      //     // }
-      //   },
-      //   {
-      //     title: 'Task',
-      //     key: '_state',
-      //     width: 150
-      //   }
-      // ]
+      this.colviewCols = [
+        {
+          title: 'ID',
+          key: '_uuid',
+          fixed: 'left',
+          width: 280
+          // render: (h, params) => {
+          //   if (params.row.hasOwnProperty('first')) {
+          //     if (params.row.first) {
+          //       console.log('Id: ', params.row.id)
+          //       return h('div', [
+          //         h('span', {
+          //           attrs: {
+          //             title: 'Click to Copy',
+          //             class: 'clickToCopy'
+          //           },
+          //           on: {
+          //             click: () => {
+          //               var $temp = $('<input>')
+          //               $('body').append($temp)
+          //               $temp.val(params.row.id).select()
+          //               document.execCommand('copy')
+          //               this.$Message.info('Copied to Clipboard')
+          //               $temp.remove()
+          //             }
+          //           }
+          //         }, params.row._uuid),
+          //         h('span', {
+          //           attrs: {
+          //             class: 'btn btn-default btn-sm showHideBtn'
+          //           },
+          //           on: {
+          //             click: () => {
+          //               for (let [inx, item] of this.colviewData.entries()) {
+          //                 if (item.id === params.row.id && params.index !== inx) {
+          //                   if (!params.row.first) {
+          //                     item.className = ''
+          //                   } else {
+          //                     item.className = 'notfirst'
+          //                   }
+          //                 }
+          //                 if (params.index === inx) {
+          //                   item.first = !item.first
+          //                 }
+          //               }
+          //             }
+          //           }
+          //         }, [
+          //           h('i', {
+          //             attrs: {
+          //               class: 'fa fa-angle-up'
+          //             }
+          //           })
+          //         ])
+          //       ])
+          //     } else {
+          //       console.log('Id: ', params.row.id)
+          //       return h('div', [
+          //         h('span', {
+          //           attrs: {
+          //             title: 'Click to Copy',
+          //             class: 'clickToCopy'
+          //           },
+          //           on: {
+          //             click: () => {
+          //               var $temp = $('<input>')
+          //               $('body').append($temp)
+          //               $temp.val(params.row.id).select()
+          //               document.execCommand('copy')
+          //               this.$Message.info('Copied to Clipboard')
+          //               $temp.remove()
+          //             }
+          //           }
+          //         }, params.row._uuid),
+          //         h('span', {
+          //           attrs: {
+          //             class: 'btn btn-sm showHideBtn'
+          //           },
+          //           on: {
+          //             click: () => {
+          //               for (let [inx, item] of this.colviewData.entries()) {
+          //                 if (item.id === params.row.id && params.index !== inx) {
+          //                   if (!params.row.first) {
+          //                     item.className = ''
+          //                   } else {
+          //                     item.className = 'notfirst'
+          //                   }
+          //                 }
+          //                 if (params.index === inx) {
+          //                   item.first = !item.first
+          //                 }
+          //               }
+          //             }
+          //           }
+          //         }, [
+          //           h('i', {
+          //             attrs: {
+          //               class: 'fa fa-angle-down'
+          //             }
+          //           })
+          //         ])
+          //       ])
+          //     }
+          //   }
+          // }
+        },
+        {
+          title: 'Task',
+          key: '_state',
+          width: 150
+        }
+      ]
       this.colviewData = []
       this.fid = this.$route.params.id
 
@@ -792,29 +801,28 @@ export default {
   computed: {
     configdata () {
       return this.configuration.fields
-    },
-
-    colviewCols () {
-      this.colviewCols = []
-
-      let cols = []
-      cols.push({
-        title: 'ID',
-        key: '_uuid',
-        fixed: 'left',
-        width: 280
-      })
-
-      cols.push({
-        title: 'Task',
-        key: '_state',
-        width: 150
-      })
-
-      this.colviewCols = cols
-
-      return this.colviewCols
     }
+    // colviewCols () {
+    //   this.colviewCols = []
+
+    //   let cols = []
+    //   cols.push({
+    //     title: 'ID',
+    //     key: '_uuid',
+    //     fixed: 'left',
+    //     width: 280
+    //   })
+
+    //   cols.push({
+    //     title: 'Task',
+    //     key: '_state',
+    //     width: 150
+    //   })
+
+    //   this.colviewCols = cols
+
+    //   return this.colviewCols
+    // }
   },
   mounted () {
     this.init()
