@@ -1,11 +1,14 @@
 <template>
   <div id="emailtemplate">
+      <Row type="flex" justify="end">
+        <Button type="primary" size="small" style="margin-bottom: 2px;position: absolute;right: 10px;" @click="emailTemplateList" icon="ivu-icon ivu-icon-ios-arrow-back"> back</Button>
+      </Row>
       <h2 class="heading">Create New Template</h2>
       <keep-alive>
         <editor v-model="GetHtmlOfEditor" api-key="ppzi01crrfo3pvd43s3do89pguwkhowrwajpjdqdkginzj7k" :toolbar="toolbar1" :plugins="plugins" :init="settings" :initial-value="gethtmlcontent"></editor>
       </keep-alive>
       <Input v-model="templateName" placeholder="Enter Template name" style="width: 300px" class="dataEnter"/>
-      <Button type="primary" @click="saveTemplate" class="dataEnter">Save Template</Button>
+      <Button type="primary" @click="saveTemplate" class="dataEnter" :loading="loading">Save Template</Button>
       <Button type="error" @click="cancelUpdateTemplate" class="dataEnter">Cancel</Button>
   </div>
 </template>
@@ -16,6 +19,7 @@ import saveemailTemplate from '@/api/emailtemplate'
 export default {
   data () {
     return {
+      loading: false,
       flag: false,
       updateTemplateid: '',
       newTemplate: true,
@@ -37,6 +41,7 @@ export default {
   },
   methods: {
     saveTemplate () {
+      this.loading = true
       let saveemailTemplateObj = {
         user: this.$store.state.user._id,
         template: this.GetHtmlOfEditor,
@@ -45,6 +50,7 @@ export default {
       }
       saveemailTemplate.post(saveemailTemplateObj)
       .then((res) => {
+        this.loading = false
         this.$Message.success('Email Template Saved.')
         this.GetHtmlOfEditor = ''
         this.GetHtmlContent = ''
@@ -52,11 +58,15 @@ export default {
         this.$router.push({name: 'emailtemplate'})
       })
       .catch((err) => {
+        this.loading = false
         this.$Message.error('Template Save Error!')
         console.log(err)
       })
     },
     cancelUpdateTemplate () {
+      this.$router.push({name: 'emailtemplate'})
+    },
+    emailTemplateList () {
       this.$router.push({name: 'emailtemplate'})
     }
   },

@@ -131,7 +131,7 @@
           </div>
           </TabPane>
           <TabPane v-if="this.$store.state.role === 2" :label="'Work Pool ('+ dataTotalUnclaim + ')'" icon="lock-combination">
-            <schemalist :schema="dataSchema" :datashow="'dataU'" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotalUnclaim" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+            <schemalist :schema="dataSchema" :datashow="'dataU'" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotalUnclaim="dataTotalUnclaim" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
             <div style="padding: 10px">
             <div class="row" v-if="id != null">
               <div class="col-md-12" id="top">
@@ -212,6 +212,7 @@
 </template>
 
 <script>
+/*eslint-disable */
 import _ from 'lodash'
 import $ from 'jquery'
 
@@ -750,9 +751,17 @@ export default {
                     this.email = true
                     this.loadEmail = false
                   } else {
-                    this.sendDataEmail = res.data.template + this.$refs.schemasubformview.$el.outerHTML
-                    this.email = true
-                    this.loadEmail = false
+                    console.log(res.data.template)
+                    let OrderData = res.data.template.split('{{OrderData}}')
+                    if (OrderData == res.data.template) {
+                      this.sendDataEmail = res.data.template + this.$refs.schemasubformview.$el.outerHTML
+                      this.email = true
+                      this.loadEmail = false
+                    } else {
+                      this.sendDataEmail = OrderData[0] + this.$refs.schemasubformview.$el.outerHTML + OrderData[1]
+                      this.email = true
+                      this.loadEmail = false
+                    }
                   }
                 }, 1000)
               })
@@ -1239,11 +1248,14 @@ export default {
       created (data) {
       },
       updated (data) {
+        console.log(data)
+        this.pageno = 1
         if (this.$store.state.role === 1) {
           if (data.currentStatus === this.$route.params.stateid) {
             if (this.instanceEntries.length < this.entriesTotal) {
               let instanceObj = data
               let inx = _.findIndex(this.dataData, (o) => { return o.id === data.id })
+              this.populateTables()
               let lastEntryId = data.stageReference[data.stageReference.length - 1].stageRecordId
               if (lastEntryId !== undefined) {
                 flowzdataModal.get(lastEntryId).then(res => {

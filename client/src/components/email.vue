@@ -262,15 +262,11 @@ import schemaModel from '@/api/schema'
         
         if (this.flag == true) {
           this.emailForm.html = `<!DOCTYPE html><html lang=\"en\" ><head> <meta charset=\"UTF-8\"><title>Email Proof</title>
-          <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css'> </head>
           <body><div class=\"container\">
           ` + htmlContent +`
           <h2>Customer Proof:</h2>
           ${this.btn}
-          <br> <h4>Comment: ${this.emailForm.Comment}</h4><br>
-          <h4>While we strongly you to take advantage of this time saving option,
-              your proof may still be fixed back to company name at: <strong>Toll Free Fax:</strong> 800-238-0082
-              <strong>Local Fax:<strong> 716-773-2332</h4></div></body></html>`
+          <br> <h4>Comment: ${this.emailForm.Comment}</h4><br></body></html>`
           sendmailModal.post(this.emailForm)
           .then((res)=>{
             this.loading = false
@@ -285,15 +281,11 @@ import schemaModel from '@/api/schema'
         } else {
           this.formSchemaInstance.data[0].html = []
           this.formSchemaInstance.data[0].html = `<!DOCTYPE html><html lang=\"en\" ><head> <meta charset=\"UTF-8\"><title>Email Proof</title>
-          <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css'> </head>
           <body><div class=\"container\">
           ` + htmlContent +`
           <h2>Customer Proof:</h2>
           ${this.btn}
-          <br> <h4>Comment: ${this.formSchemaInstance.data.comment}</h4><br>
-          <h4>While we strongly you to take advantage of this time saving option,
-              your proof may still be fixed back to company name at: <strong>Toll Free Fax:</strong> 800-238-0082
-              <strong>Local Fax:<strong> 716-773-2332</h4></div></body></html>`
+          <br> <h4>Comment: ${this.formSchemaInstance.data.comment}</h4><br></div></body></html>`
               console.log('this.formSchemaInstance.data', this.formSchemaInstance.data)
           sendmailModal.post(this.formSchemaInstance.data[0])
           .then((res)=>{
