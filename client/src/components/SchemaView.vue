@@ -526,6 +526,7 @@ export default {
       }
       if (arr) {
         let m = [arr]
+        this.setFileList(m, self.formSchemaInstance)
         this.formSchemaInstance.data = m
       } else {
         this.handleAdd()
@@ -1201,7 +1202,7 @@ export default {
         '_state': this.$route.params.stateid
       }, heads)
       .then(res => {
-        console.log('res.data.total', res.data.total)
+        // console.log('res.data.total', res.data.total)
         this.isFlowzLoaded = true
         this.dataTotal = res.data.total
         if (res.data.data.length > 0) {
