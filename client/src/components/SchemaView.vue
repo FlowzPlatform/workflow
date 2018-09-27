@@ -203,6 +203,7 @@
       <Spin v-if="loadEmail" size="large" fix></Spin>
       <div v-if="schemabinding">
       <schemasubformview ref="schemasubformview" :schemainstance="formSchemaInstance" id="schemasubformview"></schemasubformview>
+      <schemasubformview ref="schemasubformviewfile" :schemainstance="formSchemaInstancefile" id="schemasubformview"></schemasubformview>
     </div>
     <div v-if="email">
       <email :btnArr="btnArr" :flag="flag" :emailSchemaId="emailSchemaId" :sendDataEmail="sendDataEmail" :iid="item.id" v-on:on-done="emailService"></email>
@@ -234,6 +235,11 @@ export default {
   },
   data () {
     return {
+      formSchemaInstancefile: {
+        data: [],
+        entity: []
+      },
+      fileYes: '',
       check: 0,
       dataClaim: [],
       loadEmail: false,
@@ -751,9 +757,24 @@ export default {
                     this.email = true
                     this.loadEmail = false
                   } else {
-                    this.sendDataEmail = res.data.template.replace(/{{OrderData}}/g, this.$refs.schemasubformview.$el.outerHTML)
-                    this.email = true
-                    this.loadEmail = false
+                    if (res.data.template.indexOf("{{FileAttachment}}") !== -1) {
+                      let file_entity = _.filter(this.formSchemaInstance.entity, { 'type': 'file' })
+                      for (let i = 0; i < file_entity.length; i++) {
+                        this.formSchemaInstancefile.entity.push(file_entity[i])
+                        let fieldName = file_entity[i].name
+                        let files = this.formSchemaInstance.data[0][fieldName]
+                        this.formSchemaInstancefile.data.push({[fieldName]: files})
+                      }
+                      setTimeout(() => {
+                        this.sendDataEmail = res.data.template.replace(/{{OrderData}}/g, this.$refs.schemasubformview.$el.outerHTML).replace(/{{FileAttachment}}/g, this.$refs.schemasubformviewfile.$el.outerHTML)
+                        this.email = true
+                        this.loadEmail = false
+                      }, 1000);
+                    } else{ 
+                      this.sendDataEmail = res.data.template.replace(/{{OrderData}}/g, this.$refs.schemasubformview.$el.outerHTML)
+                      this.email = true
+                      this.loadEmail = false
+                    }
                   }
                 }, 1000)
               })
