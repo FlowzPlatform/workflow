@@ -83,6 +83,10 @@ function beforeCreate (hook) {
       let tName = hook.params.headers.ftablename.replace(regex, '-')
       return hook.app.service('flowz').get(tName).then(res => {
         hook.data._currentStatus = true
+        if (res.processList[hook.data._state].type === 'endevent') {
+          console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+          hook.data._currentStatus = false
+        }
         hook.data._createdAt = new Date().toISOString()
         // hook.data._userId = ''
         // hook.data._claimUser = ''

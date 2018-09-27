@@ -225,6 +225,9 @@ import finstanceModal from '@/api/finstance'
 // import dataQuerymodel from '@/api/dataquery'
 import saveemailTemplate from '@/api/emailtemplate'
 import schemalist from '@/pages/user/SchemaList'
+import config from '@/config'
+const io = require('socket.io-client')
+const socket = io(config.socketURI)
 
 export default {
   name: 'SchemaView',
@@ -1198,6 +1201,7 @@ export default {
         '_state': this.$route.params.stateid
       }, heads)
       .then(res => {
+        console.log('res.data.total', res.data.total)
         this.isFlowzLoaded = true
         this.dataTotal = res.data.total
         if (res.data.data.length > 0) {
@@ -1285,6 +1289,54 @@ export default {
   },
   mounted () {
     this.init()
+    if (socket._callbacks['$' + this.$route.params.id.replace(/-/g, '_') + '_created'] === undefined) {
+      socket.on(this.$route.params.id.replace(/-/g, '_') + '_created', (data) => {
+        console.log('===created==', data)
+        if (data._currentStatus && data._state === this.$store.state.stateid) {
+          if (this.instanceEntries.length < this.entriesTotal) {
+            this.instanceEntries.push(data)
+            this.dataData = this.instanceEntries
+          } else {
+            console.log('..........')
+            this.dataTotal++
+          }
+        }
+      })
+    }
+    if (socket._callbacks['$' + this.$route.params.id.replace(/-/g, '_') + '_patched'] === undefined) {
+      socket.on(this.$route.params.id.replace(/-/g, '_') + '_patched', (data) => {
+        console.log('===patched==', data)
+        if (!data._currentStatus && data._state === this.$store.state.stateid) {
+          let inx = _.findIndex(this.instanceEntries, (o) => { return o.id === data.id })
+          this.instanceEntries.splice(inx, 1)
+          this.dataData = this.instanceEntries
+        }
+        // let finx = _.findIndex(this.flowzList, {id: this.$route.params.id})
+        // if (finx !== -1 && !data._currentStatus && data._next === null) {
+        //   if (this.flowzList[finx].processList[data._state].count > 0) {
+        //     this.flowzList[finx].processList[data._state].count--
+        //   }
+        //   if (this.flowzList[finx].count > 0) {
+        //     this.flowzList[finx].count--
+        //   }
+        // }
+        // let inx = _.findIndex(this.instanceEntries, (o) => { return o.id === data.id })
+        // this.instanceEntries.splice(inx, 1)
+        // this.dataData = this.instanceEntries
+      })
+    }
+    // if (socket._callbacks['$' + this.$route.params.id.replace(/-/g, '_') + '_removed'] === undefined) {
+    //   socket.on(this.$route.params.id.replace(/-/g, '_') + '_removed', (data) => {
+    //     console.log('===removed==', data)
+    //     // if (data._currentStatus) {
+    //     //   let finx = _.findIndex(this.flowzList, {id: this.$route.params.id})
+    //     //   if (finx !== -1) {
+    //     //     this.flowzList[finx].processList[data._state].count--
+    //     //     this.flowzList[finx].count--
+    //     //   }
+    //     // }
+    //   })
+    // }
   },
   computed: {
     dataCount () {

@@ -291,7 +291,7 @@
           })
           cols.push({
             title: 'ID',
-            key: 'id',
+            key: '_uuid',
             fixed: 'left',
             width: 260,
             render: (h, params) => {
@@ -304,13 +304,13 @@
                   click: () => {
                     var $temp = $('<input>')
                     $('body').append($temp)
-                    $temp.val(params.row.id).select()
+                    $temp.val(params.row._uuid).select()
                     document.execCommand('copy')
                     this.$Message.info('Copied to Clipboard')
                     $temp.remove()
                   }
                 }
-              }, params.row.id)
+              }, params.row._uuid)
             }
           })
         }
