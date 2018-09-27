@@ -37,7 +37,7 @@
           <template v-else>
             <Submenu :name="index" v-for="(item, index) in flowzList" :key="index">
               <template slot="title">
-                  {{item.name}}&nbsp;&nbsp;
+                  {{item.name}}&nbsp;&nbsp;<span style="display:none">{{item.count}}</span>
                   <span>
                     <Badge :count="item.count"  class-name="demo-badge-alone"></Badge>
                   </span>
