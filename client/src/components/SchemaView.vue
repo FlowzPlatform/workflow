@@ -1037,6 +1037,8 @@ export default {
     setValues (values) {
       this.validErr = []
       this.email = false
+      this.formSchemaInstancefile.entity = []
+      this.formSchemaInstancefile.data = []
       this.schemabinding = false
       this.nextTarget.value = ''
       this.nextTarget.options = []
