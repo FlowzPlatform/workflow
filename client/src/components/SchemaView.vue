@@ -1291,9 +1291,7 @@ export default {
     this.init()
     if (socket._callbacks['$' + this.$route.params.id.replace(/-/g, '_') + '_created'] === undefined) {
       socket.on(this.$route.params.id.replace(/-/g, '_') + '_created', (data) => {
-        console.log('===created==', data._currentStatus, data._state, this.$route.params.stateid)
         if (data._currentStatus && data._state === this.$route.params.stateid) {
-          console.log('inside')
           if (this.instanceEntries.length < this.entriesTotal) {
             this.instanceEntries.push(data)
             this.dataData = this.instanceEntries
@@ -1302,19 +1300,13 @@ export default {
             this.dataTotal++
           }
         } else {
-          console.log('inside else...')
-          console.log('data', data)
-          console.log('datadata...', this.dataData)
-          console.log('this.instanceEntries...', this.instanceEntries)
           let inx = _.findIndex(this.instanceEntries, (o) => { return o.id === data._previous })
-          console.log('inx', inx)
           this.instanceEntries.splice(inx, 1)
         }
       })
     }
     if (socket._callbacks['$' + this.$route.params.id.replace(/-/g, '_') + '_patched'] === undefined) {
       socket.on(this.$route.params.id.replace(/-/g, '_') + '_patched', (data) => {
-        console.log('===patched==', data)
         if (!data._currentStatus && data._state === this.$route.params.stateid) {
           let inx = _.findIndex(this.instanceEntries, (o) => { return o.id === data.id })
           this.instanceEntries.splice(inx, 1)
@@ -1336,7 +1328,6 @@ export default {
     }
     if (socket._callbacks['$' + this.$route.params.id.replace(/-/g, '_') + '_removed'] === undefined) {
       socket.on(this.$route.params.id.replace(/-/g, '_') + '_removed', (data) => {
-        console.log('===removed==', data)
         if (data._currentStatus) {
           let finx = _.findIndex(this.flowzList, {id: this.$route.params.id})
           if (finx !== -1) {
