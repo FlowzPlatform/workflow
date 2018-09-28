@@ -24,7 +24,11 @@ import Analytics from '@/pages/flow/analytics'
 
 import ManageBPMNPlugin from '@/pages/BPMNPlugins/Manage'
 import SchemaView from '@/components/SchemaView'
-import emailtemplate from '@/components/emailtemplate'
+
+import emailTemplateList from '@/pages/emailTemplate/emailTemplateList'
+import editEmailTemplate from '@/pages/emailTemplate/editEmailTemplate'
+import createEmailTemplate from '@/pages/emailTemplate/createEmailTemplate'
+
 import permission from '@/components/permission'
 
 // const tagSpinner = resolve => require(['./spinner'], resolve)
@@ -80,11 +84,25 @@ const mroutes = [
           }
         ]
       },
-      { // Emailtemplate
+      { // Emailtemplate List
         path: 'emailtemplate',
-        component: emailtemplate,
+        component: emailTemplateList,
         name: 'emailtemplate',
         meta: { description: 'emailtemplate' }
+      },
+      { // Emailtemplate edit
+        path: 'emailtemplate/edit/:id',
+        component: editEmailTemplate,
+        name: 'editemailtemplate',
+        meta: { description: 'emailtemplate' },
+        props: true
+      },
+      { // Emailtemplate create
+        path: 'emailtemplate/new',
+        component: createEmailTemplate,
+        name: 'createemailtemplate',
+        meta: { description: 'emailtemplate' },
+        props: true
       },
       { // permission
         path: 'permission/:id',

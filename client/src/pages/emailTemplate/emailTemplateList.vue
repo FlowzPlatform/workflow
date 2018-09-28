@@ -1,23 +1,14 @@
 <template>
   <div id="emailtemplate">
     <div>
+      <Row type="flex" justify="end">
+      <Button type="primary" size="small" style="margin-bottom: 2px;position: absolute;right: 10px;" @click="addNewEmailTemplate" icon="plus"> Add</Button>
+    </Row>
       <h2 class="heading">Templates</h2>
       <Table border highlight-row :columns="columns7" class="tableCss" :data="data6"></Table>
     </div>
-    <div class="editor" v-if="newTemplate && flag">
-      <h2 class="heading">Create Template</h2>
-      <keep-alive>
-        <editor v-model="GetHtmlOfEditor" api-key="ppzi01crrfo3pvd43s3do89pguwkhowrwajpjdqdkginzj7k" :toolbar="toolbar1" :plugins="plugins" :init="settings" :initial-value="gethtmlcontent"></editor>
-      </keep-alive>
-      <Input v-model="templateName" placeholder="Enter Template name" style="width: 300px" class="dataEnter"/>
-      <Button type="primary" @click="saveTemplate" class="dataEnter">Save Template</Button>
-    </div>
-    <div class="editor" v-else>
-      <h2 class="heading">View Template</h2>
-      <editor v-model="GetHtmlOfEditor" api-key="ppzi01crrfo3pvd43s3do89pguwkhowrwajpjdqdkginzj7k" :initial-value="GetHtmlContent"></editor>
-      <Input v-model="templateName" placeholder="Enter Template name" style="width: 300px" class="dataEnter"/>
-      <Button type="primary" @click="updateTemplate" class="dataEnter">Update Template</Button>
-      <Button type="error" @click="cancelUpdateTemplate" class="dataEnter">Cancel</Button>
+    <div style="margin-top: 20px; float:right">
+      <Page :total="total" show-sizer />
     </div>
   </div>
 </template>
@@ -29,13 +20,13 @@ import _ from 'lodash'
 export default {
   data () {
     return {
+      total: '',
       flag: false,
       updateTemplateid: '',
       newTemplate: true,
       templateName: '',
       GetHtmlOfEditor: '',
       gethtmlcontent: '<p>Hello!</p>',
-      GetHtmlContent: '',
       plugins: 'print preview searchreplace fullscreen image link media template codesample table hr pagebreak anchor toc insertdatetime lists textcolor imagetools contextmenu colorpicker',
       toolbar1: 'formatselect | bold italic strikethrough forecolor backcolor | link | alignleft aligncenter alignright alignjustify  | numlist bullist outdent indent  | removeformat',
       settings: {
@@ -64,20 +55,21 @@ export default {
                 props: {
                   type: 'text',
                   size: 'large',
-                  icon: 'ios-eye-outline'
+                  icon: 'edit'
                 },
                 domProps: {
-                  title: 'view template'
+                  title: 'Edit Emailtemplate'
                 },
                 style: {
+                  color: '#7DE144',
                   marginRight: '3px',
                   padding: '0px',
-                  fontSize: '20px',
-                  color: '#0052a9'
+                  fontSize: '20px'
                 },
                 on: {
                   click: () => {
-                    this.show(params)
+                    console.log(params)
+                    this.$router.push({name: 'editemailtemplate', params: {id: params.row.id}})
                   }
                 }
               }, ''),
@@ -112,6 +104,9 @@ export default {
     'editor': (resolve) => { require(['@tinymce/tinymce-vue'], resolve) }
   },
   methods: {
+    addNewEmailTemplate () {
+      this.$router.push({name: 'createemailtemplate'})
+    },
     saveTemplate () {
       let saveemailTemplateObj = {
         user: this.$store.state.user._id,
@@ -183,6 +178,7 @@ export default {
     .then((res) => {
       this.flag = true
       this.data6 = res.data.data
+      this.total = res.data.data.length
     })
     .catch((err) => {
       console.log(err)
