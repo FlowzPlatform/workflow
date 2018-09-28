@@ -131,7 +131,7 @@
           </div>
           </TabPane>
           <TabPane v-if="this.$store.state.role === 2" :label="'Work Pool ('+ dataTotalUnclaim + ')'" icon="lock-combination">
-            <schemalist :schema="dataSchema" :datashow="'dataU'" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotalUnclaim" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+            <schemalist :schema="dataSchema" :datashow="'dataU'" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotalUnclaim="dataTotalUnclaim" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
             <div style="padding: 10px">
             <div class="row" v-if="id != null">
               <div class="col-md-12" id="top">
@@ -203,6 +203,7 @@
       <Spin v-if="loadEmail" size="large" fix></Spin>
       <div v-if="schemabinding">
       <schemasubformview ref="schemasubformview" :schemainstance="formSchemaInstance" id="schemasubformview"></schemasubformview>
+      <schemasubformview ref="schemasubformviewfile" :schemainstance="formSchemaInstancefile" id="schemasubformview"></schemasubformview>
     </div>
     <div v-if="email">
       <email :btnArr="btnArr" :flag="flag" :emailSchemaId="emailSchemaId" :sendDataEmail="sendDataEmail" :iid="item.id" v-on:on-done="emailService"></email>
@@ -212,6 +213,7 @@
 </template>
 
 <script>
+/*eslint-disable */
 import _ from 'lodash'
 import $ from 'jquery'
 
@@ -233,6 +235,11 @@ export default {
   },
   data () {
     return {
+      formSchemaInstancefile: {
+        data: [],
+        entity: []
+      },
+      fileYes: '',
       check: 0,
       dataClaim: [],
       loadEmail: false,
@@ -750,9 +757,24 @@ export default {
                     this.email = true
                     this.loadEmail = false
                   } else {
-                    this.sendDataEmail = res.data.template + this.$refs.schemasubformview.$el.outerHTML
-                    this.email = true
-                    this.loadEmail = false
+                    if (res.data.template.indexOf("{{FileAttachment}}") !== -1) {
+                      let file_entity = _.filter(this.formSchemaInstance.entity, { 'type': 'file' })
+                      for (let i = 0; i < file_entity.length; i++) {
+                        this.formSchemaInstancefile.entity.push(file_entity[i])
+                        let fieldName = file_entity[i].name
+                        let files = this.formSchemaInstance.data[0][fieldName]
+                        this.formSchemaInstancefile.data.push({[fieldName]: files})
+                      }
+                      setTimeout(() => {
+                        this.sendDataEmail = res.data.template.replace(/{{OrderData}}/g, this.$refs.schemasubformview.$el.outerHTML).replace(/{{FileAttachment}}/g, this.$refs.schemasubformviewfile.$el.outerHTML)
+                        this.email = true
+                        this.loadEmail = false
+                      }, 1000);
+                    } else{ 
+                      this.sendDataEmail = res.data.template.replace(/{{OrderData}}/g, this.$refs.schemasubformview.$el.outerHTML)
+                      this.email = true
+                      this.loadEmail = false
+                    }
                   }
                 }, 1000)
               })
@@ -1015,6 +1037,8 @@ export default {
     setValues (values) {
       this.validErr = []
       this.email = false
+      this.formSchemaInstancefile.entity = []
+      this.formSchemaInstancefile.data = []
       this.schemabinding = false
       this.nextTarget.value = ''
       this.nextTarget.options = []
@@ -1239,11 +1263,13 @@ export default {
       created (data) {
       },
       updated (data) {
+        this.pageno = 1
         if (this.$store.state.role === 1) {
           if (data.currentStatus === this.$route.params.stateid) {
             if (this.instanceEntries.length < this.entriesTotal) {
               let instanceObj = data
               let inx = _.findIndex(this.dataData, (o) => { return o.id === data.id })
+              this.populateTables()
               let lastEntryId = data.stageReference[data.stageReference.length - 1].stageRecordId
               if (lastEntryId !== undefined) {
                 flowzdataModal.get(lastEntryId).then(res => {

@@ -379,9 +379,10 @@
           'user': this.$store.state.user._id
         })
         .then((res) => {
+          // tempVar = res.data.data
           tempVar.push({id: '', templateName: '--Select Template--'})
           for (let i = 0; i < res.data.data.length; i++) {
-            tempVar.push({id: res.data.data[i].name, templateName: res.data.data[i].templateName})
+            tempVar.push({id: res.data.data[i].id, templateName: res.data.data[i].templateName})
           }
         })
         .catch((err) => {
