@@ -19,4 +19,7 @@ export default {
   getXML (state) {
     return state.BPMNxml
   }
+  // getActiveFlow (state) {
+  //   return state.activeFlow
+  // }
 }
