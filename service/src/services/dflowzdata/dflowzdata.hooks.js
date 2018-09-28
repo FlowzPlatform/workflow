@@ -84,7 +84,7 @@ function beforeCreate (hook) {
       return hook.app.service('flowz').get(tName).then(res => {
         hook.data._currentStatus = true
         if (res.processList[hook.data._state].type === 'endevent') {
-          console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+          // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
           hook.data._currentStatus = false
         }
         hook.data._createdAt = new Date().toISOString()

@@ -399,7 +399,7 @@
                         id: this.flowzData.schema,
                         item: params.row,
                         formName: params.row.name,
-                        currentState: params.row._currentStatus,
+                        currentState: params.row._state,
                         flowzData: this.flowzData,
                         formData: params.row
                       }
