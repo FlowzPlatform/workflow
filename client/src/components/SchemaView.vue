@@ -304,21 +304,36 @@ export default {
     'schemasubformview': (resolve) => { require(['./SchemaSubFormView'], resolve) }
   },
   methods: {
-    searchData (query) {
+    searchData (query, sort) {
+      console.log('query', query, sort)
       this.dataLoading = true
 
       // New Custom Dynamic FLowz Data call
       let heads = {
         ftablename: this.currentFlowzId
       }
-      dflowzdata.get(null, {
+      if (query === null) {
+        query = {
+          text: '',
+          filter: ''
+        }
+      }
+      let params = {
         $skip: this.skip,
         $limit: this.limit,
         '_currentStatus': true,
         '_state': this.$route.params.stateid,
         // 'id[$search]': '^' + query.text
         '$search': query.text
-      }, heads)
+      }
+      if (sort !== undefined) {
+        if (sort.order === 'asc') {
+          params['$sort[' + sort.key + ']'] = 1
+        } else if (sort.order === 'desc') {
+          params['$sort[' + sort.key + ']'] = -1
+        }
+      }
+      dflowzdata.get(null, params, heads)
       .then(res => {
         this.isFlowzLoaded = true
         this.dataTotal = res.data.total
@@ -379,7 +394,8 @@ export default {
       // })
     },
     sortData (object) {
-      // console.log('object')
+      // console.log('object', object, query)
+      this.searchData(null, object)
     },
     emailService (item) {
       this.isEmailDone = true
