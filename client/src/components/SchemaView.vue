@@ -930,7 +930,8 @@ export default {
       if (this.$store.state.role === 2) {
         fheaders = {
           workflowid: 'workflow_' + this.flowzData.id,
-          stateid: this.$route.params.stateid
+          stateid: this.$route.params.stateid,
+          normalpatch: true
         }
       }
       // if (fheaders !== null) {
