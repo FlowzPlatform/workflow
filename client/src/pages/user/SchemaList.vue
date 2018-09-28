@@ -346,7 +346,7 @@
             width: 200,
             render: (h, params) => {
               return h('span',
-              this.selectOption(params),
+              this.selectUser(params),
               )
             }
           })
@@ -739,13 +739,11 @@
           this.$Notice.error({title: 'Please first select Rows'})
         } else {
           for (let i = 0; i < this.selectedRows.length; i++) {
-            console.log(this.selectedRows[i])
             let fheaders = {
               // workflowid: 'workflow_' + this.$route.params.id,
               normalpatch: true,
               ftablename: this.currentFlowzId
             }
-            console.log(fheaders)
             if (this.selectedAssignUser !== 'noValue') {
               dflowzdata.patch(this.selectedRows[i].id, {_claimUser: this.selectedAssignUser, _state: this.$route.params.stateid}, null, fheaders)
               .then((res) => {
@@ -781,11 +779,11 @@
       handleSelectAll (status) {
         this.$refs.selection.selectAll(status)
       },
-      selectOption (params) {
-        if (params.row.claimUser !== '') {
-          let obj = _.find(this.stageClaimUsers, {value: params.row.claimUser})
+      selectUser (params) {
+        if (params.row.hasOwnProperty('_claimUser')) {
+          let obj = _.find(this.stageClaimUsers, {value: params.row._claimUser})
           if (obj !== undefined) {
-            this.data[params.index].claim = obj.value
+            this.instanceEntries[params.index].claim = obj.value
             return obj.label
           }
         }
