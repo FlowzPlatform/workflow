@@ -516,7 +516,8 @@ export default {
             return days + ' Days'
           }
         }
-      ]
+      ],
+      entriesTotal: 10
     }
   },
   mounted () {
@@ -533,6 +534,22 @@ export default {
         .catch(error => {
           console.log(error)
         })
+      }
+    },
+    'flowz': {
+      created (data) {
+        if (this.total < this.entriesTotal) {
+          this.flowzList.push(data)
+        } else {
+          this.total = ((this.total) + 1)
+        }
+      },
+      updated (data) {
+        if (this.flowzList < this.entriesTotal) {
+          let inx = _.findIndex(this.flowzList, (o) => { return o.id === data.id })
+          this.flowzList.splice(inx, 1)
+          this.flowzList.push(data)
+        }
       }
     }
   },
