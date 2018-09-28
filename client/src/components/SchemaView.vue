@@ -1293,6 +1293,7 @@ export default {
     this.init()
     if (socket._callbacks['$' + this.$route.params.id.replace(/-/g, '_') + '_created'] === undefined) {
       socket.on(this.$route.params.id.replace(/-/g, '_') + '_created', (data) => {
+        console.log(data._currentStatus && data._state, this.$route.params.stateid)
         if (data._currentStatus && data._state === this.$route.params.stateid) {
           if (this.instanceEntries.length < this.entriesTotal) {
             this.instanceEntries.push(data)
@@ -1309,9 +1310,10 @@ export default {
     }
     if (socket._callbacks['$' + this.$route.params.id.replace(/-/g, '_') + '_patched'] === undefined) {
       socket.on(this.$route.params.id.replace(/-/g, '_') + '_patched', (data) => {
-        if (!data._currentStatus && data._state === this.$route.params.stateid) {
+        if (data._currentStatus && data._state === this.$route.params.stateid) {
           let inx = _.findIndex(this.instanceEntries, (o) => { return o.id === data.id })
           this.instanceEntries.splice(inx, 1)
+          this.instanceEntries.push(data)
           this.dataData = this.instanceEntries
         }
         // let finx = _.findIndex(this.flowzList, {id: this.$route.params.id})
