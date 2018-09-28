@@ -143,7 +143,7 @@ function afterCreate (hook) {
     })
   } else {
     // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', hook.datas)
-    hook.params.headers.normalPatch = true
+    hook.params.headers.normalpatch = true
     return hook.app.service('dflowzdata').patch(hook.data._previous, {
       // _state: hook.data._state,
       _next: hook.result.id,
@@ -156,10 +156,10 @@ function afterCreate (hook) {
 }
 
 function beforePatch (hook) {
-  // console.log('beforePatch =============================', hook.data, '>>>>>>>>>>>>>>>>>>>>', hook.id)
+  // console.log('beforePatch =============================>>>>>>>>>>>>>>>>>>>>', hook.params)
   hook.params.done1 = true
   if (hook.params.headers.ftablename !== undefined) {
-      if (hook.params.headers.normalPatch !== undefined) {
+      if (hook.params.headers.normalpatch !== undefined) {
       } else {
         if (hook.data._state !== undefined) {
           let regex = /_/g
@@ -198,8 +198,8 @@ function beforePatch (hook) {
 
 function afterPatch (hook) {
   // console.log('================================ afterPatch', hook.data, hook.id)
-  if (hook.params.headers.normalPatch !== undefined) {
-    // console.log('.....................................')
+  if (hook.params.headers.normalpatch !== undefined) {
+    // console.log('..................................... ', hook.params.headers.normalpatch)
   } else {
     if (hook.params.done1) {
       return hook.app.service('dflowzdata').get(hook.id, hook.params).then(resp => {

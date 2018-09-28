@@ -195,7 +195,7 @@ export default {
             })
             if (socket._callbacks['$' + m.id.replace(/-/g, '_') + '_created'] === undefined) {
               socket.on(m.id.replace(/-/g, '_') + '_created', (data) => {
-                // console.log('===created==', data)
+                console.log('===created==', data)
                 if (data._currentStatus) {
                   let finx = _.findIndex(this.flowzList, {id: m.id})
                   if (finx !== -1) {
@@ -207,7 +207,7 @@ export default {
             }
             if (socket._callbacks['$' + m.id.replace(/-/g, '_') + '_patched'] === undefined) {
               socket.on(m.id.replace(/-/g, '_') + '_patched', (data) => {
-                // console.log('===patched==', data)
+                console.log('===patched==', data)
                 let finx = _.findIndex(this.flowzList, {id: m.id})
                 if (finx !== -1 && !data._currentStatus && data._next === null) {
                   if (this.flowzList[finx].processList[data._state].count > 0) {
@@ -221,7 +221,7 @@ export default {
             }
             if (socket._callbacks['$' + m.id.replace(/-/g, '_') + '_removed'] === undefined) {
               socket.on(m.id.replace(/-/g, '_') + '_removed', (data) => {
-                // console.log('===removed==', data)
+                console.log('===removed==', data)
                 if (data._currentStatus) {
                   let finx = _.findIndex(this.flowzList, {id: m.id})
                   if (finx !== -1) {
