@@ -85,7 +85,7 @@
       <Table ref="selection" @on-sort-change="sortTableData" highlight-row :columns="setColumns2" :data="instanceEntries" :border="config.border" :stripe="config.stripe"></Table>
       <div style="margin: 10px;overflow: hidden">
         <div style="float: right;">
-          <Page placement="top" :total="total" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+          <Page placement="top" :total="dataTotalC" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
         </div>
       </div>
     </div>
@@ -93,7 +93,7 @@
       <Table ref="selection" @on-sort-change="sortTableData" highlight-row :columns="setColumns" :data="instanceEntries" :border="config.border" :stripe="config.stripe"></Table>
       <div style="margin: 10px;overflow: hidden">
         <div style="float: right;">
-          <Page placement="top" :total="total" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+          <Page placement="top" :total="dataTotalU" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
         </div>
       </div>
     </div>
@@ -104,7 +104,7 @@
   import axios from 'axios'
   import config from '../../config/index.js'
   import $ from 'jquery'
-  import finstanceModal from '@/api/finstance'
+  // import finstanceModal from '@/api/finstance'
   import dflowzdata from '@/api/dflowzdata'
   export default {
     name: 'schemalist',
@@ -115,6 +115,8 @@
       'flowzData': Object,
       'instanceEntries': Array,
       'dataTotal': Number,
+      'dataTotalC': Number,
+      'dataTotalU': Number,
       'pageno': Number,
       'limit': Number,
       'datashow': String
@@ -425,12 +427,12 @@
                   on: {
                     'click': async () => {
                       let fheaders = {
-                        workflowid: 'workflow_' + this.$route.params.id,
-                        stateid: this.$route.params.stateid
+                        // workflowid: 'workflow_' + this.$route.params.id,
+                        normalpatch: true,
+                        ftablename: this.currentFlowzId
                       }
-                      finstanceModal.patch(params.row.id, {claimUser: ''}, null, fheaders)
+                      dflowzdata.patch(params.row.id, {_claimUser: '', _state: this.$route.params.stateid}, null, fheaders)
                       .then((res) => {
-                        this.instanceEntries.splice(params.index, 1)
                         this.$Notice.success({title: 'Successfully Unclaim'})
                       })
                       .catch((err) => {
@@ -574,12 +576,12 @@
                   on: {
                     'click': async () => {
                       let fheaders = {
-                        workflowid: 'workflow_' + this.$route.params.id,
-                        stateid: this.$route.params.stateid
+                        // workflowid: 'workflow_' + this.$route.params.id,
+                        normalpatch: true,
+                        ftablename: this.currentFlowzId
                       }
-                      finstanceModal.patch(params.row.id, {claimUser: this.$store.state.user._id}, null, fheaders)
+                      dflowzdata.patch(params.row.id, {_claimUser: this.$store.state.user._id, _state: this.$route.params.stateid}, null, fheaders)
                       .then((res) => {
-                        this.data.splice(params.index, 1)
                         this.$Notice.success({title: 'Successfully Claim'})
                       })
                       .catch((err) => {
@@ -745,7 +747,7 @@
               ftablename: this.currentFlowzId
             }
             if (this.selectedAssignUser !== 'noValue') {
-              dflowzdata.patch(this.selectedRows[i].id, {_claimUser: this.selectedAssignUser, _state: this.$route.params.stateid}, null, fheaders)
+              dflowzdata.patch(this.selectedRows[i].id, {_claimUser: '', _state: this.$route.params.stateid}, null, fheaders)
               .then((res) => {
                 this.$Notice.success({title: 'Successfully Assign'})
               })
