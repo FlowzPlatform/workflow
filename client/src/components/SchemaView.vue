@@ -71,7 +71,7 @@
         
         <div v-if="itsFirstState === false">
           <tabs> 
-          <TabPane v-if="this.$store.state.role === 1" :label="dataCount" icon="lock-combination">
+          <TabPane v-if="this.$store.state.role === 1" :label="'Data ('+ dataTotal + ')'" icon="lock-combination">
           <schemalist v-if="this.$store.state.role === 1" :schema="dataSchema" :pageno="pageno" :datashow="'dataA'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
           <!-- <schemalist v-if="this.$store.state.role === 2" :schema="dataSchema" :pageno="pageno" :datashow="'dataU'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist> -->
 
@@ -130,8 +130,8 @@
             </div>
           </div>
           </TabPane>
-          <TabPane v-if="this.$store.state.role === 2" :label="'Work Pool ('+ dataData2.length + ')'" icon="lock-combination">
-            <schemalist :schema="dataSchema" :datashow="'dataU'" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+          <TabPane v-if="this.$store.state.role === 2" :label="'Work Pool ('+ dataTotalC + ')'" icon="lock-combination">
+            <schemalist :schema="dataSchema" :datashow="'dataU'" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotalC="dataTotalC" :data="dataData2" :configuration="configuration" :instanceEntries="dataClaim" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
             <div style="padding: 10px">
             <div class="row" v-if="id != null">
               <div class="col-md-12" id="top">
@@ -187,8 +187,8 @@
             </div>
           </div>
           </TabPane>
-          <TabPane v-if="this.$store.state.role === 2" :label="'In Progress ('+ dataClaim.length + ')'" icon="lock-combination">
-            <schemalist v-if="this.$store.state.role === 2" :schema="dataSchema" :pageno="pageno" :datashow="'dataC'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataClaim" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+          <TabPane v-if="this.$store.state.role === 2" :label="'In Progress ('+ dataTotalU + ')'" icon="lock-combination">
+            <schemalist :schema="dataSchema" :pageno="pageno" :datashow="'dataC'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotalU="dataTotalU" :data="dataClaim" :configuration="configuration" :instanceEntries="dataUnclaim" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
           </TabPane>
           </Tabs>
         </div>
@@ -239,11 +239,12 @@ export default {
   data () {
     return {
       check: 0,
-      dataClaim: [],
       loadEmail: false,
       skip: 0,
       limit: 10,
       dataTotal: 0,
+      dataTotalC: 0,
+      dataTotalU: 0,
       pageno: 1,
       isFlowzLoaded: false,
       htmlcontent: false,
@@ -285,6 +286,8 @@ export default {
       configuration: true,
       dynamicData: true,
       instanceEntries: [],
+      dataClaim: [],
+      dataUnclaim: [],
       isEmailDone: false,
       itsFirstState: true,
       sendDataEmail: null,
@@ -1196,37 +1199,104 @@ export default {
       let heads = {
         ftablename: this.currentFlowzId
       }
-      dflowzdata.get(null, {
-        $skip: this.skip,
-        $limit: this.limit,
-        '_currentStatus': true,
-        '_state': this.$route.params.stateid
-      }, heads)
-      .then(res => {
-        // console.log('res.data.total', res.data.total)
-        this.isFlowzLoaded = true
-        this.dataTotal = res.data.total
-        if (res.data.data.length > 0) {
-          this.instanceEntries = res.data.data
-          this.$Loading.finish()
-          this.dataLoading = false
-        } else {
-          this.instanceEntries = []
-          this.dataData = []
-          this.dataData2 = []
-          this.dataLoading = false
-          this.$Loading.finish()
-        }
-      }).catch(e => {
-        this.$Loading.error()
-        console.log('error', e)
-        this.bLoading = false
-        if (e.response.data.message) {
-          this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
-        } else {
-          this.$Notice.error({title: 'Error', desc: e.message})
-        }
-      })
+      if (this.$store.state.role === 1) {
+        dflowzdata.get(null, {
+          $skip: this.skip,
+          $limit: this.limit,
+          '_currentStatus': true,
+          '_state': this.$route.params.stateid
+        }, heads)
+        .then(res => {
+          // console.log('res.data.total', res.data.total)
+          this.isFlowzLoaded = true
+          this.dataTotal = res.data.total
+          if (res.data.data.length > 0) {
+            this.instanceEntries = res.data.data
+            this.$Loading.finish()
+            this.dataLoading = false
+          } else {
+            this.instanceEntries = []
+            this.dataClaim = []
+            this.dataUnclaim = []
+            this.dataLoading = false
+            this.$Loading.finish()
+          }
+        }).catch(e => {
+          this.$Loading.error()
+          console.log('error', e)
+          this.bLoading = false
+          if (e.response.data.message) {
+            this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+          } else {
+            this.$Notice.error({title: 'Error', desc: e.message})
+          }
+        })
+      }
+      if (this.$store.state.role === 2) {
+        dflowzdata.get(null, {
+          $skip: this.skip,
+          $limit: this.limit,
+          '_currentStatus': true,
+          '_state': this.$route.params.stateid,
+          '_claimUser': ''
+        }, heads)
+        .then(res => {
+          console.log('res.data.total', res.data)
+          this.isFlowzLoaded = true
+          this.dataTotalU = res.data.total
+          if (res.data.data.length > 0) {
+            this.dataUnclaim = res.data.data
+            this.$Loading.finish()
+            this.dataLoading = false
+          } else {
+            this.instanceEntries = []
+            this.dataUnclaim = []
+            this.dataClaim = []
+            this.dataLoading = false
+            this.$Loading.finish()
+          }
+        }).catch(e => {
+          this.$Loading.error()
+          console.log('error', e)
+          this.bLoading = false
+          if (e.response.data.message) {
+            this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+          } else {
+            this.$Notice.error({title: 'Error', desc: e.message})
+          }
+        })
+        dflowzdata.get(null, {
+          $skip: this.skip,
+          $limit: this.limit,
+          '_currentStatus': true,
+          '_state': this.$route.params.stateid,
+          '_claimUser': this.$store.state.user._id
+        }, heads)
+        .then(res => {
+          this.isFlowzLoaded = true
+          this.dataTotalC = res.data.total
+          if (res.data.data.length > 0) {
+            this.dataClaim = res.data.data
+            this.$Loading.finish()
+            this.dataLoading = false
+          } else {
+            this.instanceEntries = []
+            this.dataClaim = []
+            this.dataUnclaim = []
+            this.dataLoading = false
+            this.$Loading.finish()
+          }
+        }).catch(e => {
+          this.$Loading.error()
+          console.log('error', e)
+          this.bLoading = false
+          if (e.response.data.message) {
+            this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+          } else {
+            this.$Notice.error({title: 'Error', desc: e.message})
+          }
+        })
+      }
 
       // dataQuerymodel.get(null, {
       //   $last: true,
