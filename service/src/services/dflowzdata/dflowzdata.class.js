@@ -12,7 +12,11 @@ class Service {
 
   setup(app) {
     this.app = app;
-    const _thisApp = app
+    this.app.service('dflowzdata').removeAllListeners('created');
+    this.app.service('dflowzdata').removeAllListeners('updated');
+    this.app.service('dflowzdata').removeAllListeners('removed');
+    this.app.service('dflowzdata').removeAllListeners('patched');
+
     // this.service.watchChangefeeds(app);
     this.on('created',(data) => {
       this.app.service('dflowzdata').emit('_created',{[this.service.options.name]:data});
@@ -28,7 +32,7 @@ class Service {
     });
   }
   setTableName (params) {
-    params.headers.ftablename = params.headers.ftablename.replace(/-/g, '_')
+    params.headers.ftablename = params.headers.ftablename.replace(/-/g, '_');
     this.service.options.name = params.headers.ftablename;
     this.service.table = this.rDB.table(params.headers.ftablename);
   }
