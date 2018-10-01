@@ -514,8 +514,7 @@ export default {
             return days + ' Days'
           }
         }
-      ],
-      entriesTotal: 0
+      ]
     }
   },
   mounted () {
