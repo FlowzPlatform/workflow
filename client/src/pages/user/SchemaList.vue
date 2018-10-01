@@ -427,11 +427,12 @@
                   on: {
                     'click': async () => {
                       let fheaders = {
-                        // workflowid: 'workflow_' + this.$route.params.id,
+                        workflowid: 'workflow_' + this.$route.params.id,
                         normalpatch: true,
-                        ftablename: this.currentFlowzId
+                        ftablename: this.currentFlowzId,
+                        stateid: this.$route.params.stateid
                       }
-                      dflowzdata.patch(params.row.id, {_claimUser: '', _state: this.$route.params.stateid}, null, fheaders)
+                      dflowzdata.patch(params.row.id, {_claimUser: ''}, null, fheaders)
                       .then((res) => {
                         this.$Notice.success({title: 'Successfully Unclaim'})
                       })
@@ -576,11 +577,12 @@
                   on: {
                     'click': async () => {
                       let fheaders = {
-                        // workflowid: 'workflow_' + this.$route.params.id,
+                        workflowid: 'workflow_' + this.$route.params.id,
                         normalpatch: true,
-                        ftablename: this.currentFlowzId
+                        ftablename: this.currentFlowzId,
+                        stateid: this.$route.params.stateid
                       }
-                      dflowzdata.patch(params.row.id, {_claimUser: this.$store.state.user._id, _state: this.$route.params.stateid}, null, fheaders)
+                      dflowzdata.patch(params.row.id, {_claimUser: this.$store.state.user._id}, null, fheaders)
                       .then((res) => {
                         this.$Notice.success({title: 'Successfully Claim'})
                       })
@@ -742,14 +744,15 @@
         } else {
           for (let i = 0; i < this.selectedRows.length; i++) {
             let fheaders = {
-              // workflowid: 'workflow_' + this.$route.params.id,
+              workflowid: 'workflow_' + this.$route.params.id,
               normalpatch: true,
-              ftablename: this.currentFlowzId
+              ftablename: this.currentFlowzId,
+              stateid: this.$route.params.stateid
             }
             if (this.selectedAssignUser !== 'noValue') {
-              dflowzdata.patch(this.selectedRows[i].id, {_claimUser: '', _state: this.$route.params.stateid}, null, fheaders)
+              dflowzdata.patch(this.selectedRows[i].id, {_claimUser: this.selectedAssignUser, _state: this.$route.params.stateid}, null, fheaders)
               .then((res) => {
-                this.$Notice.success({title: 'Successfully Assign'})
+                this.$Notice.success({title: 'Successfully Un-Assign'})
               })
               .catch((err) => {
                 if (err.response) {
@@ -759,7 +762,7 @@
                 }
               })
             } else {
-              dflowzdata.patch(this.selectedRows[i].id, {_claimUser: this.selectedAssignUser, _state: this.$route.params.stateid}, null, fheaders)
+              dflowzdata.patch(this.selectedRows[i].id, {_claimUser: '', _state: this.$route.params.stateid}, null, fheaders)
               .then((res) => {
                 this.$Notice.success({title: 'Successfully Assign'})
               })
