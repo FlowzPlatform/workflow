@@ -77,31 +77,11 @@
 
 <script>
 import flowzModal from '@/api/flowz'
-// import finstanceModal from '@/api/finstance'
 import dflowzdataModal from '@/api/dflowzdata'
 import _ from 'lodash'
 import config from '@/config'
 import axios from 'axios'
-const io = require('socket.io-client')
-const socket = io(config.socketURI)
-// socket.on('5a6e2e8b_cfeb_4060_b420_6ca95184b884_created', data => {
-//   console.log('===d8finstance created==', data)
-//   if (data._currentStatus) {
-//     console.log('data._currentStatus', data._currentStatus, this.flowzList)
-//     let finx = _.findIndex(this.flowzList, {id: '5a6e2e8b_cfeb_4060_b420_6ca95184b884'.replace(/_/g, '-')})
-//     if (finx !== -1) {
-//       console.log('Index', finx)
-//       // this.flowzList[finx].count += 1
-//       this.flowzList[finx].processList[data._state].count++
-//     }
-//   }
-// })
-// socket.on('5a6e2e8b_cfeb_4060_b420_6ca95184b884_updated', data => {
-//   console.log('===d6finstance updated==', data)
-// })
-// socket.on('5a6e2e8b_cfeb_4060_b420_6ca95184b884_removed', data => {
-//   console.log('===d6finstance removed==', data)
-// })
+
 export default {
   data () {
     return {
@@ -111,16 +91,6 @@ export default {
       flowzList: null,
       roles: {},
       resource: {}
-    }
-  },
-  created () {
-    // console.log('created', socket._callbacks)
-  },
-  beforeDestroy () {
-    // alert('beforeDestroy')
-    // console.log(socket)
-    for (let item of socket.subs) {
-      item.destroy()
     }
   },
   methods: {
@@ -196,44 +166,44 @@ export default {
               p.count = 0
               return p
             })
-            if (socket._callbacks['$' + m.id.replace(/-/g, '_') + '_created'] === undefined) {
-              socket.on(m.id.replace(/-/g, '_') + '_created', (data) => {
-                // console.log('===created==', data)
-                if (data._currentStatus) {
-                  let finx = _.findIndex(this.flowzList, {id: m.id})
-                  if (finx !== -1) {
-                    this.flowzList[finx].processList[data._state].count++
-                    this.flowzList[finx].count++
-                  }
-                }
-              })
-            }
-            if (socket._callbacks['$' + m.id.replace(/-/g, '_') + '_patched'] === undefined) {
-              socket.on(m.id.replace(/-/g, '_') + '_patched', (data) => {
-                // console.log('===patched==', data)
-                let finx = _.findIndex(this.flowzList, {id: m.id})
-                if (finx !== -1 && !data._currentStatus && data._next === null) {
-                  if (this.flowzList[finx].processList[data._state].count > 0) {
-                    this.flowzList[finx].processList[data._state].count--
-                  }
-                  if (this.flowzList[finx].count > 0) {
-                    this.flowzList[finx].count--
-                  }
-                }
-              })
-            }
-            if (socket._callbacks['$' + m.id.replace(/-/g, '_') + '_removed'] === undefined) {
-              socket.on(m.id.replace(/-/g, '_') + '_removed', (data) => {
-                // console.log('===removed==', data)
-                if (data._currentStatus) {
-                  let finx = _.findIndex(this.flowzList, {id: m.id})
-                  if (finx !== -1) {
-                    this.flowzList[finx].processList[data._state].count--
-                    this.flowzList[finx].count--
-                  }
-                }
-              })
-            }
+            // if (socket._callbacks['$' + m.id.replace(/-/g, '_') + '_created'] === undefined) {
+            //   socket.on(m.id.replace(/-/g, '_') + '_created', (data) => {
+            //     // console.log('===created==', data)
+            //     if (data._currentStatus) {
+            //       let finx = _.findIndex(this.flowzList, {id: m.id})
+            //       if (finx !== -1) {
+            //         this.flowzList[finx].processList[data._state].count++
+            //         this.flowzList[finx].count++
+            //       }
+            //     }
+            //   })
+            // }
+            // if (socket._callbacks['$' + m.id.replace(/-/g, '_') + '_patched'] === undefined) {
+            //   socket.on(m.id.replace(/-/g, '_') + '_patched', (data) => {
+            //     // console.log('===patched==', data)
+            //     let finx = _.findIndex(this.flowzList, {id: m.id})
+            //     if (finx !== -1 && !data._currentStatus && data._next === null) {
+            //       if (this.flowzList[finx].processList[data._state].count > 0) {
+            //         this.flowzList[finx].processList[data._state].count--
+            //       }
+            //       if (this.flowzList[finx].count > 0) {
+            //         this.flowzList[finx].count--
+            //       }
+            //     }
+            //   })
+            // }
+            // if (socket._callbacks['$' + m.id.replace(/-/g, '_') + '_removed'] === undefined) {
+            //   socket.on(m.id.replace(/-/g, '_') + '_removed', (data) => {
+            //     // console.log('===removed==', data)
+            //     if (data._currentStatus) {
+            //       let finx = _.findIndex(this.flowzList, {id: m.id})
+            //       if (finx !== -1) {
+            //         this.flowzList[finx].processList[data._state].count--
+            //         this.flowzList[finx].count--
+            //       }
+            //     }
+            //   })
+            // }
             return m
           })
           this.loading = false
@@ -444,21 +414,9 @@ export default {
     '$store.state.subscription': function (newValue) {
       this.init()
     }
-    // '$store.state.role': function (newValue) {
-    //   this.init()
-    // }
   },
   mounted () {
-    // this.activeFlow(this.$store.state.activeFlow)
-    for (let item of socket.subs) {
-      item.destroy()
-    }
     this.init()
-    // console.log('socket', socket)
-    // console.log('this.$feathers', this.$feathers)
-    // this.$feathers.on('5a6e2e8b_cfeb_4060_b420_6ca95184b884_created', (data) => {
-    //   console.log('this.$feathers', data)
-    // })
   },
   feathers: {
     'flowz': {
@@ -477,6 +435,54 @@ export default {
           // this.init()
           let i = _.findIndex(this.flowzList, (o) => { return o.id === data.id })
           this.flowzList.splice(i, 1)
+        }
+      }
+    },
+    'dflowzdata': {
+      _created (data) {
+        // console.log('================created==============', data)
+        let keys = Object.keys(data)
+        for (let tName of keys) {
+          if (data[tName]._currentStatus) {
+            let finx = _.findIndex(this.flowzList, {id: tName.replace(/_/g, '-')})
+            if (finx !== -1) {
+              this.flowzList[finx].processList[data[tName]._state].count++
+              this.flowzList[finx].count++
+            }
+          }
+        }
+      },
+      _updated (data) {
+      },
+      _patched (data) {
+        // console.log('==============patched============', data)
+        let keys = Object.keys(data)
+        for (let tName of keys) {
+          let finx = _.findIndex(this.flowzList, {id: tName.replace(/_/g, '-')})
+          if (finx !== -1 && !data[tName]._currentStatus && data[tName]._next === null) {
+            if (this.flowzList[finx].processList[data[tName]._state].count > 0) {
+              this.flowzList[finx].processList[data[tName]._state].count--
+            }
+            if (this.flowzList[finx].count > 0) {
+              this.flowzList[finx].count--
+            }
+          }
+        }
+      },
+      _removed (data) {
+        let keys = Object.keys(data)
+        for (let tName of keys) {
+          if (data[tName]._currentStatus) {
+            let finx = _.findIndex(this.flowzList, {id: tName.replace(/_/g, '-')})
+            if (finx !== -1) {
+              if (this.flowzList[finx].processList[data[tName]._state].count > 0) {
+                this.flowzList[finx].processList[data[tName]._state].count--
+              }
+              if (this.flowzList[finx].count > 0) {
+                this.flowzList[finx].count--
+              }
+            }
+          }
         }
       }
     }

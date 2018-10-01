@@ -7,7 +7,9 @@ module.exports = {
     get: [
       hook => beforeGet(hook)
     ],
-    create: [],
+    create: [
+      hook => beforeCreate(hook)
+    ],
     update: [],
     patch: [],
     remove: []
@@ -16,7 +18,9 @@ module.exports = {
     all: [],
     find: [],
     get: [],
-    create: [],
+    create: [
+      hook => afterCreate(hook)
+    ],
     update: [],
     patch: [],
     remove: []
@@ -39,8 +43,12 @@ let beforeFind = function(hook) {
   }
 }
 
-let beforeGet = function (hook) {
-  // console.log('-------------------------------------------------------------------')
-  // console.log('hook.params.headers', hook.params)
-  // console.log('-------------------------------------------------------------------')
+let beforeCreate = function (hook) {
+  hook.params.done = true
+}
+
+let afterCreate = function (hook) {
+  if (hook.result.id && hook.params.done) {
+    hook.service.options.r.db(hook.service.options.db).tableCreate(hook.result.id.replace(/-/g, '_')).run()
+  }
 }

@@ -58,7 +58,7 @@ let beforeFind = function (hook) {
     let value = hook.params.query.$group
     delete hook.params.query.$group
     const query = hook.service.service.createQuery(hook.params.query);
-    hook.params.rethinkdb = query.group(value)
+    hook.params.rethinkdb = query.group(value).ungroup()
   }
   if (query.$search !== undefined) {
     hook.service.service.options.name = hook.params.headers.ftablename;
