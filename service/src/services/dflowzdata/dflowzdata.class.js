@@ -5,24 +5,26 @@ const createServiceMain = require('feathers-rethinkdb');
 class Service {
   constructor (options) {
     this.options = options || {};
+    this.events = ['_created','_updated','_patched','_removed'];
     this.service = new createServiceMain(options);
     this.rDB = this.service.options.r.db(this.service.options.db);
   }
 
   setup(app) {
     this.app = app;
+    const _thisApp = app
     // this.service.watchChangefeeds(app);
     this.on('created',(data) => {
-      this.app.io.emit(this.service.options.name+'_created', data);
+      this.app.service('dflowzdata').emit('_created',{[this.service.options.name]:data});
     });
     this.on('updated',(data) => {
-      this.app.io.emit(this.service.options.name+'_updated', data);
+      this.app.service('dflowzdata').emit('_updated', {[this.service.options.name]:data});
     });
     this.on('patched',(data) => {
-      this.app.io.emit(this.service.options.name+'_patched', data);
+      this.app.service('dflowzdata').emit('_patched', {[this.service.options.name]:data});
     });
     this.on('removed',(data) => {
-      this.app.io.emit(this.service.options.name+'_removed', data);
+      this.app.service('dflowzdata').emit('_removed', {[this.service.options.name]:data});
     });
   }
   setTableName (params) {

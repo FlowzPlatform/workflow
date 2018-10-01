@@ -89,7 +89,7 @@ function beforeCreate (hook) {
         }
         hook.data._createdAt = new Date().toISOString()
         // hook.data._userId = ''
-        // hook.data._claimUser = ''
+        hook.data._claimUser = ''
         if (hook.data._state === res.first) {
           if (hook.data._nextTarget === undefined || hook.data._nextTarget === '') {
             hook.data._nextTarget = res.processList[hook.data._state].target[0].id
