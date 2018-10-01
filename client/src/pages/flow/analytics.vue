@@ -86,13 +86,13 @@
     <!-- Main Table -->
     <div v-show="rowview">
       <!-- <Table height="690" border :columns="mainColumns()" :data="tableData"></Table> -->
-      <Table :loading="tableLoading" v-if="schemaId !== null" height="590" border :columns="mainColumns()" :data="tableData"></Table>
+      <Table :loading="tableLoading" v-if="schemaId !== null" border :columns="mainColumns()" :data="tableData"></Table>
       <Row style="margin-top: 4px; float: right">
         <Page placement="top" :total="total" :current="cpage" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
       </Row>
     </div>
     <div v-show="columnview">
-      <Table :loading="tableLoading" :row-class-name="rowClassName" :columns="colviewCols" height="590" :data="colviewData"></Table>
+      <Table :loading="tableLoading" :row-class-name="rowClassName" :columns="colviewCols" :data="colviewData"></Table>
       <Row style="margin-top: 4px; float: right">
         <Page placement="top" :total="total" :current="cpage" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
       </Row>
@@ -105,13 +105,14 @@
 <script>
 import flowzModal from '@/api/flowz'
 // import finstanceModal from '@/api/finstance'
-import dataQueryModel from '@/api/dataquery'
+// import dataQueryModel from '@/api/dataquery'
 import schemaModal from '@/api/schema'
 import CellRender from '@/components/cellRender'
 import ConfigExpand from '@/components/configExpand'
 import _ from 'lodash'
 import moment from 'moment'
 import $ from 'jquery'
+import dflowzdata from '@/api/dflowzdata'
 
 export default {
   name: 'dashboard',
@@ -123,19 +124,7 @@ export default {
       tableData: [],
       isModel: false,
       anotherBinding: [],
-      colviewCols: [
-        {
-          title: 'ID',
-          key: 'id',
-          fixed: 'left',
-          width: 280
-        },
-        {
-          title: 'Task',
-          key: 'task',
-          width: 150
-        }
-      ],
+      colviewCols: [],
       colviewData: [],
       configCols: [
         {
@@ -300,7 +289,7 @@ export default {
       this.init()
     },
     rowClassName (row, index) {
-      return row.className
+      return ((row.hasOwnProperty('_first')) ? '' : row._uuid + ' notfirst')
     },
     viewChange (item) {
       if (item === 1) {
@@ -336,47 +325,62 @@ export default {
           // console.log('params.column: ')
           // console.log('Item: ', item)
           // console.log('Params: ', params)
-          let obj = _.find(params.row.stageReference, {StageName: item.key})
+          // console.log('item.key: ', item.key)
+          let obj = _.find(params.row.states, {_state: item.key})
           // console.log('obj: ', obj)
-          let finalValue = {
-            obj: obj,
-            isCurrentTask: false,
-            isCompletedTask: true
-          }
           if (obj) {
-            obj['createdAt'] = params.row.createdAt
-            finalValue.isCurrentTask = false
-            finalValue.isCompletedTask = true
-          } else {
-            if (item.key === params.row.currentStatus) {
-              // console.log('params.row.stageReference.length: ', params.row.stageReference[(params.row.stageReference.length - 1)])
-              // obj = params.row.stageReference[(params.row.stageReference.length - 1)]
-              finalValue.obj = params.row.stageReference[(params.row.stageReference.length - 1)]
+            let finalValue = {
+              obj: obj,
+              isCurrentTask: false,
+              isCompletedTask: true
+            }
+
+            if (obj._currentStatus === true) {
+              // console.log('Oject Date: ', obj._currentStatus)
               finalValue.isCurrentTask = true
               finalValue.isCompletedTask = false
-            } else {
-              finalValue.obj = null
+            } else if (obj._currentStatus === false) {
+              // alert('Completed Task')
               finalValue.isCurrentTask = false
-              finalValue.isCompletedTask = false
+              finalValue.isCompletedTask = true
             }
+            // if (obj) {
+            //   obj['createdAt'] = params.row.createdAt
+            //   finalValue.isCurrentTask = false
+            //   finalValue.isCompletedTask = true
+            // } else {
+            //   if (item.key === params.row.currentStatus) {
+            //     // console.log('params.row.stageReference.length: ', params.row.stageReference[(params.row.stageReference.length - 1)])
+            //     // obj = params.row.stageReference[(params.row.stageReference.length - 1)]
+            //     finalValue.obj = params.row.stageReference[(params.row.stageReference.length - 1)]
+            //     finalValue.isCurrentTask = true
+            //     finalValue.isCompletedTask = false
+            //   } else {
+            //     finalValue.obj = null
+            //     finalValue.isCurrentTask = false
+            //     finalValue.isCompletedTask = false
+            //   }
+            // }
+            // console.log('finalValue: ', finalValue)
+            return h(CellRender, {
+              props: {
+                item: finalValue,
+                schemaId: this.schemaId
+              }
+            })
           }
-          // console.log('finalValue: ', finalValue)
-          return h(CellRender, {
-            props: {
-              item: finalValue,
-              schemaId: this.schemaId
-            }
-          })
         }
       }
       tableCols.splice(0, 0, {
         title: 'Instance Id',
-        key: 'id',
+        key: '_uuid',
         firstColumn: true,
         width: 270,
         fixed: 'left',
         render: (h, params) => {
-          if (params.row.mainStatus === 'inprocess') {
+          // console.log('Params: ', params.row)
+          let findInProcessIndex = _.findIndex(params.row.states, function (o) { return o._currentStatus === true })
+          if (findInProcessIndex !== -1) {
             return h('div', [
               h('span', {
                 attrs: {
@@ -393,7 +397,7 @@ export default {
                     $temp.remove()
                   }
                 }
-              }, params.row.id),
+              }, params.row._uuid),
               h('span', {
                 props: {
                 },
@@ -403,33 +407,6 @@ export default {
                 }
               })
             ])
-          } else if (params.row.mainStatus === 'completed') {
-            return h('div', [
-              h('span', {
-                attrs: {
-                  title: 'Click to Copy',
-                  class: 'clickToCopy'
-                },
-                on: {
-                  click: () => {
-                    var $temp = $('<input>')
-                    $('body').append($temp)
-                    $temp.val(params.row.id).select()
-                    document.execCommand('copy')
-                    this.$Message.info('Copied to Clipboard')
-                    $temp.remove()
-                  }
-                }
-              }, params.row.id),
-              h('span', {
-                props: {
-                },
-                attrs: {
-                  class: 'completedTaskDot',
-                  title: 'Completed'
-                }
-              })
-            ])
           } else {
             return h('div', [
               h('span', {
@@ -447,17 +424,49 @@ export default {
                     $temp.remove()
                   }
                 }
-              }, params.row.id),
+              }, params.row._uuid),
               h('span', {
                 props: {
                 },
                 attrs: {
-                  class: 'otherTaskDot',
-                  title: 'Other'
+                  class: 'completedTaskDot',
+                  title: 'Completed'
                 }
               })
             ])
           }
+          // if (params.row.mainStatus === 'inprocess') {
+
+          // } else if (params.row.mainStatus === 'completed') {
+
+          // } else {
+          //   return h('div', [
+          //     h('span', {
+          //       attrs: {
+          //         title: 'Click to Copy',
+          //         class: 'clickToCopy'
+          //       },
+          //       on: {
+          //         click: () => {
+          //           var $temp = $('<input>')
+          //           $('body').append($temp)
+          //           $temp.val(params.row.id).select()
+          //           document.execCommand('copy')
+          //           this.$Message.info('Copied to Clipboard')
+          //           $temp.remove()
+          //         }
+          //       }
+          //     }, params.row._uuid),
+          //     h('span', {
+          //       props: {
+          //       },
+          //       attrs: {
+          //         class: 'otherTaskDot',
+          //         title: 'Other'
+          //       }
+          //     })
+          //   ])
+          // }
         }
       })
 
@@ -493,7 +502,7 @@ export default {
       this.flowName = this.flowzData.name
 
       let cols = []
-      let colviewData = []
+      // let colviewData = []
       // console.log('res.data.processList: ', res.data.processList)
       let listing = this.getByOrder(this.flowzData.processList)
       for (let col of listing) {
@@ -511,171 +520,278 @@ export default {
       this.anotherBinding = _.cloneDeep(cols)
       this.configuration.fields = _.cloneDeep(cols)
 
-      dataQueryModel.get(null, {
-        $all: true,
-        fid: this.fid,
+      // New Custom Dynamic FLowz Data call
+      let heads = {
+        ftablename: this.$route.params.id.replace(/-/g, '_')
+      }
+      dflowzdata.get(null, {
         $skip: this.skip,
-        $limit: this.limit
-      }).then(queryresp => {
-        // this.$Spin.hide()
-        this.tableData = queryresp.data.data
-        colviewData = queryresp.data.data
-        this.total = queryresp.data.total
-        let listing = this.getByOrder(this.flowzData.processList)
-        for (let item of colviewData) {
-          let isfirst = false
-          for (let task of listing) {
-            if (task.type !== 'startevent' && task.type !== 'endevent') {
-              // flowzdataModal.get().then(res => {
-
-              // }).catch(e => {
-              //   console.log('e', e)
-              // })
-              // console.log('colviewData.stageReference ', item, task)
-              let dataExist = _.find(item.stageReference, {StageName: task.id})
-              if (!isfirst) {
-                task.first = false
-                task.className = ''
-                isfirst = true
-              } else {
-                task.className = 'notfirst'
-              }
-              // console.log('dataExist: ', dataExist)
-              let m = {
-                id: item.id,
-                task: task.name || task.id,
-                className: task.className
-              }
-              if (task.hasOwnProperty('first')) {
-                m.first = task.first
-              }
-              if (dataExist !== null && dataExist !== undefined && dataExist.hasOwnProperty('data')) {
-                for (let k in dataExist.data) {
-                  m[k] = dataExist.data[k]
+        $limit: this.limit,
+        $group: '_uuid',
+        '$sort[_createdAt]': 1
+      }, heads)
+      .then(res => {
+        // console.log('res: ', res)
+        this.total = res.data.total
+        let tableDataArr = []
+        for (let item of res.data.data) {
+          let value = {
+            _uuid: item.group,
+            states: item.reduction
+          }
+          tableDataArr.push(value)
+        }
+        // let groupedData = _.groupBy(res.data.data, (o) => { return o._uuid })
+        // console.log('Grouped Data: ', groupedData)
+        // // let tableGroupedArray = []
+        // for (let item in groupedData) {
+        //   console.log('Item: ', item)
+        //   let value = groupedData[item]
+        //   console.log('Value: ', value)
+        // }
+        // console.log('tableGroupedArray: ', tableGroupedArray)
+        this.tableData = tableDataArr
+        // this.colviewData = tableDataArr
+        for (let inst in tableDataArr) {
+          for (let items in tableDataArr[inst]) {
+            if (items === 'states') {
+              for (let [inx, item] of tableDataArr[inst][items].entries()) {
+                if (inx === 0) {
+                  item._first = true
                 }
-                this.colviewData.push(m)
-              } else {
-                this.colviewData.push(m)
+                this.colviewData.push(item)
               }
             }
           }
         }
+        // console.log('this.colviewData', this.colviewData)
         this.tableLoading = false
-      }).catch(err => {
+      }).catch(e => {
         this.tableLoading = false
-        console.log('Erro: ', err)
+        this.$Loading.error()
+        console.log('error', e)
+        this.bLoading = false
+        if (e.response.data.message) {
+          this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+        } else {
+          this.$Notice.error({title: 'Error', desc: e.message})
+        }
       })
+
+      // dataQueryModel.get(null, {
+      //   $all: true,
+      //   fid: this.fid,
+      //   $skip: this.skip,
+      //   $limit: this.limit
+      // }).then(queryresp => {
+      //   // this.$Spin.hide()
+      //   this.tableData = queryresp.data.data
+      //   colviewData = queryresp.data.data
+      //   this.total = queryresp.data.total
+      //   let listing = this.getByOrder(this.flowzData.processList)
+      //   for (let item of colviewData) {
+      //     let isfirst = false
+      //     for (let task of listing) {
+      //       if (task.type !== 'startevent' && task.type !== 'endevent') {
+      //         // flowzdataModal.get().then(res => {
+
+      //         // }).catch(e => {
+      //         //   console.log('e', e)
+      //         // })
+      //         // console.log('colviewData.stageReference ', item, task)
+      //         let dataExist = _.find(item.stageReference, {StageName: task.id})
+      //         if (!isfirst) {
+      //           task.first = false
+      //           task.className = ''
+      //           isfirst = true
+      //         } else {
+      //           task.className = 'notfirst'
+      //         }
+      //         // console.log('dataExist: ', dataExist)
+      //         let m = {
+      //           id: item.id,
+      //           task: task.name || task.id,
+      //           className: task.className
+      //         }
+      //         if (task.hasOwnProperty('first')) {
+      //           m.first = task.first
+      //         }
+      //         if (dataExist !== null && dataExist !== undefined && dataExist.hasOwnProperty('data')) {
+      //           for (let k in dataExist.data) {
+      //             m[k] = dataExist.data[k]
+      //           }
+      //           this.colviewData.push(m)
+      //         } else {
+      //           this.colviewData.push(m)
+      //         }
+      //       }
+      //     }
+      //   }
+      //   this.tableLoading = false
+      // }).catch(err => {
+      //   this.tableLoading = false
+      //   console.log('Erro: ', err)
+      // })
     },
     async init () {
       this.tableLoading = true
       this.colviewCols = [
         {
           title: 'ID',
-          key: 'id',
+          key: '_uuid',
           fixed: 'left',
           width: 280,
           render: (h, params) => {
-            if (params.row.hasOwnProperty('first')) {
-              if (params.row.first) {
-                return h('div', [
-                  h('span', {
-                    attrs: {
-                      title: 'Click to Copy',
-                      class: 'clickToCopy'
-                    },
-                    on: {
-                      click: () => {
-                        var $temp = $('<input>')
-                        $('body').append($temp)
-                        $temp.val(params.row.id).select()
-                        document.execCommand('copy')
-                        this.$Message.info('Copied to Clipboard')
-                        $temp.remove()
-                      }
+            if (params.row._first) {
+              return h('div', [
+                h('span', {
+                  attrs: {
+                    title: 'Click to Copy',
+                    class: 'clickToCopy'
+                  },
+                  on: {
+                    click: () => {
+                      let $temp = $('<input>')
+                      $('body').append($temp)
+                      $temp.val(params.row._uuid).select()
+                      document.execCommand('copy')
+                      this.$Message.info('Copied to Clipboard')
+                      $temp.remove()
                     }
-                  }, params.row.id),
-                  h('span', {
-                    attrs: {
-                      class: 'btn btn-default btn-sm showHideBtn'
-                    },
-                    on: {
-                      click: () => {
-                        for (let [inx, item] of this.colviewData.entries()) {
-                          if (item.id === params.row.id && params.index !== inx) {
-                            if (!params.row.first) {
-                              item.className = ''
-                            } else {
-                              item.className = 'notfirst'
-                            }
-                          }
-                          if (params.index === inx) {
-                            item.first = !item.first
-                          }
-                        }
-                      }
+                  }
+                }, params.row._uuid),
+                h('span', {
+                  attrs: {
+                    class: 'btn btn-default btn-sm showHideBtn'
+                  },
+                  on: {
+                    click: () => {
+                      $('.' + params.row._uuid).toggle()
                     }
-                  }, [
-                    h('i', {
-                      attrs: {
-                        class: 'fa fa-angle-up'
-                      }
-                    })
-                  ])
+                  }
+                }, [
+                  h('i', {
+                    attrs: {
+                      class: 'fa fa-angle-down'
+                    }
+                  })
                 ])
-              } else {
-                return h('div', [
-                  h('span', {
-                    attrs: {
-                      title: 'Click to Copy',
-                      class: 'clickToCopy'
-                    },
-                    on: {
-                      click: () => {
-                        var $temp = $('<input>')
-                        $('body').append($temp)
-                        $temp.val(params.row.id).select()
-                        document.execCommand('copy')
-                        this.$Message.info('Copied to Clipboard')
-                        $temp.remove()
-                      }
-                    }
-                  }, params.row.id),
-                  h('span', {
-                    attrs: {
-                      class: 'btn btn-sm showHideBtn'
-                    },
-                    on: {
-                      click: () => {
-                        for (let [inx, item] of this.colviewData.entries()) {
-                          if (item.id === params.row.id && params.index !== inx) {
-                            if (!params.row.first) {
-                              item.className = ''
-                            } else {
-                              item.className = 'notfirst'
-                            }
-                          }
-                          if (params.index === inx) {
-                            item.first = !item.first
-                          }
-                        }
-                      }
-                    }
-                  }, [
-                    h('i', {
-                      attrs: {
-                        class: 'fa fa-angle-down'
-                      }
-                    })
-                  ])
-                ])
-              }
+              ])
+            } else {
+              return h('span', '')
             }
           }
+          // render: (h, params) => {
+          //   if (params.row.hasOwnProperty('first')) {
+          //     if (params.row.first) {
+          //       console.log('Id: ', params.row.id)
+          //       return h('div', [
+          //         h('span', {
+          //           attrs: {
+          //             title: 'Click to Copy',
+          //             class: 'clickToCopy'
+          //           },
+          //           on: {
+          //             click: () => {
+          //               var $temp = $('<input>')
+          //               $('body').append($temp)
+          //               $temp.val(params.row.id).select()
+          //               document.execCommand('copy')
+          //               this.$Message.info('Copied to Clipboard')
+          //               $temp.remove()
+          //             }
+          //           }
+          //         }, params.row._uuid),
+          //         h('span', {
+          //           attrs: {
+          //             class: 'btn btn-default btn-sm showHideBtn'
+          //           },
+          //           on: {
+          //             click: () => {
+          //               for (let [inx, item] of this.colviewData.entries()) {
+          //                 if (item.id === params.row.id && params.index !== inx) {
+          //                   if (!params.row.first) {
+          //                     item.className = ''
+          //                   } else {
+          //                     item.className = 'notfirst'
+          //                   }
+          //                 }
+          //                 if (params.index === inx) {
+          //                   item.first = !item.first
+          //                 }
+          //               }
+          //             }
+          //           }
+          //         }, [
+          //           h('i', {
+          //             attrs: {
+          //               class: 'fa fa-angle-up'
+          //             }
+          //           })
+          //         ])
+          //       ])
+          //     } else {
+          //       console.log('Id: ', params.row.id)
+          //       return h('div', [
+          //         h('span', {
+          //           attrs: {
+          //             title: 'Click to Copy',
+          //             class: 'clickToCopy'
+          //           },
+          //           on: {
+          //             click: () => {
+          //               var $temp = $('<input>')
+          //               $('body').append($temp)
+          //               $temp.val(params.row.id).select()
+          //               document.execCommand('copy')
+          //               this.$Message.info('Copied to Clipboard')
+          //               $temp.remove()
+          //             }
+          //           }
+          //         }, params.row._uuid),
+          //         h('span', {
+          //           attrs: {
+          //             class: 'btn btn-sm showHideBtn'
+          //           },
+          //           on: {
+          //             click: () => {
+          //               for (let [inx, item] of this.colviewData.entries()) {
+          //                 if (item.id === params.row.id && params.index !== inx) {
+          //                   if (!params.row.first) {
+          //                     item.className = ''
+          //                   } else {
+          //                     item.className = 'notfirst'
+          //                   }
+          //                 }
+          //                 if (params.index === inx) {
+          //                   item.first = !item.first
+          //                 }
+          //               }
+          //             }
+          //           }
+          //         }, [
+          //           h('i', {
+          //             attrs: {
+          //               class: 'fa fa-angle-down'
+          //             }
+          //           })
+          //         ])
+          //       ])
+          //     }
+          //   }
+          // }
         },
         {
           title: 'Task',
-          key: 'task',
-          width: 150
+          key: '_state',
+          width: 150,
+          render: (h, params) => {
+            if (this.flowzData.processList[params.row._state].name && this.flowzData.processList[params.row._state].name !== '') {
+              return h('span', this.flowzData.processList[params.row._state].name)
+            } else {
+              return h('span', params.row._state)
+            }
+          }
         }
       ]
       this.colviewData = []
@@ -737,6 +853,27 @@ export default {
     configdata () {
       return this.configuration.fields
     }
+    // colviewCols () {
+    //   this.colviewCols = []
+
+    //   let cols = []
+    //   cols.push({
+    //     title: 'ID',
+    //     key: '_uuid',
+    //     fixed: 'left',
+    //     width: 280
+    //   })
+
+    //   cols.push({
+    //     title: 'Task',
+    //     key: '_state',
+    //     width: 150
+    //   })
+
+    //   this.colviewCols = cols
+
+    //   return this.colviewCols
+    // }
   },
   mounted () {
     this.init()

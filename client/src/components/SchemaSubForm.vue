@@ -132,6 +132,13 @@
                                                     </Row>          
                                               </div>
                                             </div>
+                                            <div v-if="schemainstance.data[index][field.name + 'List']" >
+                                              <div class="" v-for="(val, i) in schemainstance.data[index][field.name + 'List']">
+                                                    <Row>
+                                                        <Col :span="24"> <a :href="val" class="list-group-item" target="_blank" style="color:blue;padding:2px 2px;" >{{val}}</a></Col>
+                                                    </Row>          
+                                                </div>
+                                            </div>
                                         </Col>
                                         <Col :span="1">&nbsp;&nbsp;{{fileNumber}} / {{fileSize}}</Col>
                                       </div>
@@ -144,10 +151,17 @@
                                             <div v-if="schemainstance.data[index][field.name]" >
                                               <Progress v-if="stratProgress"  v-bind:percent="fileUploadProgress" :success-percent="30" />
                                               <div class="" v-for="(val, i) in schemainstance.data[index][field.name]">
-                                                    {{schemainstance.data[index][field.name].length}}
+                                                    <!-- {{schemainstance.data[index][field.name].length}} -->
                                                     <Row>
                                                         <Col :span="23"> <a :href="val" class="list-group-item" target="_blank" style="color:blue;padding:2px 2px;" >{{val}}</a></Col>
-                                                        <!-- <Col :span="1"><a href="#" style="color:red;float:right"  @click="removeSection(i, schemainstance.data[index][field.name])">&#10005;&nbsp;</a></Col> -->
+                                                        <Col :span="1"><a href="#" style="color:red;float:right"  @click="removeSection(i, schemainstance.data[index][field.name])">&#10005;&nbsp;</a></Col>
+                                                    </Row>          
+                                                </div>
+                                            </div>
+                                            <div v-if="schemainstance.data[index][field.name + 'List']" >
+                                              <div class="" v-for="(val, i) in schemainstance.data[index][field.name + 'List']">
+                                                    <Row>
+                                                        <Col :span="24"> <a :href="val" class="list-group-item" target="_blank" style="color:blue;padding:2px 2px;" >{{val}}</a></Col>
                                                     </Row>          
                                                 </div>
                                             </div>
@@ -192,7 +206,7 @@
                         <FormItem :key="inx" :rules="createRules(field)" style="margin-bottom:10px;">
                             <Row>
                                 <Col :span="2">
-                                    <b>{{field.name}}</b>
+                                    <b>{{field.name}}</b>1
                                 </Col>
                                 <Col :span="21" >
                                     <input class="form-control" type="file" v-if="field.type == 'file'" @change="handleFileChange($event, index, field.name)" :multiple="(field.property.isMultiple)? field.property.isMultiple: false"/>
@@ -201,7 +215,14 @@
                                       <div class="" v-for="(val, i) in schemainstance.data[index][field.name]">
                                             <Row>
                                                 <Col :span="23"> <a :href="val" class="list-group-item" target="_blank" style="color:blue;padding:2px 2px;" >{{val}}</a></Col>
-                                                <Col :span="1" v-if="i >= oldFiles"><a href="#" style="color:red;float:right"  @click="removeSection(i, schemainstance.data[index][field.name])">&#10005;&nbsp;</a></Col>
+                                                <Col :span="1" v-if="i >= oldFiles"><a href="#" style="color:red;float:right"  @click="removeSection(i, schemainstance.data[index][field.name])">&#10005;&nbsp;1</a></Col>
+                                            </Row>          
+                                        </div>
+                                    </div>
+                                    <div v-if="schemainstance.data[index][field.name + 'List']" >
+                                      <div class="" v-for="(val, i) in schemainstance.data[index][field.name + 'List']">
+                                            <Row>
+                                                <Col :span="24"> <a :href="val" class="list-group-item" target="_blank" style="color:blue;padding:2px 2px;" >{{val}}</a></Col>
                                             </Row>          
                                         </div>
                                     </div>

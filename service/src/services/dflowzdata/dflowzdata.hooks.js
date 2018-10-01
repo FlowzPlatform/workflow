@@ -4,7 +4,9 @@ const uuidv4 = require('uuid/v4');
 module.exports = {
   before: {
     all: [],
-    find: [],
+    find: [
+      hook => beforeFind(hook)
+    ],
     get: [],
     create: [
       hook => beforeCreate(hook)
@@ -41,18 +43,53 @@ module.exports = {
   }
 };
 
+let beforeFind = function (hook) {
+  const query = hook.params.query
+  if (query._currentStatus !== undefined) {
+    if (hook.params.query._currentStatus === 'true') {
+      hook.params.query._currentStatus = true
+    } else if (hook.params.query._currentStatus === 'false') {
+      hook.params.query._currentStatus = false
+    }
+  }
+  if (query.$group !== undefined) {
+    hook.service.service.options.name = hook.params.headers.ftablename;
+    hook.service.service.table = hook.service.rDB.table(hook.params.headers.ftablename);
+    let value = hook.params.query.$group
+    delete hook.params.query.$group
+    const query = hook.service.service.createQuery(hook.params.query);
+    hook.params.rethinkdb = query.group(value).ungroup()
+  }
+  if (query.$search !== undefined) {
+    hook.service.service.options.name = hook.params.headers.ftablename;
+    hook.service.service.table = hook.service.rDB.table(hook.params.headers.ftablename);
+    let value = hook.params.query.$search
+    delete hook.params.query.$search
+    const query = hook.service.service.createQuery(hook.params.query);
+    // hook.params.rethinkdb = query.group(value)
+    hook.params.rethinkdb = query.filter(function(doc) {
+      return doc.coerceTo('string').match('(?i)' + value);
+    })
+    // console.log('hook.params.rethinkdb', hook.params.rethinkdb)
+  }
+}
+
 function beforeCreate (hook) {
   try {
-    // console.log('before create ================================', hook.data, hook.params)
+    // console.log('before create ================================', hook.params)
     hook.params.done = true
     if (hook.params.headers.ftablename !== undefined && hook.data._state !== undefined) {
       let regex = /_/g
       let tName = hook.params.headers.ftablename.replace(regex, '-')
       return hook.app.service('flowz').get(tName).then(res => {
         hook.data._currentStatus = true
+        if (res.processList[hook.data._state].type === 'endevent') {
+          // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+          hook.data._currentStatus = false
+        }
         hook.data._createdAt = new Date().toISOString()
         // hook.data._userId = ''
-        // hook.data._claimUser = ''
+        hook.data._claimUser = ''
         if (hook.data._state === res.first) {
           if (hook.data._nextTarget === undefined || hook.data._nextTarget === '') {
             hook.data._nextTarget = res.processList[hook.data._state].target[0].id
@@ -106,7 +143,7 @@ function afterCreate (hook) {
     })
   } else {
     // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', hook.datas)
-    hook.params.headers.normalPatch = true
+    hook.params.headers.normalpatch = true
     return hook.app.service('dflowzdata').patch(hook.data._previous, {
       // _state: hook.data._state,
       _next: hook.result.id,
@@ -119,10 +156,10 @@ function afterCreate (hook) {
 }
 
 function beforePatch (hook) {
-  // console.log('beforePatch =============================', hook.data, '>>>>>>>>>>>>>>>>>>>>', hook.id)
+  // console.log('beforePatch =============================>>>>>>>>>>>>>>>>>>>>', hook.params)
   hook.params.done1 = true
   if (hook.params.headers.ftablename !== undefined) {
-      if (hook.params.headers.normalPatch !== undefined) {
+      if (hook.params.headers.normalpatch !== undefined) {
       } else {
         if (hook.data._state !== undefined) {
           let regex = /_/g
@@ -161,8 +198,8 @@ function beforePatch (hook) {
 
 function afterPatch (hook) {
   // console.log('================================ afterPatch', hook.data, hook.id)
-  if (hook.params.headers.normalPatch !== undefined) {
-    // console.log('.....................................')
+  if (hook.params.headers.normalpatch !== undefined) {
+    // console.log('..................................... ', hook.params.headers.normalpatch)
   } else {
     if (hook.params.done1) {
       return hook.app.service('dflowzdata').get(hook.id, hook.params).then(resp => {
