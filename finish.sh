@@ -40,7 +40,7 @@ then
 else
   {
       echo "call $TRAVIS_BRANCH branch"
-      ENV_ID=`curl -u ""$RANCHER_ACCESSKEY_QA":"$RANCHER_SECRETKEY_QA"" -X GET -H 'Accept: application/json' -H 'Content-Type: application/json' "$RANCHER_URL_QA/v2-beta/projects?name=Develop" | jq '.data[].id' | tr -d '"'`
+      ENV_ID=`curl -u ""$RANCHER_ACCESSKEY_QA":"$RANCHER_SECRETKEY_QA"" -X GET -H 'Accept: application/json' -H 'Content-Type: application/json' "$RANCHER_URL_QA/v2-beta/projects?name=QA" | jq '.data[].id' | tr -d '"'`
       echo $ENV_ID
       RANCHER_ACCESSKEY="$RANCHER_ACCESSKEY_QA";
       RANCHER_SECRETKEY="$RANCHER_SECRETKEY_QA";
