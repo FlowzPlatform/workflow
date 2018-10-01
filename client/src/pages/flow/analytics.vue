@@ -86,13 +86,13 @@
     <!-- Main Table -->
     <div v-show="rowview">
       <!-- <Table height="690" border :columns="mainColumns()" :data="tableData"></Table> -->
-      <Table :loading="tableLoading" v-if="schemaId !== null" height="590" border :columns="mainColumns()" :data="tableData"></Table>
+      <Table :loading="tableLoading" v-if="schemaId !== null" border :columns="mainColumns()" :data="tableData"></Table>
       <Row style="margin-top: 4px; float: right">
         <Page placement="top" :total="total" :current="cpage" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
       </Row>
     </div>
     <div v-show="columnview">
-      <Table :loading="tableLoading" :row-class-name="rowClassName" :columns="colviewCols" height="590" :data="colviewData"></Table>
+      <Table :loading="tableLoading" :row-class-name="rowClassName" :columns="colviewCols" :data="colviewData"></Table>
       <Row style="margin-top: 4px; float: right">
         <Page placement="top" :total="total" :current="cpage" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
       </Row>
@@ -289,7 +289,7 @@ export default {
       this.init()
     },
     rowClassName (row, index) {
-      return row.className
+      return ((row.hasOwnProperty('_first')) ? '' : row._uuid + ' notfirst')
     },
     viewChange (item) {
       if (item === 1) {
@@ -531,8 +531,8 @@ export default {
         '$sort[_createdAt]': 1
       }, heads)
       .then(res => {
-        console.log('res: ', res)
-        this.total = res.data.total.length
+        // console.log('res: ', res)
+        this.total = res.data.total
         let tableDataArr = []
         for (let item of res.data.data) {
           let value = {
@@ -555,12 +555,16 @@ export default {
         for (let inst in tableDataArr) {
           for (let items in tableDataArr[inst]) {
             if (items === 'states') {
-              for (let item of tableDataArr[inst][items]) {
+              for (let [inx, item] of tableDataArr[inst][items].entries()) {
+                if (inx === 0) {
+                  item._first = true
+                }
                 this.colviewData.push(item)
               }
             }
           }
         }
+        // console.log('this.colviewData', this.colviewData)
         this.tableLoading = false
       }).catch(e => {
         this.tableLoading = false
@@ -636,7 +640,47 @@ export default {
           title: 'ID',
           key: '_uuid',
           fixed: 'left',
-          width: 280
+          width: 280,
+          render: (h, params) => {
+            if (params.row._first) {
+              return h('div', [
+                h('span', {
+                  attrs: {
+                    title: 'Click to Copy',
+                    class: 'clickToCopy'
+                  },
+                  on: {
+                    click: () => {
+                      let $temp = $('<input>')
+                      $('body').append($temp)
+                      $temp.val(params.row._uuid).select()
+                      document.execCommand('copy')
+                      this.$Message.info('Copied to Clipboard')
+                      $temp.remove()
+                    }
+                  }
+                }, params.row._uuid),
+                h('span', {
+                  attrs: {
+                    class: 'btn btn-default btn-sm showHideBtn'
+                  },
+                  on: {
+                    click: () => {
+                      $('.' + params.row._uuid).toggle()
+                    }
+                  }
+                }, [
+                  h('i', {
+                    attrs: {
+                      class: 'fa fa-angle-down'
+                    }
+                  })
+                ])
+              ])
+            } else {
+              return h('span', '')
+            }
+          }
           // render: (h, params) => {
           //   if (params.row.hasOwnProperty('first')) {
           //     if (params.row.first) {
@@ -740,7 +784,14 @@ export default {
         {
           title: 'Task',
           key: '_state',
-          width: 150
+          width: 150,
+          render: (h, params) => {
+            if (this.flowzData.processList[params.row._state].name && this.flowzData.processList[params.row._state].name !== '') {
+              return h('span', this.flowzData.processList[params.row._state].name)
+            } else {
+              return h('span', params.row._state)
+            }
+          }
         }
       ]
       this.colviewData = []
