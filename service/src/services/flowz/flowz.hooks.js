@@ -4,9 +4,7 @@ module.exports = {
     find: [
       hook => beforeFind(hook)
     ],
-    get: [
-      hook => beforeGet(hook)
-    ],
+    get: [],
     create: [
       hook => beforeCreate(hook)
     ],
