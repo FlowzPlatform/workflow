@@ -36,6 +36,7 @@ module.exports = {
 
 
 function beforeFind(hook) {
+  console.log('hook.params.rethinkdb****************************************', hook.params.rethinkdb)
   let query = {};
   // console.log('__________________________________________________')
   if (hook.params.query.hasOwnProperty('$all')) {

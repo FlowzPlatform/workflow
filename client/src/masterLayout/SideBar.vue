@@ -37,7 +37,7 @@
           <template v-else>
             <Submenu :name="index" v-for="(item, index) in flowzList" :key="index">
               <template slot="title">
-                  {{item.name}}&nbsp;&nbsp;
+                  {{item.name}}&nbsp;&nbsp;<span style="display:none">{{item.count}}</span>
                   <span>
                     <Badge :count="item.count"  class-name="demo-badge-alone"></Badge>
                   </span>
@@ -77,10 +77,11 @@
 
 <script>
 import flowzModal from '@/api/flowz'
-import finstanceModal from '@/api/finstance'
+import dflowzdataModal from '@/api/dflowzdata'
 import _ from 'lodash'
 import config from '@/config'
 import axios from 'axios'
+
 export default {
   data () {
     return {
@@ -92,9 +93,6 @@ export default {
       resource: {}
     }
   },
-  created () {
-    // console.log('this.$store.state.activeFlow', this.$store.state.activeFlow)
-  },
   methods: {
     getByOrder (array) {
       let allProcess = []
@@ -102,35 +100,8 @@ export default {
         allProcess[array[key].order] = array[key]
       }
       return allProcess
-      // return allProcess.sort((a, b) => {
-      //   return a.order - b.order
-      // })
     },
-    // createInstance (item, subItemID) {
-    //   // console.log('item', item)
-    //   this.$Loading.start()
-    //   let fheaders = null
-    //   if (subItemID !== undefined) {
-    //     fheaders = {
-    //       workflowid: 'workflow_' + item.id,
-    //       stateid: subItemID
-    //     }
-    //   }
-    //   finstanceModal.post({fid: item.id}, null, fheaders).then(res => {
-    //     this.$Notice.success({title: 'Instance Generated'})
-    //     this.$Loading.finish()
-    //   }).catch(e => {
-    //     this.$Loading.error()
-    //     console.log('error', e.response)
-    //     if (e.response.data.message) {
-    //       this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
-    //     } else {
-    //       this.$Notice.error({title: 'Error', desc: 'Instace Not Generated'})
-    //     }
-    //   })
-    // },
     viewProgress (item) {
-      // console.log('item: ', item)
       if (item.id === this.$route.params.id) {
         let randomStr = this.makeid()
         this.$store.state.updateView = randomStr
@@ -148,17 +119,14 @@ export default {
         } else {
           this.$router.push({name: 'schemaview', params: {id: node[0], stateid: node[1]}})
         }
-        // this.$router.push('/admin/schemaview/' + node[0] + '/' + node[1])
       } else {
         this.$router.push('/view/' + node[0] + '/' + node[1])
       }
     },
     makeid () {
-      var text = ''
-      var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-
-      for (var i = 0; i < 8; i++) { text += possible.charAt(Math.floor(Math.random() * possible.length)) }
-
+      let text = ''
+      let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+      for (let i = 0; i < 8; i++) { text += possible.charAt(Math.floor(Math.random() * possible.length)) }
       return text
     },
     async getModuleRoles (moduleId) {
@@ -198,6 +166,44 @@ export default {
               p.count = 0
               return p
             })
+            // if (socket._callbacks['$' + m.id.replace(/-/g, '_') + '_created'] === undefined) {
+            //   socket.on(m.id.replace(/-/g, '_') + '_created', (data) => {
+            //     // console.log('===created==', data)
+            //     if (data._currentStatus) {
+            //       let finx = _.findIndex(this.flowzList, {id: m.id})
+            //       if (finx !== -1) {
+            //         this.flowzList[finx].processList[data._state].count++
+            //         this.flowzList[finx].count++
+            //       }
+            //     }
+            //   })
+            // }
+            // if (socket._callbacks['$' + m.id.replace(/-/g, '_') + '_patched'] === undefined) {
+            //   socket.on(m.id.replace(/-/g, '_') + '_patched', (data) => {
+            //     // console.log('===patched==', data)
+            //     let finx = _.findIndex(this.flowzList, {id: m.id})
+            //     if (finx !== -1 && !data._currentStatus && data._next === null) {
+            //       if (this.flowzList[finx].processList[data._state].count > 0) {
+            //         this.flowzList[finx].processList[data._state].count--
+            //       }
+            //       if (this.flowzList[finx].count > 0) {
+            //         this.flowzList[finx].count--
+            //       }
+            //     }
+            //   })
+            // }
+            // if (socket._callbacks['$' + m.id.replace(/-/g, '_') + '_removed'] === undefined) {
+            //   socket.on(m.id.replace(/-/g, '_') + '_removed', (data) => {
+            //     // console.log('===removed==', data)
+            //     if (data._currentStatus) {
+            //       let finx = _.findIndex(this.flowzList, {id: m.id})
+            //       if (finx !== -1) {
+            //         this.flowzList[finx].processList[data._state].count--
+            //         this.flowzList[finx].count--
+            //       }
+            //     }
+            //   })
+            // }
             return m
           })
           this.loading = false
@@ -284,109 +290,112 @@ export default {
       }
     },
     setCounters (sitem) {
-      if (sitem) {
+      // if (sitem) {
+      //   if (this.$store.state.role === 1) {
+      //     dflowzdataModal.get(null, {
+      //       $paginate: false,
+      //       $select: ['_state'],
+      //       _currentStatus: true
+      //     }, {
+      //       ftablename: sitem.id.replace(/-/g, '_')
+      //     }).then(res => {
+      //       console.log('res count', res.data)
+      //       sitem.count = 0
+      //       _.map(sitem.processList, (pitem) => {
+      //         pitem.count = _.filter(res.data, {_state: pitem.id}).length
+      //         sitem.count += pitem.count
+      //       })
+      //       // for (let pitem in sitem.processList) {
+      //       //   pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
+      //       //   sitem.count += pitem.count
+      //       // }
+      //     }).catch(err => {
+      //       console.log('error', err)
+      //     })
+      //   } else {
+      //     let once = false
+      //     let mdata = []
+      //     sitem.count = 0
+      //     for (let pitem in sitem.processList) {
+      //       if (!once) {
+      //         dflowzdataModal.get(null, {
+      //           $paginate: false,
+      //           $select: ['_state'],
+      //           _currentStatus: true
+      //         }, {
+      //           workflowid: 'workflow_' + sitem.id,
+      //           stateid: sitem.processList[pitem].id,
+      //           ftablename: sitem.id.replace(/-/g, '_')
+      //         }).then(res => {
+      //           if (res.data.length > 0) {
+      //             once = true
+      //             mdata = res.data
+      //             sitem.processList[pitem].count = _.filter(res.data, {_state: sitem.processList[pitem].id}).length
+      //             sitem.count += sitem.processList[pitem].count
+      //           }
+      //         }).catch(err => {
+      //           console.log('error', err)
+      //         })
+      //       } else {
+      //         sitem.processList[pitem].count = _.filter(mdata, {_state: sitem.processList[pitem].id}).length
+      //         sitem.count += sitem.processList[pitem].count
+      //       }
+      //     }
+      //   }
+      // } else {
+      for (let item of this.flowzList) {
         if (this.$store.state.role === 1) {
-          finstanceModal.get(null, {
+            // item.count = 9
+          dflowzdataModal.get(null, {
             $paginate: false,
-            $select: ['currentStatus'],
-            mainStatus: 'inprocess',
-            fid: sitem.id
+            $select: ['_state'],
+            _currentStatus: true
+          }, {
+            ftablename: item.id.replace(/-/g, '_')
           }).then(res => {
-            // console.log('res count', res.data)
-            sitem.count = 0
-            _.map(sitem.processList, (pitem) => {
-              pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
-              sitem.count += pitem.count
-            })
-            // for (let pitem in sitem.processList) {
-            //   pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
-            //   sitem.count += pitem.count
-            // }
+            if (res.data.length > 0) {
+              item.count = 0
+              _.map(item.processList, (pitem) => {
+                  // console.log('_.filter(res.data, {_state: pitem.id}).length', _.filter(res.data, {_state: pitem.id}).length)
+                pitem.count = _.filter(res.data, {_state: pitem.id}).length
+                item.count += pitem.count
+              })
+            }
           }).catch(err => {
             console.log('error', err)
           })
         } else {
-          let once = false
-          let mdata = []
-          sitem.count = 0
-          for (let pitem in sitem.processList) {
-            if (!once) {
-              finstanceModal.get(null, {
+          let isonce = false
+          let pdata = []
+          for (let key in item.processList) {
+              // console.log('item', item)
+            if (!isonce) {
+              dflowzdataModal.get(null, {
                 $paginate: false,
-                $select: ['currentStatus'],
-                mainStatus: 'inprocess',
-                fid: sitem.id
+                $select: ['_state'],
+                _currentStatus: true
               }, {
-                workflowid: 'workflow_' + sitem.id,
-                stateid: sitem.processList[pitem].id
+                workflowid: 'workflow_' + item.id,
+                stateid: item.processList[key].id,
+                ftablename: item.id.replace(/-/g, '_')
               }).then(res => {
                 if (res.data.length > 0) {
-                  once = true
-                  mdata = res.data
-                  sitem.processList[pitem].count = _.filter(res.data, {currentStatus: sitem.processList[pitem].id}).length
-                  sitem.count += sitem.processList[pitem].count
+                  isonce = true
+                  pdata = res.data
+                  item.processList[key].count = _.filter(res.data, {_state: item.processList[key].id}).length
+                  item.count += item.processList[key].count
                 }
               }).catch(err => {
                 console.log('error', err)
               })
             } else {
-              sitem.processList[pitem].count = _.filter(mdata, {currentStatus: sitem.processList[pitem].id}).length
-              sitem.count += sitem.processList[pitem].count
-            }
-          }
-        }
-      } else {
-        for (let item of this.flowzList) {
-          if (this.$store.state.role === 1) {
-            // item.count = 9
-            finstanceModal.get(null, {
-              $paginate: false,
-              $select: ['currentStatus'],
-              mainStatus: 'inprocess',
-              fid: item.id
-            }).then(res => {
-              if (res.data.length > 0) {
-                item.count = 0
-                _.map(item.processList, (pitem) => {
-                  pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
-                  item.count += pitem.count
-                })
-              }
-            }).catch(err => {
-              console.log('error', err)
-            })
-          } else {
-            let isonce = false
-            let pdata = []
-            for (let key in item.processList) {
-              // console.log('item', item)
-              if (!isonce) {
-                finstanceModal.get(null, {
-                  $paginate: false,
-                  $select: ['currentStatus'],
-                  mainStatus: 'inprocess',
-                  fid: item.id
-                }, {
-                  workflowid: 'workflow_' + item.id,
-                  stateid: item.processList[key].id
-                }).then(res => {
-                  if (res.data.length > 0) {
-                    isonce = true
-                    pdata = res.data
-                    item.processList[key].count = _.filter(res.data, {currentStatus: item.processList[key].id}).length
-                    item.count += item.processList[key].count
-                  }
-                }).catch(err => {
-                  console.log('error', err)
-                })
-              } else {
-                item.processList[key].count = _.filter(pdata, {currentStatus: item.processList[key].id}).length
-                item.count += item.processList[key].count
-              }
+              item.processList[key].count = _.filter(pdata, {_state: item.processList[key].id}).length
+              item.count += item.processList[key].count
             }
           }
         }
       }
+      // }
     }
   },
   computed: {
@@ -405,40 +414,11 @@ export default {
     '$store.state.subscription': function (newValue) {
       this.init()
     }
-    // '$store.state.role': function (newValue) {
-    //   this.init()
-    // }
   },
   mounted () {
-    // this.activeFlow(this.$store.state.activeFlow)
     this.init()
   },
   feathers: {
-    'finstance': {
-      created (data) {
-        let finx = _.findIndex(this.flowzList, {id: data.fid})
-        if (finx !== -1) {
-          // this.flowzList[finx].count += 1
-          this.setCounters(this.flowzList[finx])
-        }
-      },
-      updated (data) {
-        // console.log('updated', data)
-        let finx = _.findIndex(this.flowzList, {id: data.fid})
-        if (finx !== -1) {
-          // this.flowzList[finx].count += 1
-          this.setCounters(this.flowzList[finx])
-        }
-      },
-      removed (data) {
-        // console.log('removed', data)
-        let finx = _.findIndex(this.flowzList, {id: data.fid})
-        if (finx !== -1) {
-          // this.flowzList[finx].count += 1
-          this.setCounters(this.flowzList[finx])
-        }
-      }
-    },
     'flowz': {
       created (data) {
         if (this.$store.state.role === 1) {
@@ -455,6 +435,54 @@ export default {
           // this.init()
           let i = _.findIndex(this.flowzList, (o) => { return o.id === data.id })
           this.flowzList.splice(i, 1)
+        }
+      }
+    },
+    'dflowzdata': {
+      _created (data) {
+        // console.log('================created==============', data)
+        let keys = Object.keys(data)
+        for (let tName of keys) {
+          if (data[tName]._currentStatus) {
+            let finx = _.findIndex(this.flowzList, {id: tName.replace(/_/g, '-')})
+            if (finx !== -1) {
+              this.flowzList[finx].processList[data[tName]._state].count++
+              this.flowzList[finx].count++
+            }
+          }
+        }
+      },
+      _updated (data) {
+      },
+      _patched (data) {
+        // console.log('==============patched============', data)
+        let keys = Object.keys(data)
+        for (let tName of keys) {
+          let finx = _.findIndex(this.flowzList, {id: tName.replace(/_/g, '-')})
+          if (finx !== -1 && !data[tName]._currentStatus && data[tName]._next === null) {
+            if (this.flowzList[finx].processList[data[tName]._state].count > 0) {
+              this.flowzList[finx].processList[data[tName]._state].count--
+            }
+            if (this.flowzList[finx].count > 0) {
+              this.flowzList[finx].count--
+            }
+          }
+        }
+      },
+      _removed (data) {
+        let keys = Object.keys(data)
+        for (let tName of keys) {
+          if (data[tName]._currentStatus) {
+            let finx = _.findIndex(this.flowzList, {id: tName.replace(/_/g, '-')})
+            if (finx !== -1) {
+              if (this.flowzList[finx].processList[data[tName]._state].count > 0) {
+                this.flowzList[finx].processList[data[tName]._state].count--
+              }
+              if (this.flowzList[finx].count > 0) {
+                this.flowzList[finx].count--
+              }
+            }
+          }
         }
       }
     }
