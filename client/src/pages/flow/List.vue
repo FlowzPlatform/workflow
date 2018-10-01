@@ -776,7 +776,6 @@ export default {
         onOk: () => {
           flowz.delete(id)
           .then(response => {
-            console.log('response.data', response.data)
             this.$Notice.success({title: 'Success!!', desc: 'Flowz Deleted...'})
             this.flowzList.splice(inx, 1)
           })
