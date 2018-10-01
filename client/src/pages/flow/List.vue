@@ -515,7 +515,8 @@ export default {
             return days + ' Days'
           }
         }
-      ]
+      ],
+      entriesTotal: 10
     }
   },
   mounted () {
@@ -523,13 +524,31 @@ export default {
     this.getDataOfSubscriptionUser()
   },
   feathers: {
+    'flowz-instance': {
+      created (data) { // update status using socket
+        flowz.get()
+        .then(response => {
+          this.flowzList = response.data.data
+        })
+        .catch(error => {
+          console.log(error)
+        })
+      }
+    },
     'flowz': {
       created (data) {
-        console.log('data', data)
-        this.flowzList.push(data)
+        if (this.total < this.entriesTotal) {
+          this.flowzList.push(data)
+        } else {
+          this.total = ((this.total) + 1)
+        }
       },
       updated (data) {
-        this.init()
+        if (this.flowzList < this.entriesTotal) {
+          let inx = _.findIndex(this.flowzList, (o) => { return o.id === data.id })
+          this.flowzList.splice(inx, 1)
+          this.flowzList.push(data)
+        }
       },
       removed (data) {
         // console.log('Removed Data: ', data)
