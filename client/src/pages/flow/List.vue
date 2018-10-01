@@ -515,7 +515,7 @@ export default {
           }
         }
       ],
-      entriesTotal: 10
+      entriesTotal: 0
     }
   },
   mounted () {
@@ -536,18 +536,18 @@ export default {
     },
     'flowz': {
       created (data) {
-        if (this.total < this.entriesTotal) {
+        // console.log(this.limit)
+        if (this.total < this.limit) {
           this.flowzList.push(data)
         } else {
           this.total = ((this.total) + 1)
         }
       },
       updated (data) {
-        if (this.flowzList < this.entriesTotal) {
+        if (this.flowzList < this.limit) {
           let inx = _.findIndex(this.flowzList, (o) => { return o.id === data.id })
           this.flowzList.splice(inx, 1)
           this.flowzList.push(data)
-          // console.log()
         }
       },
       removed (data) {
