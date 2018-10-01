@@ -225,9 +225,9 @@ import finstanceModal from '@/api/finstance'
 // import dataQuerymodel from '@/api/dataquery'
 import saveemailTemplate from '@/api/emailtemplate'
 import schemalist from '@/pages/user/SchemaList'
-import config from '@/config'
-const io = require('socket.io-client')
-const socket = io(config.socketURI)
+// import config from '@/config'
+// const io = require('socket.io-client')
+// const socket = io(config.socketURI)
 
 export default {
   name: 'SchemaView',
@@ -1373,85 +1373,77 @@ export default {
       this.jumperLinks = objectArr
     }
   },
-  beforeDestroy () {
-    for (let item of socket.subs) {
-      item.destroy()
-    }
-  },
   mounted () {
-    for (let item of socket.subs) {
-      item.destroy()
-    }
     this.init()
-    if (socket._callbacks['$' + this.$route.params.id.replace(/-/g, '_') + '_created'] === undefined) {
-      socket.on(this.$route.params.id.replace(/-/g, '_') + '_created', (data) => {
-        console.log(data._currentStatus && data._state, this.$route.params.stateid)
-        if (data._currentStatus && data._state === this.$route.params.stateid) {
-          if (this.instanceEntries.length < this.entriesTotal) {
-            this.instanceEntries.push(data)
-            this.dataData = this.instanceEntries
-          } else {
-            console.log('..........')
-            this.dataTotal++
-          }
-        } else {
-          let inx = _.findIndex(this.instanceEntries, (o) => { return o.id === data._previous })
-          this.instanceEntries.splice(inx, 1)
-        }
-      })
-    }
-    if (socket._callbacks['$' + this.$route.params.id.replace(/-/g, '_') + '_patched'] === undefined) {
-      socket.on(this.$route.params.id.replace(/-/g, '_') + '_patched', (data) => {
-        if (this.$store.state.role === 1) {
-          if (data._currentStatus && data._state === this.$route.params.stateid) {
-            let inx = _.findIndex(this.instanceEntries, (o) => { return o.id === data.id })
-            this.instanceEntries.splice(inx, 1)
-            this.instanceEntries.push(data)
-            this.dataData = this.instanceEntries
-          }
-        }
-        console.log(this.$store.state.role === 2, data)
-        if (this.$store.state.role === 2 && data !== undefined) {
-          console.log('dataClaim', this.dataClaim)
-          console.log('dataClaim', data)
-          console.log('dataUnclaim', this.dataUnclaim)
-          if (data._claimUser === '') {
-            let inx = _.findIndex(this.dataUnclaim, (o) => { return o.id === data.id })
-            this.dataUnclaim.splice(inx, 1)
-            this.dataClaim.push(data)
-            console.log(inx)
-          } else {
-            let inx = _.findIndex(this.dataClaim, (o) => { return o.id === data.id })
-            this.dataClaim.splice(inx, 1)
-            this.dataUnclaim.push(data)
-            console.log(inx)
-          }
-        }
-        let finx = _.findIndex(this.flowzList, {id: this.$route.params.id})
-        if (finx !== -1 && !data._currentStatus && data._next === null) {
-          if (this.flowzList[finx].processList[data._state].count > 0) {
-            this.flowzList[finx].processList[data._state].count--
-          }
-          if (this.flowzList[finx].count > 0) {
-            this.flowzList[finx].count--
-          }
-        }
-        // let inx = _.findIndex(this.instanceEntries, (o) => { return o.id === data.id })
-        // this.instanceEntries.splice(inx, 1)
-        // this.dataData = this.instanceEntries
-      })
-    }
-    if (socket._callbacks['$' + this.$route.params.id.replace(/-/g, '_') + '_removed'] === undefined) {
-      socket.on(this.$route.params.id.replace(/-/g, '_') + '_removed', (data) => {
-        if (data._currentStatus) {
-          let finx = _.findIndex(this.flowzList, {id: this.$route.params.id})
-          if (finx !== -1) {
-            this.flowzList[finx].processList[data._state].count--
-            this.flowzList[finx].count--
-          }
-        }
-      })
-    }
+    // if (socket._callbacks['$' + this.$route.params.id.replace(/-/g, '_') + '_created'] === undefined) {
+    //   socket.on(this.$route.params.id.replace(/-/g, '_') + '_created', (data) => {
+    //     console.log(data._currentStatus && data._state, this.$route.params.stateid)
+    //     if (data._currentStatus && data._state === this.$route.params.stateid) {
+    //       if (this.instanceEntries.length < this.entriesTotal) {
+    //         this.instanceEntries.push(data)
+    //         this.dataData = this.instanceEntries
+    //       } else {
+    //         console.log('..........')
+    //         this.dataTotal++
+    //       }
+    //     } else {
+    //       let inx = _.findIndex(this.instanceEntries, (o) => { return o.id === data._previous })
+    //       this.instanceEntries.splice(inx, 1)
+    //     }
+    //   })
+    // }
+    // if (socket._callbacks['$' + this.$route.params.id.replace(/-/g, '_') + '_patched'] === undefined) {
+    //   socket.on(this.$route.params.id.replace(/-/g, '_') + '_patched', (data) => {
+    //     if (this.$store.state.role === 1) {
+    //       if (data._currentStatus && data._state === this.$route.params.stateid) {
+    //         let inx = _.findIndex(this.instanceEntries, (o) => { return o.id === data.id })
+    //         this.instanceEntries.splice(inx, 1)
+    //         this.instanceEntries.push(data)
+    //         this.dataData = this.instanceEntries
+    //       }
+    //     }
+    //     console.log(this.$store.state.role === 2, data)
+    //     if (this.$store.state.role === 2 && data !== undefined) {
+    //       console.log('dataClaim', this.dataClaim)
+    //       console.log('dataClaim', data)
+    //       console.log('dataUnclaim', this.dataUnclaim)
+    //       if (data._claimUser === '') {
+    //         let inx = _.findIndex(this.dataUnclaim, (o) => { return o.id === data.id })
+    //         this.dataUnclaim.splice(inx, 1)
+    //         this.dataClaim.push(data)
+    //         console.log(inx)
+    //       } else {
+    //         let inx = _.findIndex(this.dataClaim, (o) => { return o.id === data.id })
+    //         this.dataClaim.splice(inx, 1)
+    //         this.dataUnclaim.push(data)
+    //         console.log(inx)
+    //       }
+    //     }
+    //     let finx = _.findIndex(this.flowzList, {id: this.$route.params.id})
+    //     if (finx !== -1 && !data._currentStatus && data._next === null) {
+    //       if (this.flowzList[finx].processList[data._state].count > 0) {
+    //         this.flowzList[finx].processList[data._state].count--
+    //       }
+    //       if (this.flowzList[finx].count > 0) {
+    //         this.flowzList[finx].count--
+    //       }
+    //     }
+    //     // let inx = _.findIndex(this.instanceEntries, (o) => { return o.id === data.id })
+    //     // this.instanceEntries.splice(inx, 1)
+    //     // this.dataData = this.instanceEntries
+    //   })
+    // }
+    // if (socket._callbacks['$' + this.$route.params.id.replace(/-/g, '_') + '_removed'] === undefined) {
+    //   socket.on(this.$route.params.id.replace(/-/g, '_') + '_removed', (data) => {
+    //     if (data._currentStatus) {
+    //       let finx = _.findIndex(this.flowzList, {id: this.$route.params.id})
+    //       if (finx !== -1) {
+    //         this.flowzList[finx].processList[data._state].count--
+    //         this.flowzList[finx].count--
+    //       }
+    //     }
+    //   })
+    // }
   },
   computed: {
     dataCount () {
@@ -1540,6 +1532,87 @@ export default {
         }
       },
       removed (data) {
+      }
+    },
+    'dflowzdata': {
+      _created (data) {
+        // console.log('================created==============', data)
+        let keys = Object.keys(data)
+        for (let tName of keys) {
+          if (tName === this.$route.params.id.replace(/-/g, '_')) {
+            if (data[tName]._currentStatus && data[tName]._state === this.$route.params.stateid) {
+              if (this.instanceEntries.length < this.entriesTotal) {
+                this.instanceEntries.push(data[tName])
+                this.dataData = this.instanceEntries
+              } else {
+                this.dataTotal++
+              }
+            } else {
+              let inx = _.findIndex(this.instanceEntries, (o) => { return o.id === data[tName]._previous })
+              this.instanceEntries.splice(inx, 1)
+            }
+          }
+        }
+      },
+      _updated (data) {
+      },
+      _patched (data) {
+        // console.log('==============patched============', data)
+        let keys = Object.keys(data)
+        for (let tName of keys) {
+          if (data[tName]._currentStatus) {
+            if (this.$store.state.role === 1) {
+              if (data[tName]._currentStatus && data[tName]._state === this.$route.params.stateid) {
+                let inx = _.findIndex(this.instanceEntries, (o) => { return o.id === data[tName].id })
+                this.instanceEntries.splice(inx, 1)
+                this.instanceEntries.push(data[tName])
+                this.dataData = this.instanceEntries
+              }
+            }
+            // console.log(this.$store.state.role === 2, data)
+            if (this.$store.state.role === 2 && data[tName] !== undefined) {
+              // console.log('dataClaim', this.dataClaim)
+              // console.log('dataClaim', data[tName])
+              // console.log('dataUnclaim', this.dataUnclaim)
+              if (data[tName]._claimUser === '') {
+                let inx = _.findIndex(this.dataUnclaim, (o) => { return o.id === data[tName].id })
+                this.dataUnclaim.splice(inx, 1)
+                this.dataClaim.push(data[tName])
+                // console.log(inx)
+              } else {
+                let inx = _.findIndex(this.dataClaim, (o) => { return o.id === data[tName].id })
+                this.dataClaim.splice(inx, 1)
+                this.dataUnclaim.push(data[tName])
+                // console.log(inx)
+              }
+            }
+            let finx = _.findIndex(this.flowzList, {id: this.$route.params.id})
+            if (finx !== -1 && !data[tName]._currentStatus && data[tName]._next === null) {
+              if (this.flowzList[finx].processList[data[tName]._state].count > 0) {
+                this.flowzList[finx].processList[data[tName]._state].count--
+              }
+              if (this.flowzList[finx].count > 0) {
+                this.flowzList[finx].count--
+              }
+            }
+          }
+        }
+      },
+      _removed (data) {
+        // let keys = Object.keys(data)
+        // for (let tName of keys) {
+        //   if (data[tName]._currentStatus) {
+        //     let finx = _.findIndex(this.flowzList, {id: tName.replace(/_/g, '-')})
+        //     if (finx !== -1) {
+        //       if (this.flowzList[finx].processList[data[tName]._state].count > 0) {
+        //         this.flowzList[finx].processList[data[tName]._state].count--
+        //       }
+        //       if (this.flowzList[finx].count > 0) {
+        //         this.flowzList[finx].count--
+        //       }
+        //     }
+        //   }
+        // }
       }
     }
   }
