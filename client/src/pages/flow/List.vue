@@ -375,7 +375,6 @@ export default {
                 },
                 on: {
                   click: () => {
-                    // console.log(this.flowzList[params.index].id)
                     this.deleteFlow(this.flowzList[params.index].id, params.index)
                   }
                 }
@@ -735,7 +734,6 @@ export default {
     },
     init () {
       this.loading = true
-      // var string = '?$skip=' + this.skip + '&$limit=' + this.limit
       flowz.get(null, {
         $skip: this.skip,
         $limit: this.limit
@@ -776,7 +774,6 @@ export default {
         title: 'Confirm',
         content: '<p>Are you sure you want to delete?</p>',
         onOk: () => {
-          // console.log(id)
           flowz.delete(id)
           .then(response => {
             console.log('response.data', response.data)
