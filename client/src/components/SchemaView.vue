@@ -212,6 +212,7 @@
 </template>
 
 <script>
+/*eslint-disable */
 import _ from 'lodash'
 import $ from 'jquery'
 
@@ -413,6 +414,20 @@ export default {
       this.skip = 0
     },
     handlepage (skip, limit, size) {
+      this.limit = size
+      this.entriesTotal = size
+      this.skip = 0
+      this.populateTables()
+    },
+    pagination2 (skip, limit, page) {
+      this.skip = skip
+      this.limit = limit
+      this.entriesTotal = limit
+      this.pageno = page
+      this.populateTables()
+      this.skip = 0
+    },
+    handlepage2 (skip, limit, size) {
       this.limit = size
       this.entriesTotal = size
       this.skip = 0
@@ -827,9 +842,17 @@ export default {
                     this.email = true
                     this.loadEmail = false
                   } else {
-                    this.sendDataEmail = res.data.template + this.$refs.schemasubformview.$el.outerHTML
-                    this.email = true
-                    this.loadEmail = false
+                    console.log(res.data.template)
+                    let OrderData = res.data.template.split('{{OrderData}}')
+                    if (OrderData == res.data.template) {
+                      this.sendDataEmail = res.data.template + this.$refs.schemasubformview.$el.outerHTML
+                      this.email = true
+                      this.loadEmail = false
+                    } else {
+                      this.sendDataEmail = OrderData[0] + this.$refs.schemasubformview.$el.outerHTML + OrderData[1]
+                      this.email = true
+                      this.loadEmail = false
+                    }
                   }
                 }, 1000)
               })
@@ -1210,7 +1233,6 @@ export default {
       this.email = false
       this.htmlcontent = false
       this.id = null
-
       // New Custom Dynamic FLowz Data call
       let heads = {
         ftablename: this.currentFlowzId
@@ -1468,45 +1490,22 @@ export default {
       created (data) {
       },
       updated (data) {
+        console.log(data)
+        this.pageno = 1
         if (this.$store.state.role === 1) {
           if (data.currentStatus === this.$route.params.stateid) {
-            // // data = data.data
-            // // data.data['iid'] = data.id
-            // // this.instanceEntries.push(data)
-            // // this.dataData.push(data.data)
-            // let StageName = data.stageReference[(data.stageReference.length - 1)].StageName
-
-            // setTimeout(() => {
-            //   flowzdataModal.get(null, {
-            //     iid: data.id,
-            //     state: StageName
-            //   }).then((resData) => {
-            //     // console.log('Form Data: ', resData)
-            //     data.data = resData.data[0].data
-            //     data.data['iid'] = data.id
-
-            //     console.log('Data: ', data)
-            //     this.instanceEntries.push(data)
-            //     this.dataData.push(data.data)
-            //   }).catch((err) => {
-            //     console.log('err: ', err)
-            //   })
-            // }, 2000)
-            // console.log('Length: ', this.instanceEntries.length)
-            // console.log('instanceEntries: ', this.instanceEntries.length, this.entriesTotal)
             if (this.instanceEntries.length < this.entriesTotal) {
-              // console.log('Ready to push: ', this.instanceEntries.length)
-              // push to table
               let instanceObj = data
-              // console.log('instanceObj: ', instanceObj)
+              let inx = _.findIndex(this.dataData, (o) => { return o.id === data.id })
+              this.populateTables()
               let lastEntryId = data.stageReference[data.stageReference.length - 1].stageRecordId
-              // console.log('lastEntryId: ', lastEntryId)
               if (lastEntryId !== undefined) {
                 flowzdataModal.get(lastEntryId).then(res => {
                   // console.log('Response fdata: ', res)
                   instanceObj['data'] = res.data.data
                   instanceObj['iid'] = data.id
-                  this.instanceEntries.push(instanceObj)
+                  // this.instanceEntries.push(instanceObj)
+                  this.dataData.splice(inx, 1)
                   this.dataData.push(instanceObj)
                   // console.log('Pushed data: ', this.instanceEntries, this.dataData)
                 })
@@ -1524,10 +1523,10 @@ export default {
         if (this.$store.state.role === 2) {
           if (data.claimuser === '') {
             this.dataClaim.push(data)
-            this.init()
+            this.populateTables()
           } else {
             this.dataData2.push(data)
-            this.init()
+            this.populateTables()
           }
         }
       },

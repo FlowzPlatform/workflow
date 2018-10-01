@@ -29,6 +29,10 @@ import emailTemplateList from '@/pages/emailTemplate/emailTemplateList'
 import editEmailTemplate from '@/pages/emailTemplate/editEmailTemplate'
 import createEmailTemplate from '@/pages/emailTemplate/createEmailTemplate'
 
+// import emailtemplate from '@/components/emailtemplate'
+// import editEmailTemplate from '@/components/editEmailTemplate'
+import emailTemplateCreate from '@/components/emailTemplateCreate'
+
 import permission from '@/components/permission'
 
 // const tagSpinner = resolve => require(['./spinner'], resolve)
@@ -89,6 +93,32 @@ const mroutes = [
         component: emailTemplateList,
         name: 'emailtemplate',
         meta: { description: 'emailtemplate' }
+        // children: [
+        //   {
+        //     path: 'edit/:id',
+        //     component: editEmailTemplate,
+        //     name: 'emailtemplate/edit',
+        //     meta: { description: 'Edit' },
+        //     props: {
+        //       id: Number,
+        //       required: false
+        //     }
+        //   }
+        // ]
+      },
+      { // Emailtemplate
+        path: 'emailtemplate/edit/:id',
+        component: editEmailTemplate,
+        name: 'editemailtemplate',
+        meta: { description: 'emailtemplate' },
+        props: true
+      },
+      { // Emailtemplate
+        path: 'emailtemplate/new',
+        component: emailTemplateCreate,
+        name: 'createemailtemplate',
+        meta: { description: 'emailtemplate' },
+        props: true
       },
       { // Emailtemplate edit
         path: 'emailtemplate/edit/:id',

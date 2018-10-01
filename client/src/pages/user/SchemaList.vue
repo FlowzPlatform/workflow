@@ -47,9 +47,9 @@
                   </div> -->
                 </div>
               </div>
-              <div class="col-md-3" style="margin-top: 20px;">
+              <div class="col-md-2" style="margin-top: 20px;">
                 <Button icon="search" type="primary" @click="searchData">Search</Button>
-                <Tooltip content="Clear Search">
+                <Tooltip content="Clear Search" style="float: right;">
                   <Button icon="ios-trash" type="error" @click="clearSearchData"></Button>  
                 </Tooltip>
                 
@@ -102,10 +102,11 @@
 <script>
   import _ from 'lodash'
   import axios from 'axios'
-  import config from '../../config/index.js'
   import $ from 'jquery'
-  // import finstanceModal from '@/api/finstance'
   import dflowzdata from '@/api/dflowzdata'
+  import config from '@/config'
+  // import getuserdetails from '@/api/getuserdetails'
+  // import usermodulerole from '@/api/usermodulerole'
   export default {
     name: 'schemalist',
     props: {
@@ -348,7 +349,7 @@
             width: 200,
             render: (h, params) => {
               return h('span',
-              this.selectUser(params),
+                this.selectUser(params),
               )
             }
           })
@@ -821,6 +822,13 @@
       },
       handlePagesize (size) {
         this.$emit('on-handlepage', this.skip, this.limit, size)
+      },
+      handlePage2 (page) {
+        this.skip = (page * this.limit) - this.limit
+        this.$emit('on-paginate2', this.skip, this.limit, page)
+      },
+      handlePagesize2 (size) {
+        this.$emit('on-handlepage2', this.skip, this.limit, size)
       }
     }
   }
@@ -858,7 +866,6 @@
         margin-left: 100px !important
       }
    }
-
 </style>
 
 <style>
