@@ -1,5 +1,6 @@
 <template>
-  <div :loading="cellLoading" class="CellRender stageTuple" :class="classObject(item)">
+  <div class="CellRender stageTuple" :class="classObject(item)">
+    <Spin v-if="cellLoading"></Spin>
     <!-- <div class="CellRender stageTuple" :class="classObject(item.row, item.column.key)"> -->
   	<!-- <span :class="classObject(item.row, item.column.key)"></span> -->
 
@@ -265,6 +266,7 @@ export default {
     this.cellLoading = true
     if (this.$store.state.userDetails[this.item.obj.userId]) {
       this.item.obj['userDetails'] = this.$store.state.userDetails[this.item.obj.userId]
+      this.cellLoading = false
     } else {
       await axios.get(config.userdetails + this.item.obj.userId)
       .then((response) => {
