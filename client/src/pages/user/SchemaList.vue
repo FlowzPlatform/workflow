@@ -735,6 +735,10 @@
       .catch((err) => {
         console.log(err)
       })
+      setTimeout(() => {
+        let tempClaimusers = _.uniqWith(this.stageClaimUsers, _.isEqual)
+        this.stageClaimUsers = tempClaimusers
+      }, 3000)
     },
     methods: {
       assignUser () {
