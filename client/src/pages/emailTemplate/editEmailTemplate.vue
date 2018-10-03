@@ -1,13 +1,13 @@
 <template>
   <div id="emailtemplate">
     <Row type="flex" justify="end">
-      <Button type="primary" size="small" style="margin-bottom: 2px;position: absolute;right: 10px;" @click="emailTemplateList" icon="ivu-icon ivu-icon-ios-arrow-back"> back</Button>
+      <Button type="primary" size="small" style="margin-bottom: 2px;position: absolute;right: 10px;" @click="emailTemplateList" icon="ivu-icon ivu-icon-ios-arrow-back"> Back</Button>
     </Row>
     <div>
       <h2 class="heading">Template Edit</h2>
     </div>
     <div class="editor">
-      <editor v-model="GetHtmlOfEditor" api-key="ppzi01crrfo3pvd43s3do89pguwkhowrwajpjdqdkginzj7k" :initial-value="GetHtmlContent"></editor>
+      <editor v-model="GetHtmlOfEditor" api-key="ppzi01crrfo3pvd43s3do89pguwkhowrwajpjdqdkginzj7k"></editor>
       <Input v-model="templateName" placeholder="Enter Template name" style="width: 300px" class="dataEnter"/>
       <Button type="primary" @click="updateTemplate" class="dataEnter" :loading="loading">Update Template</Button>
       <Button type="error" @click="cancelUpdateTemplate" class="dataEnter">Cancel</Button>

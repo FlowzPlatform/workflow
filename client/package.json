@@ -33,7 +33,7 @@
     "feathers-hooks": "^2.1.0",
     "feathers-socketio": "^2.0.0",
     "file-loader": "^2.0.0",
-    "flowz-subscription": "^0.2.10",
+    "flowz-subscription": "^0.2.14",
     "fs": "0.0.1-security",
     "inherits": "^2.0.3",
     "iview": "^2.9.2",

@@ -1,5 +1,6 @@
 <template>
   <div class="CellRender stageTuple" :class="classObject(item)">
+    <Spin v-if="cellLoading"></Spin>
     <!-- <div class="CellRender stageTuple" :class="classObject(item.row, item.column.key)"> -->
   	<!-- <span :class="classObject(item.row, item.column.key)"></span> -->
 
@@ -43,7 +44,7 @@
       <small><em>Waiting</em></small>
     </span>
 
-    <!-- <img v-if="item.obj != null && item.isCompletedTask == true" :title="getUserHoverDetails(item)" :src="getUserAvatar(item)" class="avatarImg" alt="User Avatar"> -->
+    <img v-if="item.obj.userDetails && item.isCompletedTask == true" :title="getUserHoverDetails(item.obj.userDetails)" :src="getUserAvatar(item.obj.userDetails)" class="avatarImg" alt="User Avatar">
     
     <!-- <span :title="getCompletedActualStatus(item.row, item.column.key)">
       <i class="fa fa-calendar fa-fw"></i>
@@ -79,6 +80,8 @@
 import moment from 'moment'
 import flowzdataModal from '@/api/flowzdata'
 import schemaModel from '@/api/schema'
+import config from '@/config'
+import axios from 'axios'
 
 export default {
   name: 'CellRender',
@@ -92,7 +95,8 @@ export default {
       schemainstance: {
         data: [],
         entity: []
-      }
+      },
+      cellLoading: false
     }
   },
   components: {
@@ -173,15 +177,16 @@ export default {
       // return days + hours + minutes + seconds
     },
     getUserAvatar (item) {
-      if (item.obj.user.avatar) {
-        return item.obj.user.avatar
+      if (item.picture) {
+        return item.picture
       } else {
         return ('https://www.sigmanest.com/wp-content/uploads/2017/11/Dummy.jpg')
       }
     },
     getUserHoverDetails (item) {
-      if (item.obj.user.name && item.obj.user.email && item.obj.user.role) {
-        return ('Name: ' + item.obj.user.name + '\nEmail: ' + item.obj.user.email + '\nRole: ' + item.obj.user.role)
+      // console.log('Item: ', item)
+      if (item.fullname && item.email && item.role) {
+        return ('Name: ' + item.fullname + '\nEmail: ' + item.email + '\nRole: ' + item.role)
       } else {
         return ('User details not available.')
       }
@@ -257,8 +262,22 @@ export default {
     //   }
     // },
   },
-  mounted () {
-    // console.log('this.item: ', this.item)
+  async created () {
+    this.cellLoading = true
+    if (this.$store.state.userDetails[this.item.obj.userId]) {
+      this.item.obj['userDetails'] = this.$store.state.userDetails[this.item.obj.userId]
+      this.cellLoading = false
+    } else {
+      await axios.get(config.userdetails + this.item.obj.userId)
+      .then((response) => {
+        this.item.obj['userDetails'] = response.data.data[0]
+        this.$store.state.userDetails[this.item.obj.userId] = response.data.data[0]
+        this.cellLoading = false
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+    }
   }
 }
 

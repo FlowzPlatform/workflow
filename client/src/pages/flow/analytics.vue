@@ -113,6 +113,8 @@ import _ from 'lodash'
 import moment from 'moment'
 import $ from 'jquery'
 import dflowzdata from '@/api/dflowzdata'
+// import config from '@/config'
+// import axios from 'axios'
 
 export default {
   name: 'dashboard',
@@ -343,6 +345,14 @@ export default {
               // alert('Completed Task')
               finalValue.isCurrentTask = false
               finalValue.isCompletedTask = true
+              // axios.get(config.userdetails + obj.userId)
+              // .then((response) => {
+              //   finalValue.obj['userDetails'] = response.data.data[0]
+              //   // console.log('user details: ', obj['userDetails'])
+              // })
+              // .catch((error) => {
+              //   console.log(error)
+              // })
             }
             // if (obj) {
             //   obj['createdAt'] = params.row.createdAt
