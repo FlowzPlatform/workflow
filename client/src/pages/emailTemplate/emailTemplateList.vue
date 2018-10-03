@@ -184,7 +184,8 @@ export default {
     },
     init () {
       saveemailTemplate.get(null, {
-        'user': this.$store.state.user._id,
+        subscriptionId: this.$store.state.subscription,
+        userId: this.$store.state.user._id,
         $skip: this.skip,
         $limit: this.limit
       })

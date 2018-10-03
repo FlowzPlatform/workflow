@@ -206,7 +206,7 @@
                         <FormItem :key="inx" :rules="createRules(field)" style="margin-bottom:10px;">
                             <Row>
                                 <Col :span="2">
-                                    <b>{{field.name}}</b>1
+                                    <b>{{field.name}}</b>
                                 </Col>
                                 <Col :span="21" >
                                     <input class="form-control" type="file" v-if="field.type == 'file'" @change="handleFileChange($event, index, field.name)" :multiple="(field.property.isMultiple)? field.property.isMultiple: false"/>

@@ -186,7 +186,9 @@
           isdeleted: false,
           '$sort[createdAt]': -1,
           $skip: this.skip,
-          $limit: this.$limit
+          $limit: this.$limit,
+          subscriptionId: this.$store.state.subscription,
+          userId: this.$store.state.user._id
         }).then(res => {
           this.loading = false
           this.total = res.data.total
