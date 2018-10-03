@@ -1549,7 +1549,7 @@ export default {
     },
     'dflowzdata': {
       _created (data) {
-        // console.log('================created==============', data)
+        console.log('================created==============', data)
         let keys = Object.keys(data)
         for (let tName of keys) {
           if (tName === this.$route.params.id.replace(/-/g, '_')) {
@@ -1570,7 +1570,6 @@ export default {
       _updated (data) {
       },
       _patched (data) {
-        // console.log('==============patched============', data)
         let keys = Object.keys(data)
         for (let tName of keys) {
           if (data[tName]._currentStatus) {
@@ -1582,21 +1581,19 @@ export default {
                 this.dataData = this.instanceEntries
               }
             }
-            // console.log(this.$store.state.role === 2, data)
-            if (this.$store.state.role === 2 && data[tName] !== undefined) {
-              // console.log('dataClaim', this.dataClaim)
-              // console.log('dataClaim', data[tName])
-              // console.log('dataUnclaim', this.dataUnclaim)
+            if (this.$store.state.role === 2) {
               if (data[tName]._claimUser === '') {
-                let inx = _.findIndex(this.dataUnclaim, (o) => { return o.id === data[tName].id })
-                this.dataUnclaim.splice(inx, 1)
-                this.dataClaim.push(data[tName])
-                // console.log(inx)
-              } else {
                 let inx = _.findIndex(this.dataClaim, (o) => { return o.id === data[tName].id })
                 this.dataClaim.splice(inx, 1)
                 this.dataUnclaim.push(data[tName])
-                // console.log(inx)
+                this.dataTotalU = this.dataTotalU + 1
+                this.dataTotalC = this.dataTotalC -1
+              } else {
+                let inx = _.findIndex(this.dataUnclaim, (o) => { return o.id === data[tName].id })
+                this.dataUnclaim.splice(inx, 1)
+                this.dataClaim.push(data[tName])
+                this.dataTotalU = this.dataTotalU - 1
+                this.dataTotalC = this.dataTotalC + 1
               }
             }
             let finx = _.findIndex(this.flowzList, {id: this.$route.params.id})
