@@ -303,6 +303,8 @@ export default {
       }
     },
     searchInstances () {
+      this.tableData = []
+      this.colviewData = []
       // this.tableData = _.filter(this.tableData, (o) => { return o.id === this.searchQuery })
       let query = this.searchQuery
       let sort = this.selectedSortBy
