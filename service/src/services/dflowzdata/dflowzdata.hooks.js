@@ -52,15 +52,27 @@ let beforeFind = function (hook) {
       hook.params.query._currentStatus = false
     }
   }
-  if (query.$group !== undefined) {
+  if (query.$group !== undefined && query.$search !== undefined) {
+    // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+    hook.service.service.options.name = hook.params.headers.ftablename;
+    hook.service.service.table = hook.service.rDB.table(hook.params.headers.ftablename);
+    let value = hook.params.query.$group
+    let search = hook.params.query.$search
+    delete hook.params.query.$group
+    delete hook.params.query.$search
+    const query = hook.service.service.createQuery(hook.params.query);
+    hook.params.rethinkdb = query.filter(function(doc) {
+      return doc.coerceTo('string').match('(?i)' + search);
+    }).group(value).ungroup()
+    // console.log('hook.params.rethinkdb', hook.params.rethinkdb)
+  } else if (query.$group !== undefined) {
     hook.service.service.options.name = hook.params.headers.ftablename;
     hook.service.service.table = hook.service.rDB.table(hook.params.headers.ftablename);
     let value = hook.params.query.$group
     delete hook.params.query.$group
     const query = hook.service.service.createQuery(hook.params.query);
     hook.params.rethinkdb = query.group(value).ungroup()
-  }
-  if (query.$search !== undefined) {
+  } else if (query.$search !== undefined) {
     hook.service.service.options.name = hook.params.headers.ftablename;
     hook.service.service.table = hook.service.rDB.table(hook.params.headers.ftablename);
     let value = hook.params.query.$search
@@ -70,7 +82,6 @@ let beforeFind = function (hook) {
     hook.params.rethinkdb = query.filter(function(doc) {
       return doc.coerceTo('string').match('(?i)' + value);
     })
-    // console.log('hook.params.rethinkdb', hook.params.rethinkdb)
   }
 }
 
