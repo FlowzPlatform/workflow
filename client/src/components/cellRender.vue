@@ -35,7 +35,7 @@
     <span v-if="item.obj != null && item.isCompletedTask == true" title="Duration" style="display: block;">
       <i class="fa fa-clock-o fa-fw"></i>
       <!-- <span>{{item.obj.createdAt}} : {{ item.obj.completedAt}}</span> -->
-      <small>{{ getDuration(item.obj._createdAt, item.obj.completedAt) }}</small>
+      <small>{{ getDuration(item.obj._createdAt, item.obj._completedAt) }}</small>
     </span>
 
     <span v-if="item.obj != null && item.isCompletedTask == false" title="Duration" style="display: block;">
