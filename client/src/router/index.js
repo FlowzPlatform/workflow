@@ -31,7 +31,7 @@ import createEmailTemplate from '@/pages/emailTemplate/createEmailTemplate'
 
 // import emailtemplate from '@/components/emailtemplate'
 // import editEmailTemplate from '@/components/editEmailTemplate'
-import emailTemplateCreate from '@/components/emailTemplateCreate'
+// import emailTemplateCreate from '@/components/emailTemplateCreate'
 
 import permission from '@/components/permission'
 
@@ -110,13 +110,6 @@ const mroutes = [
         path: 'emailtemplate/edit/:id',
         component: editEmailTemplate,
         name: 'editemailtemplate',
-        meta: { description: 'emailtemplate' },
-        props: true
-      },
-      { // Emailtemplate
-        path: 'emailtemplate/new',
-        component: emailTemplateCreate,
-        name: 'createemailtemplate',
         meta: { description: 'emailtemplate' },
         props: true
       },

@@ -55,7 +55,7 @@
                 
               </div>
             </div>
-            <div v-if="action === 'filter'" style="margin-top: 10px;">
+            <div v-if="action === 'assign'" style="margin-top: 10px;">
               <div class="col-md-2" style="margin-top: 20px;">
                 <Select v-model="selectedAssignUser" style="width:200px">
                   <Option v-for="item in stageClaimUsers" :value="item.value" :key="item.value">{{ item.label }}</Option>
@@ -130,8 +130,8 @@
           value: 'search',
           label: 'SEARCH'
         }, {
-          value: 'filter',
-          label: 'FILTER'
+          value: 'assign',
+          label: 'ASSIGN'
         }],
         dataActionRole2: [{
           value: 'search',
