@@ -1,7 +1,7 @@
 <template>
   <div id="emailtemplate">
       <Row type="flex" justify="end">
-        <Button type="primary" size="small" style="margin-bottom: 2px;position: absolute;right: 10px;" @click="emailTemplateList" icon="ivu-icon ivu-icon-ios-arrow-back"> back</Button>
+        <Button type="primary" size="small" style="margin-bottom: 2px;position: absolute;right: 10px;" @click="emailTemplateList" icon="ivu-icon ivu-icon-ios-arrow-back"> Back</Button>
       </Row>
       <h2 class="heading">Create New Template</h2>
       <keep-alive>
