@@ -77,7 +77,7 @@
           <Button @click="handleSelectAll(false)">Cancel all selected</Button>
         </div>
         <div style="float: right; display: inline-block">
-          <Page placement="top" :total="total" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+          <Page placement="top" :total="dataTotal" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
         </div>
       </div>
     </div>
@@ -85,7 +85,7 @@
       <Table ref="selection" @on-sort-change="sortTableData" highlight-row :columns="setColumns2" :data="instanceEntries" :border="config.border" :stripe="config.stripe"></Table>
       <div style="margin: 10px;overflow: hidden">
         <div style="float: right;">
-          <Page placement="top" :total="dataTotalC" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+          <Page placement="top" :total="dataTotalU" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
         </div>
       </div>
     </div>
@@ -93,7 +93,7 @@
       <Table ref="selection" @on-sort-change="sortTableData" highlight-row :columns="setColumns" :data="instanceEntries" :border="config.border" :stripe="config.stripe"></Table>
       <div style="margin: 10px;overflow: hidden">
         <div style="float: right;">
-          <Page placement="top" :total="dataTotalU" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+          <Page placement="top" :total="dataTotalC" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
         </div>
       </div>
     </div>
@@ -714,6 +714,9 @@
       }
     },
     mounted () {
+      console.log('dataTotal', this.dataTotal)
+      console.log('dataTotalC', this.dataTotalC)
+      console.log('dataTotalu', this.dataTotalU)
       this.currentFlowzId = this.$route.params.id.replace(/-/g, '_')
       this.total = this.dataTotal
       axios.get(config.usermodulerole)
