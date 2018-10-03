@@ -1570,7 +1570,6 @@ export default {
       _updated (data) {
       },
       _patched (data) {
-        // console.log('==============patched============', data)
         let keys = Object.keys(data)
         for (let tName of keys) {
           if (data[tName]._currentStatus) {
@@ -1583,9 +1582,6 @@ export default {
               }
             }
             if (this.$store.state.role === 2) {
-              // console.log('dataClaim', this.dataClaim)
-              // console.log('dataClaim', data[tName])
-              // console.log('dataUnclaim', this.dataUnclaim)
               if (data[tName]._claimUser === '') {
                 let inx = _.findIndex(this.dataClaim, (o) => { return o.id === data[tName].id })
                 this.dataClaim.splice(inx, 1)
@@ -1593,10 +1589,7 @@ export default {
                 this.dataTotalU = this.dataTotalU + 1
                 this.dataTotalC = this.dataTotalC -1
               } else {
-                console.log('Claim--', this.dataUnclaim)
-                console.log('Claim--ID', data[tName].id)
                 let inx = _.findIndex(this.dataUnclaim, (o) => { return o.id === data[tName].id })
-                console.log(inx)
                 this.dataUnclaim.splice(inx, 1)
                 this.dataClaim.push(data[tName])
                 this.dataTotalU = this.dataTotalU - 1
