@@ -162,7 +162,8 @@ export default {
   methods: {
     init () {
       flowzModel.get(null, {
-        $limit: 0
+        $limit: 0,
+        userId: this.$store.state.user._id
       })
       .then((res) => { 
         this.countFlowz = res.data.total 

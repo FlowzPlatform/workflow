@@ -68,7 +68,7 @@ export default {
                 },
                 on: {
                   click: () => {
-                    console.log(params)
+                    // console.log(params)
                     this.$router.push({name: 'editemailtemplate', params: {id: params.row.id}})
                   }
                 }
@@ -173,7 +173,9 @@ export default {
   },
   mounted () {
     saveemailTemplate.get(null, {
-      'user': this.$store.state.user._id
+      // 'user': this.$store.state.user._id
+      subscriptionId: this.$store.state.subscription,
+      userId: this.$store.state.user._id
     })
     .then((res) => {
       this.flag = true

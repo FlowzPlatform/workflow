@@ -522,17 +522,6 @@ export default {
     this.getDataOfSubscriptionUser()
   },
   feathers: {
-    'flowz-instance': {
-      created (data) { // update status using socket
-        flowz.get()
-        .then(response => {
-          this.flowzList = response.data.data
-        })
-        .catch(error => {
-          console.log(error)
-        })
-      }
-    },
     'flowz': {
       created (data) {
         // console.log(this.limit)
@@ -736,7 +725,9 @@ export default {
       this.loading = true
       flowz.get(null, {
         $skip: this.skip,
-        $limit: this.limit
+        $limit: this.limit,
+        subscriptionId: this.$store.state.subscription,
+        userId: this.$store.state.user._id
       })
       .then(response => {
         this.total = response.data.total
