@@ -14,5 +14,6 @@ export default {
   subscription: '',
   updateView: '',
   registerResources: {},
-  registerRoles: {}
+  registerRoles: {},
+  userDetails: {}
 }
