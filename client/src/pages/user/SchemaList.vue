@@ -77,23 +77,23 @@
           <Button @click="handleSelectAll(false)">Cancel all selected</Button>
         </div>
         <div style="float: right; display: inline-block">
-          <Page placement="top" :total="total" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
-        </div>
-      </div>
-    </div>
-    <div v-if="datashow === 'dataC'">
-      <Table ref="selection" @on-sort-change="sortTableData" highlight-row :columns="setColumns2" :data="instanceEntries" :border="config.border" :stripe="config.stripe"></Table>
-      <div style="margin: 10px;overflow: hidden">
-        <div style="float: right;">
-          <Page placement="top" :total="dataTotalC" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+          <Page placement="top" :total="dataTotal" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
         </div>
       </div>
     </div>
     <div v-if="datashow === 'dataU'">
-      <Table ref="selection" @on-sort-change="sortTableData" highlight-row :columns="setColumns" :data="instanceEntries" :border="config.border" :stripe="config.stripe"></Table>
+      <Table ref="selection" @on-sort-change="sortTableData" highlight-row :columns="setColumns2" :data="instanceEntries" :border="config.border" :stripe="config.stripe"></Table>
       <div style="margin: 10px;overflow: hidden">
         <div style="float: right;">
           <Page placement="top" :total="dataTotalU" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+        </div>
+      </div>
+    </div>
+    <div v-if="datashow === 'dataC'">
+      <Table ref="selection" @on-sort-change="sortTableData" highlight-row :columns="setColumns" :data="instanceEntries" :border="config.border" :stripe="config.stripe"></Table>
+      <div style="margin: 10px;overflow: hidden">
+        <div style="float: right;">
+          <Page placement="top" :total="dataTotalC" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
         </div>
       </div>
     </div>
