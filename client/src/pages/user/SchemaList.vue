@@ -81,7 +81,7 @@
         </div>
       </div>
     </div>
-    <div v-if="datashow === 'dataC'">
+    <div v-if="datashow === 'dataU'">
       <Table ref="selection" @on-sort-change="sortTableData" highlight-row :columns="setColumns2" :data="instanceEntries" :border="config.border" :stripe="config.stripe"></Table>
       <div style="margin: 10px;overflow: hidden">
         <div style="float: right;">
@@ -89,7 +89,7 @@
         </div>
       </div>
     </div>
-    <div v-if="datashow === 'dataU'">
+    <div v-if="datashow === 'dataC'">
       <Table ref="selection" @on-sort-change="sortTableData" highlight-row :columns="setColumns" :data="instanceEntries" :border="config.border" :stripe="config.stripe"></Table>
       <div style="margin: 10px;overflow: hidden">
         <div style="float: right;">
@@ -714,9 +714,6 @@
       }
     },
     mounted () {
-      console.log('dataTotal', this.dataTotal)
-      console.log('dataTotalC', this.dataTotalC)
-      console.log('dataTotalu', this.dataTotalU)
       this.currentFlowzId = this.$route.params.id.replace(/-/g, '_')
       this.total = this.dataTotal
       axios.get(config.usermodulerole)
