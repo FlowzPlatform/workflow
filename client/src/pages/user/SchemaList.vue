@@ -723,13 +723,18 @@
         let users = _.filter(res.data.data, {'module': module})
         this.stageClaimUsers.push({value: 'noValue', label: '-- Unassign User --'})
         for (let i = 0; i < users.length; i++) {
-          axios.get(config.userdetails + users[i].userId)
-          .then((response) => {
-            this.stageClaimUsers.push({value: users[i].userId, label: response.data.data[0].fullname})
-          })
-          .catch((error) => {
-            console.log(error)
-          })
+          if (this.$store.state.userDetails[users[i].userId]) {
+            this.stageClaimUsers.push({value: users[i].userId, label: this.$store.state.userDetails[users[i].userId].fullname})
+          } else {
+            axios.get(config.userdetails + users[i].userId)
+            .then((response) => {
+              this.stageClaimUsers.push({value: users[i].userId, label: response.data.data[0].fullname})
+              this.$store.state.userDetails[users[i].userId] = response.data.data[0]
+            })
+            .catch((error) => {
+              console.log(error)
+            })
+          }
         }
       })
       .catch((err) => {
