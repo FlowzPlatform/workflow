@@ -90,6 +90,22 @@ module.exports = function (generalGroup, element, bpmnFactory, translate, option
     });
     generalGroup.entries.push(SchemaEntry);
   }
+  if (is(element, 'bpmn:ComplexGateway')) {
+    let condition = entryFactory.textField({
+      id: 'condition',
+      label: translate('Condition'),
+      modelProperty: 'condition'
+    });
+    generalGroup.entries.push(condition)
+  }
+  if (is(element, 'bpmn:ComplexGateway')) {
+    let var_name = entryFactory.textField({
+      id: 'var_name',
+      label: translate('Variable Name'),
+      modelProperty: 'var_name'
+    });
+    generalGroup.entries.push(var_name)
+  }
   
 
 };
