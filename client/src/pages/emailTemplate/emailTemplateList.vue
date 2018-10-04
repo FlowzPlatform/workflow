@@ -8,7 +8,7 @@
       <Table border highlight-row :columns="columns7" class="tableCss" :data="data6"></Table>
     </div>
     <div style="margin-top: 20px; float:right">
-      <Page :total="total" show-sizer />
+      <Page :total="total" :current="cpage" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
     </div>
   </div>
 </template>
@@ -20,7 +20,10 @@ import _ from 'lodash'
 export default {
   data () {
     return {
-      total: '',
+      cpage: 1,
+      total: 0,
+      skip: 0,
+      limit: 10,
       flag: false,
       updateTemplateid: '',
       newTemplate: true,
@@ -68,7 +71,6 @@ export default {
                 },
                 on: {
                   click: () => {
-                    console.log(params)
                     this.$router.push({name: 'editemailtemplate', params: {id: params.row.id}})
                   }
                 }
@@ -169,21 +171,37 @@ export default {
       this.templateName = ''
       this.GetHtmlOfEditor = '<p>Hello</p>'
       this.GetHtmlContent = '<p>Hello</p>'
+    },
+    handlePage (page) {
+      this.cpage = page
+      this.skip = (page * this.limit) - this.limit
+      this.init()
+    },
+    handlePagesize (size) {
+      this.limit = size
+      this.skip = 0
+      this.init()
+    },
+    init () {
+      saveemailTemplate.get(null, {
+        subscriptionId: this.$store.state.subscription,
+        userId: this.$store.state.user._id,
+        $skip: this.skip,
+        $limit: this.limit
+      })
+      .then((res) => {
+        this.flag = true
+        this.data6 = res.data.data
+        this.total = res.data.data.length
+      })
+      .catch((err) => {
+        console.log(err)
+        this.$Notice.error({duration: '3', title: err.message, desc: ''})
+      })
     }
   },
   mounted () {
-    saveemailTemplate.get(null, {
-      'user': this.$store.state.user._id
-    })
-    .then((res) => {
-      this.flag = true
-      this.data6 = res.data.data
-      this.total = res.data.data.length
-    })
-    .catch((err) => {
-      console.log(err)
-      this.$Notice.error({duration: '3', title: err.message, desc: ''})
-    })
+    this.init()
   },
   feathers: {
     'emailtemplate': {

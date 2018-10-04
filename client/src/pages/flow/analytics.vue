@@ -113,6 +113,8 @@ import _ from 'lodash'
 import moment from 'moment'
 import $ from 'jquery'
 import dflowzdata from '@/api/dflowzdata'
+// import config from '@/config'
+// import axios from 'axios'
 
 export default {
   name: 'dashboard',
@@ -301,7 +303,96 @@ export default {
       }
     },
     searchInstances () {
+      this.tableData = []
+      this.colviewData = []
       // this.tableData = _.filter(this.tableData, (o) => { return o.id === this.searchQuery })
+      let query = this.searchQuery
+      let sort = this.selectedSortBy
+      console.log('query', query, sort)
+      this.dataLoading = true
+      this.tableLoading = true
+
+      // New Custom Dynamic FLowz Data call
+      let heads = {
+        ftablename: this.flowzData.id.replace(/-/g, '_')
+      }
+      if (query === null) {
+        query = {
+          text: '',
+          filter: ''
+        }
+      }
+      let params = {
+        $skip: this.skip,
+        $limit: this.limit,
+        '_currentStatus': true,
+        '_state': this.$route.params.stateid,
+        // 'id[$search]': '^' + query.text
+        '$search': query,
+        $group: '_uuid'
+      }
+      if (sort !== undefined || sort !== null) {
+        if (sort === 'asc') {
+          params['$sort[' + sort + ']'] = 1
+        } else if (sort === 'desc') {
+          params['$sort[' + sort + ']'] = -1
+        }
+      }
+      dflowzdata.get(null, params, heads)
+      .then(res => {
+        console.log('res: ', res)
+        if (res.data.data.length > 0) {
+          this.total = res.data.total
+          let tableDataArr = []
+          for (let item of res.data.data) {
+            let value = {
+              _uuid: item.group,
+              states: item.reduction
+            }
+            tableDataArr.push(value)
+          }
+          // let groupedData = _.groupBy(res.data.data, (o) => { return o._uuid })
+          // console.log('Grouped Data: ', groupedData)
+          // // let tableGroupedArray = []
+          // for (let item in groupedData) {
+          //   console.log('Item: ', item)
+          //   let value = groupedData[item]
+          //   console.log('Value: ', value)
+          // }
+          // console.log('tableGroupedArray: ', tableGroupedArray)
+          this.tableData = tableDataArr
+          // this.colviewData = tableDataArr
+          // this.colviewData = tableDataArr
+          for (let inst in tableDataArr) {
+            for (let items in tableDataArr[inst]) {
+              if (items === 'states') {
+                for (let [inx, item] of tableDataArr[inst][items].entries()) {
+                  if (inx === 0) {
+                    item._first = true
+                  }
+                  this.colviewData.push(item)
+                }
+              }
+            }
+          }
+          this.tableLoading = false
+        } else {
+          this.tableData = []
+          this.colviewData = []
+          this.tableLoading = false
+        }
+      }).catch(e => {
+        this.$Loading.error()
+        this.dataLoading = false
+        this.tableLoading = false
+        console.log('error', e)
+        this.bLoading = false
+        if (e.response.data.message) {
+          this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+        } else {
+          this.$Notice.error({title: 'Error', desc: e.message})
+        }
+      })
     },
     ok () {
       this.$Message.success('Saved')
@@ -343,6 +434,14 @@ export default {
               // alert('Completed Task')
               finalValue.isCurrentTask = false
               finalValue.isCompletedTask = true
+              // axios.get(config.userdetails + obj.userId)
+              // .then((response) => {
+              //   finalValue.obj['userDetails'] = response.data.data[0]
+              //   // console.log('user details: ', obj['userDetails'])
+              // })
+              // .catch((error) => {
+              //   console.log(error)
+              // })
             }
             // if (obj) {
             //   obj['createdAt'] = params.row.createdAt

@@ -131,7 +131,7 @@
           </div>
           </TabPane>
           <TabPane v-if="this.$store.state.role === 2" :label="'Work Pool ('+ dataTotalC + ')'" icon="lock-combination">
-            <schemalist :schema="dataSchema" :datashow="'dataU'" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotalC="dataTotalC" :data="dataData2" :configuration="configuration" :instanceEntries="dataClaim" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+            <schemalist :schema="dataSchema" :datashow="'dataC'" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotalC="dataTotalC" :data="dataData2" :configuration="configuration" :instanceEntries="dataClaim" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
             <div style="padding: 10px">
             <div class="row" v-if="id != null">
               <div class="col-md-12" id="top">
@@ -188,7 +188,7 @@
           </div>
           </TabPane>
           <TabPane v-if="this.$store.state.role === 2" :label="'In Progress ('+ dataTotalU + ')'" icon="lock-combination">
-            <schemalist :schema="dataSchema" :pageno="pageno" :datashow="'dataC'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotalU="dataTotalU" :data="dataClaim" :configuration="configuration" :instanceEntries="dataUnclaim" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+            <schemalist :schema="dataSchema" :pageno="pageno" :datashow="'dataU'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotalU="dataTotalU" :data="dataClaim" :configuration="configuration" :instanceEntries="dataUnclaim" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
           </TabPane>
           </Tabs>
         </div>
@@ -206,7 +206,7 @@
       <schemasubformview ref="schemasubformviewfile" :schemainstance="formSchemaInstancefile" id="schemasubformview"></schemasubformview>
     </div>
     <div v-if="email">
-      <email :btnArr="btnArr" :flag="flag" :emailSchemaId="emailSchemaId" :sendDataEmail="sendDataEmail" :iid="item.id" v-on:on-done="emailService"></email>
+      <email :btnArr="btnArr" :flag="flag" :emailSchemaId="emailSchemaId" :sendDataEmail="sendDataEmail" :iid="item.id" v-on:on-done="emailService" :tableId="tableId" :taskName="taskName"></email>
     </div>
     </div>
   </div>
@@ -240,6 +240,8 @@ export default {
   },
   data () {
     return {
+      tableId: '',
+      taskName: '',
       formSchemaInstancefile: {
         data: [],
         entity: []
@@ -840,6 +842,8 @@ export default {
             this.id = null
             this.schemabinding = true
             if (nextTargetId.hasOwnProperty('emailtemplate')) {
+              this.tableId = this.$route.params.id
+              this.taskName = this.$route.params.stateid
               saveemailTemplate.get(nextTargetId.emailtemplate)
               .then((res) => {
                 setTimeout(() => {
@@ -1549,7 +1553,7 @@ export default {
     },
     'dflowzdata': {
       _created (data) {
-        // console.log('================created==============', data)
+        console.log('================created==============', data)
         let keys = Object.keys(data)
         for (let tName of keys) {
           if (tName === this.$route.params.id.replace(/-/g, '_')) {
@@ -1570,7 +1574,6 @@ export default {
       _updated (data) {
       },
       _patched (data) {
-        // console.log('==============patched============', data)
         let keys = Object.keys(data)
         for (let tName of keys) {
           if (data[tName]._currentStatus) {
@@ -1582,21 +1585,19 @@ export default {
                 this.dataData = this.instanceEntries
               }
             }
-            // console.log(this.$store.state.role === 2, data)
-            if (this.$store.state.role === 2 && data[tName] !== undefined) {
-              // console.log('dataClaim', this.dataClaim)
-              // console.log('dataClaim', data[tName])
-              // console.log('dataUnclaim', this.dataUnclaim)
+            if (this.$store.state.role === 2) {
               if (data[tName]._claimUser === '') {
-                let inx = _.findIndex(this.dataUnclaim, (o) => { return o.id === data[tName].id })
-                this.dataUnclaim.splice(inx, 1)
-                this.dataClaim.push(data[tName])
-                // console.log(inx)
-              } else {
                 let inx = _.findIndex(this.dataClaim, (o) => { return o.id === data[tName].id })
                 this.dataClaim.splice(inx, 1)
                 this.dataUnclaim.push(data[tName])
-                // console.log(inx)
+                this.dataTotalU = this.dataTotalU + 1
+                this.dataTotalC = this.dataTotalC -1
+              } else {
+                let inx = _.findIndex(this.dataUnclaim, (o) => { return o.id === data[tName].id })
+                this.dataUnclaim.splice(inx, 1)
+                this.dataClaim.push(data[tName])
+                this.dataTotalU = this.dataTotalU - 1
+                this.dataTotalC = this.dataTotalC + 1
               }
             }
             let finx = _.findIndex(this.flowzList, {id: this.$route.params.id})

@@ -55,7 +55,7 @@
                 
               </div>
             </div>
-            <div v-if="action === 'filter'" style="margin-top: 10px;">
+            <div v-if="action === 'assign'" style="margin-top: 10px;">
               <div class="col-md-2" style="margin-top: 20px;">
                 <Select v-model="selectedAssignUser" style="width:200px">
                   <Option v-for="item in stageClaimUsers" :value="item.value" :key="item.value">{{ item.label }}</Option>
@@ -77,23 +77,23 @@
           <Button @click="handleSelectAll(false)">Cancel all selected</Button>
         </div>
         <div style="float: right; display: inline-block">
-          <Page placement="top" :total="total" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
-        </div>
-      </div>
-    </div>
-    <div v-if="datashow === 'dataC'">
-      <Table ref="selection" @on-sort-change="sortTableData" highlight-row :columns="setColumns2" :data="instanceEntries" :border="config.border" :stripe="config.stripe"></Table>
-      <div style="margin: 10px;overflow: hidden">
-        <div style="float: right;">
-          <Page placement="top" :total="dataTotalC" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+          <Page placement="top" :total="dataTotal" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
         </div>
       </div>
     </div>
     <div v-if="datashow === 'dataU'">
-      <Table ref="selection" @on-sort-change="sortTableData" highlight-row :columns="setColumns" :data="instanceEntries" :border="config.border" :stripe="config.stripe"></Table>
+      <Table ref="selection" @on-sort-change="sortTableData" highlight-row :columns="setColumns2" :data="instanceEntries" :border="config.border" :stripe="config.stripe"></Table>
       <div style="margin: 10px;overflow: hidden">
         <div style="float: right;">
           <Page placement="top" :total="dataTotalU" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+        </div>
+      </div>
+    </div>
+    <div v-if="datashow === 'dataC'">
+      <Table ref="selection" @on-sort-change="sortTableData" highlight-row :columns="setColumns" :data="instanceEntries" :border="config.border" :stripe="config.stripe"></Table>
+      <div style="margin: 10px;overflow: hidden">
+        <div style="float: right;">
+          <Page placement="top" :total="dataTotalC" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
         </div>
       </div>
     </div>
@@ -130,8 +130,8 @@
           value: 'search',
           label: 'SEARCH'
         }, {
-          value: 'filter',
-          label: 'FILTER'
+          value: 'assign',
+          label: 'ASSIGN'
         }],
         dataActionRole2: [{
           value: 'search',
@@ -723,18 +723,27 @@
         let users = _.filter(res.data.data, {'module': module})
         this.stageClaimUsers.push({value: 'noValue', label: '-- Unassign User --'})
         for (let i = 0; i < users.length; i++) {
-          axios.get(config.userdetails + users[i].userId)
-          .then((response) => {
-            this.stageClaimUsers.push({value: users[i].userId, label: response.data.data[0].fullname})
-          })
-          .catch((error) => {
-            console.log(error)
-          })
+          if (this.$store.state.userDetails[users[i].userId]) {
+            this.stageClaimUsers.push({value: users[i].userId, label: this.$store.state.userDetails[users[i].userId].fullname})
+          } else {
+            axios.get(config.userdetails + users[i].userId)
+            .then((response) => {
+              this.stageClaimUsers.push({value: users[i].userId, label: response.data.data[0].fullname})
+              this.$store.state.userDetails[users[i].userId] = response.data.data[0]
+            })
+            .catch((error) => {
+              console.log(error)
+            })
+          }
         }
       })
       .catch((err) => {
         console.log(err)
       })
+      setTimeout(() => {
+        let tempClaimusers = _.uniqWith(this.stageClaimUsers, _.isEqual)
+        this.stageClaimUsers = tempClaimusers
+      }, 3000)
     },
     methods: {
       assignUser () {

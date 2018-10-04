@@ -156,7 +156,9 @@ export default {
       if (this.$store.state.role === 1) {
         this.loading = true
         flowzModal.get(null, {
-          $paginate: false
+          $paginate: false,
+          subscriptionId: this.$store.state.subscription,
+          userId: this.$store.state.user._id
         })
         .then((response) => {
           this.loading = false
