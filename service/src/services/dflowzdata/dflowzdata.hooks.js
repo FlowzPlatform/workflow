@@ -118,7 +118,7 @@ function beforeCreate (hook) {
     console.log('err', err)
     throw new errors.BadRequest('Error', {
       errors: { message: err.toString() }
-    }); 
+    });
   }
 }
 
@@ -133,7 +133,7 @@ function afterCreate (hook) {
     hook.data._previous = hook.result.id
     delete hook.params.first
     // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', hook.data)
-    return hook.app.service('dflowzdata').create(hook.data, hook.params).then(res => {
+    return hook.app.service(hook.path).create(hook.data, hook.params).then(res => {
       return hook;
     }).catch(err => {
       console.log('err', err)
@@ -144,7 +144,7 @@ function afterCreate (hook) {
   } else {
     // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', hook.datas)
     hook.params.headers.normalpatch = true
-    return hook.app.service('dflowzdata').patch(hook.data._previous, {
+    return hook.app.service(hook.path).patch(hook.data._previous, {
       // _state: hook.data._state,
       _next: hook.result.id,
       _completedAt: new Date().toISOString()
@@ -193,7 +193,7 @@ function beforePatch (hook) {
       errors: { message: 'BadRequest' }
     });
   }
-  
+
 }
 
 function afterPatch (hook) {
@@ -202,7 +202,7 @@ function afterPatch (hook) {
     // console.log('..................................... ', hook.params.headers.normalpatch)
   } else {
     if (hook.params.done1) {
-      return hook.app.service('dflowzdata').get(hook.id, hook.params).then(resp => {
+      return hook.app.service(hook.path).get(hook.id, hook.params).then(resp => {
         hook.data._state = hook.data._nextTarget
         hook.data._nextTarget = ''
         hook.data._createdAt = new Date().toISOString()
@@ -214,7 +214,7 @@ function afterPatch (hook) {
         hook.data._next = null
         hook.data._uuid = resp._uuid
         delete hook.data.id
-        return hook.app.service('dflowzdata').create(hook.data, hook.params).then(res => {
+        return hook.app.service(hook.path).create(hook.data, hook.params).then(res => {
           return hook;
         }).catch(err => {
           console.log('err', err)
