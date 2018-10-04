@@ -29,9 +29,14 @@
 const createService = require('./email-receive.class.js');
 const hooks = require('./email-receive.hooks');
 
+const createDflowzData = require('../dflowzdata/dflowzdata.class.js');
+const hooksDflowzData = require('../dflowzdata/dflowzdata.hooks');
+
+
 module.exports = function () {
   const app = this;
   const paginate = app.get('paginate');
+  const Model = app.get('rethinkdbClient');
 
   const options = {
     name: 'email-receive',
@@ -54,4 +59,16 @@ module.exports = function () {
   const service = app.service('email-receive');
 
   service.hooks(hooks);
+
+  const options1 = {
+    name: 'dflowzdataInt',
+    Model,
+    paginate,
+    app
+  };
+  // Initialize our service with any options it requires
+  app.use('/dflowzdataInt', createDflowzData(options1));
+  // Get our initialized service so that we can register hooks and filters
+  const service1 = app.service('dflowzdataInt');
+  service1.hooks(hooksDflowzData);
 };
