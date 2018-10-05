@@ -86,7 +86,7 @@
     <!-- Main Table -->
     <div v-show="rowview">
       <!-- <Table height="690" border :columns="mainColumns()" :data="tableData"></Table> -->
-      <Table :loading="tableLoading" v-if="schemaId !== null" border :columns="mainColumns()" :data="tableData"></Table>
+      <Table :loading="tableLoading" v-if="schemaId !== null" border :columns="mainColumns" :data="tableData"></Table>
       <Row style="margin-top: 4px; float: right">
         <Page placement="top" :total="total" :current="cpage" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
       </Row>
@@ -126,7 +126,6 @@ export default {
       tableData: [],
       isModel: false,
       anotherBinding: [],
-      colviewCols: [],
       colviewData: [],
       configCols: [
         {
@@ -306,9 +305,14 @@ export default {
       this.tableData = []
       this.colviewData = []
       // this.tableData = _.filter(this.tableData, (o) => { return o.id === this.searchQuery })
+      if (this.searchQuery === '') {
+        this.tableData = []
+        this.colviewData = []
+        this.populateTables()
+      }
       let query = this.searchQuery
       let sort = this.selectedSortBy
-      console.log('query', query, sort)
+      // console.log('query', query, sort)
       this.dataLoading = true
       this.tableLoading = true
 
@@ -340,7 +344,7 @@ export default {
       }
       dflowzdata.get(null, params, heads)
       .then(res => {
-        console.log('res: ', res)
+        // console.log('res: ', res)
         if (res.data.data.length > 0) {
           this.total = res.data.total
           let tableDataArr = []
@@ -407,6 +411,400 @@ export default {
         allProcess[array[key].order] = array[key]
       }
       return allProcess
+    },
+
+    getFlowz () {
+      return flowzModal.get(this.fid, {
+        $paginate: false
+      })
+      .then((res) => {
+        return (res.data)
+      }).catch(err => {
+        this.tableLoading = false
+        console.log('Error: ', err)
+        return
+      })
+    },
+
+    getSchema (id) {
+      return schemaModal.getAll(id).then(res => {
+        return res
+      }).catch(err => {
+        this.tableLoading = false
+        console.log('Error: ', err)
+        return
+      })
+    },
+
+    populateTables () {
+      this.schemaId = this.currentSchema.id
+      this.flowName = this.flowzData.name
+
+      let cols = []
+      // let colviewData = []
+      // console.log('res.data.processList: ', res.data.processList)
+      let listing = this.getByOrder(this.flowzData.processList)
+      for (let col of listing) {
+        if (col.type !== 'startevent' && col.type !== 'endevent') {
+          cols.push({
+            title: col.name || col.id,
+            key: col.id,
+            firstColumn: false,
+            show: true,
+            width: 150
+          })
+        }
+      }
+      // console.log('cols: ', cols)
+      this.anotherBinding = _.cloneDeep(cols)
+      this.configuration.fields = _.cloneDeep(cols)
+
+      // New Custom Dynamic FLowz Data call
+      let heads = {
+        ftablename: this.$route.params.id.replace(/-/g, '_')
+      }
+      dflowzdata.get(null, {
+        $skip: this.skip,
+        $limit: this.limit,
+        $group: '_uuid',
+        '$sort[_createdAt]': 1
+      }, heads)
+      .then(res => {
+        // console.log('res: ', res)
+        this.total = res.data.total
+        let tableDataArr = []
+        for (let item of res.data.data) {
+          let value = {
+            _uuid: item.group,
+            states: item.reduction
+          }
+          tableDataArr.push(value)
+        }
+        // let groupedData = _.groupBy(res.data.data, (o) => { return o._uuid })
+        // console.log('Grouped Data: ', groupedData)
+        // // let tableGroupedArray = []
+        // for (let item in groupedData) {
+        //   console.log('Item: ', item)
+        //   let value = groupedData[item]
+        //   console.log('Value: ', value)
+        // }
+        // console.log('tableGroupedArray: ', tableGroupedArray)
+        this.tableData = tableDataArr
+        // this.colviewData = tableDataArr
+        for (let inst in tableDataArr) {
+          for (let items in tableDataArr[inst]) {
+            if (items === 'states') {
+              for (let [inx, item] of tableDataArr[inst][items].entries()) {
+                if (inx === 0) {
+                  item._first = true
+                }
+                this.colviewData.push(item)
+              }
+            }
+          }
+        }
+        // console.log('this.colviewData', this.colviewData)
+        this.tableLoading = false
+      }).catch(e => {
+        this.tableLoading = false
+        this.$Loading.error()
+        console.log('error', e)
+        this.bLoading = false
+        if (e.response.data.message) {
+          this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+        } else {
+          this.$Notice.error({title: 'Error', desc: e.message})
+        }
+      })
+
+      // dataQueryModel.get(null, {
+      //   $all: true,
+      //   fid: this.fid,
+      //   $skip: this.skip,
+      //   $limit: this.limit
+      // }).then(queryresp => {
+      //   // this.$Spin.hide()
+      //   this.tableData = queryresp.data.data
+      //   colviewData = queryresp.data.data
+      //   this.total = queryresp.data.total
+      //   let listing = this.getByOrder(this.flowzData.processList)
+      //   for (let item of colviewData) {
+      //     let isfirst = false
+      //     for (let task of listing) {
+      //       if (task.type !== 'startevent' && task.type !== 'endevent') {
+      //         // flowzdataModal.get().then(res => {
+
+      //         // }).catch(e => {
+      //         //   console.log('e', e)
+      //         // })
+      //         // console.log('colviewData.stageReference ', item, task)
+      //         let dataExist = _.find(item.stageReference, {StageName: task.id})
+      //         if (!isfirst) {
+      //           task.first = false
+      //           task.className = ''
+      //           isfirst = true
+      //         } else {
+      //           task.className = 'notfirst'
+      //         }
+      //         // console.log('dataExist: ', dataExist)
+      //         let m = {
+      //           id: item.id,
+      //           task: task.name || task.id,
+      //           className: task.className
+      //         }
+      //         if (task.hasOwnProperty('first')) {
+      //           m.first = task.first
+      //         }
+      //         if (dataExist !== null && dataExist !== undefined && dataExist.hasOwnProperty('data')) {
+      //           for (let k in dataExist.data) {
+      //             m[k] = dataExist.data[k]
+      //           }
+      //           this.colviewData.push(m)
+      //         } else {
+      //           this.colviewData.push(m)
+      //         }
+      //       }
+      //     }
+      //   }
+      //   this.tableLoading = false
+      // }).catch(err => {
+      //   this.tableLoading = false
+      //   console.log('Erro: ', err)
+      // })
+    },
+    async init () {
+      this.tableLoading = true
+      // this.colviewCols = [
+      //   {
+      //     title: 'ID',
+      //     key: '_uuid',
+      //     fixed: 'left',
+      //     width: 280,
+      //     render: (h, params) => {
+      //       if (params.row._first) {
+      //         return h('div', [
+      //           h('span', {
+      //             attrs: {
+      //               title: 'Click to Copy',
+      //               class: 'clickToCopy'
+      //             },
+      //             on: {
+      //               click: () => {
+      //                 let $temp = $('<input>')
+      //                 $('body').append($temp)
+      //                 $temp.val(params.row._uuid).select()
+      //                 document.execCommand('copy')
+      //                 this.$Message.info('Copied to Clipboard')
+      //                 $temp.remove()
+      //               }
+      //             }
+      //           }, params.row._uuid),
+      //           h('span', {
+      //             attrs: {
+      //               class: 'btn btn-default btn-sm showHideBtn'
+      //             },
+      //             on: {
+      //               click: () => {
+      //                 $('.' + params.row._uuid).toggle()
+      //               }
+      //             }
+      //           }, [
+      //             h('i', {
+      //               attrs: {
+      //                 class: 'fa fa-angle-down'
+      //               }
+      //             })
+      //           ])
+      //         ])
+      //       } else {
+      //         return h('span', '')
+      //       }
+      //     }
+      //   },
+      //   {
+      //     title: 'Task',
+      //     key: '_state',
+      //     width: 150,
+      //     render: (h, params) => {
+      //       if (this.flowzData.processList[params.row._state].name && this.flowzData.processList[params.row._state].name !== '') {
+      //         return h('span', this.flowzData.processList[params.row._state].name)
+      //       } else {
+      //         return h('span', params.row._state)
+      //       }
+      //     }
+      //   }
+      // ]
+      this.colviewData = []
+      this.fid = this.$route.params.id
+
+      this.flowzData = await this.getFlowz()
+      this.currentSchema = await this.getSchema(this.flowzData.schema)
+      this.populateTables()
+
+      //   // let anyCustom = false
+      // for (let item of this.currentSchema.entity) {
+      //   if (!item.customtype) {
+      //     if (item.type === 'file') {
+      //       this.colviewCols.push({
+      //         title: item.name,
+      //         key: item.name,
+      //         width: 150,
+      //         render: (h, params) => {
+      //           let arr = []
+      //           if (params.row[item.name]) {
+      //             for (let i = 0; i < params.row[item.name].length; i++) {
+      //               arr.push(h('Button', {
+      //                 attrs: {
+      //                   type: 'info',
+      //                   style: 'margin: 2px',
+      //                   title: params.row[item.name][i].split('/').pop()
+      //                 },
+      //                 on: {
+      //                   click: () => {
+      //                     window.open(params.row[item.name][i])
+      //                   }
+      //                 }
+      //               }, [
+      //                 h('i', {
+      //                   attrs: {
+      //                     class: 'fa fa-link'
+      //                   }
+      //                 })
+      //               ]))
+      //             }
+      //             return arr
+      //           }
+      //         }
+      //       })
+      //     } else {
+      //       this.colviewCols.push({
+      //         title: item.name,
+      //         key: item.name,
+      //         width: 150
+      //       })
+      //     }
+      //   } else {
+      //     // anyCustom = true
+      //   }
+      // }
+    }
+  },
+  computed: {
+    configdata () {
+      return this.configuration.fields
+    },
+    colviewCols () {
+      let cols = []
+      cols.push({
+        title: 'ID',
+        key: '_uuid',
+        fixed: 'left',
+        width: 280,
+        render: (h, params) => {
+          if (params.row._first) {
+            return h('div', [
+              h('span', {
+                attrs: {
+                  title: 'Click to Copy',
+                  class: 'clickToCopy'
+                },
+                on: {
+                  click: () => {
+                    let $temp = $('<input>')
+                    $('body').append($temp)
+                    $temp.val(params.row._uuid).select()
+                    document.execCommand('copy')
+                    this.$Message.info('Copied to Clipboard')
+                    $temp.remove()
+                  }
+                }
+              }, params.row._uuid),
+              h('span', {
+                attrs: {
+                  class: 'btn btn-default btn-sm showHideBtn'
+                },
+                on: {
+                  click: () => {
+                    $('.' + params.row._uuid).toggle()
+                  }
+                }
+              }, [
+                h('i', {
+                  attrs: {
+                    class: 'fa fa-angle-down'
+                  }
+                })
+              ])
+            ])
+          } else {
+            return h('span', '')
+          }
+        }
+      })
+
+      cols.push({
+        title: 'Task',
+        key: '_state',
+        width: 150,
+        render: (h, params) => {
+          // console.log('%%%%%%%%%%%%%%%%%%%%%%%params.row._state%%%%%%%%%%%%%%%%%%: ', params)
+          if (this.flowzData.processList[params.row._state].name && this.flowzData.processList[params.row._state].name !== '') {
+            return h('span', this.flowzData.processList[params.row._state].name)
+          } else {
+            return h('span', params.row._state)
+          }
+        }
+      })
+
+      if (this.currentSchema) {
+        for (let item of this.currentSchema.entity) {
+          if (!item.customtype) {
+            if (item.type === 'file') {
+              cols.push({
+                title: item.name,
+                key: item.name,
+                width: 150,
+                render: (h, params) => {
+                  let arr = []
+                  if (params.row[item.name]) {
+                    for (let i = 0; i < params.row[item.name].length; i++) {
+                      arr.push(h('Button', {
+                        attrs: {
+                          type: 'info',
+                          style: 'margin: 2px',
+                          title: params.row[item.name][i].split('/').pop()
+                        },
+                        on: {
+                          click: () => {
+                            window.open(params.row[item.name][i])
+                          }
+                        }
+                      }, [
+                        h('i', {
+                          attrs: {
+                            class: 'fa fa-link'
+                          }
+                        })
+                      ]))
+                    }
+                    return arr
+                  }
+                }
+              })
+            } else {
+              cols.push({
+                title: item.name,
+                key: item.name,
+                width: 150
+              })
+            }
+          } else {
+            // anyCustom = true
+          }
+        }
+      }
+      // this.colviewCols = cols
+      return cols
     },
     mainColumns () {
       // console.log('mainColumns')
@@ -571,388 +969,7 @@ export default {
 
         // console.log('table cols: ', tableCols)
       return tableCols
-    },
-
-    getFlowz () {
-      return flowzModal.get(this.fid, {
-        $paginate: false
-      })
-      .then((res) => {
-        return (res.data)
-      }).catch(err => {
-        this.tableLoading = false
-        console.log('Error: ', err)
-        return
-      })
-    },
-
-    getSchema (id) {
-      return schemaModal.getAll(id).then(res => {
-        return res
-      }).catch(err => {
-        this.tableLoading = false
-        console.log('Error: ', err)
-        return
-      })
-    },
-
-    populateTables () {
-      this.schemaId = this.currentSchema.id
-      this.flowName = this.flowzData.name
-
-      let cols = []
-      // let colviewData = []
-      // console.log('res.data.processList: ', res.data.processList)
-      let listing = this.getByOrder(this.flowzData.processList)
-      for (let col of listing) {
-        if (col.type !== 'startevent' && col.type !== 'endevent') {
-          cols.push({
-            title: col.name || col.id,
-            key: col.id,
-            firstColumn: false,
-            show: true,
-            width: 150
-          })
-        }
-      }
-      // console.log('cols: ', cols)
-      this.anotherBinding = _.cloneDeep(cols)
-      this.configuration.fields = _.cloneDeep(cols)
-
-      // New Custom Dynamic FLowz Data call
-      let heads = {
-        ftablename: this.$route.params.id.replace(/-/g, '_')
-      }
-      dflowzdata.get(null, {
-        $skip: this.skip,
-        $limit: this.limit,
-        $group: '_uuid',
-        '$sort[_createdAt]': 1
-      }, heads)
-      .then(res => {
-        // console.log('res: ', res)
-        this.total = res.data.total
-        let tableDataArr = []
-        for (let item of res.data.data) {
-          let value = {
-            _uuid: item.group,
-            states: item.reduction
-          }
-          tableDataArr.push(value)
-        }
-        // let groupedData = _.groupBy(res.data.data, (o) => { return o._uuid })
-        // console.log('Grouped Data: ', groupedData)
-        // // let tableGroupedArray = []
-        // for (let item in groupedData) {
-        //   console.log('Item: ', item)
-        //   let value = groupedData[item]
-        //   console.log('Value: ', value)
-        // }
-        // console.log('tableGroupedArray: ', tableGroupedArray)
-        this.tableData = tableDataArr
-        // this.colviewData = tableDataArr
-        for (let inst in tableDataArr) {
-          for (let items in tableDataArr[inst]) {
-            if (items === 'states') {
-              for (let [inx, item] of tableDataArr[inst][items].entries()) {
-                if (inx === 0) {
-                  item._first = true
-                }
-                this.colviewData.push(item)
-              }
-            }
-          }
-        }
-        // console.log('this.colviewData', this.colviewData)
-        this.tableLoading = false
-      }).catch(e => {
-        this.tableLoading = false
-        this.$Loading.error()
-        console.log('error', e)
-        this.bLoading = false
-        if (e.response.data.message) {
-          this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
-        } else {
-          this.$Notice.error({title: 'Error', desc: e.message})
-        }
-      })
-
-      // dataQueryModel.get(null, {
-      //   $all: true,
-      //   fid: this.fid,
-      //   $skip: this.skip,
-      //   $limit: this.limit
-      // }).then(queryresp => {
-      //   // this.$Spin.hide()
-      //   this.tableData = queryresp.data.data
-      //   colviewData = queryresp.data.data
-      //   this.total = queryresp.data.total
-      //   let listing = this.getByOrder(this.flowzData.processList)
-      //   for (let item of colviewData) {
-      //     let isfirst = false
-      //     for (let task of listing) {
-      //       if (task.type !== 'startevent' && task.type !== 'endevent') {
-      //         // flowzdataModal.get().then(res => {
-
-      //         // }).catch(e => {
-      //         //   console.log('e', e)
-      //         // })
-      //         // console.log('colviewData.stageReference ', item, task)
-      //         let dataExist = _.find(item.stageReference, {StageName: task.id})
-      //         if (!isfirst) {
-      //           task.first = false
-      //           task.className = ''
-      //           isfirst = true
-      //         } else {
-      //           task.className = 'notfirst'
-      //         }
-      //         // console.log('dataExist: ', dataExist)
-      //         let m = {
-      //           id: item.id,
-      //           task: task.name || task.id,
-      //           className: task.className
-      //         }
-      //         if (task.hasOwnProperty('first')) {
-      //           m.first = task.first
-      //         }
-      //         if (dataExist !== null && dataExist !== undefined && dataExist.hasOwnProperty('data')) {
-      //           for (let k in dataExist.data) {
-      //             m[k] = dataExist.data[k]
-      //           }
-      //           this.colviewData.push(m)
-      //         } else {
-      //           this.colviewData.push(m)
-      //         }
-      //       }
-      //     }
-      //   }
-      //   this.tableLoading = false
-      // }).catch(err => {
-      //   this.tableLoading = false
-      //   console.log('Erro: ', err)
-      // })
-    },
-    async init () {
-      this.tableLoading = true
-      this.colviewCols = [
-        {
-          title: 'ID',
-          key: '_uuid',
-          fixed: 'left',
-          width: 280,
-          render: (h, params) => {
-            if (params.row._first) {
-              return h('div', [
-                h('span', {
-                  attrs: {
-                    title: 'Click to Copy',
-                    class: 'clickToCopy'
-                  },
-                  on: {
-                    click: () => {
-                      let $temp = $('<input>')
-                      $('body').append($temp)
-                      $temp.val(params.row._uuid).select()
-                      document.execCommand('copy')
-                      this.$Message.info('Copied to Clipboard')
-                      $temp.remove()
-                    }
-                  }
-                }, params.row._uuid),
-                h('span', {
-                  attrs: {
-                    class: 'btn btn-default btn-sm showHideBtn'
-                  },
-                  on: {
-                    click: () => {
-                      $('.' + params.row._uuid).toggle()
-                    }
-                  }
-                }, [
-                  h('i', {
-                    attrs: {
-                      class: 'fa fa-angle-down'
-                    }
-                  })
-                ])
-              ])
-            } else {
-              return h('span', '')
-            }
-          }
-          // render: (h, params) => {
-          //   if (params.row.hasOwnProperty('first')) {
-          //     if (params.row.first) {
-          //       console.log('Id: ', params.row.id)
-          //       return h('div', [
-          //         h('span', {
-          //           attrs: {
-          //             title: 'Click to Copy',
-          //             class: 'clickToCopy'
-          //           },
-          //           on: {
-          //             click: () => {
-          //               var $temp = $('<input>')
-          //               $('body').append($temp)
-          //               $temp.val(params.row.id).select()
-          //               document.execCommand('copy')
-          //               this.$Message.info('Copied to Clipboard')
-          //               $temp.remove()
-          //             }
-          //           }
-          //         }, params.row._uuid),
-          //         h('span', {
-          //           attrs: {
-          //             class: 'btn btn-default btn-sm showHideBtn'
-          //           },
-          //           on: {
-          //             click: () => {
-          //               for (let [inx, item] of this.colviewData.entries()) {
-          //                 if (item.id === params.row.id && params.index !== inx) {
-          //                   if (!params.row.first) {
-          //                     item.className = ''
-          //                   } else {
-          //                     item.className = 'notfirst'
-          //                   }
-          //                 }
-          //                 if (params.index === inx) {
-          //                   item.first = !item.first
-          //                 }
-          //               }
-          //             }
-          //           }
-          //         }, [
-          //           h('i', {
-          //             attrs: {
-          //               class: 'fa fa-angle-up'
-          //             }
-          //           })
-          //         ])
-          //       ])
-          //     } else {
-          //       console.log('Id: ', params.row.id)
-          //       return h('div', [
-          //         h('span', {
-          //           attrs: {
-          //             title: 'Click to Copy',
-          //             class: 'clickToCopy'
-          //           },
-          //           on: {
-          //             click: () => {
-          //               var $temp = $('<input>')
-          //               $('body').append($temp)
-          //               $temp.val(params.row.id).select()
-          //               document.execCommand('copy')
-          //               this.$Message.info('Copied to Clipboard')
-          //               $temp.remove()
-          //             }
-          //           }
-          //         }, params.row._uuid),
-          //         h('span', {
-          //           attrs: {
-          //             class: 'btn btn-sm showHideBtn'
-          //           },
-          //           on: {
-          //             click: () => {
-          //               for (let [inx, item] of this.colviewData.entries()) {
-          //                 if (item.id === params.row.id && params.index !== inx) {
-          //                   if (!params.row.first) {
-          //                     item.className = ''
-          //                   } else {
-          //                     item.className = 'notfirst'
-          //                   }
-          //                 }
-          //                 if (params.index === inx) {
-          //                   item.first = !item.first
-          //                 }
-          //               }
-          //             }
-          //           }
-          //         }, [
-          //           h('i', {
-          //             attrs: {
-          //               class: 'fa fa-angle-down'
-          //             }
-          //           })
-          //         ])
-          //       ])
-          //     }
-          //   }
-          // }
-        },
-        {
-          title: 'Task',
-          key: '_state',
-          width: 150,
-          render: (h, params) => {
-            if (this.flowzData.processList[params.row._state].name && this.flowzData.processList[params.row._state].name !== '') {
-              return h('span', this.flowzData.processList[params.row._state].name)
-            } else {
-              return h('span', params.row._state)
-            }
-          }
-        }
-      ]
-      this.colviewData = []
-      this.fid = this.$route.params.id
-
-      this.flowzData = await this.getFlowz()
-      this.currentSchema = await this.getSchema(this.flowzData.schema)
-      this.populateTables()
-
-      //   // let anyCustom = false
-      for (let item of this.currentSchema.entity) {
-        if (!item.customtype) {
-          if (item.type === 'file') {
-            this.colviewCols.push({
-              title: item.name,
-              key: item.name,
-              width: 150,
-              render: (h, params) => {
-                let arr = []
-                if (params.row[item.name]) {
-                  for (let i = 0; i < params.row[item.name].length; i++) {
-                    arr.push(h('Button', {
-                      attrs: {
-                        type: 'info',
-                        style: 'margin: 2px',
-                        title: params.row[item.name][i].split('/').pop()
-                      },
-                      on: {
-                        click: () => {
-                          window.open(params.row[item.name][i])
-                        }
-                      }
-                    }, [
-                      h('i', {
-                        attrs: {
-                          class: 'fa fa-link'
-                        }
-                      })
-                    ]))
-                  }
-                  return arr
-                }
-              }
-            })
-          } else {
-            this.colviewCols.push({
-              title: item.name,
-              key: item.name,
-              width: 150
-            })
-          }
-        } else {
-          // anyCustom = true
-        }
-      }
     }
-  },
-  computed: {
-    configdata () {
-      return this.configuration.fields
-    }
-    // colviewCols () {
     //   this.colviewCols = []
 
     //   let cols = []
@@ -983,6 +1000,100 @@ export default {
     },
     '$store.state.updateView': function (newValue, oldValue) {
       this.init()
+    }
+  },
+  feathers: {
+    'dflowzdata': {
+      _created (data) {
+        // console.log('================created==============', data)
+        let keys = Object.keys(data)
+        for (let tName of keys) {
+          if (tName === this.$route.params.id.replace(/-/g, '_')) {
+            if (this.tableData.length < this.limit) {
+              // console.log('data[tName]._uuid: ', data[tName]._uuid)
+              let findIndex = _.findIndex(this.tableData, (o) => { return o._uuid === data[tName]._uuid })
+              // let findIndexCol = _.findIndex(this.colviewData, (o) => { return o._uuid === data[tName]._uuid })
+              let findIndexCol = _.findLastIndex(this.colviewData, (o) => { return o._uuid === data[tName]._uuid })
+              // console.log('findIndex: ', findIndex)
+              if (findIndex === -1) {
+                let value = {
+                  _uuid: data[tName]._uuid,
+                  states: []
+                }
+
+                value.states.push(data[tName])
+                // console.log('value: ', value)
+                this.tableData.push(value)
+                data[tName]['_first'] = true
+                this.colviewData.push(data[tName])
+              } else {
+                // console.log('Index Found: ', findIndex, findIndexCol)
+                // console.log('ThisTableData: ', this.tableData[findIndex])
+                // console.log('this coldata: ', this.colviewData[findIndexCol])
+                this.tableData[findIndex].states.push(data[tName])
+                this.colviewData.splice((findIndexCol + 1), 0, data[tName])
+              }
+            }
+          }
+        }
+      },
+      _updated (data) {
+      },
+      _patched (data) {
+        let keys = Object.keys(data)
+        for (let tName of keys) {
+          if (data[tName]._currentStatus) {
+            if (this.$store.state.role === 1) {
+              if (data[tName]._currentStatus && data[tName]._state === this.$route.params.stateid) {
+                let inx = _.findIndex(this.instanceEntries, (o) => { return o.id === data[tName].id })
+                this.instanceEntries.splice(inx, 1)
+                this.instanceEntries.push(data[tName])
+                this.dataData = this.instanceEntries
+              }
+            }
+            if (this.$store.state.role === 2) {
+              if (data[tName]._claimUser === '') {
+                let inx = _.findIndex(this.dataClaim, (o) => { return o.id === data[tName].id })
+                this.dataClaim.splice(inx, 1)
+                this.dataUnclaim.push(data[tName])
+                this.dataTotalU = this.dataTotalU + 1
+                this.dataTotalC = this.dataTotalC - 1
+              } else {
+                let inx = _.findIndex(this.dataUnclaim, (o) => { return o.id === data[tName].id })
+                this.dataUnclaim.splice(inx, 1)
+                this.dataClaim.push(data[tName])
+                this.dataTotalU = this.dataTotalU - 1
+                this.dataTotalC = this.dataTotalC + 1
+              }
+            }
+            let finx = _.findIndex(this.flowzList, {id: this.$route.params.id})
+            if (finx !== -1 && !data[tName]._currentStatus && data[tName]._next === null) {
+              if (this.flowzList[finx].processList[data[tName]._state].count > 0) {
+                this.flowzList[finx].processList[data[tName]._state].count--
+              }
+              if (this.flowzList[finx].count > 0) {
+                this.flowzList[finx].count--
+              }
+            }
+          }
+        }
+      },
+      _removed (data) {
+        // let keys = Object.keys(data)
+        // for (let tName of keys) {
+        //   if (data[tName]._currentStatus) {
+        //     let finx = _.findIndex(this.flowzList, {id: tName.replace(/_/g, '-')})
+        //     if (finx !== -1) {
+        //       if (this.flowzList[finx].processList[data[tName]._state].count > 0) {
+        //         this.flowzList[finx].processList[data[tName]._state].count--
+        //       }
+        //       if (this.flowzList[finx].count > 0) {
+        //         this.flowzList[finx].count--
+        //       }
+        //     }
+        //   }
+        // }
+      }
     }
   }
 }

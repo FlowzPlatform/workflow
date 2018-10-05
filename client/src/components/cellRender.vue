@@ -263,20 +263,22 @@ export default {
     // },
   },
   async created () {
-    this.cellLoading = true
-    if (this.$store.state.userDetails[this.item.obj.userId]) {
-      this.item.obj['userDetails'] = this.$store.state.userDetails[this.item.obj.userId]
-      this.cellLoading = false
-    } else {
-      await axios.get(config.userdetails + this.item.obj.userId)
-      .then((response) => {
-        this.item.obj['userDetails'] = response.data.data[0]
-        this.$store.state.userDetails[this.item.obj.userId] = response.data.data[0]
+    if (this.item.obj.userId) {
+      this.cellLoading = true
+      if (this.$store.state.userDetails[this.item.obj.userId]) {
+        this.item.obj['userDetails'] = this.$store.state.userDetails[this.item.obj.userId]
         this.cellLoading = false
-      })
-      .catch((error) => {
-        console.log(error)
-      })
+      } else {
+        await axios.get(config.userdetails + this.item.obj.userId)
+        .then((response) => {
+          this.item.obj['userDetails'] = response.data.data[0]
+          this.$store.state.userDetails[this.item.obj.userId] = response.data.data[0]
+          this.cellLoading = false
+        })
+        .catch((error) => {
+          console.log(error)
+        })
+      }
     }
   }
 }
