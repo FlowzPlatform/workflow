@@ -87,7 +87,7 @@ let beforeFind = function (hook) {
 
 function beforeCreate (hook) {
   try {
-    // console.log('before create ================================', hook.params)
+    // console.log('before create ================================', hook.params, hook.data)
     hook.params.done = true
     if (hook.params.headers.ftablename !== undefined && hook.data._state !== undefined) {
       let regex = /_/g
@@ -143,6 +143,7 @@ function afterCreate (hook) {
     // hook.data._createdAt = new Date().toISOString()
     hook.data._previous = hook.result.id
     delete hook.params.first
+    delete hook.data.id
     // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', hook.data)
     return hook.app.service(hook.path).create(hook.data, hook.params).then(res => {
       return hook;
@@ -153,8 +154,8 @@ function afterCreate (hook) {
       });
     })
   } else {
-    // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', hook.datas)
     hook.params.headers.normalpatch = true
+    // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', hook.data._previous, hook.result.id)
     return hook.app.service(hook.path).patch(hook.data._previous, {
       // _state: hook.data._state,
       _next: hook.result.id,
@@ -167,7 +168,7 @@ function afterCreate (hook) {
 }
 
 function beforePatch (hook) {
-  // console.log('beforePatch =============================>>>>>>>>>>>>>>>>>>>>', hook.params)
+  // console.log('beforePatch =============================>>>>>>>>>>>>>>>>>>>>', hook.params, hook.id, hook.data)
   hook.params.done1 = true
   if (hook.params.headers.ftablename !== undefined) {
       if (hook.params.headers.normalpatch !== undefined) {
@@ -184,6 +185,7 @@ function beforePatch (hook) {
             // hook.data._userId = ''
             // hook.data._claimUser = ''
             hook.data._completedAt = new Date().toISOString()
+            // console.log('before patchOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO', hook.data)
             return hook;
           }).catch(err => {
             console.log('err', err)
@@ -213,6 +215,7 @@ function afterPatch (hook) {
     // console.log('..................................... ', hook.params.headers.normalpatch)
   } else {
     if (hook.params.done1) {
+      // console.log('111111111111111111111111111111111111111111111111111111111111111111', hook.path)
       return hook.app.service(hook.path).get(hook.id, hook.params).then(resp => {
         hook.data._state = hook.data._nextTarget
         hook.data._nextTarget = ''
@@ -225,6 +228,7 @@ function afterPatch (hook) {
         hook.data._next = null
         hook.data._uuid = resp._uuid
         delete hook.data.id
+        // console.log('???????????????????????????????????????????????????????????????//', hook.path)
         return hook.app.service(hook.path).create(hook.data, hook.params).then(res => {
           return hook;
         }).catch(err => {

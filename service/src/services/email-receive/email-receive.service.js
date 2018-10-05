@@ -48,7 +48,7 @@ module.exports = function () {
   // Initialize our service with any options it requires
   app.use('/email-receive', createService(options));
 
-  app.use('/email-receive/:finstanceId/:taskid', {
+  app.use('/email-receive/:id/:targetid/:flowid/:stateid', {
     find (data, params) {
       // do complex stuff here
       return serviceObj.updateStatus(data, params);
