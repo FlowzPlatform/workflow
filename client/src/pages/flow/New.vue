@@ -176,7 +176,6 @@
                     for (let [inx, item] of data.definitions.BPMNDiagram.BPMNPlane.BPMNShape.entries()) {
                       let m = _.find(allProcess, {_id: item._bpmnElement})
                       if (m !== undefined && m !== null) {
-                        console.log('m', m.type)
                         if (m.type === 'sendproofmail') {
                           this.flowObject.processList[m._id] = {
                             id: m._id,
