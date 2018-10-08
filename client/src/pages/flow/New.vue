@@ -190,6 +190,17 @@
                             emailtemplate: m._emailtemplate || '',
                             target: this.getTargetId(m, jsonXML)
                           }
+                        } else if (m.type === 'exclusivegateway' || m.type === 'complexgateway') {
+                          console.log(m)
+                          this.flowObject.processList[m._id] = {
+                            id: m._id,
+                            name: m._name || '',
+                            type: m.type,
+                            order: inx,
+                            condition: m._condition || '',
+                            var_name: m._var_name || '',
+                            target: this.getTargetId(m, jsonXML)
+                          }
                         } else {
                           this.flowObject.processList[m._id] = {
                             id: m._id,
