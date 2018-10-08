@@ -176,6 +176,7 @@
                     for (let [inx, item] of data.definitions.BPMNDiagram.BPMNPlane.BPMNShape.entries()) {
                       let m = _.find(allProcess, {_id: item._bpmnElement})
                       if (m !== undefined && m !== null) {
+                        console.log('m', m.type)
                         if (m.type === 'sendproofmail') {
                           this.flowObject.processList[m._id] = {
                             id: m._id,
@@ -188,6 +189,17 @@
                               user: m._user || ''
                             },
                             emailtemplate: m._emailtemplate || '',
+                            target: this.getTargetId(m, jsonXML)
+                          }
+                        } else if (m.type === 'exclusivegateway' || m.type === 'complexgateway') {
+                          console.log(m)
+                          this.flowObject.processList[m._id] = {
+                            id: m._id,
+                            name: m._name || '',
+                            type: m.type,
+                            order: inx,
+                            condition: m._condition || '',
+                            var_name: m._var_name || '',
                             target: this.getTargetId(m, jsonXML)
                           }
                         } else {
