@@ -213,7 +213,7 @@
 </template>
 
 <script>
-/*eslint-disable */
+
 import _ from 'lodash'
 import $ from 'jquery'
 
@@ -223,7 +223,7 @@ import schemaModel from '@/api/schema'
 
 import dflowzdata from '@/api/dflowzdata'
 
-import finstanceModal from '@/api/finstance'
+// import finstanceModal from '@/api/finstance'
 // import dataQuerymodel from '@/api/dataquery'
 import saveemailTemplate from '@/api/emailtemplate'
 import schemalist from '@/pages/user/SchemaList'
@@ -721,88 +721,39 @@ export default {
       if (this.check === -1) {
         this.$Loading.start()
         let fheaders = null
-        let saveObj = {
-          fid: this.$route.params.id,
-          currentStatus: this.$route.params.stateid,
-          data: this.formSchemaInstance.data[0]
-        }
         if (this.$store.state.role === 2) {
           fheaders = {
             workflowid: 'workflow_' + this.flowzData.id,
-            stateid: this.$route.params.stateid
-          }
-        }
-        if (fheaders !== null) {
-          // replace with new dynamic table API
-          finstanceModal.post(saveObj, null, fheaders)
-          .then(res => {
-            this.$Loading.finish()
-            this.$Notice.success({title: 'Saved Successfully'})
-            this.bLoading = false
-            setTimeout(() => {
-              $('html, body').animate({
-                scrollTop: $('#top').offset().top
-              }, 500)
-            }, 0)
-            this.init()
-          }).catch(e => {
-            this.$Loading.error()
-            console.log('error', e)
-            this.bLoading = false
-            if (e.response.data.message) {
-              this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
-            } else {
-              this.$Notice.error({duration: '3', title: e.message, desc: ''})
-            }
-          })
-        } else {
-          let heads = {
+            stateid: this.$route.params.stateid,
             ftablename: this.currentFlowzId
           }
-          this.formSchemaInstance.data[0]._state = this.$route.params.stateid
-          dflowzdata.post(this.formSchemaInstance.data[0], null, heads)
-          .then(res => {
-            this.$Loading.finish()
-            this.$Notice.success({title: 'Saved Successfully'})
-            this.bLoading = false
-            setTimeout(() => {
-              $('html, body').animate({
-                scrollTop: $('#top').offset().top
-              }, 500)
-            }, 0)
-            this.init()
-          }).catch(e => {
-            this.$Loading.error()
-            console.log('error', e)
-            this.bLoading = false
-            if (e.response.data.message) {
-              this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
-            } else {
-              this.$Notice.error({title: 'Error', desc: e.message})
-            }
-          })
-          // finstanceModal.post(saveObj)
-          // .then(res => {
-          //   this.$Loading.finish()
-          //   this.$Notice.success({title: 'Saved Successfully'})
-          //   this.bLoading = false
-          //   setTimeout(() => {
-          //     $('html, body').animate({
-          //       scrollTop: $('#top').offset().top
-          //     }, 500)
-          //   }, 0)
-          //   this.init()
-          // }).catch(e => {
-          //   this.$Loading.error()
-          //   console.log('error', e)
-          //   this.bLoading = false
-          //   if (e.response.data.message) {
-          //     this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
-          //   } else {
-          //     this.$Notice.error({title: 'Error', desc: e.message})
-          //   }
-          // })
+        } else {
+          fheaders = {
+            ftablename: this.currentFlowzId
+          }
         }
+        this.formSchemaInstance.data[0]._state = this.$route.params.stateid
+        dflowzdata.post(this.formSchemaInstance.data[0], null, fheaders)
+        .then(res => {
+          this.$Loading.finish()
+          this.$Notice.success({title: 'Saved Successfully'})
+          this.bLoading = false
+          setTimeout(() => {
+            $('html, body').animate({
+              scrollTop: $('#top').offset().top
+            }, 500)
+          }, 0)
+          this.init()
+        }).catch(e => {
+          this.$Loading.error()
+          console.log('error', e)
+          this.bLoading = false
+          if (e.response.data.message) {
+            this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+          } else {
+            this.$Notice.error({title: 'Error', desc: e.message})
+          }
+        })
       } else {
         this.validErr = _.uniqBy(this.validErr, 'name')
         this.$Notice.error({title: 'Validation Error!'})
@@ -852,11 +803,11 @@ export default {
                     this.email = true
                     this.loadEmail = false
                   } else {
-                    if (res.data.template.indexOf("{{FileAttachment}}") !== -1) {
-                      let file_entity = _.filter(this.formSchemaInstance.entity, { 'type': 'file' })
-                      for (let i = 0; i < file_entity.length; i++) {
-                        this.formSchemaInstancefile.entity.push(file_entity[i])
-                        let fieldName = file_entity[i].name
+                    if (res.data.template.indexOf('{{FileAttachment}}') !== -1) {
+                      let fileEntity = _.filter(this.formSchemaInstance.entity, {'type': 'file'})
+                      for (let i = 0; i < fileEntity.length; i++) {
+                        this.formSchemaInstancefile.entity.push(fileEntity[i])
+                        let fieldName = fileEntity[i].name
                         let files = this.formSchemaInstance.data[0][fieldName]
                         this.formSchemaInstancefile.data.push({[fieldName]: files})
                       }
@@ -864,8 +815,8 @@ export default {
                         this.sendDataEmail = res.data.template.replace(/{{OrderData}}/g, this.$refs.schemasubformview.$el.outerHTML).replace(/{{FileAttachment}}/g, this.$refs.schemasubformviewfile.$el.outerHTML)
                         this.email = true
                         this.loadEmail = false
-                      }, 1000);
-                    } else{ 
+                      }, 1000)
+                    } else {
                       this.sendDataEmail = res.data.template.replace(/{{OrderData}}/g, this.$refs.schemasubformview.$el.outerHTML)
                       this.email = true
                       this.loadEmail = false
@@ -972,12 +923,6 @@ export default {
       let fheaders = {
         ftablename: this.currentFlowzId
       }
-      // let saveObj = {
-      //   fid: this.item.fid,
-      //   iid: this.item.id,
-      //   state: this.item.currentStatus,
-      //   data: obj.data[0]
-      // }
       let saveObj = obj.data[0]
       delete saveObj['_index']
       delete saveObj['_rowKey']
@@ -993,7 +938,6 @@ export default {
           normalpatch: true
         }
       }
-      // if (fheaders !== null) {
       dflowzdata.patch(saveObj.id, saveObj, null, fheaders)
       .then(res => {
         this.id = null
@@ -1015,55 +959,6 @@ export default {
           this.$Notice.error({duration: '3', title: e.message, desc: ''})
         }
       })
-      // } else {
-        // New API call
-        // let heads = {
-        //   ftablename: this.currentFlowzId
-        // }
-        // dflowzdata.post(obj.data[0], null, heads)
-        // .then(res => {
-        //   this.$Loading.finish()
-        //   this.$Notice.success({title: 'Saved Successfully'})
-        //   this.bLoading = false
-        //   setTimeout(() => {
-        //     $('html, body').animate({
-        //       scrollTop: $('#top').offset().top
-        //     }, 500)
-        //   }, 0)
-        //   this.init()
-        // }).catch(e => {
-        //   this.$Loading.error()
-        //   console.log('error', e)
-        //   this.bLoading = false
-        //   if (e.response.data.message) {
-        //     this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
-        //   } else {
-        //     this.$Notice.error({duration: '3', title: e.message, desc: ''})
-        //   }
-        // })
-      //   console.log('saveObj', saveObj)
-      //   dflowzdata.patch(saveObj.id, saveObj)
-      //   .then(res => {
-      //     this.$Loading.finish()
-      //     this.$Notice.success({title: 'Saved Successfully'})
-      //     this.bLoading = false
-      //     setTimeout(() => {
-      //       $('html, body').animate({
-      //         scrollTop: $('#top').offset().top
-      //       }, 500)
-      //     }, 0)
-      //     this.init()
-      //   }).catch(e => {
-      //     this.$Loading.error()
-      //     console.log('error', e)
-      //     this.bLoading = false
-      //     if (e.response.data.message) {
-      //       this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
-      //     } else {
-      //       this.$Notice.error({duration: '3', title: e.message, desc: ''})
-      //     }
-      //   })
-      // }
     },
     checkValidation (data, ent) {
       let self = this
@@ -1298,7 +1193,7 @@ export default {
           '_claimUser': ''
         }, heads)
         .then(res => {
-          console.log('res.data.total', res.data)
+          // console.log('res.data.total', res.data)
           this.isFlowzLoaded = true
           this.dataTotalU = res.data.total
           if (res.data.data.length > 0) {
@@ -1591,7 +1486,7 @@ export default {
                 this.dataClaim.splice(inx, 1)
                 this.dataUnclaim.push(data[tName])
                 this.dataTotalU = this.dataTotalU + 1
-                this.dataTotalC = this.dataTotalC -1
+                this.dataTotalC = this.dataTotalC - 1
               } else {
                 let inx = _.findIndex(this.dataUnclaim, (o) => { return o.id === data[tName].id })
                 this.dataUnclaim.splice(inx, 1)
