@@ -1553,7 +1553,7 @@ export default {
     },
     'dflowzdata': {
       _created (data) {
-        console.log('================created==============', data)
+        // console.log('================created==============', data)
         let keys = Object.keys(data)
         for (let tName of keys) {
           if (tName === this.$route.params.id.replace(/-/g, '_')) {

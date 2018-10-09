@@ -37,8 +37,8 @@ class Service {
         let mdata = resp
         mdata._nextTarget = targetId
         mdata.userId = ''
-        mdata.subscriptionId = ''
-        mdata.subscriptionOwnerId = ''
+        // mdata.subscriptionId = ''
+        // mdata.subscriptionOwnerId = ''
         
         mdata._currentStatus = false
         return this.app.service('dflowzdataInt').patch(resp.id, mdata, {headers: headers}).then(res => {

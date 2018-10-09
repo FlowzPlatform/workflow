@@ -665,4 +665,8 @@ export default {
   .ivu-form-item-error-tip {
     position: relative;
   }
+  .ivu-select-dropdown-list {
+    max-height: inherit;
+    overflow-y: scroll;
+  }
 </style>

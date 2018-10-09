@@ -472,6 +472,7 @@ export default {
         }
       },
       _removed (data) {
+        // console.log('==============patched============', data)
         let keys = Object.keys(data)
         for (let tName of keys) {
           if (data[tName]._currentStatus) {
