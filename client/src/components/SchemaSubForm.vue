@@ -12,14 +12,13 @@
                           <FormItem :key="inx" style="margin-bottom:10px;">
                               <Row style="font-size:16px">
                                   <span class="card-title">{{field.name}}</span>
-                                  
                               </Row>
                               <Row v-if="field.property.IsArray">
                                   <schemasubform :schemainstance="getObject(inx, index, field.name, field.type)"></schemasubform>
                                   <Button class="btnAdd" @click="handleAdd(inx, index, schemainstance.entity[inx].entity[0], schemainstance.data[index][field.name], field.name)" icon="plus"> Add ({{field.name}})</Button>
                               </Row>
                               <Row v-else>
-                                  <SchemaSubFormView :schemainstance="getObject(inx, index, field.name, field.type)"></SchemaSubFormView>
+                                  <schemasubform :schemainstance="getObject(inx, index, field.name, field.type)"></schemasubform>
                               </Row>
                           </FormItem>
                         </Col>
@@ -586,6 +585,7 @@ export default {
     }
   },
   mounted () {
+    console.log('schemainstance', this.schemainstance)
     // this.oldFiles = this.schemainstance.data[0].Fileattachment.length
   },
   created () {}
