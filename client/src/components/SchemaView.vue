@@ -206,7 +206,7 @@
       <schemasubformview ref="schemasubformviewfile" :schemainstance="formSchemaInstancefile" id="schemasubformview"></schemasubformview>
     </div>
     <div v-if="email">
-      <email :btnArr="btnArr" :flag="flag" :emailSchemaId="emailSchemaId" :sendDataEmail="sendDataEmail" :iid="item.id" v-on:on-done="emailService"></email>
+      <email :btnArr="btnArr" :flag="flag" :emailSchemaId="emailSchemaId" :sendDataEmail="sendDataEmail" :iid="item.id" v-on:on-done="emailService" :tableId="tableId" :taskName="taskName"></email>
     </div>
     </div>
   </div>
@@ -240,6 +240,8 @@ export default {
   },
   data () {
     return {
+      tableId: '',
+      taskName: '',
       formSchemaInstancefile: {
         data: [],
         entity: []
@@ -840,6 +842,8 @@ export default {
             this.id = null
             this.schemabinding = true
             if (nextTargetId.hasOwnProperty('emailtemplate')) {
+              this.tableId = this.$route.params.id
+              this.taskName = this.$route.params.stateid
               saveemailTemplate.get(nextTargetId.emailtemplate)
               .then((res) => {
                 setTimeout(() => {
@@ -1549,7 +1553,7 @@ export default {
     },
     'dflowzdata': {
       _created (data) {
-        console.log('================created==============', data)
+        // console.log('================created==============', data)
         let keys = Object.keys(data)
         for (let tName of keys) {
           if (tName === this.$route.params.id.replace(/-/g, '_')) {
