@@ -176,6 +176,7 @@ export default {
                   'on-change': (value) => {
                     // console.log('show', value)
                     this.configuration.fields[params.index].firstColumn = value
+                    // console.log('this.configuration.fields[params.index]: ', this.configuration.fields[params.index])
                     this.anotherBinding[params.index].firstColumn = value
                     for (let i = 0; i < this.anotherBinding.length; i++) {
                       if (i !== params.index) {
@@ -463,12 +464,27 @@ export default {
       let heads = {
         ftablename: this.$route.params.id.replace(/-/g, '_')
       }
-      dflowzdata.get(null, {
-        $skip: this.skip,
-        $limit: this.limit,
-        $group: '_uuid',
-        '$sort[_createdAt]': 1
-      }, heads)
+
+      let paramsToSend = {}
+      if (this.$store.state.role === 1) {
+        paramsToSend = {
+          $skip: this.skip,
+          $limit: this.limit,
+          $group: '_uuid',
+          '$sort[_createdAt]': 1
+        }
+      } else if (this.$store.state.role === 2) {
+        paramsToSend = {
+          $skip: this.skip,
+          $limit: this.limit,
+          $group: '_uuid',
+          'subscriptionId': this.$store.state.subscription,
+          '_creatorId': this.$store.state.subscription,
+          '$sort[_createdAt]': 1
+        }
+      }
+
+      dflowzdata.get(null, paramsToSend, heads)
       .then(res => {
         // console.log('res: ', res)
         this.total = res.data.total
@@ -695,9 +711,20 @@ export default {
     },
     colviewCols () {
       let cols = []
+      let obj = _.filter(this.configuration.fields, (o) => { return o.firstColumn === true })
+      let key = ''
+      let title = ''
+      if (obj.length !== 0) {
+        key = obj[0].key
+        title = obj[0].title
+      } else {
+        key = '_uuid'
+        title = 'ID'
+      }
+      console.log('OBJ: ', obj)
       cols.push({
-        title: 'ID',
-        key: '_uuid',
+        title: title,
+        key: key,
         fixed: 'left',
         width: 280,
         render: (h, params) => {
@@ -712,20 +739,20 @@ export default {
                   click: () => {
                     let $temp = $('<input>')
                     $('body').append($temp)
-                    $temp.val(params.row._uuid).select()
+                    $temp.val(params.row[key]).select()
                     document.execCommand('copy')
                     this.$Message.info('Copied to Clipboard')
                     $temp.remove()
                   }
                 }
-              }, params.row._uuid),
+              }, params.row[key]),
               h('span', {
                 attrs: {
                   class: 'btn btn-default btn-sm showHideBtn'
                 },
                 on: {
                   click: () => {
-                    $('.' + params.row._uuid).toggle()
+                    $('.' + params.row[key]).toggle()
                   }
                 }
               }, [
@@ -1040,43 +1067,55 @@ export default {
       _updated (data) {
       },
       _patched (data) {
+        console.log('Pached: ', data)
         let keys = Object.keys(data)
         for (let tName of keys) {
-          if (data[tName]._currentStatus) {
-            if (this.$store.state.role === 1) {
-              if (data[tName]._currentStatus && data[tName]._state === this.$route.params.stateid) {
-                let inx = _.findIndex(this.instanceEntries, (o) => { return o.id === data[tName].id })
-                this.instanceEntries.splice(inx, 1)
-                this.instanceEntries.push(data[tName])
-                this.dataData = this.instanceEntries
-              }
-            }
-            if (this.$store.state.role === 2) {
-              if (data[tName]._claimUser === '') {
-                let inx = _.findIndex(this.dataClaim, (o) => { return o.id === data[tName].id })
-                this.dataClaim.splice(inx, 1)
-                this.dataUnclaim.push(data[tName])
-                this.dataTotalU = this.dataTotalU + 1
-                this.dataTotalC = this.dataTotalC - 1
-              } else {
-                let inx = _.findIndex(this.dataUnclaim, (o) => { return o.id === data[tName].id })
-                this.dataUnclaim.splice(inx, 1)
-                this.dataClaim.push(data[tName])
-                this.dataTotalU = this.dataTotalU - 1
-                this.dataTotalC = this.dataTotalC + 1
-              }
-            }
-            let finx = _.findIndex(this.flowzList, {id: this.$route.params.id})
-            if (finx !== -1 && !data[tName]._currentStatus && data[tName]._next === null) {
-              if (this.flowzList[finx].processList[data[tName]._state].count > 0) {
-                this.flowzList[finx].processList[data[tName]._state].count--
-              }
-              if (this.flowzList[finx].count > 0) {
-                this.flowzList[finx].count--
-              }
-            }
+          if (tName === this.$route.params.id.replace(/-/g, '_')) {
+            let findIndex = _.findIndex(this.tableData, (o) => { return o._uuid === data[tName]._uuid })
+            let findIndexCol = _.findIndex(this.colviewData, (o) => { return o._uuid === data[tName]._uuid })
+
+            let stageIndex = _.findIndex(this.tableData[findIndex], (o) => { return o._state === data[tName]._state })
+            this.tableData[findIndex].stages[stageIndex] = data[tName]
+            this.colviewData[findIndexCol] = data[tName]
           }
         }
+        // let keys = Object.keys(data)
+        // for (let tName of keys) {
+        //   if (data[tName]._currentStatus) {
+        //     if (this.$store.state.role === 1) {
+        //       if (data[tName]._currentStatus && data[tName]._state === this.$route.params.stateid) {
+        //         let inx = _.findIndex(this.instanceEntries, (o) => { return o.id === data[tName].id })
+        //         this.instanceEntries.splice(inx, 1)
+        //         this.instanceEntries.push(data[tName])
+        //         this.dataData = this.instanceEntries
+        //       }
+        //     }
+        //     if (this.$store.state.role === 2) {
+        //       if (data[tName]._claimUser === '') {
+        //         let inx = _.findIndex(this.dataClaim, (o) => { return o.id === data[tName].id })
+        //         this.dataClaim.splice(inx, 1)
+        //         this.dataUnclaim.push(data[tName])
+        //         this.dataTotalU = this.dataTotalU + 1
+        //         this.dataTotalC = this.dataTotalC - 1
+        //       } else {
+        //         let inx = _.findIndex(this.dataUnclaim, (o) => { return o.id === data[tName].id })
+        //         this.dataUnclaim.splice(inx, 1)
+        //         this.dataClaim.push(data[tName])
+        //         this.dataTotalU = this.dataTotalU - 1
+        //         this.dataTotalC = this.dataTotalC + 1
+        //       }
+        //     }
+        //     let finx = _.findIndex(this.flowzList, {id: this.$route.params.id})
+        //     if (finx !== -1 && !data[tName]._currentStatus && data[tName]._next === null) {
+        //       if (this.flowzList[finx].processList[data[tName]._state].count > 0) {
+        //         this.flowzList[finx].processList[data[tName]._state].count--
+        //       }
+        //       if (this.flowzList[finx].count > 0) {
+        //         this.flowzList[finx].count--
+        //       }
+        //     }
+        //   }
+        // }
       },
       _removed (data) {
         // let keys = Object.keys(data)

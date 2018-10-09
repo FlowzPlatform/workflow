@@ -200,6 +200,15 @@ const mroutes = [
         name: 'userDashboard'
       },
       {
+        path: 'analytics/:id',
+        alias: '',
+        component: Analytics,
+        name: 'Analytics',
+        props: {
+          id: String
+        }
+      },
+      {
         path: '/view/:id/:stateid',
         name: 'userSchemaview',
         component: SchemaView,

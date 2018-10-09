@@ -82,7 +82,10 @@ let beforeFind = function (hook) {
     hook.params.rethinkdb = query.filter(function(doc) {
       return doc.coerceTo('string').match('(?i)' + value);
     })
-  }
+  } 
+  // else if (query.$subscriptionId !== undefined && query.$userId !== undefined) {
+
+  // }
 }
 
 function beforeCreate (hook) {

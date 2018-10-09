@@ -44,7 +44,7 @@
                   <!-- <span v-if="$store.state.role === 1" style="float:right;" title="Create Instance" @click.prevent="createInstance(item)">
                     <i class="fa fa-plus"></i>
                   </span> -->
-                  <span v-if="$store.state.role === 1" style="float:right;padding-right:5px;" title="Preview Progress" @click.prevent="viewProgress(item)">
+                  <span v-if="$store.state.role === 1 || $store.state.role === 2" style="float:right;padding-right:5px;" title="Preview Progress" @click.prevent="viewProgress(item)">
                     <i class="fa fa-line-chart"></i>
                   </span>
               </template>
@@ -105,9 +105,17 @@ export default {
       if (item.id === this.$route.params.id) {
         let randomStr = this.makeid()
         this.$store.state.updateView = randomStr
-        this.$router.push('/admin/flow/analytics/' + item.id)
+        if (this.$store.state.role === 1) {
+          this.$router.push('/admin/flow/analytics/' + item.id)
+        } else if (this.$store.state.role === 2) {
+          this.$router.push('/analytics/' + item.id)
+        }
       } else {
-        this.$router.push('/admin/flow/analytics/' + item.id)
+        if (this.$store.state.role === 1) {
+          this.$router.push('/admin/flow/analytics/' + item.id)
+        } else if (this.$store.state.role === 2) {
+          this.$router.push('/analytics/' + item.id)
+        }
       }
     },
     handleopenChange (node) {
