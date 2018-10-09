@@ -10,7 +10,7 @@
       </h3>
     </Row>
     <Row>
-        <Table :loading="tableLoading" :columns="columns" :data="data" border></Table>
+      <Table :loading="tableLoading" :columns="columns" :data="data" border></Table>
     </Row>
     <Row style="padding: 5px 0">
       <Button :loading="buttonLoading" type="primary" @click="handleSave">Save</Button>
@@ -78,8 +78,8 @@ export default {
           for (let proc in sortedArray) {
             if (sortedArray[proc].type !== 'startevent' && sortedArray[proc].type !== 'endevent') {
               let mdata = {
-                state: sortedArray[proc].name || proc,
-                _state: proc
+                state: sortedArray[proc].name || sortedArray[proc].id,
+                _state: sortedArray[proc].id
               }
               for (let ent of schemaRes.data.entity) {
                 if (sortedArray[proc].hasOwnProperty('permission') && sortedArray[proc].permission[ent.name] !== undefined) {
