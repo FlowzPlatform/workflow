@@ -22,25 +22,36 @@ class Service {
   }
 
   async updateStatus (data, params) {
-    let stageId = (new Buffer(data.taskid,'base64')).toString('ascii');
-    data.taskid = stageId
-    // get Flowz data
-    let fInstance = await this.app.service('finstance').get(data.finstanceId);
-    // get last Stage submitted data
-    let lastIndex = fInstance.stageReference.length - 1
-    // get Flowz data
-    let flowzData = await this.app.service('flowzdata').get(fInstance.stageReference[lastIndex].stageRecordId);
-
-    let flowzDataRecord = await this.app.service('flowzdata').create({
-      data: flowzData.data,
-      fid: fInstance.fid,
-      iid: data.finstanceId,
-      state: fInstance.currentStatus,
-      nextTarget: stageId
-    }).catch((err)=> {
-      throw new Error(err.message)
-    });
-    return "Your response saved successfully"
+    let stageId = (new Buffer(data.targetid,'base64')).toString('ascii');
+    // data.taskid = stageId
+    // console.log('data >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', data)
+    let id = data.id
+    let targetId = stageId
+    let currentId = data.stateid
+    let flowId = data.flowid
+    let headers = {
+      ftablename: flowId.replace(/-/g, '_')
+    }
+    return this.app.service('dflowzdata').get(id, {headers}).then(res => {
+      return this.app.service('dflowzdata').get(res._next, {headers}).then(resp => {
+        let mdata = resp
+        mdata._nextTarget = targetId
+        mdata.userId = ''
+        // mdata.subscriptionId = ''
+        // mdata.subscriptionOwnerId = ''
+        
+        mdata._currentStatus = false
+        return this.app.service('dflowzdataInt').patch(resp.id, mdata, {headers: headers}).then(res => {
+          return "Your response saved successfully"
+        }).catch(err => {
+          throw new Error(err.message)
+        })
+      }).catch(err => {
+        throw new Error(err.message)
+      })
+    }).catch(e => {
+      throw new Error(e.message)
+    })
   }
 
   async create (data, params) {

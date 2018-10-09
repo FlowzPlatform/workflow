@@ -76,6 +76,8 @@ import schemaModel from '@/api/schema'
     props: {
     'btnArr': Object,
     'iid': String,
+    'tableId': String,
+    'taskName': String,
     'sendDataEmail': String,
     'emailSchemaId': String,
     'flag': Boolean
@@ -85,7 +87,7 @@ import schemaModel from '@/api/schema'
       for(let idx in this.btnArr) {
           let targetId = (new Buffer(this.btnArr[idx])).toString('base64')
           this.btn = this.btn + `
-          <a href="${config11.serverURI}/email-receive/${this.iid}/${targetId}">
+          <a href="${config11.serverURI}/email-receive/${this.iid}/${targetId}/${this.tableId}/${this.taskName}">
           <button type=\"submit\" style=\"width: 140px; height: 45px; font-family: 'Roboto', sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 2.5px; font-weight: 500; color: #000; background-color: #eee; border: none; border-radius: 45px; box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2); transition: all 0.3s ease 0s; cursor: pointer\">
           <span class=\"glyphicon glyphicon-ok\" style=\"color:black; margin-right:8px\"></span> ${idx.toUpperCase()}</button><br><br>
           </a>
