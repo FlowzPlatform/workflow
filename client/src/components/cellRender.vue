@@ -209,7 +209,8 @@ export default {
                 this.schemainstance.entity[index]['entity'] = await this.getChildEntity(entity.type)
               }
             }
-            this.schemainstance.data.push(this.currentPopTipData)
+            // this.schemainstance.data.push(this.currentPopTipData)
+            this.schemainstance.data[0] = this.item.obj
             this.dataModal = true
             this.$Spin.hide()
           }).catch(err => {
