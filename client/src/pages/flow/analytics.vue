@@ -336,6 +336,10 @@ export default {
         '$search': query,
         $group: '_uuid'
       }
+      if (this.$store.state.role === 2) {
+        params._creatorid = this.$store.state.user._id
+        params.subscriptionId = this.$store.state.subscription
+      }
       if (sort !== undefined || sort !== null) {
         if (sort === 'asc') {
           params['$sort[' + sort + ']'] = 1
@@ -479,8 +483,8 @@ export default {
           $limit: this.limit,
           $group: '_uuid',
           'subscriptionId': this.$store.state.subscription,
-          '_creatorId': this.$store.state.subscription,
-          '$sort[_createdAt]': 1
+          '_creatorid': this.$store.state.user._id,
+          '$sort[_createdAt]': -1
         }
       }
 
@@ -721,7 +725,7 @@ export default {
         key = '_uuid'
         title = 'ID'
       }
-      console.log('OBJ: ', obj)
+      // console.log('OBJ: ', obj)
       cols.push({
         title: title,
         key: key,
