@@ -585,7 +585,6 @@ export default {
     }
   },
   mounted () {
-    console.log('schemainstance', this.schemainstance)
     // this.oldFiles = this.schemainstance.data[0].Fileattachment.length
   },
   created () {}
