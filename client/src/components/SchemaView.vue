@@ -70,8 +70,9 @@
         </div> -->
         
         <div v-if="itsFirstState === false">
-          <tabs> 
-          <TabPane v-if="this.$store.state.role === 1" :label="'Data ('+ dataTotal + ')'" icon="lock-combination">
+          <Tabs> 
+           <!-- :label="'Data ('+ dataTotal + ')'" -->
+          <TabPane v-if="this.$store.state.role === 1" :label="adminLabel" icon="lock-combination">
           <schemalist v-if="this.$store.state.role === 1" :schema="dataSchema" :pageno="pageno" :datashow="'dataA'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
           <!-- <schemalist v-if="this.$store.state.role === 2" :schema="dataSchema" :pageno="pageno" :datashow="'dataU'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist> -->
 
@@ -130,7 +131,8 @@
             </div>
           </div>
           </TabPane>
-          <TabPane v-if="this.$store.state.role === 2" :label="'Work Pool ('+ dataTotalC + ')'" icon="lock-combination">
+          <!-- :label="'Work Pool ('+ dataTotalC + ')'" -->
+          <TabPane v-if="this.$store.state.role === 2" :label="workPoolLabel" icon="lock-combination">
             <schemalist :schema="dataSchema" :datashow="'dataC'" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotalC="dataTotalC" :data="dataData2" :configuration="configuration" :instanceEntries="dataClaim" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
             <div style="padding: 10px">
             <div class="row" v-if="id != null">
@@ -187,7 +189,8 @@
             </div>
           </div>
           </TabPane>
-          <TabPane v-if="this.$store.state.role === 2" :label="'In Progress ('+ dataTotalU + ')'" icon="lock-combination">
+          <!-- :label="'In Progress ('+ dataTotalU + ')'" -->
+          <TabPane v-if="this.$store.state.role === 2"  :label="queueLabel" icon="lock-combination">
             <schemalist :schema="dataSchema" :pageno="pageno" :datashow="'dataU'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotalU="dataTotalU" :data="dataClaim" :configuration="configuration" :instanceEntries="dataUnclaim" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
           </TabPane>
           </Tabs>
@@ -240,6 +243,54 @@ export default {
   },
   data () {
     return {
+      adminLabel: (h) => {
+        return h('span', [
+          h('span', 'Data '),
+          h('span', {
+            attrs: {
+              title: this.dataTotal
+            }
+          }, [
+            h('Badge', {
+              props: {
+                count: this.dataTotal
+              }
+            })
+          ])
+        ])
+      },
+      workPoolLabel: (h) => {
+        return h('span', [
+          h('span', 'Work Pool '),
+          h('span', {
+            attrs: {
+              title: this.dataTotalC
+            }
+          }, [
+            h('Badge', {
+              props: {
+                count: this.dataTotalC
+              }
+            })
+          ])
+        ])
+      },
+      queueLabel: (h) => {
+        return h('span', [
+          h('span', 'In Progress '),
+          h('span', {
+            attrs: {
+              title: this.dataTotalU
+            }
+          }, [
+            h('Badge', {
+              props: {
+                count: this.dataTotalU
+              }
+            })
+          ])
+        ])
+      },
       tableId: '',
       taskName: '',
       formSchemaInstancefile: {
