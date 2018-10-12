@@ -817,6 +817,9 @@
           text: this.searchQuery,
           filterBy: this.selectedFilterBy
         }
+        if (this.selectedFilterBy === 'customRange') {
+          object['customValue'] = this.enteredDateRange
+        }
         this.$emit('search-data', object)
       },
       sortTableData (object) {
