@@ -50,7 +50,7 @@
               </template>
               <template
                 v-for="(subItem, key) in getByOrder(item.processList)" 
-                v-if="subItem && subItem.type !== 'startevent' && subItem.type !== 'endevent' && subItem.type !== 'intermediatethrowevent'"
+                v-if="subItem && subItem.type !== 'startevent' && subItem.type !== 'endevent' && subItem.type !== 'intermediatethrowevent' && subItem.type !== 'exclusivegateway'"
               >
                 <Menu-item 
                   :name="item.id + '/' + subItem.id" 
@@ -176,48 +176,9 @@ export default {
               p.count = 0
               return p
             })
-            // if (socket._callbacks['$' + m.id.replace(/-/g, '_') + '_created'] === undefined) {
-            //   socket.on(m.id.replace(/-/g, '_') + '_created', (data) => {
-            //     // console.log('===created==', data)
-            //     if (data._currentStatus) {
-            //       let finx = _.findIndex(this.flowzList, {id: m.id})
-            //       if (finx !== -1) {
-            //         this.flowzList[finx].processList[data._state].count++
-            //         this.flowzList[finx].count++
-            //       }
-            //     }
-            //   })
-            // }
-            // if (socket._callbacks['$' + m.id.replace(/-/g, '_') + '_patched'] === undefined) {
-            //   socket.on(m.id.replace(/-/g, '_') + '_patched', (data) => {
-            //     // console.log('===patched==', data)
-            //     let finx = _.findIndex(this.flowzList, {id: m.id})
-            //     if (finx !== -1 && !data._currentStatus && data._next === null) {
-            //       if (this.flowzList[finx].processList[data._state].count > 0) {
-            //         this.flowzList[finx].processList[data._state].count--
-            //       }
-            //       if (this.flowzList[finx].count > 0) {
-            //         this.flowzList[finx].count--
-            //       }
-            //     }
-            //   })
-            // }
-            // if (socket._callbacks['$' + m.id.replace(/-/g, '_') + '_removed'] === undefined) {
-            //   socket.on(m.id.replace(/-/g, '_') + '_removed', (data) => {
-            //     // console.log('===removed==', data)
-            //     if (data._currentStatus) {
-            //       let finx = _.findIndex(this.flowzList, {id: m.id})
-            //       if (finx !== -1) {
-            //         this.flowzList[finx].processList[data._state].count--
-            //         this.flowzList[finx].count--
-            //       }
-            //     }
-            //   })
-            // }
             return m
           })
           this.loading = false
-          // console.log('this.flowzList', this.flowzList)
           this.setCounters()
         })
         .catch(error => {
@@ -300,62 +261,8 @@ export default {
       }
     },
     setCounters (sitem) {
-      // if (sitem) {
-      //   if (this.$store.state.role === 1) {
-      //     dflowzdataModal.get(null, {
-      //       $paginate: false,
-      //       $select: ['_state'],
-      //       _currentStatus: true
-      //     }, {
-      //       ftablename: sitem.id.replace(/-/g, '_')
-      //     }).then(res => {
-      //       console.log('res count', res.data)
-      //       sitem.count = 0
-      //       _.map(sitem.processList, (pitem) => {
-      //         pitem.count = _.filter(res.data, {_state: pitem.id}).length
-      //         sitem.count += pitem.count
-      //       })
-      //       // for (let pitem in sitem.processList) {
-      //       //   pitem.count = _.filter(res.data, {currentStatus: pitem.id}).length
-      //       //   sitem.count += pitem.count
-      //       // }
-      //     }).catch(err => {
-      //       console.log('error', err)
-      //     })
-      //   } else {
-      //     let once = false
-      //     let mdata = []
-      //     sitem.count = 0
-      //     for (let pitem in sitem.processList) {
-      //       if (!once) {
-      //         dflowzdataModal.get(null, {
-      //           $paginate: false,
-      //           $select: ['_state'],
-      //           _currentStatus: true
-      //         }, {
-      //           workflowid: 'workflow_' + sitem.id,
-      //           stateid: sitem.processList[pitem].id,
-      //           ftablename: sitem.id.replace(/-/g, '_')
-      //         }).then(res => {
-      //           if (res.data.length > 0) {
-      //             once = true
-      //             mdata = res.data
-      //             sitem.processList[pitem].count = _.filter(res.data, {_state: sitem.processList[pitem].id}).length
-      //             sitem.count += sitem.processList[pitem].count
-      //           }
-      //         }).catch(err => {
-      //           console.log('error', err)
-      //         })
-      //       } else {
-      //         sitem.processList[pitem].count = _.filter(mdata, {_state: sitem.processList[pitem].id}).length
-      //         sitem.count += sitem.processList[pitem].count
-      //       }
-      //     }
-      //   }
-      // } else {
       for (let item of this.flowzList) {
         if (this.$store.state.role === 1) {
-            // item.count = 9
           dflowzdataModal.get(null, {
             $paginate: false,
             $select: ['_state'],
@@ -366,7 +273,6 @@ export default {
             if (res.data.length > 0) {
               item.count = 0
               _.map(item.processList, (pitem) => {
-                  // console.log('_.filter(res.data, {_state: pitem.id}).length', _.filter(res.data, {_state: pitem.id}).length)
                 pitem.count = _.filter(res.data, {_state: pitem.id}).length
                 item.count += pitem.count
               })
@@ -378,7 +284,6 @@ export default {
           let isonce = false
           let pdata = []
           for (let key in item.processList) {
-              // console.log('item', item)
             if (!isonce) {
               dflowzdataModal.get(null, {
                 $paginate: false,
@@ -405,7 +310,6 @@ export default {
           }
         }
       }
-      // }
     }
   },
   computed: {
@@ -427,6 +331,12 @@ export default {
   },
   mounted () {
     this.init()
+    // console.log(this.$feathers)
+  },
+  beforeDestroy () {
+    this.$feathers.services.dflowzdata.removeAllListeners('_created')
+    this.$feathers.services.dflowzdata.removeAllListeners('_removed')
+    this.$feathers.services.dflowzdata.removeAllListeners('_patched')
   },
   feathers: {
     'flowz': {
@@ -450,7 +360,8 @@ export default {
     },
     'dflowzdata': {
       _created (data) {
-        // console.log('================created==============', data)
+        // console.log('================created==============')
+        // alert('Created' + Object.keys(data))
         let keys = Object.keys(data)
         for (let tName of keys) {
           if (data[tName]._currentStatus) {
@@ -465,7 +376,8 @@ export default {
       _updated (data) {
       },
       _patched (data) {
-        // console.log('==============patched============', data)
+        // console.log('==============patched============')
+        // alert('Patched' + Object.keys(data))
         let keys = Object.keys(data)
         for (let tName of keys) {
           let finx = _.findIndex(this.flowzList, {id: tName.replace(/_/g, '-')})

@@ -972,7 +972,7 @@ export default {
     checkValidation (data, ent, permission) {
       let self = this
       for (let v of ent) {
-        if (permission[v.name] !== undefined) {
+        if (permission !== undefined && permission[v.name] !== undefined) {
           if (permission[v.name].write || permission[v.name].read) {
             if (v.customtype) {
               for (let d of data[v.name]) {
@@ -1063,91 +1063,91 @@ export default {
           }
         } else {
           if (v.customtype) {
-              for (let d of data[v.name]) {
-                self.validFlag = self.checkValidation(d, v.entity[0].entity, permission)
-              }
-            } else {
-              if (!v.property.optional) {
-                if (data[v.name] === '') {
-                  self.validErr.push({name: v.name, errmsg: 'Field is required.'})
-                  self.validFlag = false
-                } else if (Array.isArray(data[v.name]) && data[v.name].length === 0) {
-                  self.validErr.push({name: v.name, errmsg: 'File is required.'})
-                  self.validFlag = false
-                } else if (v.type === 'text') {
-                  if (v.property.regEx !== '') {
-                    let patt0 = v.property.regEx
-                    let res0 = patt0.test(data[v.name])
-                    if (!res0) {
-                      self.validErr.push({name: v.name, errmsg: 'Invalid Email.'})
-                      self.validFlag = false
-                    }
-                  } else if (v.property.max !== 0) {
-                    if (data[v.name].length > v.property.max) {
-                      self.validErr.push({name: v.name, errmsg: 'max ' + v.property.max + ' characters allowed.'})
-                      self.validFlag = false
-                    }
-                  } else if (v.property.allowedValue.length > 0) {
-                    let exist = _.indexOf(v.property.allowedValue, data[v.name])
-                    if (exist === -1) {
-                      self.validErr.push({name: v.name, errmsg: 'Not Allowed Email, Please select allow one.'})
-                      self.validFlag = false
-                    }
-                  }
-                } else if (v.type === 'email' && data[v.name] !== '') {
-                  let patt1 = (v.property.regEx === '') ? new RegExp('[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}$') : new RegExp(v.property.regEx)
-                  let res1 = patt1.test(data[v.name])
-                  if (!res1) {
+            for (let d of data[v.name]) {
+              self.validFlag = self.checkValidation(d, v.entity[0].entity, permission)
+            }
+          } else {
+            if (!v.property.optional) {
+              if (data[v.name] === '') {
+                self.validErr.push({name: v.name, errmsg: 'Field is required.'})
+                self.validFlag = false
+              } else if (Array.isArray(data[v.name]) && data[v.name].length === 0) {
+                self.validErr.push({name: v.name, errmsg: 'File is required.'})
+                self.validFlag = false
+              } else if (v.type === 'text') {
+                if (v.property.regEx !== '') {
+                  let patt0 = v.property.regEx
+                  let res0 = patt0.test(data[v.name])
+                  if (!res0) {
                     self.validErr.push({name: v.name, errmsg: 'Invalid Email.'})
                     self.validFlag = false
-                  } else if (v.property.allowedValue.length > 0) {
-                    let exist = _.indexOf(v.property.allowedValue, data[v.name])
-                    if (exist === -1) {
-                      self.validErr.push({name: v.name, errmsg: 'Not Allowed Email, Please select allow one.'})
-                      self.validFlag = false
-                    }
                   }
-                } else if (v.type === 'phone') {
-                  let patt2 = (v.property.regEx === '') ? new RegExp('^\\(?([0-9]{3})\\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$') : new RegExp(v.property.regEx)
-                  let res2 = patt2.test(data[v.name])
-                  if (!res2) {
-                    self.validErr.push({name: v.name, errmsg: 'Invalid Phone.'})
+                } else if (v.property.max !== 0) {
+                  if (data[v.name].length > v.property.max) {
+                    self.validErr.push({name: v.name, errmsg: 'max ' + v.property.max + ' characters allowed.'})
                     self.validFlag = false
-                  } else if (v.property.allowedValue.length > 0) {
-                    let exist = _.indexOf(v.property.allowedValue, data[v.name])
-                    if (exist === -1) {
-                      self.validErr.push({name: v.name, errmsg: 'Not Allowed Phone, Please select allow one.'})
-                      self.validFlag = false
-                    }
                   }
-                } else if (v.type === 'number') {
-                  if (v.property.allowedValue.length > 0) {
-                    let exist = _.indexOf(v.property.allowedValue, data[v.name])
-                    if (exist === -1) {
-                      self.validErr.push({name: v.name, errmsg: 'Not Allowed Number, Please select allow one.'})
-                      self.validFlag = false
-                    }
+                } else if (v.property.allowedValue.length > 0) {
+                  let exist = _.indexOf(v.property.allowedValue, data[v.name])
+                  if (exist === -1) {
+                    self.validErr.push({name: v.name, errmsg: 'Not Allowed Email, Please select allow one.'})
+                    self.validFlag = false
                   }
-                } else if (v.type === 'date') {
-                  if (v.property.mindate !== '' && v.property.maxdate !== '') {
-                    if (data[v.name] < v.property.mindate && data[v.name] > v.property.maxdate) {
-                      self.validErr.push({name: v.name, errmsg: 'Date must in between ' + v.property.mindate + ' and ' + v.property.maxdate})
-                      self.validFlag = false
-                    }
-                  } else if (v.property.mindate !== '') {
-                    if (data[v.name] < v.property.mindate) {
-                      self.validErr.push({name: v.name, errmsg: 'Date must be greater than or equal ' + v.property.mindate + '.'})
-                      self.validFlag = false
-                    }
-                  } else if (v.property.maxdate !== '') {
-                    if (data[v.name] > v.property.maxdate) {
-                      self.validErr.push({name: v.name, errmsg: 'Date must be less than or equal ' + v.property.mindate + '.'})
-                      self.validFlag = false
-                    }
+                }
+              } else if (v.type === 'email' && data[v.name] !== '') {
+                let patt1 = (v.property.regEx === '') ? new RegExp('[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}$') : new RegExp(v.property.regEx)
+                let res1 = patt1.test(data[v.name])
+                if (!res1) {
+                  self.validErr.push({name: v.name, errmsg: 'Invalid Email.'})
+                  self.validFlag = false
+                } else if (v.property.allowedValue.length > 0) {
+                  let exist = _.indexOf(v.property.allowedValue, data[v.name])
+                  if (exist === -1) {
+                    self.validErr.push({name: v.name, errmsg: 'Not Allowed Email, Please select allow one.'})
+                    self.validFlag = false
+                  }
+                }
+              } else if (v.type === 'phone') {
+                let patt2 = (v.property.regEx === '') ? new RegExp('^\\(?([0-9]{3})\\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$') : new RegExp(v.property.regEx)
+                let res2 = patt2.test(data[v.name])
+                if (!res2) {
+                  self.validErr.push({name: v.name, errmsg: 'Invalid Phone.'})
+                  self.validFlag = false
+                } else if (v.property.allowedValue.length > 0) {
+                  let exist = _.indexOf(v.property.allowedValue, data[v.name])
+                  if (exist === -1) {
+                    self.validErr.push({name: v.name, errmsg: 'Not Allowed Phone, Please select allow one.'})
+                    self.validFlag = false
+                  }
+                }
+              } else if (v.type === 'number') {
+                if (v.property.allowedValue.length > 0) {
+                  let exist = _.indexOf(v.property.allowedValue, data[v.name])
+                  if (exist === -1) {
+                    self.validErr.push({name: v.name, errmsg: 'Not Allowed Number, Please select allow one.'})
+                    self.validFlag = false
+                  }
+                }
+              } else if (v.type === 'date') {
+                if (v.property.mindate !== '' && v.property.maxdate !== '') {
+                  if (data[v.name] < v.property.mindate && data[v.name] > v.property.maxdate) {
+                    self.validErr.push({name: v.name, errmsg: 'Date must in between ' + v.property.mindate + ' and ' + v.property.maxdate})
+                    self.validFlag = false
+                  }
+                } else if (v.property.mindate !== '') {
+                  if (data[v.name] < v.property.mindate) {
+                    self.validErr.push({name: v.name, errmsg: 'Date must be greater than or equal ' + v.property.mindate + '.'})
+                    self.validFlag = false
+                  }
+                } else if (v.property.maxdate !== '') {
+                  if (data[v.name] > v.property.maxdate) {
+                    self.validErr.push({name: v.name, errmsg: 'Date must be less than or equal ' + v.property.mindate + '.'})
+                    self.validFlag = false
                   }
                 }
               }
             }
+          }
         }
       }
       return self.validFlag
