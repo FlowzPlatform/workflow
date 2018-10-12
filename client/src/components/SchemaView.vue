@@ -367,8 +367,38 @@ export default {
     'schemasubformview': (resolve) => { require(['./SchemaSubFormView'], resolve) }
   },
   methods: {
+    getFilterDate (type) {
+      let date = ''
+      switch (type) {
+        case '12hours':
+          date = new Date()
+          date.setHours(date.getHours() - 12)
+          break
+        case '24hours':
+          date = new Date()
+          date.setDate(date.getDate() - 1)
+          break
+        case '7days':
+          date = new Date()
+          date.setDate(date.getDate() - 7)
+          break
+        case '30days':
+          date = new Date()
+          date.setMonth(date.getMonth() - 1)
+          break
+        case '3months':
+          date = new Date()
+          date.setMonth(date.getMonth() - 3)
+          break
+        case 'thisYear':
+          date = new Date()
+          date.setFullYear(date.getFullYear() - 1)
+          break
+      }
+      return date.toISOString()
+    },
     searchData (query, sort) {
-      console.log('query', query, sort)
+      // console.log('query', query, sort)
       this.dataLoading = true
 
       // New Custom Dynamic FLowz Data call
@@ -388,6 +418,21 @@ export default {
         '_state': this.$route.params.stateid,
         // 'id[$search]': '^' + query.text
         '$search': query.text
+      }
+      if (query.filterBy !== null && query.filterBy !== undefined) {
+        if (query.filterBy === 'customRange') {
+          console.log('Custom Range Found', query.customValue)
+          if (query.customValue.length >= 1) {
+            if (query.customValue[0] !== '' && query.customValue[1] !== '') {
+              params['_createdAt[$gte]'] = query.customValue[0].toISOString()
+              params['_createdAt[$lte]'] = query.customValue[1].toISOString()
+            }
+          }
+        } else {
+          let dateRange = this.getFilterDate(query.filterBy)
+          // console.log('Normal Range Found', this.selectedFilterBy, $lte, new Date().toISOString())
+          params['_createdAt[$gte]'] = dateRange
+        }
       }
       if (sort !== undefined) {
         if (sort.order === 'asc') {

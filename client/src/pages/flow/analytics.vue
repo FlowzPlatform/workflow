@@ -227,7 +227,7 @@ export default {
       },
       fid: null,
       schemaId: '',
-      searchQuery: null,
+      searchQuery: '',
       filterBy: [
         {
           'label': 'Last 12 Hours',
@@ -280,6 +280,36 @@ export default {
     }
   },
   methods: {
+    getFilterDate (type) {
+      let date = ''
+      switch (type) {
+        case '12hours':
+          date = new Date()
+          date.setHours(date.getHours() - 12)
+          break
+        case '24hours':
+          date = new Date()
+          date.setDate(date.getDate() - 1)
+          break
+        case '7days':
+          date = new Date()
+          date.setDate(date.getDate() - 7)
+          break
+        case '30days':
+          date = new Date()
+          date.setMonth(date.getMonth() - 1)
+          break
+        case '3months':
+          date = new Date()
+          date.setMonth(date.getMonth() - 3)
+          break
+        case 'thisYear':
+          date = new Date()
+          date.setFullYear(date.getFullYear() - 1)
+          break
+      }
+      return date.toISOString()
+    },
     handlePage (page) {
       this.cpage = page
       this.skip = (page * this.limit) - this.limit
@@ -321,24 +351,41 @@ export default {
       let heads = {
         ftablename: this.flowzData.id.replace(/-/g, '_')
       }
-      if (query === null) {
-        query = {
-          text: '',
-          filter: ''
-        }
-      }
+      // if (query === null) {
+      //   query = {
+      //     text: '',
+      //     filter: ''
+      //   }
+      // }
       let params = {
         $skip: this.skip,
         $limit: this.limit,
         '_currentStatus': true,
         '_state': this.$route.params.stateid,
         // 'id[$search]': '^' + query.text
-        '$search': query,
         $group: '_uuid'
+      }
+      if (query !== '') {
+        params['$search'] = query
       }
       if (this.$store.state.role === 2) {
         params._creatorid = this.$store.state.user._id
         params.subscriptionId = this.$store.state.subscription
+      }
+      if (this.selectedFilterBy !== null && this.selectedFilterBy !== undefined) {
+        if (this.selectedFilterBy === 'customRange') {
+          console.log('Custom Range Found', this.enteredDateRange)
+          if (this.enteredDateRange.length >= 1) {
+            if (this.enteredDateRange[0] !== '' && this.enteredDateRange[1] !== '') {
+              params['_createdAt[$gte]'] = this.enteredDateRange[0].toISOString()
+              params['_createdAt[$lte]'] = this.enteredDateRange[1].toISOString()
+            }
+          }
+        } else {
+          let dateRange = this.getFilterDate(this.selectedFilterBy)
+          // console.log('Normal Range Found', this.selectedFilterBy, $lte, new Date().toISOString())
+          params['_createdAt[$gte]'] = dateRange
+        }
       }
       if (sort !== undefined || sort !== null) {
         if (sort === 'asc') {
@@ -450,7 +497,7 @@ export default {
       // console.log('res.data.processList: ', res.data.processList)
       let listing = this.getByOrder(this.flowzData.processList)
       for (let col of listing) {
-        if (col.type !== 'startevent' && col.type !== 'endevent') {
+        if (col.type !== 'startevent' && col.type !== 'endevent' && col.type !== 'exclusivegateway') {
           cols.push({
             title: col.name || col.id,
             key: col.id,
