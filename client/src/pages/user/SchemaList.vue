@@ -16,59 +16,84 @@
 
     <div class="row">
       <div class="col-md-12">
-        <div class="card">
+        <div class="card" style="padding-bottom:15px">
           <div class="row">
-            <div class="col-md-6">
-              <Input search enter-button placeholder="Search..." v-model="searchQuery"/>
+            <div class="col-md-12">
+              <span><b>Select Action</b></span>
+              <Select v-if="this.$store.state.role === 1" v-model="action" label="Select Action" style="width:200px">
+                <Option v-for="item in dataActionRole1" :value="item.value" :key="item.value">{{ item.label }}</Option>
+              </Select>
+              <Select v-if="this.$store.state.role === 2" v-model="action" label="Select Action" style="width:200px">
+                <Option v-for="item in dataActionRole2" :value="item.value" :key="item.value">{{ item.label }}</Option>
+              </Select>
             </div>
-            <div class="col-md-4">
-              <div class="row">
-                <div class="col-md-12">
-                  <Select style="width: 100%" v-model="selectedFilterBy" clearable placeholder="Filter By">
-                    <Option v-for="item in filterBy" :value="item.value" :key="item.value">{{ item.label }}</Option>
-                  </Select>
-                  <br>
-                  <DatePicker v-if="selectedFilterBy === 'customRange'" type="daterange" split-panels placeholder="Select date" style="width: 100%; margin: 5px 0;" v-model="enteredDateRange"></DatePicker>
+            <div v-if="action === 'search'" style="margin-top: 20px;">
+              <div class="col-md-4" style="margin-top: 20px;">
+                <Input search enter-button placeholder="Search..." v-model="searchQuery"/>
+              </div>
+              <div class="col-md-4" style="margin-top: 20px;">
+                <div class="row">
+                  <div class="col-md-12">
+                    <Select style="width: 100%" v-model="selectedFilterBy" clearable placeholder="Filter By">
+                      <Option v-for="item in filterBy" :value="item.value" :key="item.value">{{ item.label }}</Option>
+                    </Select>
+                    <br>
+                    <DatePicker v-if="selectedFilterBy === 'customRange'" type="daterange" split-panels placeholder="Select date" style="width: 100%; margin: 5px 0;" v-model="enteredDateRange"></DatePicker>
+                  </div>
+                  <!-- <div class="col-md-6">
+                    <Select style="width: 100%" v-model="selectedSortBy" clearable placeholder="Sort By">
+                      <Option v-for="item in sortBy" :value="item.value" :key="item.value">{{ item.label }}</Option>
+                    </Select>    
+                  </div> -->
                 </div>
-                <!-- <div class="col-md-6">
-                  <Select style="width: 100%" v-model="selectedSortBy" clearable placeholder="Sort By">
-                    <Option v-for="item in sortBy" :value="item.value" :key="item.value">{{ item.label }}</Option>
-                  </Select>    
-                </div> -->
+              </div>
+              <div class="col-md-3" style="margin-top: 20px;">
+                <Button icon="search" type="primary" @click="searchData">Search</Button>
+                <Tooltip content="Clear Search">
+                  <Button icon="ios-trash" type="error" @click="clearSearchData"></Button>  
+                </Tooltip>
+                
               </div>
             </div>
-            <div class="col-md-2">
-              <Button icon="search" type="primary" @click="searchData">Search</Button>
-              <Tooltip content="Clear Search" style="float: right;">
-                <Button icon="ios-trash" type="error" @click="clearSearchData"></Button>  
-              </Tooltip>
-              
+            <div v-if="action === 'assign'" style="margin-top: 10px;">
+              <div class="col-md-2" style="margin-top: 20px;">
+                <Select v-model="selectedAssignUser" style="width:200px">
+                  <Option v-for="item in stageClaimUsers" :value="item.value" :key="item.value">{{ item.label }}</Option>
+                </Select>
+              </div>
+              <div class="col-md-2 buttonAssign" style="margin-top: 20px;">
+                <Button type="primary" @click="assignUser">Assign</Button>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
     <div v-if="datashow === 'dataA'">
-      <Table @on-sort-change="sortTableData" highlight-row :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
+      <Table ref="selection" @on-selection-change="AddRows" @on-sort-change="sortTableData" highlight-row :columns="setColumns" :data="instanceEntries" :border="config.border" :stripe="config.stripe"></Table>
       <div style="margin: 10px;overflow: hidden">
-        <div style="float: right;">
-          <Page placement="top" :total="total" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+        <div style="display: inline-block">
+          <Button @click="handleSelectAll(true)">Set all selected</Button>
+          <Button @click="handleSelectAll(false)">Cancel all selected</Button>
         </div>
-      </div>
-    </div>
-    <div v-if="datashow === 'dataC'">
-      <Table @on-sort-change="sortTableData" highlight-row :columns="setColumns2" :data="data" :border="config.border" :stripe="config.stripe"></Table>
-      <div style="margin: 10px;overflow: hidden">
-        <div style="float: right;">
-          <Page placement="top" :total="total" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+        <div style="float: right; display: inline-block">
+          <Page placement="top" :total="dataTotal" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
         </div>
       </div>
     </div>
     <div v-if="datashow === 'dataU'">
-      <Table @on-sort-change="sortTableData" highlight-row :columns="setColumns" :data="data" :border="config.border" :stripe="config.stripe"></Table>
+      <Table ref="selection" @on-sort-change="sortTableData" highlight-row :columns="setColumns2" :data="instanceEntries" :border="config.border" :stripe="config.stripe"></Table>
       <div style="margin: 10px;overflow: hidden">
         <div style="float: right;">
-          <Page placement="top" :total="total" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+          <Page placement="top" :total="dataTotalU" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+        </div>
+      </div>
+    </div>
+    <div v-if="datashow === 'dataC'">
+      <Table ref="selection" @on-sort-change="sortTableData" highlight-row :columns="setColumns" :data="instanceEntries" :border="config.border" :stripe="config.stripe"></Table>
+      <div style="margin: 10px;overflow: hidden">
+        <div style="float: right;">
+          <Page placement="top" :total="dataTotalC" :current="pageno" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
         </div>
       </div>
     </div>
@@ -76,24 +101,45 @@
 </template>
 <script>
   import _ from 'lodash'
+  import axios from 'axios'
   import $ from 'jquery'
-  import finstanceModal from '@/api/finstance'
+  import dflowzdata from '@/api/dflowzdata'
+  import config from '@/config'
+  // import getuserdetails from '@/api/getuserdetails'
+  // import usermodulerole from '@/api/usermodulerole'
   export default {
     name: 'schemalist',
     props: {
       'schema': Object,
-      'data': Array,
       'configuration': Boolean,
       'dynamicData': Boolean,
       'flowzData': Object,
       'instanceEntries': Array,
       'dataTotal': Number,
+      'dataTotalC': Number,
+      'dataTotalU': Number,
       'pageno': Number,
       'limit': Number,
       'datashow': String
     },
     data () {
       return {
+        currentFlowzId: '',
+        action: 'search',
+        dataActionRole1: [{
+          value: 'search',
+          label: 'SEARCH'
+        }, {
+          value: 'assign',
+          label: 'ASSIGN'
+        }],
+        dataActionRole2: [{
+          value: 'search',
+          label: 'SEARCH'
+        }],
+        selectedRows: [],
+        selectedAssignUser: 'noValue',
+        stageClaimUsers: [],
         dataClaim: [],
         skip: 0,
         total: 0,
@@ -258,6 +304,12 @@
         const cols = []
         if (this.dynamicData && this.$store.state.role === 1) {
           cols.push({
+            type: 'selection',
+            width: 60,
+            align: 'center',
+            fixed: 'left'
+          })
+          cols.push({
             title: 'Action',
             width: 80,
             align: 'center',
@@ -278,9 +330,9 @@
                       let values = {
                         id: this.flowzData.schema,
                         item: params.row,
-                        currentState: params.row.currentStatus,
+                        currentState: params.row._state,
                         flowzData: this.flowzData,
-                        formData: params.row.data
+                        formData: params.row
                       }
                       this.$Loading.finish()
                       await this.$emit('setValues', values)
@@ -291,8 +343,19 @@
             }
           })
           cols.push({
+            title: 'Assigned To',
+            key: 'claim',
+            fixed: 'left',
+            width: 200,
+            render: (h, params) => {
+              return h('span',
+                this.selectUser(params),
+              )
+            }
+          })
+          cols.push({
             title: 'ID',
-            key: 'iid',
+            key: '_uuid',
             fixed: 'left',
             width: 260,
             render: (h, params) => {
@@ -305,13 +368,13 @@
                   click: () => {
                     var $temp = $('<input>')
                     $('body').append($temp)
-                    $temp.val(params.row.id).select()
+                    $temp.val(params.row._uuid).select()
                     document.execCommand('copy')
                     this.$Message.info('Copied to Clipboard')
                     $temp.remove()
                   }
                 }
-              }, params.row.iid)
+              }, params.row._uuid)
             }
           })
         }
@@ -333,15 +396,15 @@
                   on: {
                     'click': async () => {
                       this.$Loading.start()
-                      let indexFind = _.findIndex(this.instanceEntries, (o) => { return o.id === params.row.id })
-                      let currentObj = this.flowzData.processList[this.instanceEntries[indexFind].currentStatus]
+                      // let indexFind = _.findIndex(this.instanceEntries, (o) => { return o.id === params.row.id })
+                      // let currentObj = this.flowzData.processList[this.instanceEntries[indexFind].currentStatus]
                       let values = {
                         id: this.flowzData.schema,
-                        item: this.instanceEntries[indexFind],
-                        formName: currentObj.name,
-                        currentState: currentObj.id,
+                        item: params.row,
+                        formName: params.row.name,
+                        currentState: params.row._state,
                         flowzData: this.flowzData,
-                        formData: params.row.data
+                        formData: params.row
                       }
                       this.$Loading.finish()
                       this.$emit('setValues', values)
@@ -366,11 +429,12 @@
                     'click': async () => {
                       let fheaders = {
                         workflowid: 'workflow_' + this.$route.params.id,
+                        normalpatch: true,
+                        ftablename: this.currentFlowzId,
                         stateid: this.$route.params.stateid
                       }
-                      finstanceModal.patch(params.row.id, {claimUser: ''}, null, fheaders)
+                      dflowzdata.patch(params.row.id, {_claimUser: ''}, null, fheaders)
                       .then((res) => {
-                        this.data.splice(params.index, 1)
                         this.$Notice.success({title: 'Successfully Unclaim'})
                       })
                       .catch((err) => {
@@ -388,7 +452,7 @@
           })
           cols.push({
             title: 'ID',
-            key: 'iid',
+            key: 'id',
             width: 260
           })
         }
@@ -410,17 +474,17 @@
                   width: item.width,
                   render: (h, params) => {
                     let arr = []
-                    if (params.row.data[item.title]) {
-                      for (let i = 0; i < params.row.data[item.title].length; i++) {
+                    if (params.row[item.title]) {
+                      for (let i = 0; i < params.row[item.title].length; i++) {
                         arr.push(h('Button', {
                           attrs: {
                             type: 'info',
                             style: 'margin: 2px',
-                            title: params.row.data[item.title][i].split('/').pop()
+                            title: params.row[item.title][i].split('/').pop()
                           },
                           on: {
                             click: () => {
-                              window.open(params.row.data[item.title][i])
+                              window.open(params.row[item.title][i])
                             }
                           }
                         }, [
@@ -442,7 +506,7 @@
                   sortable: item.sortable,
                   width: item.width,
                   render: (h, params) => {
-                    return h('div', params.row.data[item.key])
+                    return h('div', params.row[item.key])
                   }
                 })
               }
@@ -458,17 +522,17 @@
                   width: 150,
                   render: (h, params) => {
                     let arr = []
-                    if (params.row.data[item.title]) {
-                      for (let i = 0; i < params.row.data[item.title].length; i++) {
+                    if (params.row[item.title]) {
+                      for (let i = 0; i < params.row[item.title].length; i++) {
                         arr.push(h('Button', {
                           attrs: {
                             type: 'info',
                             style: 'margin: 2px',
-                            title: params.row.data[item.title][i].split('/').pop()
+                            title: params.row[item.title][i].split('/').pop()
                           },
                           on: {
                             click: () => {
-                              window.open(params.row.data[item.title][i])
+                              window.open(params.row[item.title][i])
                             }
                           }
                         }, [
@@ -489,7 +553,7 @@
                   key: item.name,
                   width: 150,
                   render: (h, params) => {
-                    return h('div', params.row.data[item.name])
+                    return h('div', params.row[item.name])
                   }
                 })
               }
@@ -515,11 +579,12 @@
                     'click': async () => {
                       let fheaders = {
                         workflowid: 'workflow_' + this.$route.params.id,
+                        normalpatch: true,
+                        ftablename: this.currentFlowzId,
                         stateid: this.$route.params.stateid
                       }
-                      finstanceModal.patch(params.row.id, {claimUser: this.$store.state.user._id}, null, fheaders)
+                      dflowzdata.patch(params.row.id, {_claimUser: this.$store.state.user._id}, null, fheaders)
                       .then((res) => {
-                        this.data.splice(params.index, 1)
                         this.$Notice.success({title: 'Successfully Claim'})
                       })
                       .catch((err) => {
@@ -537,7 +602,7 @@
           })
           cols.push({
             title: 'ID',
-            key: 'iid',
+            key: 'id',
             width: 260
           })
         }
@@ -559,17 +624,17 @@
                   width: item.width,
                   render: (h, params) => {
                     let arr = []
-                    if (params.row.data[item.title]) {
-                      for (let i = 0; i < params.row.data[item.title].length; i++) {
+                    if (params.row[item.title]) {
+                      for (let i = 0; i < params.row[item.title].length; i++) {
                         arr.push(h('Button', {
                           attrs: {
                             type: 'info',
                             style: 'margin: 2px',
-                            title: params.row.data[item.title][i].split('/').pop()
+                            title: params.row[item.title][i].split('/').pop()
                           },
                           on: {
                             click: () => {
-                              window.open(params.row.data[item.title][i])
+                              window.open(params.row[item.title][i])
                             }
                           }
                         }, [
@@ -591,7 +656,7 @@
                   sortable: item.sortable,
                   width: item.width,
                   render: (h, params) => {
-                    return h('div', params.row.data[item.key])
+                    return h('div', params.row[item.key])
                   }
                 })
               }
@@ -607,17 +672,17 @@
                   width: 150,
                   render: (h, params) => {
                     let arr = []
-                    if (params.row.data[item.title]) {
-                      for (let i = 0; i < params.row.data[item.title].length; i++) {
+                    if (params.row[item.title]) {
+                      for (let i = 0; i < params.row[item.title].length; i++) {
                         arr.push(h('Button', {
                           attrs: {
                             type: 'info',
                             style: 'margin: 2px',
-                            title: params.row.data[item.title][i].split('/').pop()
+                            title: params.row[item.title][i].split('/').pop()
                           },
                           on: {
                             click: () => {
-                              window.open(params.row.data[item.title][i])
+                              window.open(params.row[item.title][i])
                             }
                           }
                         }, [
@@ -638,7 +703,7 @@
                   key: item.name,
                   width: 150,
                   render: (h, params) => {
-                    return h('div', params.row.data[item.name])
+                    return h('div', params.row[item.name])
                   }
                 })
               }
@@ -649,10 +714,95 @@
       }
     },
     mounted () {
+      this.currentFlowzId = this.$route.params.id.replace(/-/g, '_')
       this.total = this.dataTotal
-      this.mdata = this.data
+      axios.get(config.usermodulerole)
+      // usermodulerole.get()
+      .then((res) => {
+        let module = 'workflow_' + this.$route.params.id
+        let users = _.filter(res.data.data, {'module': module})
+        this.stageClaimUsers.push({value: 'noValue', label: '-- Unassign User --'})
+        for (let i = 0; i < users.length; i++) {
+          if (this.$store.state.userDetails[users[i].userId]) {
+            this.stageClaimUsers.push({value: users[i].userId, label: this.$store.state.userDetails[users[i].userId].fullname})
+          } else {
+            axios.get(config.userdetails + users[i].userId)
+            .then((response) => {
+              this.stageClaimUsers.push({value: users[i].userId, label: response.data.data[0].fullname})
+              this.$store.state.userDetails[users[i].userId] = response.data.data[0]
+            })
+            .catch((error) => {
+              console.log(error)
+            })
+          }
+        }
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+      setTimeout(() => {
+        let tempClaimusers = _.uniqWith(this.stageClaimUsers, _.isEqual)
+        this.stageClaimUsers = tempClaimusers
+      }, 3000)
     },
     methods: {
+      assignUser () {
+        if (this.selectedAssignUser === '') {
+          this.$Notice.error({title: 'Please first select user'})
+        } else if (this.selectedRows.length === 0) {
+          this.$Notice.error({title: 'Please first select Rows'})
+        } else {
+          for (let i = 0; i < this.selectedRows.length; i++) {
+            let fheaders = {
+              workflowid: 'workflow_' + this.$route.params.id,
+              normalpatch: true,
+              ftablename: this.currentFlowzId,
+              stateid: this.$route.params.stateid
+            }
+            if (this.selectedAssignUser !== 'noValue') {
+              dflowzdata.patch(this.selectedRows[i].id, {_claimUser: this.selectedAssignUser, _state: this.$route.params.stateid}, null, fheaders)
+              .then((res) => {
+                this.$Notice.success({title: 'Successfully Un-Assign'})
+              })
+              .catch((err) => {
+                if (err.response) {
+                  this.$Notice.error({title: err.response.data.message})
+                } else {
+                  this.$Message.error(err.message)
+                }
+              })
+            } else {
+              dflowzdata.patch(this.selectedRows[i].id, {_claimUser: '', _state: this.$route.params.stateid}, null, fheaders)
+              .then((res) => {
+                this.$Notice.success({title: 'Successfully Assign'})
+              })
+              .catch((err) => {
+                if (err.response) {
+                  this.$Notice.error({title: err.response.data.message})
+                } else {
+                  this.$Message.error(err.message)
+                }
+              })
+            }
+          }
+        }
+      },
+      AddRows (selection) {
+        this.selectedRows = []
+        this.selectedRows = selection
+      },
+      handleSelectAll (status) {
+        this.$refs.selection.selectAll(status)
+      },
+      selectUser (params) {
+        if (params.row.hasOwnProperty('_claimUser')) {
+          let obj = _.find(this.stageClaimUsers, {value: params.row._claimUser})
+          if (obj !== undefined) {
+            this.instanceEntries[params.index].claim = obj.value
+            return obj.label
+          }
+        }
+      },
       clearSearchData () {
         this.searchQuery = ''
         this.selectedFilterBy = ''
@@ -666,6 +816,9 @@
         let object = {
           text: this.searchQuery,
           filterBy: this.selectedFilterBy
+        }
+        if (this.selectedFilterBy === 'customRange') {
+          object['customValue'] = this.enteredDateRange
         }
         this.$emit('search-data', object)
       },
@@ -681,6 +834,13 @@
       },
       handlePagesize (size) {
         this.$emit('on-handlepage', this.skip, this.limit, size)
+      },
+      handlePage2 (page) {
+        this.skip = (page * this.limit) - this.limit
+        this.$emit('on-paginate2', this.skip, this.limit, page)
+      },
+      handlePagesize2 (size) {
+        this.$emit('on-handlepage2', this.skip, this.limit, size)
       }
     }
   }
@@ -708,6 +868,16 @@
     overflow: hidden !important;
     text-overflow: ellipsis !important;
   }
+  @media only screen and (max-width: 1600px ) and (min-width: 1400px) {
+      .buttonAssign {
+        margin-left: 30px !important
+      }
+  }
+   @media only screen and (min-width: 900px) and (max-width: 1400px) {
+     .buttonAssign {
+        margin-left: 100px !important
+      }
+   }
 </style>
 
 <style>

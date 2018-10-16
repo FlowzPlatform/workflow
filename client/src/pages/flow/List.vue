@@ -34,6 +34,10 @@
                                     <template v-for="(field,fieldNumber) in fields[moduleName]">
                                         <td v-if="fieldNumber ==0" style="padding:10px;font-weight:bold;border-right: 3px solid #cdd0d4;">
                                             {{selectedFlowObject.processList[titleCase(item.service)].name}}
+                                            <!-- {{item.service}}
+                                            <br>
+                                            <br>
+                                            {{selectedFlowObject.processList[titleCase(item.service)]}} -->
                                         </td>
                                         <td v-else>
                                             <table class="table-bordered" style="width:100%">
@@ -162,7 +166,7 @@
 <script>
 import flowz from '@/api/flowz'
 import _ from 'lodash'
-// import finstanceModal from '@/api/finstance'
+import finstanceModal from '@/api/finstance'
 import axios from 'axios'
 import viewSVG from './viewSVG'
 import psl from 'psl'
@@ -180,7 +184,7 @@ import moment from 'moment'
 export default {
   name: 'Flowz',
   components: {
-    viewSVG: (resolve) => { require(['./viewSVG'], resolve) },
+    'viewSVG': (resolve) => { require(['./viewSVG'], resolve) },
     expandRow2: (resolve) => { require(['./assigned_invite_table-expand.vue'], resolve) },
     subscription: (resolve) => { require(['@/components/subscription'], resolve) }
   },
@@ -244,32 +248,32 @@ export default {
           align: 'center',
           render: (h, params) => {
             return h('div', [
-              // h('Button', {
-              //   props: {
-              //     type: 'text',
-              //     size: 'large',
-              //     icon: 'arrow-right-b'
-              //   },
-              //   domProps: {
-              //     title: 'Start Instance'
-              //   },
-              //   style: {
-              //     marginRight: '3px',
-              //     padding: '0px',
-              //     fontSize: '20px',
-              //     color: '#2411c5'
-              //   },
-              //   on: {
-              //     click: () => {
-              //       this.createNewInstance(params.row.id)
-              //     }
-              //   }
-              // }, ''),
               h('Button', {
                 props: {
                   type: 'text',
                   size: 'large',
-                  icon: 'key'
+                  icon: 'arrow-right-b'
+                },
+                domProps: {
+                  title: 'Start Instance'
+                },
+                style: {
+                  marginRight: '3px',
+                  padding: '0px',
+                  fontSize: '20px',
+                  color: '#2411c5'
+                },
+                on: {
+                  click: () => {
+                    this.createNewInstance(params.row.id)
+                  }
+                }
+              }, ''),
+              h('Button', {
+                props: {
+                  type: 'text',
+                  size: 'large',
+                  icon: 'settings'
                 },
                 domProps: {
                   title: 'Set Permission'
@@ -313,9 +317,6 @@ export default {
                   size: 'large',
                   icon: 'ios-personadd'
                 },
-                domProps: {
-                  title: 'Invite User'
-                },
                 style: {
                   marginRight: '3px',
                   padding: '0px',
@@ -332,9 +333,6 @@ export default {
                 props: {
                   type: 'text',
                   size: 'large'
-                },
-                domProps: {
-                  title: 'Field Permissions'
                 },
                 style: {
                   marginRight: '3px',
@@ -524,15 +522,30 @@ export default {
     this.getDataOfSubscriptionUser()
   },
   feathers: {
-    'flowz-instance': {
-      created (data) { // update status using socket
-        flowz.get()
-        .then(response => {
-          this.flowzList = response.data.data
-        })
-        .catch(error => {
-          console.log(error)
-        })
+    'flowz': {
+      created (data) {
+        // console.log(this.limit)
+        if (this.total < this.limit) {
+          this.flowzList.push(data)
+        } else {
+          this.total = ((this.total) + 1)
+        }
+      },
+      updated (data) {
+        if (this.flowzList < this.limit) {
+          let inx = _.findIndex(this.flowzList, (o) => { return o.id === data.id })
+          this.flowzList.splice(inx, 1)
+          this.flowzList.push(data)
+        }
+      },
+      removed (data) {
+        // console.log('Removed Data: ', data)
+        if (this.$store.state.role === 1) {
+          // this.$store.state.flowz = []
+          // this.init()
+          let i = _.findIndex(this.flowzList, (o) => { return o.id === data.id })
+          this.flowzList.splice(i, 1)
+        }
       }
     }
   },
@@ -709,10 +722,12 @@ export default {
       this.init()
     },
     init () {
-      // var string = '?$skip=' + this.skip + '&$limit=' + this.limit
+      this.loading = true
       flowz.get(null, {
         $skip: this.skip,
-        $limit: this.limit
+        $limit: this.limit,
+        subscriptionId: this.$store.state.subscription,
+        userId: this.$store.state.user._id
       })
       .then(response => {
         this.total = response.data.total
@@ -721,26 +736,26 @@ export default {
       })
       .catch(error => {
         this.loading = false
-        this.$Notice.error({duration: '3', title: error.message, desc: ''})
+        this.$Notice({duration: '3', title: 'Network Error', desc: ''})
         console.log(error)
       })
     },
-    // createNewInstance (item) {
-    //   this.$Loading.start()
-    //   let fheaders = null
-    //   finstanceModal.post({fid: item.id}, null, fheaders).then(res => {
-    //     this.$Notice.success({title: 'Instance Generated'})
-    //     this.$Loading.finish()
-    //   }).catch(e => {
-    //     this.$Loading.error()
-    //     console.log('error', e.response)
-    //     if (e.response.data.message) {
-    //       this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
-    //     } else {
-    //       this.$Notice.error({title: 'Error', desc: 'Instace Not Generated'})
-    //     }
-    //   })
-    // },
+    createNewInstance (item) {
+      this.$Loading.start()
+      let fheaders = null
+      finstanceModal.post({fid: item.id}, null, fheaders).then(res => {
+        this.$Notice.success({title: 'Instance Generated'})
+        this.$Loading.finish()
+      }).catch(e => {
+        this.$Loading.error()
+        console.log('error', e.response)
+        if (e.response.data.message) {
+          this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+        } else {
+          this.$Notice.error({title: 'Error', desc: 'Instace Not Generated'})
+        }
+      })
+    },
     addNewFlow () {
       this.$store.dispatch('removeXMLtoLocalStorage')
       this.$router.push({name: 'flow/new'})
@@ -850,8 +865,18 @@ export default {
           'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
         }
       }).then(async function (response) {
-        let arrResources = await _.groupBy(response.data.data, 'module')
-        console.log('arrResources: ', arrResources)
+        // console.log('Response: ', response.data.data)
+        let actionsArray = response.data.data
+        // console.log('processList: ', self.selectedFlowObject.processList)
+        let processListArray = self.selectedFlowObject.processList
+        let sortedArray = []
+        for (let item of actionsArray) {
+          // console.log('Item: ', item, processListArray[self.titleCase(item.service)])
+          item['order'] = processListArray[self.titleCase(item.service)].order
+          sortedArray.push(item)
+        }
+        sortedArray = _.sortBy(sortedArray, [function (o) { return o.order }])
+        let arrResources = await _.groupBy(sortedArray, 'module')
         // self.tableData = arrResources
         // self.tableData = ['hi']
         self.tableData = await _.extend(self.tableData, arrResources)

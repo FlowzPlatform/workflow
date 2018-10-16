@@ -162,7 +162,8 @@ export default {
   methods: {
     init () {
       flowzModel.get(null, {
-        $limit: 0
+        $limit: 0,
+        userId: this.$store.state.user._id
       })
       .then((res) => { 
         this.countFlowz = res.data.total 
@@ -201,6 +202,30 @@ export default {
     // this.chart = new CanvasJS.Chart("chartContainer", this.newVSReturningVisitorsOptions);
     // this.chart.options.data = this.visitorsData["New vs Returning Visitors"];
     // this.chart.render();
+  },
+  fethers: {
+    'dflowzdata': {
+      created (data) {
+        console.log('created dflowzdata..', data)
+      },
+      updated (data) {
+        console.log('updated dflowzdata..', data)
+      },
+      removed (data) {
+        console.log('removed dflowzdata..', data)
+      }
+    },
+    'dflowzdata_created': {
+      created (data) {
+        console.log('dflowzdata_created..', data)
+      },
+      updated (data) {
+        console.log('dflowzdata_updated..', data)
+      },
+      removed (data) {
+        console.log('dflowzdata_removed..', data)
+      }
+    }
   }
 }
 </script>
