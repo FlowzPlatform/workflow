@@ -50,6 +50,7 @@ elif [ "$TRAVIS_BRANCH" = "staging" ]
 then
     {
       echo "call $TRAVIS_BRANCH branch"
+
       ENV_ID=`curl -u ""$RANCHER_ACCESSKEY_STAGING":"$RANCHER_SECRETKEY_STAGING"" -X GET -H 'Accept: application/json' -H 'Content-Type: application/json' "$RANCHER_URL_STAGING/v2-beta/projects?name=Staging" | jq '.data[].id' | tr -d '"'`
       echo $ENV_ID
       USERNAME="$DOCKER_USERNAME";
