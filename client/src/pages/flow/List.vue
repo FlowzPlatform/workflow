@@ -872,7 +872,16 @@ export default {
         let sortedArray = []
         for (let item of actionsArray) {
           // console.log('Item: ', item, processListArray[self.titleCase(item.service)])
-          item['order'] = processListArray[self.titleCase(item.service)].order
+          if (processListArray[self.titleCase(item.service)] === undefined) {
+            let realName = _.findKey(processListArray, function (value, key) {
+              return key.toLowerCase() === item.service.toLowerCase()
+            })
+            // console.log('item', realName)
+            item['order'] = processListArray[realName].order
+          } else {
+            // item['order']
+            item['order'] = processListArray[self.titleCase(item.service)].order
+          }
           sortedArray.push(item)
         }
         sortedArray = _.sortBy(sortedArray, [function (o) { return o.order }])
