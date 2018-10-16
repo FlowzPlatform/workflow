@@ -1,5 +1,6 @@
 <template>
   <div class="CellRender stageTuple" :class="classObject(item)">
+    <Spin v-if="cellLoading"></Spin>
     <!-- <div class="CellRender stageTuple" :class="classObject(item.row, item.column.key)"> -->
   	<!-- <span :class="classObject(item.row, item.column.key)"></span> -->
 
@@ -18,20 +19,23 @@
         <img src="http://placehold.it/20x20" style="margin-top: 20px;">
       </div>
     </div> -->
-    <span v-if="item.obj != null && item.isCompletedTask == true" :title="getAgoActualStatus(item.obj.createdAt)" style="display: block;; width: 80% !important">
+    <span v-if="item.obj != null && item.isCompletedTask == true" :title="getAgoActualStatus(item.obj._createdAt)" style="display: block;; width: 80% !important">
       <i class="fa fa-calendar fa-fw"></i>
-      <small>{{getAgoStatus(item.obj.createdAt)}}</small>
+      <!-- {{item.obj._createdAt | getAgoStatusFormat}} -->
+      <small>{{getAgoStatus(item.obj._createdAt)}}</small>
     </span>
 
-    <span v-if="item.obj != null && item.isCompletedTask == false && item.isCurrentTask == true" :title="getAgoActualStatus(item.obj.completedAt)" style="display: block; width: 80% !important">
+    <span v-if="item.isCompletedTask == false && item.isCurrentTask == true" :title="getAgoActualStatus(item.obj._createdAt)" style="display: block; width: 80% !important">
       <i class="fa fa-calendar fa-fw"></i>
-      <small>{{getAgoStatus(item.obj.completedAt)}}</small>
+      <!-- {{item.obj._createdAt}} -->
+      <!-- {{item.obj._createdAt | getAgoStatusFormat}} -->
+      <small>{{getAgoStatus(item.obj._createdAt)}}</small>
     </span>
 
     <span v-if="item.obj != null && item.isCompletedTask == true" title="Duration" style="display: block;">
       <i class="fa fa-clock-o fa-fw"></i>
       <!-- <span>{{item.obj.createdAt}} : {{ item.obj.completedAt}}</span> -->
-      <small>{{ getDuration(item.obj.createdAt, item.obj.completedAt) }}</small>
+      <small>{{ getDuration(item.obj._createdAt, item.obj._completedAt) }}</small>
     </span>
 
     <span v-if="item.obj != null && item.isCompletedTask == false" title="Duration" style="display: block;">
@@ -40,7 +44,7 @@
       <small><em>Waiting</em></small>
     </span>
 
-    <img v-if="item.obj != null && item.isCompletedTask == true" :title="getUserHoverDetails(item)" :src="getUserAvatar(item)" class="avatarImg" alt="User Avatar">
+    <img v-if="item.obj.userDetails && item.isCompletedTask == true" :title="getUserHoverDetails(item.obj.userDetails)" :src="getUserAvatar(item.obj.userDetails)" class="avatarImg" alt="User Avatar">
     
     <!-- <span :title="getCompletedActualStatus(item.row, item.column.key)">
       <i class="fa fa-calendar fa-fw"></i>
@@ -76,6 +80,8 @@
 import moment from 'moment'
 import flowzdataModal from '@/api/flowzdata'
 import schemaModel from '@/api/schema'
+import config from '@/config'
+import axios from 'axios'
 
 export default {
   name: 'CellRender',
@@ -89,14 +95,15 @@ export default {
       schemainstance: {
         data: [],
         entity: []
-      }
+      },
+      cellLoading: false
     }
   },
   components: {
     'schemasubformview': (resolve) => { require(['./SchemaSubFormView'], resolve) }
   },
   filters: {
-    getAgoStatus (item) {
+    getAgoStatusFormat (item) {
       return moment(item).fromNow()
     }
   },
@@ -111,6 +118,7 @@ export default {
       if (item.isCurrentTask === true && item.isCompletedTask === false) {
         return { 'currentTask': true }
       } else if (item.isCurrentTask === false && item.isCompletedTask === true) {
+        // alert('completedTask')
         return { 'completedTask': true }
       } else {
         return { 'pendingTaskk': true }
@@ -120,7 +128,10 @@ export default {
       return ('Started at: ' + moment(item).format('MMMM Do YYYY, h:mm:ss a'))
     },
     getAgoStatus (item) {
+      // console.log('Item Date: ', item)
+      // console.log('moment(item).fromNow(): ', moment(item).fromNow())
       return moment(item).fromNow()
+      // return moment(item).format('MMMM Do YYYY, h:mm:ss a')
     },
     getDuration (x, y) {
       // if (x) {
@@ -166,15 +177,16 @@ export default {
       // return days + hours + minutes + seconds
     },
     getUserAvatar (item) {
-      if (item.obj.user.avatar) {
-        return item.obj.user.avatar
+      if (item.picture) {
+        return item.picture
       } else {
         return ('https://www.sigmanest.com/wp-content/uploads/2017/11/Dummy.jpg')
       }
     },
     getUserHoverDetails (item) {
-      if (item.obj.user.name && item.obj.user.email && item.obj.user.role) {
-        return ('Name: ' + item.obj.user.name + '\nEmail: ' + item.obj.user.email + '\nRole: ' + item.obj.user.role)
+      // console.log('Item: ', item)
+      if (item.fullname && item.email && item.role) {
+        return ('Name: ' + item.fullname + '\nEmail: ' + item.email + '\nRole: ' + item.role)
       } else {
         return ('User details not available.')
       }
@@ -197,7 +209,8 @@ export default {
                 this.schemainstance.entity[index]['entity'] = await this.getChildEntity(entity.type)
               }
             }
-            this.schemainstance.data.push(this.currentPopTipData)
+            // this.schemainstance.data.push(this.currentPopTipData)
+            this.schemainstance.data[0] = this.item.obj
             this.dataModal = true
             this.$Spin.hide()
           }).catch(err => {
@@ -250,8 +263,24 @@ export default {
     //   }
     // },
   },
-  mounted () {
-    // console.log('this.item: ', this.item)
+  async created () {
+    if (this.item.obj.userId) {
+      this.cellLoading = true
+      if (this.$store.state.userDetails[this.item.obj.userId]) {
+        this.item.obj['userDetails'] = this.$store.state.userDetails[this.item.obj.userId]
+        this.cellLoading = false
+      } else {
+        await axios.get(config.userdetails + this.item.obj.userId)
+        .then((response) => {
+          this.item.obj['userDetails'] = response.data.data[0]
+          this.$store.state.userDetails[this.item.obj.userId] = response.data.data[0]
+          this.cellLoading = false
+        })
+        .catch((error) => {
+          console.log(error)
+        })
+      }
+    }
   }
 }
 

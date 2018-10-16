@@ -1,5 +1,5 @@
 [Settings]
-ID = "Develop-I" 
+ID = "Develop-I"
 [build]
   # This will be your default build command
   base = "client/"
