@@ -1667,12 +1667,9 @@ export default {
       _updated (data) {
       },
       _patched (data) {
-        console.log('patch called')
         let keys = Object.keys(data)
         for (let tName of keys) {
-          console.log('data', data[tName])
           if (data[tName]._currentStatus) {
-            console.log('111')
             if (this.$store.state.role === 1) {
               if (data[tName]._currentStatus && data[tName]._state === this.$route.params.stateid) {
                 let inx = _.findIndex(this.instanceEntries, (o) => { return o.id === data[tName].id })
@@ -1682,7 +1679,6 @@ export default {
               }
             }
             if (this.$store.state.role === 2) {
-              console.log('patchFlag', this.patchFlag)
               if (data[tName]._claimUser === '') {
                 let inx = _.findIndex(this.dataClaim, (o) => { return o.id === data[tName].id })
                 this.dataClaim.splice(inx, 1)
