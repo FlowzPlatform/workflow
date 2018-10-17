@@ -291,6 +291,7 @@ export default {
           ])
         ])
       },
+      patchFlag: false,
       tableId: '',
       taskName: '',
       formSchemaInstancefile: {
@@ -1037,10 +1038,11 @@ export default {
       }
       this.bLoading = true
       if (this.$store.state.role === 2) {
+        this.patchFlag = true
         fheaders = {
           workflowid: 'workflow_' + this.flowzData.id,
           stateid: this.$route.params.stateid,
-          normalpatch: true
+          ftablename: this.currentFlowzId
         }
       }
       dflowzdata.patch(saveObj.id, saveObj, null, fheaders)
@@ -1665,9 +1667,12 @@ export default {
       _updated (data) {
       },
       _patched (data) {
+        console.log('patch called')
         let keys = Object.keys(data)
         for (let tName of keys) {
+          console.log('data', data[tName])
           if (data[tName]._currentStatus) {
+            console.log('111')
             if (this.$store.state.role === 1) {
               if (data[tName]._currentStatus && data[tName]._state === this.$route.params.stateid) {
                 let inx = _.findIndex(this.instanceEntries, (o) => { return o.id === data[tName].id })
@@ -1677,6 +1682,7 @@ export default {
               }
             }
             if (this.$store.state.role === 2) {
+              console.log('patchFlag', this.patchFlag)
               if (data[tName]._claimUser === '') {
                 let inx = _.findIndex(this.dataClaim, (o) => { return o.id === data[tName].id })
                 this.dataClaim.splice(inx, 1)
@@ -1700,6 +1706,10 @@ export default {
                 this.flowzList[finx].count--
               }
             }
+          } else {
+            let inx = _.findIndex(this.dataClaim, (o) => { return o.id === data[tName].id })
+            this.dataClaim.splice(inx, 1)
+            this.dataTotalC = this.dataTotalC - 1
           }
         }
       },
