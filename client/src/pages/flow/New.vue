@@ -36,7 +36,8 @@
 <script>
   const subscriptionNew = require('flowz-subscription')
   import _ from 'lodash'
-  import emailTemplateModel from '@/api/emailtemplate'
+  // import emailTemplateModel from '@/api/emailtemplate'
+  import saveemailTemplate from '@/api/emailtemplate'
   import modelBpmnplugin from '@/api/bpmnplugins'
   import flowz from '@/api/flowz'
   import schemaModel from '@/api/schema'
@@ -392,8 +393,8 @@
       },
       initFlow () {
         let tempVar = []
-        emailTemplateModel.get(null, {
-          'user': this.$store.state.user._id
+        saveemailTemplate.get(null, {
+          userId: this.$store.state.user._id
         })
         .then((res) => {
           // tempVar = res.data.data
