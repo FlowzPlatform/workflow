@@ -565,7 +565,9 @@ export default {
                 if (inx === 0) {
                   item._first = true
                 }
-                this.colviewData.push(item)
+                if (this.flowzData.processList[item._state].type !== 'startevent' && this.flowzData.processList[item._state].type !== 'endevent' && this.flowzData.processList[item._state].type !== 'intermediatethrowevent' && this.flowzData.processList[item._state].type !== 'exclusivegateway') {
+                  this.colviewData.push(item)
+                }
               }
             }
           }
