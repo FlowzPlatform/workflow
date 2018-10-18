@@ -429,7 +429,7 @@ export default {
               params['_createdAt[$lte]'] = query.customValue[1].toISOString()
             }
           }
-        } else {
+        } else if (query.filterBy !== '') {
           let dateRange = this.getFilterDate(query.filterBy)
           // console.log('Normal Range Found', this.selectedFilterBy, $lte, new Date().toISOString())
           params['_createdAt[$gte]'] = dateRange
