@@ -291,6 +291,7 @@ export default {
           ])
         ])
       },
+      patchFlag: false,
       tableId: '',
       taskName: '',
       formSchemaInstancefile: {
@@ -428,7 +429,7 @@ export default {
               params['_createdAt[$lte]'] = query.customValue[1].toISOString()
             }
           }
-        } else {
+        } else if (query.filterBy !== '') {
           let dateRange = this.getFilterDate(query.filterBy)
           // console.log('Normal Range Found', this.selectedFilterBy, $lte, new Date().toISOString())
           params['_createdAt[$gte]'] = dateRange
@@ -1037,10 +1038,11 @@ export default {
       }
       this.bLoading = true
       if (this.$store.state.role === 2) {
+        this.patchFlag = true
         fheaders = {
           workflowid: 'workflow_' + this.flowzData.id,
           stateid: this.$route.params.stateid,
-          normalpatch: true
+          ftablename: this.currentFlowzId
         }
       }
       dflowzdata.patch(saveObj.id, saveObj, null, fheaders)
@@ -1700,6 +1702,10 @@ export default {
                 this.flowzList[finx].count--
               }
             }
+          } else {
+            let inx = _.findIndex(this.dataClaim, (o) => { return o.id === data[tName].id })
+            this.dataClaim.splice(inx, 1)
+            this.dataTotalC = this.dataTotalC - 1
           }
         }
       },

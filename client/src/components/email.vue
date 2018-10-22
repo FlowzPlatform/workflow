@@ -93,7 +93,7 @@ import schemaModel from '@/api/schema'
           </a>
           `
       }
-      this.tinyMCEcontent = this.sendDataEmail.replace(/{{NextTargetButton}}/g, this.btn)
+      this.tinyMCEcontent = this.sendDataEmail.replace(/{{NextTargetButton}}/g, this.btn) + this.btn
       if (this.flag == false) {
         let response = await schemaModel.get(this.emailSchemaId).catch(error => {
           console.log(error)
