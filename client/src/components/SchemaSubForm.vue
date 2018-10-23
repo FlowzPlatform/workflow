@@ -617,7 +617,11 @@ export default {
   margin-left: -20px;
   margin-bottom: 10px;
   position: relative;
-  z-index: 999;
+  /*z-index: 999;*/
+}
+
+.ivu-select-dropdown{
+  padding: 0
 }
 
 .btnAdd {
