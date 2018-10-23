@@ -1125,18 +1125,12 @@ export default {
       _updated (data) {
       },
       _patched (data) {
-        console.log('Pached: ', data)
         let keys = Object.keys(data)
         for (let tName of keys) {
-          console.log('tName: ', tName)
           if (tName === this.$route.params.id.replace(/-/g, '_')) {
             let findIndex = _.findIndex(this.tableData, (o) => { return o._uuid === data[tName]._uuid })
             let findIndexCol = _.findIndex(this.colviewData, (o) => { return o._uuid === data[tName]._uuid })
-            console.log('Finid Index: ', findIndex)
-            console.log('this.tableData[findIndex]: ', this.tableData[findIndex])
-            console.log('Data: ', data[tName]._state)
             let stageIndex = _.findIndex(this.tableData[findIndex].states, (o) => { return o._state === data[tName]._state })
-            console.log('stageIndex: ', stageIndex)
             this.tableData[findIndex].states[stageIndex] = data[tName]
             this.colviewData[findIndexCol] = data[tName]
           }
