@@ -757,7 +757,7 @@ export default {
       })
     },
     addNewFlow () {
-      this.$store.dispatch('removeXMLtoLocalStorage')
+      // this.$store.dispatch('removeXMLtoLocalStorage')
       this.$router.push({name: 'flow/new'})
     },
     deleteFlow (id, inx) {
