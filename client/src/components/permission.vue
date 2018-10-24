@@ -76,7 +76,7 @@ export default {
           this.schemaRes = schemaRes.data
           let sortedArray = _.sortBy(res.data.processList, [function (o) { return o.order }])
           for (let proc in sortedArray) {
-            if (sortedArray[proc].type !== 'startevent' && sortedArray[proc].type !== 'endevent') {
+            if (sortedArray[proc].type !== 'startevent' && sortedArray[proc].type !== 'endevent' && sortedArray[proc].type !== 'exclusivegateway') {
               let mdata = {
                 state: sortedArray[proc].name || sortedArray[proc].id,
                 _state: sortedArray[proc].id
