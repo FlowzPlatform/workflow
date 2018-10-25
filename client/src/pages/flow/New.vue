@@ -253,7 +253,7 @@
                       flowz.put(this.$route.params.id, this.flowObject).then(response => {
                         this.$Notice.success({title: 'Success..!', desc: 'Flow Updated..'})
                         this.$router.push({name: 'flow/list'})
-                        localStorage.removeItem('BPMNXml')
+                        // localStorage.removeItem('BPMNXml')
                         this.btnLoading = false
                       }).catch(error => {
                         console.log(error)
@@ -272,12 +272,14 @@
                       subscriptionNew.moduleResource.registerAppModule = registerAppModuleNew
                       subscriptionNew.moduleResource.appRoles = userRolesArr
                       subscriptionNew.registeredAppModulesRole()
+                      this.$store.dispatch('removeXMLtoLocalStorage')
                       this.$Notice.success({title: 'Success..!', desc: 'Flow Saved..'})
                       this.$router.push({name: 'flow/list'})
-                      localStorage.removeItem('BPMNXml')
+                      // localStorage.removeItem('BPMNXml')
                       this.btnLoading = false
                     }).catch(error => {
                       console.log(error)
+                      this.storeXMLtolocalStorage()
                       this.$Notice.error({title: 'Error..!', desc: 'Flow Not Saved...'})
                       this.btnLoading = false
                     })
@@ -287,14 +289,17 @@
                   this.btnLoading = false
                 }
               } else {
+                this.storeXMLtolocalStorage()
                 this.$Message.error('Please Add Schema for Flow !')
                 this.btnLoading = false
               }
             } else {
+              this.storeXMLtolocalStorage()
               this.$Message.error('Please Add Schema for Flow !')
               this.btnLoading = false
             }
           } else {
+            this.storeXMLtolocalStorage()
             this.$Message.error('Please Add Process name !')
             this.btnLoading = false
           }
@@ -365,6 +370,9 @@
         if (event.hasOwnProperty('outgoing')) {
           if (!_.isArray(event.outgoing)) {
             event.outgoing = [event.outgoing]
+          }
+          if (!_.isArray(process.sequenceFlow)) {
+            process.sequenceFlow = [process.sequenceFlow]
           }
           return _.map(event.outgoing, (targetMap) => {
             return _.chain(process.sequenceFlow).filter((ftr) => {
@@ -442,6 +450,10 @@
               }) // Create bpmn
             })
           } else {
+            let self = this
+            if (self.$store.getters.getXML !== undefined && self.$store.getters.getXML !== '' && self.$store.getters.getXML !== null) {
+              this.bpmnXML = self.$store.getters.getXML
+            }
             this.initBPMN({
               userId: this.$store.state.user._id,
               emailTemplate: tempVar,
@@ -456,16 +468,16 @@
               }
             }) // Create bpmn
           }
-          let self = this
-          if (self.$store.getters.getXML !== undefined && self.$store.getters.getXML !== '') {
-            this.bpmnXML = self.$store.getters.getXML
-            this.bpmnModeler.importXML(this.bpmnXML, function (err) {
-              if (err) {
-                console.error(err)
-              } else {
-              }
-            })
-          }
+          // let self = this
+          // if (self.$store.getters.getXML !== undefined && self.$store.getters.getXML !== '' && self.$store.getters.getXML !== null) {
+          //   this.bpmnXML = self.$store.getters.getXML
+          //   this.bpmnModeler.importXML(this.bpmnXML, function (err) {
+          //     if (err) {
+          //       console.error(err)
+          //     } else {
+          //     }
+          //   })
+          // }
         }, reason => {
           this.$Notice.error({
             title: reason.message,
