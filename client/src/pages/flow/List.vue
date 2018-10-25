@@ -166,12 +166,10 @@
 <script>
 import flowz from '@/api/flowz'
 import _ from 'lodash'
-import finstanceModal from '@/api/finstance'
 import axios from 'axios'
 import viewSVG from './viewSVG'
 import psl from 'psl'
-// import subscription from '@/components/subscription'
-
+import $ from 'jquery'
 import config from '@/config'
 import expandRow2 from './assigned_invite_table-expand.vue'
 let subscriptionUrl = config.subscriptionUrl
@@ -239,7 +237,28 @@ export default {
         },
         {
           title: 'Id',
-          key: 'id'
+          key: 'id',
+          render: (h, params) => {
+            return h('span', {
+              attrs: {
+                title: 'Click to Copy',
+                class: 'clickToCopy'
+              },
+              style: {
+                cursor: 'pointer'
+              },
+              on: {
+                click: () => {
+                  let $temp = $('<input>')
+                  $('body').append($temp)
+                  $temp.val(params.row.id).select()
+                  document.execCommand('copy')
+                  this.$Message.info('Copied to Clipboard')
+                  $temp.remove()
+                }
+              }
+            }, params.row.id)
+          }
         },
         {
           title: 'Action',
@@ -248,27 +267,6 @@ export default {
           align: 'center',
           render: (h, params) => {
             return h('div', [
-              h('Button', {
-                props: {
-                  type: 'text',
-                  size: 'large',
-                  icon: 'arrow-right-b'
-                },
-                domProps: {
-                  title: 'Start Instance'
-                },
-                style: {
-                  marginRight: '3px',
-                  padding: '0px',
-                  fontSize: '20px',
-                  color: '#2411c5'
-                },
-                on: {
-                  click: () => {
-                    this.createNewInstance(params.row.id)
-                  }
-                }
-              }, ''),
               h('Button', {
                 props: {
                   type: 'text',
@@ -740,22 +738,6 @@ export default {
         console.log(error)
       })
     },
-    createNewInstance (item) {
-      this.$Loading.start()
-      let fheaders = null
-      finstanceModal.post({fid: item.id}, null, fheaders).then(res => {
-        this.$Notice.success({title: 'Instance Generated'})
-        this.$Loading.finish()
-      }).catch(e => {
-        this.$Loading.error()
-        console.log('error', e.response)
-        if (e.response.data.message) {
-          this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
-        } else {
-          this.$Notice.error({title: 'Error', desc: 'Instace Not Generated'})
-        }
-      })
-    },
     addNewFlow () {
       // this.$store.dispatch('removeXMLtoLocalStorage')
       this.$router.push({name: 'flow/new'})
@@ -1161,6 +1143,10 @@ export default {
       max-height: 80%;
     }
   }
+  .clickToCopy{
+    cursor: pointer;
+  }
+
 
   /* 
   Maybe add some animations!
