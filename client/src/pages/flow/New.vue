@@ -36,8 +36,7 @@
 <script>
   const subscriptionNew = require('flowz-subscription')
   import _ from 'lodash'
-  // import emailTemplateModel from '@/api/emailtemplate'
-  import saveemailTemplate from '@/api/emailtemplate'
+  import emailTemplateModel from '@/api/emailtemplate'
   import modelBpmnplugin from '@/api/bpmnplugins'
   import flowz from '@/api/flowz'
   import schemaModel from '@/api/schema'
@@ -254,7 +253,7 @@
                       flowz.put(this.$route.params.id, this.flowObject).then(response => {
                         this.$Notice.success({title: 'Success..!', desc: 'Flow Updated..'})
                         this.$router.push({name: 'flow/list'})
-                        localStorage.removeItem('BPMNXml')
+                        // localStorage.removeItem('BPMNXml')
                         this.btnLoading = false
                       }).catch(error => {
                         console.log(error)
@@ -273,12 +272,14 @@
                       subscriptionNew.moduleResource.registerAppModule = registerAppModuleNew
                       subscriptionNew.moduleResource.appRoles = userRolesArr
                       subscriptionNew.registeredAppModulesRole()
+                      this.$store.dispatch('removeXMLtoLocalStorage')
                       this.$Notice.success({title: 'Success..!', desc: 'Flow Saved..'})
                       this.$router.push({name: 'flow/list'})
-                      localStorage.removeItem('BPMNXml')
+                      // localStorage.removeItem('BPMNXml')
                       this.btnLoading = false
                     }).catch(error => {
                       console.log(error)
+                      this.storeXMLtolocalStorage()
                       this.$Notice.error({title: 'Error..!', desc: 'Flow Not Saved...'})
                       this.btnLoading = false
                     })
@@ -288,14 +289,17 @@
                   this.btnLoading = false
                 }
               } else {
+                this.storeXMLtolocalStorage()
                 this.$Message.error('Please Add Schema for Flow !')
                 this.btnLoading = false
               }
             } else {
+              this.storeXMLtolocalStorage()
               this.$Message.error('Please Add Schema for Flow !')
               this.btnLoading = false
             }
           } else {
+            this.storeXMLtolocalStorage()
             this.$Message.error('Please Add Process name !')
             this.btnLoading = false
           }
@@ -367,6 +371,9 @@
           if (!_.isArray(event.outgoing)) {
             event.outgoing = [event.outgoing]
           }
+          if (!_.isArray(process.sequenceFlow)) {
+            process.sequenceFlow = [process.sequenceFlow]
+          }
           return _.map(event.outgoing, (targetMap) => {
             return _.chain(process.sequenceFlow).filter((ftr) => {
               // console.log('ftr._id', ftr._id, targetMap)
@@ -393,9 +400,8 @@
       },
       initFlow () {
         let tempVar = []
-        saveemailTemplate.get(null, {
-          userId: this.$store.state.user._id,
-          subscriptionId: this.$store.state.subscription
+        emailTemplateModel.get(null, {
+          'user': this.$store.state.user._id
         })
         .then((res) => {
           // tempVar = res.data.data
@@ -412,8 +418,7 @@
           new Promise((resolve, reject) => {
             schemaModel.get(null, {
               $paginate: false,
-              isdeleted: false,
-              subscriptionId: this.$store.state.subscription
+              isdeleted: false
             }).then((response) => {
               response.data.splice(0, 0, { title: '---select---', id: 0 })
               resolve(response.data)
@@ -445,6 +450,10 @@
               }) // Create bpmn
             })
           } else {
+            let self = this
+            if (self.$store.getters.getXML !== undefined && self.$store.getters.getXML !== '' && self.$store.getters.getXML !== null) {
+              this.bpmnXML = self.$store.getters.getXML
+            }
             this.initBPMN({
               userId: this.$store.state.user._id,
               emailTemplate: tempVar,
@@ -459,16 +468,16 @@
               }
             }) // Create bpmn
           }
-          let self = this
-          if (self.$store.getters.getXML !== undefined && self.$store.getters.getXML !== '') {
-            this.bpmnXML = self.$store.getters.getXML
-            this.bpmnModeler.importXML(this.bpmnXML, function (err) {
-              if (err) {
-                console.error(err)
-              } else {
-              }
-            })
-          }
+          // let self = this
+          // if (self.$store.getters.getXML !== undefined && self.$store.getters.getXML !== '' && self.$store.getters.getXML !== null) {
+          //   this.bpmnXML = self.$store.getters.getXML
+          //   this.bpmnModeler.importXML(this.bpmnXML, function (err) {
+          //     if (err) {
+          //       console.error(err)
+          //     } else {
+          //     }
+          //   })
+          // }
         }, reason => {
           this.$Notice.error({
             title: reason.message,

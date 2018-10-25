@@ -1082,6 +1082,11 @@ export default {
       this.init()
     }
   },
+  beforeDestroy () {
+    this.$feathers.services.dflowzdata.removeAllListeners('_created')
+    this.$feathers.services.dflowzdata.removeAllListeners('_removed')
+    this.$feathers.services.dflowzdata.removeAllListeners('_patched')
+  },
   feathers: {
     'dflowzdata': {
       _created (data) {
@@ -1120,15 +1125,13 @@ export default {
       _updated (data) {
       },
       _patched (data) {
-        console.log('Pached: ', data)
         let keys = Object.keys(data)
         for (let tName of keys) {
           if (tName === this.$route.params.id.replace(/-/g, '_')) {
             let findIndex = _.findIndex(this.tableData, (o) => { return o._uuid === data[tName]._uuid })
             let findIndexCol = _.findIndex(this.colviewData, (o) => { return o._uuid === data[tName]._uuid })
-
-            let stageIndex = _.findIndex(this.tableData[findIndex], (o) => { return o._state === data[tName]._state })
-            this.tableData[findIndex].stages[stageIndex] = data[tName]
+            let stageIndex = _.findIndex(this.tableData[findIndex].states, (o) => { return o._state === data[tName]._state })
+            this.tableData[findIndex].states[stageIndex] = data[tName]
             this.colviewData[findIndexCol] = data[tName]
           }
         }
