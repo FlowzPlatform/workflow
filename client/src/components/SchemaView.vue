@@ -560,7 +560,7 @@ export default {
         var _res = response.data
         var obj = {}
 
-        for (let v of _res.entity) {
+        for (let [inx, v] of _res.entity.entries()) {
           if (v.customtype) {
             obj[v.name] = await self.getChildData(v.type)
           } else {
@@ -612,6 +612,8 @@ export default {
               }
             } else if (v.type === 'file') {
               obj[v.name] = []
+            } else if (v.type === 'autogenerator') {
+              obj[v.name] = v.property.prefix + (inx + 1)
             } else {
               if (v.property.defaultValue !== '') {
                 obj[v.name] = v.property.defaultValue
@@ -1078,7 +1080,7 @@ export default {
               }
             } else {
               if (!v.property.optional) {
-                if (data[v.name] === '') {
+                if (data[v.name] === '' && v.type !== 'autogenerator') {
                   self.validErr.push({name: v.name, errmsg: 'Field is required.'})
                   self.validFlag = false
                 } else if (Array.isArray(data[v.name]) && data[v.name].length === 0) {
@@ -1166,7 +1168,7 @@ export default {
             }
           } else {
             if (!v.property.optional) {
-              if (data[v.name] === '') {
+              if (data[v.name] === '' && v.type !== 'autogenerator') {
                 self.validErr.push({name: v.name, errmsg: 'Field is required.'})
                 self.validFlag = false
               } else if (Array.isArray(data[v.name]) && data[v.name].length === 0) {
