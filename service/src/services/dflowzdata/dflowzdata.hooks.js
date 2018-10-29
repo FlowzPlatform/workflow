@@ -44,6 +44,49 @@ module.exports = {
   }
 };
 
+// autogenetator function --> only apply at outer schema contains autogenerator
+async function functionAutoGenerater(hook, field) {
+  let mdata = hook.data
+  hook.service.service.options.name = hook.params.headers.ftablename;
+  hook.service.service.table = hook.service.rDB.table(hook.params.headers.ftablename);
+
+  mdata._autoVal =
+    hook.service.options.r.branch(
+      hook.service.service.table.isEmpty().not()
+          .and(hook.service.service.table
+          .hasFields('_autoVal')
+          .isEmpty().not()),
+      hook.service.service.table
+        .hasFields('_autoVal').max('_autoVal')
+        .do(function(doc){
+          return doc('_autoVal').add(1)
+        }),
+    1)
+
+  mdata[field.name] = 
+    hook.service.options.r.expr(field.property.prefix).add(
+      hook.service.options.r.branch(
+        hook.service.service.table.isEmpty().not()
+            .and(hook.service.service.table
+            .hasFields('_autoVal')
+            .isEmpty().not()),
+        hook.service.service.table
+          .hasFields('_autoVal').max('_autoVal')
+          .do(function(doc){
+            return doc('_autoVal').add(1).coerceTo('string')
+          }),
+      hook.service.options.r.expr(1).coerceTo('string'))
+    )
+    
+  let abc = await hook.service.service.table
+  .insert(hook.service.options.r.do(function() {
+    return mdata
+  })).run()
+  mdata.id = abc.generated_keys[0]
+  return mdata
+}
+
+
 let beforeFind = function (hook) {
   const query = hook.params.query
   if (query._currentStatus !== undefined) {
@@ -89,7 +132,7 @@ let beforeFind = function (hook) {
   // }
 }
 
-function beforeCreate (hook) {
+async function beforeCreate (hook) {
   try {
     // console.log('before create ================================', hook.params, hook.data)
     hook.params.done = true
@@ -97,50 +140,72 @@ function beforeCreate (hook) {
       let regex = /_/g
       let tName = hook.params.headers.ftablename.replace(regex, '-')
       return hook.app.service('flowz').get(tName).then(res => {
-        hook.data._currentStatus = true
-        if (res.processList[hook.data._state].type === 'endevent') {
-          // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
-          hook.data._currentStatus = false
-        }
-        hook.data._createdAt = new Date().toISOString()
-        // hook.data._userId = ''
-        hook.data._claimUser = ''
-        if (hook.data._state === res.first) {
-          if (hook.data._nextTarget === undefined || hook.data._nextTarget === '') {
-            hook.data._nextTarget = res.processList[hook.data._state].target[0].id
+        // console.log('res.......', res.schema)
+        return hook.app.service('schema').get(res.schema).then(async schemares => {
+          // console.log('schemares', schemares)
+          let isAutoGenerator = false
+          let field = ''
+          for (let ent of schemares.entity) {
+            if (ent.type === 'autogenerator') {
+              isAutoGenerator = true
+              field = ent
+            }
           }
-          hook.params.first = hook.data._state
-          // hook.data._completedAt = new Date().toISOString()
-          hook.data._currentStatus = false
-          hook.data._previous = null
-          hook.data._uuid = uuidv4()
-          hook.data._next = null
-          hook.data._creatorid = (hook.params.userPackageDetails ? hook.params.userPackageDetails._id : '')
-        }
-        if (res.processList[hook.data._state].type === 'exclusivegateway') {
-          // console.log('???????????????????????????????????????????????????')
-          let gatewayObj = res.processList[hook.data._state]
-          // console.log('gatewayObj', gatewayObj)
-          if (gatewayObj['var_name'] !== undefined && gatewayObj['var_name'] !== '' && gatewayObj.condition !== undefined && gatewayObj.condition !== '') {
-            if (hook.data.hasOwnProperty(gatewayObj['var_name'])) {
-              // console.log('hook.data', hook.data[gatewayObj['var_name']])
-              if (gatewayObj.condition == '=') {
-                // console.log('')
-               let targetIndex = _.findIndex(gatewayObj.target, {label: hook.data[gatewayObj['var_name']]})
-               // console.log('targetIndex', targetIndex)
-               if (targetIndex !== -1) {
-                // console.log('hook.data', hook.data, hook.params)
-                // hook.data._previous = 
-                hook.params.isEGateway = true
-                hook.data._currentStatus = false
-                // hook.data._next = null
-                // console.log('gatewayObj.target[targetIndex].id', gatewayObj.target[targetIndex].id)
-                hook.params.isEGatewayTarget = gatewayObj.target[targetIndex].id
-               }
+          hook.data._currentStatus = true
+          if (res.processList[hook.data._state].type === 'endevent') {
+            // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+            hook.data._currentStatus = false
+          }
+          hook.data._createdAt = new Date().toISOString()
+          // hook.data._userId = ''
+          hook.data._claimUser = ''
+          if (hook.data._state === res.first) {
+            if (hook.data._nextTarget === undefined || hook.data._nextTarget === '') {
+              hook.data._nextTarget = res.processList[hook.data._state].target[0].id
+            }
+            hook.params.first = hook.data._state
+            // hook.data._completedAt = new Date().toISOString()
+            hook.data._currentStatus = false
+            hook.data._previous = null
+            hook.data._uuid = uuidv4()
+            hook.data._next = null
+            hook.data._creatorid = (hook.params.userPackageDetails ? hook.params.userPackageDetails._id : '')
+          }
+          if (res.processList[hook.data._state].type === 'exclusivegateway') {
+            // console.log('???????????????????????????????????????????????????')
+            let gatewayObj = res.processList[hook.data._state]
+            // console.log('gatewayObj', gatewayObj)
+            if (gatewayObj['var_name'] !== undefined && gatewayObj['var_name'] !== '' && gatewayObj.condition !== undefined && gatewayObj.condition !== '') {
+              if (hook.data.hasOwnProperty(gatewayObj['var_name'])) {
+                // console.log('hook.data', hook.data[gatewayObj['var_name']])
+                if (gatewayObj.condition == '=') {
+                  // console.log('')
+                 let targetIndex = _.findIndex(gatewayObj.target, {label: hook.data[gatewayObj['var_name']]})
+                 // console.log('targetIndex', targetIndex)
+                 if (targetIndex !== -1) {
+                  // console.log('hook.data', hook.data, hook.params)
+                  // hook.data._previous = 
+                  hook.params.isEGateway = true
+                  hook.data._currentStatus = false
+                  // hook.data._next = null
+                  // console.log('gatewayObj.target[targetIndex].id', gatewayObj.target[targetIndex].id)
+                  hook.params.isEGatewayTarget = gatewayObj.target[targetIndex].id
+                 }
+                }
               }
             }
           }
-        }
+          if (isAutoGenerator) {
+            // ---------------------------------------------
+            hook.result = await functionAutoGenerater(hook, field)
+          }
+          return hook;
+        }).catch(err => {
+          console.log('err', err)
+          throw new errors.BadRequest('Error', {
+            errors: { message: err.toString() }
+          });
+        })
         return hook;
       }).catch(err => {
         console.log('err', err)
@@ -358,3 +423,6 @@ function afterPatch (hook) {
     }
   }
 }
+
+
+
