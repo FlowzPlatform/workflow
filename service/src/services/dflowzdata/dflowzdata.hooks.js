@@ -46,6 +46,7 @@ module.exports = {
 
 // autogenetator function --> only apply at outer schema contains autogenerator
 async function functionAutoGenerater(hook, field) {
+  console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
   let mdata = hook.data
   hook.service.service.options.name = hook.params.headers.ftablename;
   hook.service.service.table = hook.service.rDB.table(hook.params.headers.ftablename);
@@ -77,13 +78,16 @@ async function functionAutoGenerater(hook, field) {
           }),
       hook.service.options.r.expr(1).coerceTo('string'))
     )
-    
+
   let abc = await hook.service.service.table
   .insert(hook.service.options.r.do(function() {
     return mdata
   })).run()
-  mdata.id = abc.generated_keys[0]
-  return mdata
+  let getdata = await hook.service.service.table.get(abc.generated_keys[0]).run()
+  // mdata.id = abc.generated_keys[0]
+  // delete mdata._autoVal
+  // mdata[field.name] = ''
+  return getdata
 }
 
 
@@ -144,7 +148,7 @@ async function beforeCreate (hook) {
         return hook.app.service('schema').get(res.schema).then(async schemares => {
           // console.log('schemares', schemares)
           let isAutoGenerator = false
-          let field = ''
+          let field = {}
           for (let ent of schemares.entity) {
             if (ent.type === 'autogenerator') {
               isAutoGenerator = true
@@ -195,9 +199,11 @@ async function beforeCreate (hook) {
               }
             }
           }
-          if (isAutoGenerator) {
+          if (isAutoGenerator && hook.data._state === res.first) {
             // ---------------------------------------------
+            console.log('................', hook.data._state)
             hook.result = await functionAutoGenerater(hook, field)
+            // console.log('hook.result ', hook.result )
           }
           return hook;
         }).catch(err => {
