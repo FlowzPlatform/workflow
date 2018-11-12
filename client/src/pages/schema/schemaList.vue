@@ -17,6 +17,7 @@
 <script type="text/javascript">
   import schemaModel from '@/api/schema'
   import moment from 'moment'
+  import $ from 'jquery'
   export default {
     data () {
       return {
@@ -35,7 +36,28 @@
           },
           {
             title: 'ID',
-            key: 'id'
+            key: 'id',
+            render: (h, params) => {
+              return h('span', {
+                attrs: {
+                  title: 'Click to Copy',
+                  class: 'clickToCopy'
+                },
+                style: {
+                  cursor: 'pointer'
+                },
+                on: {
+                  click: () => {
+                    let $temp = $('<input>')
+                    $('body').append($temp)
+                    $temp.val(params.row.id).select()
+                    document.execCommand('copy')
+                    this.$Message.info('Copied to Clipboard')
+                    $temp.remove()
+                  }
+                }
+              }, params.row.id)
+            }
           },
           {
             title: 'Created',
@@ -186,7 +208,9 @@
           isdeleted: false,
           '$sort[createdAt]': -1,
           $skip: this.skip,
-          $limit: this.$limit
+          $limit: this.limit,
+          subscriptionId: this.$store.state.subscription,
+          userId: this.$store.state.user._id
         }).then(res => {
           this.loading = false
           this.total = res.data.total

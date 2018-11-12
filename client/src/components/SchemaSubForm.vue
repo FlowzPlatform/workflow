@@ -12,14 +12,13 @@
                           <FormItem :key="inx" style="margin-bottom:10px;">
                               <Row style="font-size:16px">
                                   <span class="card-title">{{field.name}}</span>
-                                  
                               </Row>
                               <Row v-if="field.property.IsArray">
                                   <schemasubform :schemainstance="getObject(inx, index, field.name, field.type)"></schemasubform>
                                   <Button class="btnAdd" @click="handleAdd(inx, index, schemainstance.entity[inx].entity[0], schemainstance.data[index][field.name], field.name)" icon="plus"> Add ({{field.name}})</Button>
                               </Row>
                               <Row v-else>
-                                  <SchemaSubFormView :schemainstance="getObject(inx, index, field.name, field.type)"></SchemaSubFormView>
+                                  <schemasubform :schemainstance="getObject(inx, index, field.name, field.type)"></schemasubform>
                               </Row>
                           </FormItem>
                         </Col>
@@ -132,6 +131,13 @@
                                                     </Row>          
                                               </div>
                                             </div>
+                                            <div v-if="schemainstance.data[index][field.name + 'List']" >
+                                              <div class="" v-for="(val, i) in schemainstance.data[index][field.name + 'List']">
+                                                    <Row>
+                                                        <Col :span="24"> <a :href="val" class="list-group-item" target="_blank" style="color:blue;padding:2px 2px;" >{{val}}</a></Col>
+                                                    </Row>          
+                                                </div>
+                                            </div>
                                         </Col>
                                         <Col :span="1">&nbsp;&nbsp;{{fileNumber}} / {{fileSize}}</Col>
                                       </div>
@@ -144,10 +150,17 @@
                                             <div v-if="schemainstance.data[index][field.name]" >
                                               <Progress v-if="stratProgress"  v-bind:percent="fileUploadProgress" :success-percent="30" />
                                               <div class="" v-for="(val, i) in schemainstance.data[index][field.name]">
-                                                    {{schemainstance.data[index][field.name].length}}
+                                                    <!-- {{schemainstance.data[index][field.name].length}} -->
                                                     <Row>
                                                         <Col :span="23"> <a :href="val" class="list-group-item" target="_blank" style="color:blue;padding:2px 2px;" >{{val}}</a></Col>
-                                                        <!-- <Col :span="1"><a href="#" style="color:red;float:right"  @click="removeSection(i, schemainstance.data[index][field.name])">&#10005;&nbsp;</a></Col> -->
+                                                        <Col :span="1"><a href="#" style="color:red;float:right"  @click="removeSection(i, schemainstance.data[index][field.name])">&#10005;&nbsp;</a></Col>
+                                                    </Row>          
+                                                </div>
+                                            </div>
+                                            <div v-if="schemainstance.data[index][field.name + 'List']" >
+                                              <div class="" v-for="(val, i) in schemainstance.data[index][field.name + 'List']">
+                                                    <Row>
+                                                        <Col :span="24"> <a :href="val" class="list-group-item" target="_blank" style="color:blue;padding:2px 2px;" >{{val}}</a></Col>
                                                     </Row>          
                                                 </div>
                                             </div>
@@ -201,7 +214,14 @@
                                       <div class="" v-for="(val, i) in schemainstance.data[index][field.name]">
                                             <Row>
                                                 <Col :span="23"> <a :href="val" class="list-group-item" target="_blank" style="color:blue;padding:2px 2px;" >{{val}}</a></Col>
-                                                <Col :span="1" v-if="i >= oldFiles"><a href="#" style="color:red;float:right"  @click="removeSection(i, schemainstance.data[index][field.name])">&#10005;&nbsp;</a></Col>
+                                                <Col :span="1" v-if="i >= oldFiles"><a href="#" style="color:red;float:right"  @click="removeSection(i, schemainstance.data[index][field.name])">&#10005;&nbsp;1</a></Col>
+                                            </Row>          
+                                        </div>
+                                    </div>
+                                    <div v-if="schemainstance.data[index][field.name + 'List']" >
+                                      <div class="" v-for="(val, i) in schemainstance.data[index][field.name + 'List']">
+                                            <Row>
+                                                <Col :span="24"> <a :href="val" class="list-group-item" target="_blank" style="color:blue;padding:2px 2px;" >{{val}}</a></Col>
                                             </Row>          
                                         </div>
                                     </div>
@@ -597,7 +617,11 @@ export default {
   margin-left: -20px;
   margin-bottom: 10px;
   position: relative;
-  z-index: 999;
+  /*z-index: 999;*/
+}
+
+.ivu-select-dropdown{
+  padding: 0
 }
 
 .btnAdd {

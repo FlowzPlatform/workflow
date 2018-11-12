@@ -86,13 +86,13 @@
     <!-- Main Table -->
     <div v-show="rowview">
       <!-- <Table height="690" border :columns="mainColumns()" :data="tableData"></Table> -->
-      <Table :loading="tableLoading" v-if="schemaId !== null" height="590" border :columns="mainColumns()" :data="tableData"></Table>
+      <Table :loading="tableLoading" v-if="schemaId !== null" border :columns="mainColumns" :data="tableData"></Table>
       <Row style="margin-top: 4px; float: right">
         <Page placement="top" :total="total" :current="cpage" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
       </Row>
     </div>
     <div v-show="columnview">
-      <Table :loading="tableLoading" :row-class-name="rowClassName" :columns="colviewCols" height="590" :data="colviewData"></Table>
+      <Table :loading="tableLoading" :row-class-name="rowClassName" :columns="colviewCols" :data="colviewData"></Table>
       <Row style="margin-top: 4px; float: right">
         <Page placement="top" :total="total" :current="cpage" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
       </Row>
@@ -105,13 +105,16 @@
 <script>
 import flowzModal from '@/api/flowz'
 // import finstanceModal from '@/api/finstance'
-import dataQueryModel from '@/api/dataquery'
+// import dataQueryModel from '@/api/dataquery'
 import schemaModal from '@/api/schema'
 import CellRender from '@/components/cellRender'
 import ConfigExpand from '@/components/configExpand'
 import _ from 'lodash'
 import moment from 'moment'
 import $ from 'jquery'
+import dflowzdata from '@/api/dflowzdata'
+// import config from '@/config'
+// import axios from 'axios'
 
 export default {
   name: 'dashboard',
@@ -123,19 +126,6 @@ export default {
       tableData: [],
       isModel: false,
       anotherBinding: [],
-      colviewCols: [
-        {
-          title: 'ID',
-          key: 'id',
-          fixed: 'left',
-          width: 280
-        },
-        {
-          title: 'Task',
-          key: 'task',
-          width: 150
-        }
-      ],
       colviewData: [],
       configCols: [
         {
@@ -186,6 +176,7 @@ export default {
                   'on-change': (value) => {
                     // console.log('show', value)
                     this.configuration.fields[params.index].firstColumn = value
+                    // console.log('this.configuration.fields[params.index]: ', this.configuration.fields[params.index])
                     this.anotherBinding[params.index].firstColumn = value
                     for (let i = 0; i < this.anotherBinding.length; i++) {
                       if (i !== params.index) {
@@ -236,7 +227,7 @@ export default {
       },
       fid: null,
       schemaId: '',
-      searchQuery: null,
+      searchQuery: '',
       filterBy: [
         {
           'label': 'Last 12 Hours',
@@ -289,6 +280,36 @@ export default {
     }
   },
   methods: {
+    getFilterDate (type) {
+      let date = ''
+      switch (type) {
+        case '12hours':
+          date = new Date()
+          date.setHours(date.getHours() - 12)
+          break
+        case '24hours':
+          date = new Date()
+          date.setDate(date.getDate() - 1)
+          break
+        case '7days':
+          date = new Date()
+          date.setDate(date.getDate() - 7)
+          break
+        case '30days':
+          date = new Date()
+          date.setMonth(date.getMonth() - 1)
+          break
+        case '3months':
+          date = new Date()
+          date.setMonth(date.getMonth() - 3)
+          break
+        case 'thisYear':
+          date = new Date()
+          date.setFullYear(date.getFullYear() - 1)
+          break
+      }
+      return date.toISOString()
+    },
     handlePage (page) {
       this.cpage = page
       this.skip = (page * this.limit) - this.limit
@@ -300,7 +321,7 @@ export default {
       this.init()
     },
     rowClassName (row, index) {
-      return row.className
+      return ((row.hasOwnProperty('_first')) ? '' : row._uuid + ' notfirst')
     },
     viewChange (item) {
       if (item === 1) {
@@ -312,7 +333,122 @@ export default {
       }
     },
     searchInstances () {
+      this.tableData = []
+      this.colviewData = []
       // this.tableData = _.filter(this.tableData, (o) => { return o.id === this.searchQuery })
+      if (this.searchQuery === '') {
+        this.tableData = []
+        this.colviewData = []
+        this.populateTables()
+      }
+      let query = this.searchQuery
+      let sort = this.selectedSortBy
+      // console.log('query', query, sort)
+      this.dataLoading = true
+      this.tableLoading = true
+
+      // New Custom Dynamic FLowz Data call
+      let heads = {
+        ftablename: this.flowzData.id.replace(/-/g, '_')
+      }
+      // if (query === null) {
+      //   query = {
+      //     text: '',
+      //     filter: ''
+      //   }
+      // }
+      let params = {
+        $skip: this.skip,
+        $limit: this.limit,
+        '_currentStatus': true,
+        '_state': this.$route.params.stateid,
+        // 'id[$search]': '^' + query.text
+        $group: '_uuid'
+      }
+      if (query !== '') {
+        params['$search'] = query
+      }
+      if (this.$store.state.role === 2) {
+        params._creatorid = this.$store.state.user._id
+        params.subscriptionId = this.$store.state.subscription
+      }
+      if (this.selectedFilterBy !== null && this.selectedFilterBy !== undefined) {
+        if (this.selectedFilterBy === 'customRange') {
+          console.log('Custom Range Found', this.enteredDateRange)
+          if (this.enteredDateRange.length >= 1) {
+            if (this.enteredDateRange[0] !== '' && this.enteredDateRange[1] !== '') {
+              params['_createdAt[$gte]'] = this.enteredDateRange[0].toISOString()
+              params['_createdAt[$lte]'] = this.enteredDateRange[1].toISOString()
+            }
+          }
+        } else {
+          let dateRange = this.getFilterDate(this.selectedFilterBy)
+          // console.log('Normal Range Found', this.selectedFilterBy, $lte, new Date().toISOString())
+          params['_createdAt[$gte]'] = dateRange
+        }
+      }
+      if (sort !== undefined || sort !== null) {
+        if (sort === 'asc') {
+          params['$sort[' + sort + ']'] = 1
+        } else if (sort === 'desc') {
+          params['$sort[' + sort + ']'] = -1
+        }
+      }
+      dflowzdata.get(null, params, heads)
+      .then(res => {
+        // console.log('res: ', res)
+        if (res.data.data.length > 0) {
+          this.total = res.data.total
+          let tableDataArr = []
+          for (let item of res.data.data) {
+            let value = {
+              _uuid: item.group,
+              states: item.reduction
+            }
+            tableDataArr.push(value)
+          }
+          // let groupedData = _.groupBy(res.data.data, (o) => { return o._uuid })
+          // console.log('Grouped Data: ', groupedData)
+          // // let tableGroupedArray = []
+          // for (let item in groupedData) {
+          //   console.log('Item: ', item)
+          //   let value = groupedData[item]
+          //   console.log('Value: ', value)
+          // }
+          // console.log('tableGroupedArray: ', tableGroupedArray)
+          this.tableData = tableDataArr
+          // this.colviewData = tableDataArr
+          // this.colviewData = tableDataArr
+          for (let inst in tableDataArr) {
+            for (let items in tableDataArr[inst]) {
+              if (items === 'states') {
+                for (let [inx, item] of tableDataArr[inst][items].entries()) {
+                  if (inx === 0) {
+                    item._first = true
+                  }
+                  this.colviewData.push(item)
+                }
+              }
+            }
+          }
+          this.tableLoading = false
+        } else {
+          this.tableData = []
+          this.colviewData = []
+          this.tableLoading = false
+        }
+      }).catch(e => {
+        this.$Loading.error()
+        this.dataLoading = false
+        this.tableLoading = false
+        console.log('error', e)
+        this.bLoading = false
+        if (e.response.data.message) {
+          this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+        } else {
+          this.$Notice.error({title: 'Error', desc: e.message})
+        }
+      })
     },
     ok () {
       this.$Message.success('Saved')
@@ -327,142 +463,6 @@ export default {
         allProcess[array[key].order] = array[key]
       }
       return allProcess
-    },
-    mainColumns () {
-      // console.log('mainColumns')
-      let tableCols = _.filter(this.configuration.fields, {show: true})
-      for (let item of tableCols) {
-        item.render = (h, params) => {
-          // console.log('params.column: ')
-          // console.log('Item: ', item)
-          // console.log('Params: ', params)
-          let obj = _.find(params.row.stageReference, {StageName: item.key})
-          // console.log('obj: ', obj)
-          let finalValue = {
-            obj: obj,
-            isCurrentTask: false,
-            isCompletedTask: true
-          }
-          if (obj) {
-            obj['createdAt'] = params.row.createdAt
-            finalValue.isCurrentTask = false
-            finalValue.isCompletedTask = true
-          } else {
-            if (item.key === params.row.currentStatus) {
-              // console.log('params.row.stageReference.length: ', params.row.stageReference[(params.row.stageReference.length - 1)])
-              // obj = params.row.stageReference[(params.row.stageReference.length - 1)]
-              finalValue.obj = params.row.stageReference[(params.row.stageReference.length - 1)]
-              finalValue.isCurrentTask = true
-              finalValue.isCompletedTask = false
-            } else {
-              finalValue.obj = null
-              finalValue.isCurrentTask = false
-              finalValue.isCompletedTask = false
-            }
-          }
-          // console.log('finalValue: ', finalValue)
-          return h(CellRender, {
-            props: {
-              item: finalValue,
-              schemaId: this.schemaId
-            }
-          })
-        }
-      }
-      tableCols.splice(0, 0, {
-        title: 'Instance Id',
-        key: 'id',
-        firstColumn: true,
-        width: 270,
-        fixed: 'left',
-        render: (h, params) => {
-          if (params.row.mainStatus === 'inprocess') {
-            return h('div', [
-              h('span', {
-                attrs: {
-                  title: 'Click to Copy',
-                  class: 'clickToCopy'
-                },
-                on: {
-                  click: () => {
-                    var $temp = $('<input>')
-                    $('body').append($temp)
-                    $temp.val(params.row.id).select()
-                    document.execCommand('copy')
-                    this.$Message.info('Copied to Clipboard')
-                    $temp.remove()
-                  }
-                }
-              }, params.row.id),
-              h('span', {
-                props: {
-                },
-                attrs: {
-                  class: 'inprocessTaskDot',
-                  title: 'In Process'
-                }
-              })
-            ])
-          } else if (params.row.mainStatus === 'completed') {
-            return h('div', [
-              h('span', {
-                attrs: {
-                  title: 'Click to Copy',
-                  class: 'clickToCopy'
-                },
-                on: {
-                  click: () => {
-                    var $temp = $('<input>')
-                    $('body').append($temp)
-                    $temp.val(params.row.id).select()
-                    document.execCommand('copy')
-                    this.$Message.info('Copied to Clipboard')
-                    $temp.remove()
-                  }
-                }
-              }, params.row.id),
-              h('span', {
-                props: {
-                },
-                attrs: {
-                  class: 'completedTaskDot',
-                  title: 'Completed'
-                }
-              })
-            ])
-          } else {
-            return h('div', [
-              h('span', {
-                attrs: {
-                  title: 'Click to Copy',
-                  class: 'clickToCopy'
-                },
-                on: {
-                  click: () => {
-                    var $temp = $('<input>')
-                    $('body').append($temp)
-                    $temp.val(params.row.id).select()
-                    document.execCommand('copy')
-                    this.$Message.info('Copied to Clipboard')
-                    $temp.remove()
-                  }
-                }
-              }, params.row.id),
-              h('span', {
-                props: {
-                },
-                attrs: {
-                  class: 'otherTaskDot',
-                  title: 'Other'
-                }
-              })
-            ])
-          }
-        }
-      })
-
-        // console.log('table cols: ', tableCols)
-      return tableCols
     },
 
     getFlowz () {
@@ -493,11 +493,11 @@ export default {
       this.flowName = this.flowzData.name
 
       let cols = []
-      let colviewData = []
+      // let colviewData = []
       // console.log('res.data.processList: ', res.data.processList)
       let listing = this.getByOrder(this.flowzData.processList)
       for (let col of listing) {
-        if (col.type !== 'startevent' && col.type !== 'endevent') {
+        if (col.type !== 'startevent' && col.type !== 'endevent' && col.type !== 'exclusivegateway') {
           cols.push({
             title: col.name || col.id,
             key: col.id,
@@ -511,173 +511,198 @@ export default {
       this.anotherBinding = _.cloneDeep(cols)
       this.configuration.fields = _.cloneDeep(cols)
 
-      dataQueryModel.get(null, {
-        $all: true,
-        fid: this.fid,
-        $skip: this.skip,
-        $limit: this.limit
-      }).then(queryresp => {
-        // this.$Spin.hide()
-        this.tableData = queryresp.data.data
-        colviewData = queryresp.data.data
-        this.total = queryresp.data.total
-        let listing = this.getByOrder(this.flowzData.processList)
-        for (let item of colviewData) {
-          let isfirst = false
-          for (let task of listing) {
-            if (task.type !== 'startevent' && task.type !== 'endevent') {
-              // flowzdataModal.get().then(res => {
+      // New Custom Dynamic FLowz Data call
+      let heads = {
+        ftablename: this.$route.params.id.replace(/-/g, '_')
+      }
 
-              // }).catch(e => {
-              //   console.log('e', e)
-              // })
-              // console.log('colviewData.stageReference ', item, task)
-              let dataExist = _.find(item.stageReference, {StageName: task.id})
-              if (!isfirst) {
-                task.first = false
-                task.className = ''
-                isfirst = true
-              } else {
-                task.className = 'notfirst'
-              }
-              // console.log('dataExist: ', dataExist)
-              let m = {
-                id: item.id,
-                task: task.name || task.id,
-                className: task.className
-              }
-              if (task.hasOwnProperty('first')) {
-                m.first = task.first
-              }
-              if (dataExist !== null && dataExist !== undefined && dataExist.hasOwnProperty('data')) {
-                for (let k in dataExist.data) {
-                  m[k] = dataExist.data[k]
+      let paramsToSend = {}
+      if (this.$store.state.role === 1) {
+        paramsToSend = {
+          $skip: this.skip,
+          $limit: this.limit,
+          $group: '_uuid',
+          '$sort[_createdAt]': 1
+        }
+      } else if (this.$store.state.role === 2) {
+        paramsToSend = {
+          $skip: this.skip,
+          $limit: this.limit,
+          $group: '_uuid',
+          'subscriptionId': this.$store.state.subscription,
+          '_creatorid': this.$store.state.user._id,
+          '$sort[_createdAt]': -1
+        }
+      }
+
+      dflowzdata.get(null, paramsToSend, heads)
+      .then(res => {
+        // console.log('res: ', res)
+        this.total = res.data.total
+        let tableDataArr = []
+        for (let item of res.data.data) {
+          let value = {
+            _uuid: item.group,
+            states: item.reduction
+          }
+          tableDataArr.push(value)
+        }
+        // let groupedData = _.groupBy(res.data.data, (o) => { return o._uuid })
+        // console.log('Grouped Data: ', groupedData)
+        // // let tableGroupedArray = []
+        // for (let item in groupedData) {
+        //   console.log('Item: ', item)
+        //   let value = groupedData[item]
+        //   console.log('Value: ', value)
+        // }
+        // console.log('tableGroupedArray: ', tableGroupedArray)
+        this.tableData = tableDataArr
+        // this.colviewData = tableDataArr
+        for (let inst in tableDataArr) {
+          for (let items in tableDataArr[inst]) {
+            if (items === 'states') {
+              for (let [inx, item] of tableDataArr[inst][items].entries()) {
+                if (inx === 0) {
+                  item._first = true
                 }
-                this.colviewData.push(m)
-              } else {
-                this.colviewData.push(m)
+                if (this.flowzData.processList[item._state].type !== 'startevent' && this.flowzData.processList[item._state].type !== 'endevent' && this.flowzData.processList[item._state].type !== 'intermediatethrowevent' && this.flowzData.processList[item._state].type !== 'exclusivegateway') {
+                  this.colviewData.push(item)
+                }
               }
             }
           }
         }
+        // console.log('this.colviewData', this.colviewData)
         this.tableLoading = false
-      }).catch(err => {
+      }).catch(e => {
         this.tableLoading = false
-        console.log('Erro: ', err)
+        this.$Loading.error()
+        console.log('error', e)
+        this.bLoading = false
+        if (e.response.data.message) {
+          this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+        } else {
+          this.$Notice.error({title: 'Error', desc: e.message})
+        }
       })
+
+      // dataQueryModel.get(null, {
+      //   $all: true,
+      //   fid: this.fid,
+      //   $skip: this.skip,
+      //   $limit: this.limit
+      // }).then(queryresp => {
+      //   // this.$Spin.hide()
+      //   this.tableData = queryresp.data.data
+      //   colviewData = queryresp.data.data
+      //   this.total = queryresp.data.total
+      //   let listing = this.getByOrder(this.flowzData.processList)
+      //   for (let item of colviewData) {
+      //     let isfirst = false
+      //     for (let task of listing) {
+      //       if (task.type !== 'startevent' && task.type !== 'endevent') {
+      //         // flowzdataModal.get().then(res => {
+
+      //         // }).catch(e => {
+      //         //   console.log('e', e)
+      //         // })
+      //         // console.log('colviewData.stageReference ', item, task)
+      //         let dataExist = _.find(item.stageReference, {StageName: task.id})
+      //         if (!isfirst) {
+      //           task.first = false
+      //           task.className = ''
+      //           isfirst = true
+      //         } else {
+      //           task.className = 'notfirst'
+      //         }
+      //         // console.log('dataExist: ', dataExist)
+      //         let m = {
+      //           id: item.id,
+      //           task: task.name || task.id,
+      //           className: task.className
+      //         }
+      //         if (task.hasOwnProperty('first')) {
+      //           m.first = task.first
+      //         }
+      //         if (dataExist !== null && dataExist !== undefined && dataExist.hasOwnProperty('data')) {
+      //           for (let k in dataExist.data) {
+      //             m[k] = dataExist.data[k]
+      //           }
+      //           this.colviewData.push(m)
+      //         } else {
+      //           this.colviewData.push(m)
+      //         }
+      //       }
+      //     }
+      //   }
+      //   this.tableLoading = false
+      // }).catch(err => {
+      //   this.tableLoading = false
+      //   console.log('Erro: ', err)
+      // })
     },
     async init () {
       this.tableLoading = true
-      this.colviewCols = [
-        {
-          title: 'ID',
-          key: 'id',
-          fixed: 'left',
-          width: 280,
-          render: (h, params) => {
-            if (params.row.hasOwnProperty('first')) {
-              if (params.row.first) {
-                return h('div', [
-                  h('span', {
-                    attrs: {
-                      title: 'Click to Copy',
-                      class: 'clickToCopy'
-                    },
-                    on: {
-                      click: () => {
-                        var $temp = $('<input>')
-                        $('body').append($temp)
-                        $temp.val(params.row.id).select()
-                        document.execCommand('copy')
-                        this.$Message.info('Copied to Clipboard')
-                        $temp.remove()
-                      }
-                    }
-                  }, params.row.id),
-                  h('span', {
-                    attrs: {
-                      class: 'btn btn-default btn-sm showHideBtn'
-                    },
-                    on: {
-                      click: () => {
-                        for (let [inx, item] of this.colviewData.entries()) {
-                          if (item.id === params.row.id && params.index !== inx) {
-                            if (!params.row.first) {
-                              item.className = ''
-                            } else {
-                              item.className = 'notfirst'
-                            }
-                          }
-                          if (params.index === inx) {
-                            item.first = !item.first
-                          }
-                        }
-                      }
-                    }
-                  }, [
-                    h('i', {
-                      attrs: {
-                        class: 'fa fa-angle-up'
-                      }
-                    })
-                  ])
-                ])
-              } else {
-                return h('div', [
-                  h('span', {
-                    attrs: {
-                      title: 'Click to Copy',
-                      class: 'clickToCopy'
-                    },
-                    on: {
-                      click: () => {
-                        var $temp = $('<input>')
-                        $('body').append($temp)
-                        $temp.val(params.row.id).select()
-                        document.execCommand('copy')
-                        this.$Message.info('Copied to Clipboard')
-                        $temp.remove()
-                      }
-                    }
-                  }, params.row.id),
-                  h('span', {
-                    attrs: {
-                      class: 'btn btn-sm showHideBtn'
-                    },
-                    on: {
-                      click: () => {
-                        for (let [inx, item] of this.colviewData.entries()) {
-                          if (item.id === params.row.id && params.index !== inx) {
-                            if (!params.row.first) {
-                              item.className = ''
-                            } else {
-                              item.className = 'notfirst'
-                            }
-                          }
-                          if (params.index === inx) {
-                            item.first = !item.first
-                          }
-                        }
-                      }
-                    }
-                  }, [
-                    h('i', {
-                      attrs: {
-                        class: 'fa fa-angle-down'
-                      }
-                    })
-                  ])
-                ])
-              }
-            }
-          }
-        },
-        {
-          title: 'Task',
-          key: 'task',
-          width: 150
-        }
-      ]
+      // this.colviewCols = [
+      //   {
+      //     title: 'ID',
+      //     key: '_uuid',
+      //     fixed: 'left',
+      //     width: 280,
+      //     render: (h, params) => {
+      //       if (params.row._first) {
+      //         return h('div', [
+      //           h('span', {
+      //             attrs: {
+      //               title: 'Click to Copy',
+      //               class: 'clickToCopy'
+      //             },
+      //             on: {
+      //               click: () => {
+      //                 let $temp = $('<input>')
+      //                 $('body').append($temp)
+      //                 $temp.val(params.row._uuid).select()
+      //                 document.execCommand('copy')
+      //                 this.$Message.info('Copied to Clipboard')
+      //                 $temp.remove()
+      //               }
+      //             }
+      //           }, params.row._uuid),
+      //           h('span', {
+      //             attrs: {
+      //               class: 'btn btn-default btn-sm showHideBtn'
+      //             },
+      //             on: {
+      //               click: () => {
+      //                 $('.' + params.row._uuid).toggle()
+      //               }
+      //             }
+      //           }, [
+      //             h('i', {
+      //               attrs: {
+      //                 class: 'fa fa-angle-down'
+      //               }
+      //             })
+      //           ])
+      //         ])
+      //       } else {
+      //         return h('span', '')
+      //       }
+      //     }
+      //   },
+      //   {
+      //     title: 'Task',
+      //     key: '_state',
+      //     width: 150,
+      //     render: (h, params) => {
+      //       if (this.flowzData.processList[params.row._state].name && this.flowzData.processList[params.row._state].name !== '') {
+      //         return h('span', this.flowzData.processList[params.row._state].name)
+      //       } else {
+      //         return h('span', params.row._state)
+      //       }
+      //     }
+      //   }
+      // ]
       this.colviewData = []
       this.fid = this.$route.params.id
 
@@ -686,57 +711,365 @@ export default {
       this.populateTables()
 
       //   // let anyCustom = false
-      for (let item of this.currentSchema.entity) {
-        if (!item.customtype) {
-          if (item.type === 'file') {
-            this.colviewCols.push({
-              title: item.name,
-              key: item.name,
-              width: 150,
-              render: (h, params) => {
-                let arr = []
-                if (params.row[item.name]) {
-                  for (let i = 0; i < params.row[item.name].length; i++) {
-                    arr.push(h('Button', {
-                      attrs: {
-                        type: 'info',
-                        style: 'margin: 2px',
-                        title: params.row[item.name][i].split('/').pop()
-                      },
-                      on: {
-                        click: () => {
-                          window.open(params.row[item.name][i])
-                        }
-                      }
-                    }, [
-                      h('i', {
-                        attrs: {
-                          class: 'fa fa-link'
-                        }
-                      })
-                    ]))
-                  }
-                  return arr
-                }
-              }
-            })
-          } else {
-            this.colviewCols.push({
-              title: item.name,
-              key: item.name,
-              width: 150
-            })
-          }
-        } else {
-          // anyCustom = true
-        }
-      }
+      // for (let item of this.currentSchema.entity) {
+      //   if (!item.customtype) {
+      //     if (item.type === 'file') {
+      //       this.colviewCols.push({
+      //         title: item.name,
+      //         key: item.name,
+      //         width: 150,
+      //         render: (h, params) => {
+      //           let arr = []
+      //           if (params.row[item.name]) {
+      //             for (let i = 0; i < params.row[item.name].length; i++) {
+      //               arr.push(h('Button', {
+      //                 attrs: {
+      //                   type: 'info',
+      //                   style: 'margin: 2px',
+      //                   title: params.row[item.name][i].split('/').pop()
+      //                 },
+      //                 on: {
+      //                   click: () => {
+      //                     window.open(params.row[item.name][i])
+      //                   }
+      //                 }
+      //               }, [
+      //                 h('i', {
+      //                   attrs: {
+      //                     class: 'fa fa-link'
+      //                   }
+      //                 })
+      //               ]))
+      //             }
+      //             return arr
+      //           }
+      //         }
+      //       })
+      //     } else {
+      //       this.colviewCols.push({
+      //         title: item.name,
+      //         key: item.name,
+      //         width: 150
+      //       })
+      //     }
+      //   } else {
+      //     // anyCustom = true
+      //   }
+      // }
     }
   },
   computed: {
     configdata () {
       return this.configuration.fields
+    },
+    colviewCols () {
+      let cols = []
+      let obj = _.filter(this.configuration.fields, (o) => { return o.firstColumn === true })
+      let key = ''
+      let title = ''
+      if (obj.length !== 0) {
+        key = obj[0].key
+        title = obj[0].title
+      } else {
+        key = '_uuid'
+        title = 'ID'
+      }
+      // console.log('OBJ: ', obj)
+      cols.push({
+        title: title,
+        key: key,
+        fixed: 'left',
+        width: 280,
+        render: (h, params) => {
+          if (params.row._first) {
+            return h('div', [
+              h('span', {
+                attrs: {
+                  title: 'Click to Copy',
+                  class: 'clickToCopy'
+                },
+                on: {
+                  click: () => {
+                    let $temp = $('<input>')
+                    $('body').append($temp)
+                    $temp.val(params.row[key]).select()
+                    document.execCommand('copy')
+                    this.$Message.info('Copied to Clipboard')
+                    $temp.remove()
+                  }
+                }
+              }, params.row[key]),
+              h('span', {
+                attrs: {
+                  class: 'btn btn-default btn-sm showHideBtn'
+                },
+                on: {
+                  click: () => {
+                    $('.' + params.row[key]).toggle()
+                  }
+                }
+              }, [
+                h('i', {
+                  attrs: {
+                    class: 'fa fa-angle-down'
+                  }
+                })
+              ])
+            ])
+          } else {
+            return h('span', '')
+          }
+        }
+      })
+
+      cols.push({
+        title: 'Task',
+        key: '_state',
+        width: 150,
+        render: (h, params) => {
+          // console.log('%%%%%%%%%%%%%%%%%%%%%%%params.row._state%%%%%%%%%%%%%%%%%%: ', params)
+          if (this.flowzData.processList[params.row._state].name && this.flowzData.processList[params.row._state].name !== '') {
+            return h('span', this.flowzData.processList[params.row._state].name)
+          } else {
+            return h('span', params.row._state)
+          }
+        }
+      })
+
+      if (this.currentSchema) {
+        for (let item of this.currentSchema.entity) {
+          if (!item.customtype) {
+            if (item.type === 'file') {
+              cols.push({
+                title: item.name,
+                key: item.name,
+                width: 150,
+                render: (h, params) => {
+                  let arr = []
+                  if (params.row[item.name]) {
+                    for (let i = 0; i < params.row[item.name].length; i++) {
+                      arr.push(h('Button', {
+                        attrs: {
+                          type: 'info',
+                          style: 'margin: 2px',
+                          title: params.row[item.name][i].split('/').pop()
+                        },
+                        on: {
+                          click: () => {
+                            window.open(params.row[item.name][i])
+                          }
+                        }
+                      }, [
+                        h('i', {
+                          attrs: {
+                            class: 'fa fa-link'
+                          }
+                        })
+                      ]))
+                    }
+                    return arr
+                  }
+                }
+              })
+            } else {
+              cols.push({
+                title: item.name,
+                key: item.name,
+                width: 150
+              })
+            }
+          } else {
+            // anyCustom = true
+          }
+        }
+      }
+      // this.colviewCols = cols
+      return cols
+    },
+    mainColumns () {
+      // console.log('mainColumns')
+      let tableCols = _.filter(this.configuration.fields, {show: true})
+      for (let item of tableCols) {
+        item.render = (h, params) => {
+          // console.log('params.column: ')
+          // console.log('Item: ', item)
+          // console.log('Params: ', params)
+          // console.log('item.key: ', item.key)
+          let obj = _.find(params.row.states, {_state: item.key})
+          // console.log('obj: ', obj)
+          if (obj) {
+            let finalValue = {
+              obj: obj,
+              isCurrentTask: false,
+              isCompletedTask: true
+            }
+
+            if (obj._currentStatus === true) {
+              // console.log('Oject Date: ', obj._currentStatus)
+              finalValue.isCurrentTask = true
+              finalValue.isCompletedTask = false
+            } else if (obj._currentStatus === false) {
+              // alert('Completed Task')
+              finalValue.isCurrentTask = false
+              finalValue.isCompletedTask = true
+              // axios.get(config.userdetails + obj.userId)
+              // .then((response) => {
+              //   finalValue.obj['userDetails'] = response.data.data[0]
+              //   // console.log('user details: ', obj['userDetails'])
+              // })
+              // .catch((error) => {
+              //   console.log(error)
+              // })
+            }
+            // if (obj) {
+            //   obj['createdAt'] = params.row.createdAt
+            //   finalValue.isCurrentTask = false
+            //   finalValue.isCompletedTask = true
+            // } else {
+            //   if (item.key === params.row.currentStatus) {
+            //     // console.log('params.row.stageReference.length: ', params.row.stageReference[(params.row.stageReference.length - 1)])
+            //     // obj = params.row.stageReference[(params.row.stageReference.length - 1)]
+            //     finalValue.obj = params.row.stageReference[(params.row.stageReference.length - 1)]
+            //     finalValue.isCurrentTask = true
+            //     finalValue.isCompletedTask = false
+            //   } else {
+            //     finalValue.obj = null
+            //     finalValue.isCurrentTask = false
+            //     finalValue.isCompletedTask = false
+            //   }
+            // }
+            // console.log('finalValue: ', finalValue)
+            return h(CellRender, {
+              props: {
+                item: finalValue,
+                schemaId: this.schemaId
+              }
+            })
+          }
+        }
+      }
+      tableCols.splice(0, 0, {
+        title: 'Instance Id',
+        key: '_uuid',
+        firstColumn: true,
+        width: 270,
+        fixed: 'left',
+        render: (h, params) => {
+          // console.log('Params: ', params.row)
+          let findInProcessIndex = _.findIndex(params.row.states, function (o) { return o._currentStatus === true })
+          if (findInProcessIndex !== -1) {
+            return h('div', [
+              h('span', {
+                attrs: {
+                  title: 'Click to Copy',
+                  class: 'clickToCopy'
+                },
+                on: {
+                  click: () => {
+                    var $temp = $('<input>')
+                    $('body').append($temp)
+                    $temp.val(params.row.id).select()
+                    document.execCommand('copy')
+                    this.$Message.info('Copied to Clipboard')
+                    $temp.remove()
+                  }
+                }
+              }, params.row._uuid),
+              h('span', {
+                props: {
+                },
+                attrs: {
+                  class: 'inprocessTaskDot',
+                  title: 'In Process'
+                }
+              })
+            ])
+          } else {
+            return h('div', [
+              h('span', {
+                attrs: {
+                  title: 'Click to Copy',
+                  class: 'clickToCopy'
+                },
+                on: {
+                  click: () => {
+                    var $temp = $('<input>')
+                    $('body').append($temp)
+                    $temp.val(params.row.id).select()
+                    document.execCommand('copy')
+                    this.$Message.info('Copied to Clipboard')
+                    $temp.remove()
+                  }
+                }
+              }, params.row._uuid),
+              h('span', {
+                props: {
+                },
+                attrs: {
+                  class: 'completedTaskDot',
+                  title: 'Completed'
+                }
+              })
+            ])
+          }
+          // if (params.row.mainStatus === 'inprocess') {
+
+          // } else if (params.row.mainStatus === 'completed') {
+
+          // } else {
+          //   return h('div', [
+          //     h('span', {
+          //       attrs: {
+          //         title: 'Click to Copy',
+          //         class: 'clickToCopy'
+          //       },
+          //       on: {
+          //         click: () => {
+          //           var $temp = $('<input>')
+          //           $('body').append($temp)
+          //           $temp.val(params.row.id).select()
+          //           document.execCommand('copy')
+          //           this.$Message.info('Copied to Clipboard')
+          //           $temp.remove()
+          //         }
+          //       }
+          //     }, params.row._uuid),
+          //     h('span', {
+          //       props: {
+          //       },
+          //       attrs: {
+          //         class: 'otherTaskDot',
+          //         title: 'Other'
+          //       }
+          //     })
+          //   ])
+          // }
+        }
+      })
+
+        // console.log('table cols: ', tableCols)
+      return tableCols
     }
+    //   this.colviewCols = []
+
+    //   let cols = []
+    //   cols.push({
+    //     title: 'ID',
+    //     key: '_uuid',
+    //     fixed: 'left',
+    //     width: 280
+    //   })
+
+    //   cols.push({
+    //     title: 'Task',
+    //     key: '_state',
+    //     width: 150
+    //   })
+
+    //   this.colviewCols = cols
+
+    //   return this.colviewCols
+    // }
   },
   mounted () {
     this.init()
@@ -747,6 +1080,115 @@ export default {
     },
     '$store.state.updateView': function (newValue, oldValue) {
       this.init()
+    }
+  },
+  beforeDestroy () {
+    this.$feathers.services.dflowzdata.removeAllListeners('_created')
+    this.$feathers.services.dflowzdata.removeAllListeners('_removed')
+    this.$feathers.services.dflowzdata.removeAllListeners('_patched')
+  },
+  feathers: {
+    'dflowzdata': {
+      _created (data) {
+        // console.log('================created==============', data)
+        let keys = Object.keys(data)
+        for (let tName of keys) {
+          if (tName === this.$route.params.id.replace(/-/g, '_')) {
+            if (this.tableData.length < this.limit) {
+              // console.log('data[tName]._uuid: ', data[tName]._uuid)
+              let findIndex = _.findIndex(this.tableData, (o) => { return o._uuid === data[tName]._uuid })
+              // let findIndexCol = _.findIndex(this.colviewData, (o) => { return o._uuid === data[tName]._uuid })
+              let findIndexCol = _.findLastIndex(this.colviewData, (o) => { return o._uuid === data[tName]._uuid })
+              // console.log('findIndex: ', findIndex)
+              if (findIndex === -1) {
+                let value = {
+                  _uuid: data[tName]._uuid,
+                  states: []
+                }
+
+                value.states.push(data[tName])
+                // console.log('value: ', value)
+                this.tableData.push(value)
+                data[tName]['_first'] = true
+                this.colviewData.push(data[tName])
+              } else {
+                // console.log('Index Found: ', findIndex, findIndexCol)
+                // console.log('ThisTableData: ', this.tableData[findIndex])
+                // console.log('this coldata: ', this.colviewData[findIndexCol])
+                this.tableData[findIndex].states.push(data[tName])
+                this.colviewData.splice((findIndexCol + 1), 0, data[tName])
+              }
+            }
+          }
+        }
+      },
+      _updated (data) {
+      },
+      _patched (data) {
+        let keys = Object.keys(data)
+        for (let tName of keys) {
+          if (tName === this.$route.params.id.replace(/-/g, '_')) {
+            let findIndex = _.findIndex(this.tableData, (o) => { return o._uuid === data[tName]._uuid })
+            let findIndexCol = _.findIndex(this.colviewData, (o) => { return o._uuid === data[tName]._uuid })
+            let stageIndex = _.findIndex(this.tableData[findIndex].states, (o) => { return o._state === data[tName]._state })
+            this.tableData[findIndex].states[stageIndex] = data[tName]
+            this.colviewData[findIndexCol] = data[tName]
+          }
+        }
+        // let keys = Object.keys(data)
+        // for (let tName of keys) {
+        //   if (data[tName]._currentStatus) {
+        //     if (this.$store.state.role === 1) {
+        //       if (data[tName]._currentStatus && data[tName]._state === this.$route.params.stateid) {
+        //         let inx = _.findIndex(this.instanceEntries, (o) => { return o.id === data[tName].id })
+        //         this.instanceEntries.splice(inx, 1)
+        //         this.instanceEntries.push(data[tName])
+        //         this.dataData = this.instanceEntries
+        //       }
+        //     }
+        //     if (this.$store.state.role === 2) {
+        //       if (data[tName]._claimUser === '') {
+        //         let inx = _.findIndex(this.dataClaim, (o) => { return o.id === data[tName].id })
+        //         this.dataClaim.splice(inx, 1)
+        //         this.dataUnclaim.push(data[tName])
+        //         this.dataTotalU = this.dataTotalU + 1
+        //         this.dataTotalC = this.dataTotalC - 1
+        //       } else {
+        //         let inx = _.findIndex(this.dataUnclaim, (o) => { return o.id === data[tName].id })
+        //         this.dataUnclaim.splice(inx, 1)
+        //         this.dataClaim.push(data[tName])
+        //         this.dataTotalU = this.dataTotalU - 1
+        //         this.dataTotalC = this.dataTotalC + 1
+        //       }
+        //     }
+        //     let finx = _.findIndex(this.flowzList, {id: this.$route.params.id})
+        //     if (finx !== -1 && !data[tName]._currentStatus && data[tName]._next === null) {
+        //       if (this.flowzList[finx].processList[data[tName]._state].count > 0) {
+        //         this.flowzList[finx].processList[data[tName]._state].count--
+        //       }
+        //       if (this.flowzList[finx].count > 0) {
+        //         this.flowzList[finx].count--
+        //       }
+        //     }
+        //   }
+        // }
+      },
+      _removed (data) {
+        // let keys = Object.keys(data)
+        // for (let tName of keys) {
+        //   if (data[tName]._currentStatus) {
+        //     let finx = _.findIndex(this.flowzList, {id: tName.replace(/_/g, '-')})
+        //     if (finx !== -1) {
+        //       if (this.flowzList[finx].processList[data[tName]._state].count > 0) {
+        //         this.flowzList[finx].processList[data[tName]._state].count--
+        //       }
+        //       if (this.flowzList[finx].count > 0) {
+        //         this.flowzList[finx].count--
+        //       }
+        //     }
+        //   }
+        // }
+      }
     }
   }
 }

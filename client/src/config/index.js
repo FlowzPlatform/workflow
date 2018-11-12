@@ -1,6 +1,8 @@
 var temp = {
   // serverURI: 'http://localhost:3030',
   // socketURI: 'http://localhost:4033',
+  // serverURI: 'http://172.16.230.130:3030',
+  // socketURI: 'http://172.16.230.130:4033',
   serverURI: 'https://api.' + process.env.domainKey + '/eng',
   socketURI: 'wss://ws.' + process.env.domainKey + ':4033',
   workerRegisterURL: 'http://localhost:4001',
@@ -29,7 +31,9 @@ var temp = {
   subscriptionUrl: 'https://api.' + process.env.domainKey + '/subscription/',
   getAllPermissionsUrl: 'https://api.' + process.env.domainKey + '/authldap/getallpermission/',
   setPermissionUrl: 'https://api.' + process.env.domainKey + '/authldap/setpermission',
-  ldapURL: 'https://api.' + process.env.domainKey + '/authldap/init'
+  ldapURL: 'https://api.' + process.env.domainKey + '/authldap/init',
+  usermodulerole: 'https://api.' + process.env.domainKey + '/subscription/user-module-role',
+  userdetails: 'https://api.' + process.env.domainKey + '/user/getuserdetails/'
 }
 if (process.env.NODE_ENV !== 'development') {
   temp = {
@@ -54,7 +58,9 @@ if (process.env.NODE_ENV !== 'development') {
     subscriptionUrl: 'https://api.' + process.env.domainKey + '/subscription/',
     getAllPermissionsUrl: 'https://api.' + process.env.domainKey + '/authldap/getallpermission/',
     setPermissionUrl: 'https://api.' + process.env.domainKey + '/authldap/setpermission',
-    ldapURL: 'https://api.' + process.env.domainKey + '/authldap/init'
+    ldapURL: 'https://api.' + process.env.domainKey + '/authldap/init',
+    usermodulerole: 'https://api.' + process.env.domainKey + '/subscription/user-module-role',
+    userdetails: 'https://api.' + process.env.domainKey + '/user/getuserdetails/'
   }
 }
 export default temp

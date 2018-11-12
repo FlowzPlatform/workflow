@@ -10,7 +10,7 @@
       </h3>
     </Row>
     <Row>
-        <Table :loading="tableLoading" :columns="columns" :data="data" border></Table>
+      <Table :loading="tableLoading" :columns="columns" :data="data" border></Table>
     </Row>
     <Row style="padding: 5px 0">
       <Button :loading="buttonLoading" type="primary" @click="handleSave">Save</Button>
@@ -74,17 +74,18 @@ export default {
         this.flowzdata = res.data
         schemaModal.get(res.data.schema).then(schemaRes => {
           this.schemaRes = schemaRes.data
-          for (let proc in res.data.processList) {
-            if (res.data.processList[proc].type !== 'startevent' && res.data.processList[proc].type !== 'endevent') {
+          let sortedArray = _.sortBy(res.data.processList, [function (o) { return o.order }])
+          for (let proc in sortedArray) {
+            if (sortedArray[proc].type !== 'startevent' && sortedArray[proc].type !== 'endevent' && sortedArray[proc].type !== 'exclusivegateway') {
               let mdata = {
-                state: res.data.processList[proc].name || proc,
-                _state: proc
+                state: sortedArray[proc].name || sortedArray[proc].id,
+                _state: sortedArray[proc].id
               }
               for (let ent of schemaRes.data.entity) {
-                if (res.data.processList[proc].hasOwnProperty('permission') && res.data.processList[proc].permission[ent.name] !== undefined) {
+                if (sortedArray[proc].hasOwnProperty('permission') && sortedArray[proc].permission[ent.name] !== undefined) {
                   mdata[ent.name] = {
-                    read: res.data.processList[proc].permission[ent.name].read,
-                    write: res.data.processList[proc].permission[ent.name].write
+                    read: sortedArray[proc].permission[ent.name].read,
+                    write: sortedArray[proc].permission[ent.name].write
                   }
                 } else {
                   if (res.data.first === proc) {

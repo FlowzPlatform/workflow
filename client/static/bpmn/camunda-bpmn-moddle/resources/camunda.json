@@ -241,6 +241,16 @@
           "type": "String"
         },
         {
+          "name": "condition",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "var_name",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
           "name": "versionTag",
           "isAttr": true,
           "type": "String"

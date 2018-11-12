@@ -70,9 +70,10 @@
         </div> -->
         
         <div v-if="itsFirstState === false">
-          <tabs> 
-          <TabPane v-if="this.$store.state.role === 1" :label="dataCount" icon="lock-combination">
-          <schemalist v-if="this.$store.state.role === 1" :schema="dataSchema" :pageno="pageno" :datashow="'dataA'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+          <Tabs> 
+           <!-- :label="'Data ('+ dataTotal + ')'" -->
+          <TabPane v-if="this.$store.state.role === 1" :label="adminLabel" icon="lock-combination">
+          <schemalist v-if="this.$store.state.role === 1" :schema="dataSchema" :pageno="pageno" :datashow="'dataA'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
           <!-- <schemalist v-if="this.$store.state.role === 2" :schema="dataSchema" :pageno="pageno" :datashow="'dataU'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist> -->
 
           <div style="padding: 10px">
@@ -130,8 +131,9 @@
             </div>
           </div>
           </TabPane>
-          <TabPane v-if="this.$store.state.role === 2" :label="'Work Pool ('+ dataData2.length + ')'" icon="lock-combination">
-            <schemalist :schema="dataSchema" :datashow="'dataU'" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataData2" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+          <!-- :label="'Work Pool ('+ dataTotalC + ')'" -->
+          <TabPane v-if="this.$store.state.role === 2" :label="workPoolLabel" icon="lock-combination">
+            <schemalist :schema="dataSchema" :datashow="'dataC'" :pageno="pageno" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotalC="dataTotalC" :data="dataData2" :configuration="configuration" :instanceEntries="dataClaim" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
             <div style="padding: 10px">
             <div class="row" v-if="id != null">
               <div class="col-md-12" id="top">
@@ -187,8 +189,9 @@
             </div>
           </div>
           </TabPane>
-          <TabPane v-if="this.$store.state.role === 2" :label="'In Progress ('+ dataClaim.length + ')'" icon="lock-combination">
-            <schemalist v-if="this.$store.state.role === 2" :schema="dataSchema" :pageno="pageno" :datashow="'dataC'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotal="dataTotal" :data="dataClaim" :configuration="configuration" :instanceEntries="instanceEntries" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
+          <!-- :label="'In Progress ('+ dataTotalU + ')'" -->
+          <TabPane v-if="this.$store.state.role === 2"  :label="queueLabel" icon="lock-combination">
+            <schemalist :schema="dataSchema" :pageno="pageno" :datashow="'dataU'" v-on:on-paginate="pagination" v-on:on-handlepage="handlepage" :limit="limit" :skip="skip" :dataTotalU="dataTotalU" :data="dataClaim" :configuration="configuration" :instanceEntries="dataUnclaim" :dynamicData="dynamicData" v-on:setValues="setValues" :flowzData="flowzData" v-on:sort-data="sortData" v-on:search-data="searchData"></schemalist>
           </TabPane>
           </Tabs>
         </div>
@@ -203,15 +206,17 @@
       <Spin v-if="loadEmail" size="large" fix></Spin>
       <div v-if="schemabinding">
       <schemasubformview ref="schemasubformview" :schemainstance="formSchemaInstance" id="schemasubformview"></schemasubformview>
+      <schemasubformview ref="schemasubformviewfile" :schemainstance="formSchemaInstancefile" id="schemasubformview"></schemasubformview>
     </div>
     <div v-if="email">
-      <email :btnArr="btnArr" :flag="flag" :emailSchemaId="emailSchemaId" :sendDataEmail="sendDataEmail" :iid="item.id" v-on:on-done="emailService"></email>
+      <email :btnArr="btnArr" :flag="flag" :emailSchemaId="emailSchemaId" :sendDataEmail="sendDataEmail" :iid="item.id" v-on:on-done="emailService" :tableId="tableId" :taskName="taskName"></email>
     </div>
     </div>
   </div>
 </template>
 
 <script>
+
 import _ from 'lodash'
 import $ from 'jquery'
 
@@ -219,10 +224,15 @@ import flowzdataModal from '@/api/flowzdata'
 import flowzModel from '@/api/flowz'
 import schemaModel from '@/api/schema'
 
-import finstanceModal from '@/api/finstance'
-import dataQuerymodel from '@/api/dataquery'
+import dflowzdata from '@/api/dflowzdata'
+
+// import finstanceModal from '@/api/finstance'
+// import dataQuerymodel from '@/api/dataquery'
 import saveemailTemplate from '@/api/emailtemplate'
 import schemalist from '@/pages/user/SchemaList'
+// import config from '@/config'
+// const io = require('socket.io-client')
+// const socket = io(config.socketURI)
 
 export default {
   name: 'SchemaView',
@@ -233,12 +243,69 @@ export default {
   },
   data () {
     return {
+      adminLabel: (h) => {
+        return h('span', [
+          h('span', 'Data '),
+          h('span', {
+            attrs: {
+              title: this.dataTotal
+            }
+          }, [
+            h('Badge', {
+              props: {
+                count: this.dataTotal
+              }
+            })
+          ])
+        ])
+      },
+      workPoolLabel: (h) => {
+        return h('span', [
+          h('span', 'Work Pool '),
+          h('span', {
+            attrs: {
+              title: this.dataTotalC
+            }
+          }, [
+            h('Badge', {
+              props: {
+                count: this.dataTotalC
+              }
+            })
+          ])
+        ])
+      },
+      queueLabel: (h) => {
+        return h('span', [
+          h('span', 'In Progress '),
+          h('span', {
+            attrs: {
+              title: this.dataTotalU
+            }
+          }, [
+            h('Badge', {
+              props: {
+                count: this.dataTotalU
+              }
+            })
+          ])
+        ])
+      },
+      patchFlag: false,
+      tableId: '',
+      taskName: '',
+      formSchemaInstancefile: {
+        data: [],
+        entity: []
+      },
+      fileYes: '',
       check: 0,
-      dataClaim: [],
       loadEmail: false,
       skip: 0,
       limit: 10,
       dataTotal: 0,
+      dataTotalC: 0,
+      dataTotalU: 0,
       pageno: 1,
       isFlowzLoaded: false,
       htmlcontent: false,
@@ -280,13 +347,16 @@ export default {
       configuration: true,
       dynamicData: true,
       instanceEntries: [],
+      dataClaim: [],
+      dataUnclaim: [],
       isEmailDone: false,
       itsFirstState: true,
       sendDataEmail: null,
       loadingEmail: true,
       currentSchema: null,
       dataLoading: true,
-      entriesTotal: 10
+      entriesTotal: 10,
+      currentFlowzId: ''
     }
   },
   components: {
@@ -298,42 +368,143 @@ export default {
     'schemasubformview': (resolve) => { require(['./SchemaSubFormView'], resolve) }
   },
   methods: {
-    searchData (query) {
+    getFilterDate (type) {
+      let date = ''
+      switch (type) {
+        case '12hours':
+          date = new Date()
+          date.setHours(date.getHours() - 12)
+          break
+        case '24hours':
+          date = new Date()
+          date.setDate(date.getDate() - 1)
+          break
+        case '7days':
+          date = new Date()
+          date.setDate(date.getDate() - 7)
+          break
+        case '30days':
+          date = new Date()
+          date.setMonth(date.getMonth() - 1)
+          break
+        case '3months':
+          date = new Date()
+          date.setMonth(date.getMonth() - 3)
+          break
+        case 'thisYear':
+          date = new Date()
+          date.setFullYear(date.getFullYear() - 1)
+          break
+      }
+      return date.toISOString()
+    },
+    searchData (query, sort) {
+      // console.log('query', query, sort)
       this.dataLoading = true
-      dataQuerymodel.get(null, {
-        $last: true,
-        fid: this.$route.params.id,
-        currentStatus: this.$route.params.stateid,
+
+      // New Custom Dynamic FLowz Data call
+      let heads = {
+        ftablename: this.currentFlowzId
+      }
+      if (query === null) {
+        query = {
+          text: '',
+          filter: ''
+        }
+      }
+      let params = {
         $skip: this.skip,
         $limit: this.limit,
-        'id[$search]': '^' + query.text
-      }).then(res => {
+        '_currentStatus': true,
+        '_state': this.$route.params.stateid,
+        // 'id[$search]': '^' + query.text
+        '$search': query.text
+      }
+      if (query.filterBy !== null && query.filterBy !== undefined) {
+        if (query.filterBy === 'customRange') {
+          console.log('Custom Range Found', query.customValue)
+          if (query.customValue.length >= 1) {
+            if (query.customValue[0] !== '' && query.customValue[1] !== '') {
+              params['_createdAt[$gte]'] = query.customValue[0].toISOString()
+              params['_createdAt[$lte]'] = query.customValue[1].toISOString()
+            }
+          }
+        } else if (query.filterBy !== '') {
+          let dateRange = this.getFilterDate(query.filterBy)
+          // console.log('Normal Range Found', this.selectedFilterBy, $lte, new Date().toISOString())
+          params['_createdAt[$gte]'] = dateRange
+        }
+      }
+      if (sort !== undefined) {
+        if (sort.order === 'asc') {
+          params['$sort[' + sort.key + ']'] = 1
+        } else if (sort.order === 'desc') {
+          params['$sort[' + sort.key + ']'] = -1
+        }
+      }
+      dflowzdata.get(null, params, heads)
+      .then(res => {
         this.isFlowzLoaded = true
-        // let firstState = this.flowzData.first
-        // if (firstState === this.$route.params.stateid) {
-        //   this.itsFirstState = true
-        // } else {
-        //   this.itsFirstState = false
-        // }
         this.dataTotal = res.data.total
         if (res.data.data.length > 0) {
           this.instanceEntries = res.data.data
-          this.dataData = this.instanceEntries
           this.$Loading.finish()
           this.dataLoading = false
         } else {
           this.instanceEntries = []
-          this.dataData = []
+          // this.dataData = []
           // this.itsFirstState = true
           this.dataLoading = false
           // this.$Spin.hide()
           this.$Loading.finish()
         }
-      }).catch(err => {
-        console.log('Error: ', err)
+      }).catch(e => {
+        this.$Loading.error()
+        this.dataLoading = false
+        console.log('error', e)
+        this.bLoading = false
+        if (e.response.data.message) {
+          this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+        } else {
+          this.$Notice.error({title: 'Error', desc: e.message})
+        }
       })
+      // dataQuerymodel.get(null, {
+      //   $last: true,
+      //   fid: this.$route.params.id,
+      //   currentStatus: this.$route.params.stateid,
+      //   $skip: this.skip,
+      //   $limit: this.limit,
+      //   'id[$search]': '^' + query.text
+      // }).then(res => {
+      //   this.isFlowzLoaded = true
+      //   // let firstState = this.flowzData.first
+      //   // if (firstState === this.$route.params.stateid) {
+      //   //   this.itsFirstState = true
+      //   // } else {
+      //   //   this.itsFirstState = false
+      //   // }
+      //   this.dataTotal = res.data.total
+      //   if (res.data.data.length > 0) {
+      //     this.instanceEntries = res.data.data
+      //     this.dataData = this.instanceEntries
+      //     this.$Loading.finish()
+      //     this.dataLoading = false
+      //   } else {
+      //     this.instanceEntries = []
+      //     this.dataData = []
+      //     // this.itsFirstState = true
+      //     this.dataLoading = false
+      //     // this.$Spin.hide()
+      //     this.$Loading.finish()
+      //   }
+      // }).catch(err => {
+      //   console.log('Error: ', err)
+      // })
     },
     sortData (object) {
+      // console.log('object', object, query)
+      this.searchData(null, object)
     },
     emailService (item) {
       this.isEmailDone = true
@@ -348,6 +519,20 @@ export default {
       this.skip = 0
     },
     handlepage (skip, limit, size) {
+      this.limit = size
+      this.entriesTotal = size
+      this.skip = 0
+      this.populateTables()
+    },
+    pagination2 (skip, limit, page) {
+      this.skip = skip
+      this.limit = limit
+      this.entriesTotal = limit
+      this.pageno = page
+      this.populateTables()
+      this.skip = 0
+    },
+    handlepage2 (skip, limit, size) {
       this.limit = size
       this.entriesTotal = size
       this.skip = 0
@@ -480,6 +665,7 @@ export default {
       }
       if (arr) {
         let m = [arr]
+        this.setFileList(m, self.formSchemaInstance)
         this.formSchemaInstance.data = m
       } else {
         this.handleAdd()
@@ -624,70 +810,52 @@ export default {
       this.validErr = []
       let allcheck = []
       this.bLoading = true
+      let currentStageP = this.$route.params.stateid
+      let currentStateP = this.flowzData.processList[currentStageP]
+      let permission = {}
+      permission = currentStateP.permission
+      console.log(permission)
       for (let dobj of this.formSchemaInstance.data) {
-        let flag = this.checkValidation(dobj, this.entity)
+        let flag = this.checkValidation(dobj, this.entity, permission)
         allcheck.push(flag)
       }
       this.check = _.indexOf(allcheck, false)
       if (this.check === -1) {
         this.$Loading.start()
         let fheaders = null
-        let saveObj = {
-          fid: this.$route.params.id,
-          currentStatus: this.$route.params.stateid,
-          data: this.formSchemaInstance.data[0]
-        }
         if (this.$store.state.role === 2) {
           fheaders = {
             workflowid: 'workflow_' + this.flowzData.id,
-            stateid: this.$route.params.stateid
+            stateid: this.$route.params.stateid,
+            ftablename: this.currentFlowzId
+          }
+        } else {
+          fheaders = {
+            ftablename: this.currentFlowzId
           }
         }
-        if (fheaders !== null) {
-          finstanceModal.post(saveObj, null, fheaders)
-          .then(res => {
-            this.$Loading.finish()
-            this.$Notice.success({title: 'Saved Successfully'})
-            this.bLoading = false
-            setTimeout(() => {
-              $('html, body').animate({
-                scrollTop: $('#top').offset().top
-              }, 500)
-            }, 0)
-            this.init()
-          }).catch(e => {
-            this.$Loading.error()
-            console.log('error', e)
-            this.bLoading = false
-            if (e.response.data.message) {
-              this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
-            } else {
-              this.$Notice.error({duration: '3', title: e.message, desc: ''})
-            }
-          })
-        } else {
-          finstanceModal.post(saveObj)
-          .then(res => {
-            this.$Loading.finish()
-            this.$Notice.success({title: 'Saved Successfully'})
-            this.bLoading = false
-            setTimeout(() => {
-              $('html, body').animate({
-                scrollTop: $('#top').offset().top
-              }, 500)
-            }, 0)
-            this.init()
-          }).catch(e => {
-            this.$Loading.error()
-            console.log('error', e)
-            this.bLoading = false
-            if (e.response.data.message) {
-              this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
-            } else {
-              this.$Notice.error({title: 'Error', desc: e.message})
-            }
-          })
-        }
+        this.formSchemaInstance.data[0]._state = this.$route.params.stateid
+        dflowzdata.post(this.formSchemaInstance.data[0], null, fheaders)
+        .then(res => {
+          this.$Loading.finish()
+          this.$Notice.success({title: 'Saved Successfully'})
+          this.bLoading = false
+          setTimeout(() => {
+            $('html, body').animate({
+              scrollTop: $('#top').offset().top
+            }, 500)
+          }, 0)
+          this.init()
+        }).catch(e => {
+          this.$Loading.error()
+          console.log('error', e)
+          this.bLoading = false
+          if (e.response.data.message) {
+            this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+          } else {
+            this.$Notice.error({title: 'Error', desc: e.message})
+          }
+        })
       } else {
         this.validErr = _.uniqBy(this.validErr, 'name')
         this.$Notice.error({title: 'Validation Error!'})
@@ -696,6 +864,10 @@ export default {
     },
 
     saveInstanceData () {
+      let currentStageP = this.$route.params.stateid
+      let currentStateP = this.flowzData.processList[currentStageP]
+      let permission = {}
+      permission = currentStateP.permission
       let currentStateId = this.$route.params.stateid
       if (this.schema.hasOwnProperty('emailSchema')) {
         if (this.schema.emailSchema.action === true) {
@@ -710,6 +882,7 @@ export default {
         if (this.isMultiple) {
           nextTargetId = this.flowData.processList[this.nextTarget.value]
         } else {
+          console.log('else condition: ')
           nextTargetId = this.flowData.processList[currentStageObject.target[0].id]
         }
         if (nextTargetId.type === 'sendproofmail') {
@@ -717,7 +890,7 @@ export default {
           this.validErr = []
           let allcheck = []
           for (let dobj of obj.data) {
-            let flag = this.checkValidation(dobj, this.entity)
+            let flag = this.checkValidation(dobj, this.entity, permission)
             allcheck.push(flag)
           }
           this.check = _.indexOf(allcheck, false)
@@ -726,6 +899,8 @@ export default {
             this.id = null
             this.schemabinding = true
             if (nextTargetId.hasOwnProperty('emailtemplate')) {
+              this.tableId = this.$route.params.id
+              this.taskName = this.$route.params.stateid
               saveemailTemplate.get(nextTargetId.emailtemplate)
               .then((res) => {
                 setTimeout(() => {
@@ -734,9 +909,24 @@ export default {
                     this.email = true
                     this.loadEmail = false
                   } else {
-                    this.sendDataEmail = res.data.template + this.$refs.schemasubformview.$el.outerHTML
-                    this.email = true
-                    this.loadEmail = false
+                    if (res.data.template.indexOf('{{FileAttachment}}') !== -1) {
+                      let fileEntity = _.filter(this.formSchemaInstance.entity, {'type': 'file'})
+                      for (let i = 0; i < fileEntity.length; i++) {
+                        this.formSchemaInstancefile.entity.push(fileEntity[i])
+                        let fieldName = fileEntity[i].name
+                        let files = this.formSchemaInstance.data[0][fieldName]
+                        this.formSchemaInstancefile.data.push({[fieldName]: files})
+                      }
+                      setTimeout(() => {
+                        this.sendDataEmail = res.data.template.replace(/{{OrderData}}/g, this.$refs.schemasubformview.$el.outerHTML).replace(/{{FileAttachment}}/g, this.$refs.schemasubformviewfile.$el.outerHTML)
+                        this.email = true
+                        this.loadEmail = false
+                      }, 1000)
+                    } else {
+                      this.sendDataEmail = res.data.template.replace(/{{OrderData}}/g, this.$refs.schemasubformview.$el.outerHTML)
+                      this.email = true
+                      this.loadEmail = false
+                    }
                   }
                 }, 1000)
               })
@@ -794,7 +984,7 @@ export default {
           this.validErr = []
           let allcheck = []
           for (let dobj of obj.data) {
-            let flag = this.checkValidation(dobj, this.entity)
+            let flag = this.checkValidation(dobj, this.entity, permission)
             allcheck.push(flag)
           }
           this.check = _.indexOf(allcheck, false)
@@ -810,7 +1000,7 @@ export default {
         this.validErr = []
         let allcheck = []
         for (let dobj of obj.data) {
-          let flag = this.checkValidation(dobj, this.entity)
+          let flag = this.checkValidation(dobj, this.entity, permission)
           allcheck.push(flag)
         }
         this.check = _.indexOf(allcheck, false)
@@ -836,153 +1026,222 @@ export default {
       this.$Loading.start()
       let mergeData = this.mergeFileList(obj.data, obj)
       obj.data = mergeData
-      let fheaders = null
-      let saveObj = {
-        fid: this.item.fid,
-        iid: this.item.id,
-        state: this.item.currentStatus,
-        data: obj.data[0]
+      let fheaders = {
+        ftablename: this.currentFlowzId
       }
+      let saveObj = obj.data[0]
+      delete saveObj['_index']
+      delete saveObj['_rowKey']
+      saveObj._state = this.$route.params.stateid
       if (this.isMultiple) {
-        saveObj.nextTarget = this.nextTarget.value
+        saveObj._nextTarget = this.nextTarget.value
       }
       this.bLoading = true
       if (this.$store.state.role === 2) {
+        this.patchFlag = true
         fheaders = {
           workflowid: 'workflow_' + this.flowzData.id,
-          stateid: this.$route.params.stateid
+          stateid: this.$route.params.stateid,
+          ftablename: this.currentFlowzId
         }
       }
-      if (fheaders !== null) {
-        flowzdataModal.post(saveObj, null, fheaders)
-        .then(res => {
-          this.id = null
-          this.$Loading.finish()
-          this.$Notice.success({title: 'Saved Successfully'})
-          this.bLoading = false
-          this.email = false
-          this.validErr = []
-          this.isEmailDone = false
-        }).catch(e => {
-          this.$Loading.error()
-          console.log('error', e)
-          this.bLoading = false
-          this.email = false
-          this.isEmailDone = false
-          if (e.response.data.message) {
-            this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
-          } else {
-            this.$Notice.error({duration: '3', title: e.message, desc: ''})
-          }
-        })
-      } else {
-        flowzdataModal.post(saveObj)
-        .then(res => {
-          this.$Loading.finish()
-          this.$Notice.success({title: 'Saved Successfully'})
-          this.bLoading = false
-          setTimeout(() => {
-            $('html, body').animate({
-              scrollTop: $('#top').offset().top
-            }, 500)
-          }, 0)
-          this.init()
-        }).catch(e => {
-          this.$Loading.error()
-          console.log('error', e)
-          this.bLoading = false
-          if (e.response.data.message) {
-            this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
-          } else {
-            this.$Notice.error({duration: '3', title: e.message, desc: ''})
-          }
-        })
-      }
+      dflowzdata.patch(saveObj.id, saveObj, null, fheaders)
+      .then(res => {
+        this.id = null
+        this.$Loading.finish()
+        this.$Notice.success({title: 'Saved Successfully'})
+        this.bLoading = false
+        this.email = false
+        this.validErr = []
+        this.isEmailDone = false
+      }).catch(e => {
+        this.$Loading.error()
+        console.log('error', e)
+        this.bLoading = false
+        this.email = false
+        this.isEmailDone = false
+        if (e.response.data.message) {
+          this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+        } else {
+          this.$Notice.error({duration: '3', title: e.message, desc: ''})
+        }
+      })
     },
-    checkValidation (data, ent) {
+    checkValidation (data, ent, permission) {
       let self = this
       for (let v of ent) {
-        if (v.customtype) {
-          for (let d of data[v.name]) {
-            self.validFlag = self.checkValidation(d, v.entity[0].entity)
+        if (permission !== undefined && permission[v.name] !== undefined) {
+          if (permission[v.name].write || permission[v.name].read) {
+            if (v.customtype) {
+              for (let d of data[v.name]) {
+                self.validFlag = self.checkValidation(d, v.entity[0].entity, permission)
+              }
+            } else {
+              if (!v.property.optional) {
+                if (data[v.name] === '') {
+                  self.validErr.push({name: v.name, errmsg: 'Field is required.'})
+                  self.validFlag = false
+                } else if (Array.isArray(data[v.name]) && data[v.name].length === 0) {
+                  self.validErr.push({name: v.name, errmsg: 'File is required.'})
+                  self.validFlag = false
+                } else if (v.type === 'text') {
+                  if (v.property.regEx !== '') {
+                    let patt0 = v.property.regEx
+                    let res0 = patt0.test(data[v.name])
+                    if (!res0) {
+                      self.validErr.push({name: v.name, errmsg: 'Invalid Email.'})
+                      self.validFlag = false
+                    }
+                  } else if (v.property.max !== 0) {
+                    if (data[v.name].length > v.property.max) {
+                      self.validErr.push({name: v.name, errmsg: 'max ' + v.property.max + ' characters allowed.'})
+                      self.validFlag = false
+                    }
+                  } else if (v.property.allowedValue.length > 0) {
+                    let exist = _.indexOf(v.property.allowedValue, data[v.name])
+                    if (exist === -1) {
+                      self.validErr.push({name: v.name, errmsg: 'Not Allowed Email, Please select allow one.'})
+                      self.validFlag = false
+                    }
+                  }
+                } else if (v.type === 'email' && data[v.name] !== '') {
+                  let patt1 = (v.property.regEx === '') ? new RegExp('[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}$') : new RegExp(v.property.regEx)
+                  let res1 = patt1.test(data[v.name])
+                  if (!res1) {
+                    self.validErr.push({name: v.name, errmsg: 'Invalid Email.'})
+                    self.validFlag = false
+                  } else if (v.property.allowedValue.length > 0) {
+                    let exist = _.indexOf(v.property.allowedValue, data[v.name])
+                    if (exist === -1) {
+                      self.validErr.push({name: v.name, errmsg: 'Not Allowed Email, Please select allow one.'})
+                      self.validFlag = false
+                    }
+                  }
+                } else if (v.type === 'phone') {
+                  let patt2 = (v.property.regEx === '') ? new RegExp('^\\(?([0-9]{3})\\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$') : new RegExp(v.property.regEx)
+                  let res2 = patt2.test(data[v.name])
+                  if (!res2) {
+                    self.validErr.push({name: v.name, errmsg: 'Invalid Phone.'})
+                    self.validFlag = false
+                  } else if (v.property.allowedValue.length > 0) {
+                    let exist = _.indexOf(v.property.allowedValue, data[v.name])
+                    if (exist === -1) {
+                      self.validErr.push({name: v.name, errmsg: 'Not Allowed Phone, Please select allow one.'})
+                      self.validFlag = false
+                    }
+                  }
+                } else if (v.type === 'number') {
+                  if (v.property.allowedValue.length > 0) {
+                    let exist = _.indexOf(v.property.allowedValue, data[v.name])
+                    if (exist === -1) {
+                      self.validErr.push({name: v.name, errmsg: 'Not Allowed Number, Please select allow one.'})
+                      self.validFlag = false
+                    }
+                  }
+                } else if (v.type === 'date') {
+                  if (v.property.mindate !== '' && v.property.maxdate !== '') {
+                    if (data[v.name] < v.property.mindate && data[v.name] > v.property.maxdate) {
+                      self.validErr.push({name: v.name, errmsg: 'Date must in between ' + v.property.mindate + ' and ' + v.property.maxdate})
+                      self.validFlag = false
+                    }
+                  } else if (v.property.mindate !== '') {
+                    if (data[v.name] < v.property.mindate) {
+                      self.validErr.push({name: v.name, errmsg: 'Date must be greater than or equal ' + v.property.mindate + '.'})
+                      self.validFlag = false
+                    }
+                  } else if (v.property.maxdate !== '') {
+                    if (data[v.name] > v.property.maxdate) {
+                      self.validErr.push({name: v.name, errmsg: 'Date must be less than or equal ' + v.property.mindate + '.'})
+                      self.validFlag = false
+                    }
+                  }
+                }
+              }
+            }
           }
         } else {
-          if (!v.property.optional) {
-            if (data[v.name] === '') {
-              self.validErr.push({name: v.name, errmsg: 'Field is required.'})
-              self.validFlag = false
-            } else if (Array.isArray(data[v.name]) && data[v.name].length === 0) {
-              self.validErr.push({name: v.name, errmsg: 'File is required.'})
-              self.validFlag = false
-            } else if (v.type === 'text') {
-              if (v.property.regEx !== '') {
-                let patt0 = v.property.regEx
-                let res0 = patt0.test(data[v.name])
-                if (!res0) {
+          if (v.customtype) {
+            for (let d of data[v.name]) {
+              self.validFlag = self.checkValidation(d, v.entity[0].entity, permission)
+            }
+          } else {
+            if (!v.property.optional) {
+              if (data[v.name] === '') {
+                self.validErr.push({name: v.name, errmsg: 'Field is required.'})
+                self.validFlag = false
+              } else if (Array.isArray(data[v.name]) && data[v.name].length === 0) {
+                self.validErr.push({name: v.name, errmsg: 'File is required.'})
+                self.validFlag = false
+              } else if (v.type === 'text') {
+                if (v.property.regEx !== '') {
+                  let patt0 = v.property.regEx
+                  let res0 = patt0.test(data[v.name])
+                  if (!res0) {
+                    self.validErr.push({name: v.name, errmsg: 'Invalid Email.'})
+                    self.validFlag = false
+                  }
+                } else if (v.property.max !== 0) {
+                  if (data[v.name].length > v.property.max) {
+                    self.validErr.push({name: v.name, errmsg: 'max ' + v.property.max + ' characters allowed.'})
+                    self.validFlag = false
+                  }
+                } else if (v.property.allowedValue.length > 0) {
+                  let exist = _.indexOf(v.property.allowedValue, data[v.name])
+                  if (exist === -1) {
+                    self.validErr.push({name: v.name, errmsg: 'Not Allowed Email, Please select allow one.'})
+                    self.validFlag = false
+                  }
+                }
+              } else if (v.type === 'email' && data[v.name] !== '') {
+                let patt1 = (v.property.regEx === '') ? new RegExp('[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}$') : new RegExp(v.property.regEx)
+                let res1 = patt1.test(data[v.name])
+                if (!res1) {
                   self.validErr.push({name: v.name, errmsg: 'Invalid Email.'})
                   self.validFlag = false
+                } else if (v.property.allowedValue.length > 0) {
+                  let exist = _.indexOf(v.property.allowedValue, data[v.name])
+                  if (exist === -1) {
+                    self.validErr.push({name: v.name, errmsg: 'Not Allowed Email, Please select allow one.'})
+                    self.validFlag = false
+                  }
                 }
-              } else if (v.property.max !== 0) {
-                if (data[v.name].length > v.property.max) {
-                  self.validErr.push({name: v.name, errmsg: 'max ' + v.property.max + ' characters allowed.'})
+              } else if (v.type === 'phone') {
+                let patt2 = (v.property.regEx === '') ? new RegExp('^\\(?([0-9]{3})\\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$') : new RegExp(v.property.regEx)
+                let res2 = patt2.test(data[v.name])
+                if (!res2) {
+                  self.validErr.push({name: v.name, errmsg: 'Invalid Phone.'})
                   self.validFlag = false
+                } else if (v.property.allowedValue.length > 0) {
+                  let exist = _.indexOf(v.property.allowedValue, data[v.name])
+                  if (exist === -1) {
+                    self.validErr.push({name: v.name, errmsg: 'Not Allowed Phone, Please select allow one.'})
+                    self.validFlag = false
+                  }
                 }
-              } else if (v.property.allowedValue.length > 0) {
-                let exist = _.indexOf(v.property.allowedValue, data[v.name])
-                if (exist === -1) {
-                  self.validErr.push({name: v.name, errmsg: 'Not Allowed Email, Please select allow one.'})
-                  self.validFlag = false
+              } else if (v.type === 'number') {
+                if (v.property.allowedValue.length > 0) {
+                  let exist = _.indexOf(v.property.allowedValue, data[v.name])
+                  if (exist === -1) {
+                    self.validErr.push({name: v.name, errmsg: 'Not Allowed Number, Please select allow one.'})
+                    self.validFlag = false
+                  }
                 }
-              }
-            } else if (v.type === 'email' && data[v.name] !== '') {
-              let patt1 = (v.property.regEx === '') ? new RegExp('[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}$') : new RegExp(v.property.regEx)
-              let res1 = patt1.test(data[v.name])
-              if (!res1) {
-                self.validErr.push({name: v.name, errmsg: 'Invalid Email.'})
-                self.validFlag = false
-              } else if (v.property.allowedValue.length > 0) {
-                let exist = _.indexOf(v.property.allowedValue, data[v.name])
-                if (exist === -1) {
-                  self.validErr.push({name: v.name, errmsg: 'Not Allowed Email, Please select allow one.'})
-                  self.validFlag = false
-                }
-              }
-            } else if (v.type === 'phone') {
-              let patt2 = (v.property.regEx === '') ? new RegExp('^\\(?([0-9]{3})\\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$') : new RegExp(v.property.regEx)
-              let res2 = patt2.test(data[v.name])
-              if (!res2) {
-                self.validErr.push({name: v.name, errmsg: 'Invalid Phone.'})
-                self.validFlag = false
-              } else if (v.property.allowedValue.length > 0) {
-                let exist = _.indexOf(v.property.allowedValue, data[v.name])
-                if (exist === -1) {
-                  self.validErr.push({name: v.name, errmsg: 'Not Allowed Phone, Please select allow one.'})
-                  self.validFlag = false
-                }
-              }
-            } else if (v.type === 'number') {
-              if (v.property.allowedValue.length > 0) {
-                let exist = _.indexOf(v.property.allowedValue, data[v.name])
-                if (exist === -1) {
-                  self.validErr.push({name: v.name, errmsg: 'Not Allowed Number, Please select allow one.'})
-                  self.validFlag = false
-                }
-              }
-            } else if (v.type === 'date') {
-              if (v.property.mindate !== '' && v.property.maxdate !== '') {
-                if (data[v.name] < v.property.mindate && data[v.name] > v.property.maxdate) {
-                  self.validErr.push({name: v.name, errmsg: 'Date must in between ' + v.property.mindate + ' and ' + v.property.maxdate})
-                  self.validFlag = false
-                }
-              } else if (v.property.mindate !== '') {
-                if (data[v.name] < v.property.mindate) {
-                  self.validErr.push({name: v.name, errmsg: 'Date must be greater than or equal ' + v.property.mindate + '.'})
-                  self.validFlag = false
-                }
-              } else if (v.property.maxdate !== '') {
-                if (data[v.name] > v.property.maxdate) {
-                  self.validErr.push({name: v.name, errmsg: 'Date must be less than or equal ' + v.property.mindate + '.'})
-                  self.validFlag = false
+              } else if (v.type === 'date') {
+                if (v.property.mindate !== '' && v.property.maxdate !== '') {
+                  if (data[v.name] < v.property.mindate && data[v.name] > v.property.maxdate) {
+                    self.validErr.push({name: v.name, errmsg: 'Date must in between ' + v.property.mindate + ' and ' + v.property.maxdate})
+                    self.validFlag = false
+                  }
+                } else if (v.property.mindate !== '') {
+                  if (data[v.name] < v.property.mindate) {
+                    self.validErr.push({name: v.name, errmsg: 'Date must be greater than or equal ' + v.property.mindate + '.'})
+                    self.validFlag = false
+                  }
+                } else if (v.property.maxdate !== '') {
+                  if (data[v.name] > v.property.maxdate) {
+                    self.validErr.push({name: v.name, errmsg: 'Date must be less than or equal ' + v.property.mindate + '.'})
+                    self.validFlag = false
+                  }
                 }
               }
             }
@@ -999,6 +1258,8 @@ export default {
     setValues (values) {
       this.validErr = []
       this.email = false
+      this.formSchemaInstancefile.entity = []
+      this.formSchemaInstancefile.data = []
       this.schemabinding = false
       this.nextTarget.value = ''
       this.nextTarget.options = []
@@ -1006,13 +1267,13 @@ export default {
       this.id = values.id
       if (values.id !== null) {
         this.item = values.item
-        this.flowData = values.flowzData
-        let targetObj = values.flowzData.processList[values.currentState]
+        this.flowData = this.flowzData
+        let targetObj = this.flowzData.processList[values.currentState]
         if (Object.keys(targetObj).length > 0) {
           if (targetObj.target.length > 1) {
             let opts = []
             for (let m of targetObj.target) {
-              let label = values.flowzData.processList[m.id].name
+              let label = this.flowzData.processList[m.id].name
               opts.push({
                 label: label,
                 value: m.id
@@ -1084,41 +1345,144 @@ export default {
       this.email = false
       this.htmlcontent = false
       this.id = null
-      dataQuerymodel.get(null, {
-        $last: true,
-        fid: this.$route.params.id,
-        currentStatus: this.$route.params.stateid,
-        $skip: this.skip,
-        $limit: this.limit
-      }).then(queryresp => {
-        // console.log('queryresp: ', queryresp)
-        // this.entriesTotal = queryresp.data.data.length
-        this.isFlowzLoaded = true
-        this.dataTotal = queryresp.data.total
-        if (queryresp.data.data.length > 0) {
-          this.instanceEntries = queryresp.data.data
-          if (this.$store.state.role === 2) {
-            this.dataClaim = _.filter(this.instanceEntries, function (o) { return o.claimUser === '' })
-            this.dataData2 = _.filter(this.instanceEntries, function (o) { return o.claimUser !== '' })
+      // New Custom Dynamic FLowz Data call
+      let heads = {
+        ftablename: this.currentFlowzId
+      }
+      if (this.$store.state.role === 1) {
+        dflowzdata.get(null, {
+          $skip: this.skip,
+          $limit: this.limit,
+          '_currentStatus': true,
+          '_state': this.$route.params.stateid
+        }, heads)
+        .then(res => {
+          // console.log('res.data.total', res.data.total)
+          this.isFlowzLoaded = true
+          this.dataTotal = res.data.total
+          if (res.data.data.length > 0) {
+            this.instanceEntries = res.data.data
+            this.$Loading.finish()
+            this.dataLoading = false
           } else {
-            this.dataData = this.instanceEntries
+            this.instanceEntries = []
+            this.dataClaim = []
+            this.dataUnclaim = []
+            this.dataLoading = false
+            this.$Loading.finish()
           }
-          this.$Loading.finish()
-          this.dataLoading = false
-        } else {
-          this.instanceEntries = []
-          this.dataData = []
-          this.dataLoading = false
-          this.$Loading.finish()
-        }
-      }).catch(err => {
-        this.$Notice.error({duration: '3', title: err.message, desc: ''})
-        this.$Loading.error()
-        this.dataLoading = false
-      })
+        }).catch(e => {
+          this.$Loading.error()
+          console.log('error', e)
+          this.bLoading = false
+          if (e.response.data.message) {
+            this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+          } else {
+            this.$Notice.error({title: 'Error', desc: e.message})
+          }
+        })
+      }
+      if (this.$store.state.role === 2) {
+        dflowzdata.get(null, {
+          $skip: this.skip,
+          $limit: this.limit,
+          '_currentStatus': true,
+          '_state': this.$route.params.stateid,
+          '_claimUser': ''
+        }, heads)
+        .then(res => {
+          // console.log('res.data.total', res.data)
+          this.isFlowzLoaded = true
+          this.dataTotalU = res.data.total
+          if (res.data.data.length > 0) {
+            this.dataUnclaim = res.data.data
+            this.$Loading.finish()
+            this.dataLoading = false
+          } else {
+            this.instanceEntries = []
+            this.dataUnclaim = []
+            this.dataLoading = false
+            this.$Loading.finish()
+          }
+        }).catch(e => {
+          this.$Loading.error()
+          console.log('error', e)
+          this.bLoading = false
+          if (e.response.data.message) {
+            this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+          } else {
+            this.$Notice.error({title: 'Error', desc: e.message})
+          }
+        })
+        dflowzdata.get(null, {
+          $skip: this.skip,
+          $limit: this.limit,
+          '_currentStatus': true,
+          '_state': this.$route.params.stateid,
+          '_claimUser': this.$store.state.user._id
+        }, heads)
+        .then(res => {
+          this.isFlowzLoaded = true
+          this.dataTotalC = res.data.total
+          if (res.data.data.length > 0) {
+            this.dataClaim = res.data.data
+            this.$Loading.finish()
+            this.dataLoading = false
+          } else {
+            this.instanceEntries = []
+            this.dataClaim = []
+            this.dataLoading = false
+            this.$Loading.finish()
+          }
+        }).catch(e => {
+          this.$Loading.error()
+          console.log('error', e)
+          this.bLoading = false
+          if (e.response.data.message) {
+            this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
+          } else {
+            this.$Notice.error({title: 'Error', desc: e.message})
+          }
+        })
+      }
+
+      // dataQuerymodel.get(null, {
+      //   $last: true,
+      //   fid: this.$route.params.id,
+      //   currentStatus: this.$route.params.stateid,
+      //   $skip: this.skip,
+      //   $limit: this.limit
+      // }).then(queryresp => {
+      //   // console.log('queryresp: ', queryresp)
+      //   // this.entriesTotal = queryresp.data.data.length
+      //   this.isFlowzLoaded = true
+      //   this.dataTotal = queryresp.data.total
+      //   if (queryresp.data.data.length > 0) {
+      //     this.instanceEntries = queryresp.data.data
+      //     if (this.$store.state.role === 2) {
+      //       this.dataClaim = _.filter(this.instanceEntries, function (o) { return o.claimUser === '' })
+      //       this.dataData2 = _.filter(this.instanceEntries, function (o) { return o.claimUser !== '' })
+      //     } else {
+      //       this.dataData = this.instanceEntries
+      //     }
+      //     this.$Loading.finish()
+      //     this.dataLoading = false
+      //   } else {
+      //     this.instanceEntries = []
+      //     this.dataData = []
+      //     this.dataData2 = []
+      //     this.dataLoading = false
+      //     this.$Loading.finish()
+      //   }
+      // }).catch(err => {
+      //   this.$Notice.error({duration: '3', title: err.message, desc: ''})
+      //   this.$Loading.error()
+      //   this.dataLoading = false
+      // })
     },
 
     async init () {
+      this.currentFlowzId = this.$route.params.id.replace(/-/g, '_')
       this.dataLoading = true
       this.instanceEntries = []
       this.isFlowzLoaded = false
@@ -1145,6 +1509,75 @@ export default {
   },
   mounted () {
     this.init()
+    // if (socket._callbacks['$' + this.$route.params.id.replace(/-/g, '_') + '_created'] === undefined) {
+    //   socket.on(this.$route.params.id.replace(/-/g, '_') + '_created', (data) => {
+    //     console.log(data._currentStatus && data._state, this.$route.params.stateid)
+    //     if (data._currentStatus && data._state === this.$route.params.stateid) {
+    //       if (this.instanceEntries.length < this.entriesTotal) {
+    //         this.instanceEntries.push(data)
+    //         this.dataData = this.instanceEntries
+    //       } else {
+    //         console.log('..........')
+    //         this.dataTotal++
+    //       }
+    //     } else {
+    //       let inx = _.findIndex(this.instanceEntries, (o) => { return o.id === data._previous })
+    //       this.instanceEntries.splice(inx, 1)
+    //     }
+    //   })
+    // }
+    // if (socket._callbacks['$' + this.$route.params.id.replace(/-/g, '_') + '_patched'] === undefined) {
+    //   socket.on(this.$route.params.id.replace(/-/g, '_') + '_patched', (data) => {
+    //     if (this.$store.state.role === 1) {
+    //       if (data._currentStatus && data._state === this.$route.params.stateid) {
+    //         let inx = _.findIndex(this.instanceEntries, (o) => { return o.id === data.id })
+    //         this.instanceEntries.splice(inx, 1)
+    //         this.instanceEntries.push(data)
+    //         this.dataData = this.instanceEntries
+    //       }
+    //     }
+    //     console.log(this.$store.state.role === 2, data)
+    //     if (this.$store.state.role === 2 && data !== undefined) {
+    //       console.log('dataClaim', this.dataClaim)
+    //       console.log('dataClaim', data)
+    //       console.log('dataUnclaim', this.dataUnclaim)
+    //       if (data._claimUser === '') {
+    //         let inx = _.findIndex(this.dataUnclaim, (o) => { return o.id === data.id })
+    //         this.dataUnclaim.splice(inx, 1)
+    //         this.dataClaim.push(data)
+    //         console.log(inx)
+    //       } else {
+    //         let inx = _.findIndex(this.dataClaim, (o) => { return o.id === data.id })
+    //         this.dataClaim.splice(inx, 1)
+    //         this.dataUnclaim.push(data)
+    //         console.log(inx)
+    //       }
+    //     }
+    //     let finx = _.findIndex(this.flowzList, {id: this.$route.params.id})
+    //     if (finx !== -1 && !data._currentStatus && data._next === null) {
+    //       if (this.flowzList[finx].processList[data._state].count > 0) {
+    //         this.flowzList[finx].processList[data._state].count--
+    //       }
+    //       if (this.flowzList[finx].count > 0) {
+    //         this.flowzList[finx].count--
+    //       }
+    //     }
+    //     // let inx = _.findIndex(this.instanceEntries, (o) => { return o.id === data.id })
+    //     // this.instanceEntries.splice(inx, 1)
+    //     // this.dataData = this.instanceEntries
+    //   })
+    // }
+    // if (socket._callbacks['$' + this.$route.params.id.replace(/-/g, '_') + '_removed'] === undefined) {
+    //   socket.on(this.$route.params.id.replace(/-/g, '_') + '_removed', (data) => {
+    //     if (data._currentStatus) {
+    //       let finx = _.findIndex(this.flowzList, {id: this.$route.params.id})
+    //       if (finx !== -1) {
+    //         this.flowzList[finx].processList[data._state].count--
+    //         this.flowzList[finx].count--
+    //       }
+    //     }
+    //   })
+    // }
   },
   computed: {
     dataCount () {
@@ -1169,45 +1602,21 @@ export default {
       created (data) {
       },
       updated (data) {
+        this.pageno = 1
         if (this.$store.state.role === 1) {
           if (data.currentStatus === this.$route.params.stateid) {
-            // // data = data.data
-            // // data.data['iid'] = data.id
-            // // this.instanceEntries.push(data)
-            // // this.dataData.push(data.data)
-            // let StageName = data.stageReference[(data.stageReference.length - 1)].StageName
-
-            // setTimeout(() => {
-            //   flowzdataModal.get(null, {
-            //     iid: data.id,
-            //     state: StageName
-            //   }).then((resData) => {
-            //     // console.log('Form Data: ', resData)
-            //     data.data = resData.data[0].data
-            //     data.data['iid'] = data.id
-
-            //     console.log('Data: ', data)
-            //     this.instanceEntries.push(data)
-            //     this.dataData.push(data.data)
-            //   }).catch((err) => {
-            //     console.log('err: ', err)
-            //   })
-            // }, 2000)
-            // console.log('Length: ', this.instanceEntries.length)
-            // console.log('instanceEntries: ', this.instanceEntries.length, this.entriesTotal)
             if (this.instanceEntries.length < this.entriesTotal) {
-              // console.log('Ready to push: ', this.instanceEntries.length)
-              // push to table
               let instanceObj = data
-              // console.log('instanceObj: ', instanceObj)
+              let inx = _.findIndex(this.dataData, (o) => { return o.id === data.id })
+              this.populateTables()
               let lastEntryId = data.stageReference[data.stageReference.length - 1].stageRecordId
-              // console.log('lastEntryId: ', lastEntryId)
               if (lastEntryId !== undefined) {
                 flowzdataModal.get(lastEntryId).then(res => {
                   // console.log('Response fdata: ', res)
                   instanceObj['data'] = res.data.data
                   instanceObj['iid'] = data.id
-                  this.instanceEntries.push(instanceObj)
+                  // this.instanceEntries.push(instanceObj)
+                  this.dataData.splice(inx, 1)
                   this.dataData.push(instanceObj)
                   // console.log('Pushed data: ', this.instanceEntries, this.dataData)
                 })
@@ -1225,14 +1634,96 @@ export default {
         if (this.$store.state.role === 2) {
           if (data.claimuser === '') {
             this.dataClaim.push(data)
-            this.init()
+            this.populateTables()
           } else {
             this.dataData2.push(data)
-            this.init()
+            this.populateTables()
           }
         }
       },
       removed (data) {
+      }
+    },
+    'dflowzdata': {
+      _created (data) {
+        // console.log('================created==============', data)
+        let keys = Object.keys(data)
+        for (let tName of keys) {
+          if (tName === this.$route.params.id.replace(/-/g, '_')) {
+            if (data[tName]._currentStatus && data[tName]._state === this.$route.params.stateid) {
+              if (this.instanceEntries.length < this.entriesTotal) {
+                this.instanceEntries.push(data[tName])
+                this.dataData = this.instanceEntries
+              } else {
+                this.dataTotal++
+              }
+            } else {
+              let inx = _.findIndex(this.instanceEntries, (o) => { return o.id === data[tName]._previous })
+              this.instanceEntries.splice(inx, 1)
+            }
+          }
+        }
+      },
+      _updated (data) {
+      },
+      _patched (data) {
+        let keys = Object.keys(data)
+        for (let tName of keys) {
+          if (data[tName]._currentStatus) {
+            if (this.$store.state.role === 1) {
+              if (data[tName]._currentStatus && data[tName]._state === this.$route.params.stateid) {
+                let inx = _.findIndex(this.instanceEntries, (o) => { return o.id === data[tName].id })
+                this.instanceEntries.splice(inx, 1)
+                this.instanceEntries.push(data[tName])
+                this.dataData = this.instanceEntries
+              }
+            }
+            if (this.$store.state.role === 2) {
+              if (data[tName]._claimUser === '') {
+                let inx = _.findIndex(this.dataClaim, (o) => { return o.id === data[tName].id })
+                this.dataClaim.splice(inx, 1)
+                this.dataUnclaim.push(data[tName])
+                this.dataTotalU = this.dataTotalU + 1
+                this.dataTotalC = this.dataTotalC - 1
+              } else {
+                let inx = _.findIndex(this.dataUnclaim, (o) => { return o.id === data[tName].id })
+                this.dataUnclaim.splice(inx, 1)
+                this.dataClaim.push(data[tName])
+                this.dataTotalU = this.dataTotalU - 1
+                this.dataTotalC = this.dataTotalC + 1
+              }
+            }
+            let finx = _.findIndex(this.flowzList, {id: this.$route.params.id})
+            if (finx !== -1 && !data[tName]._currentStatus && data[tName]._next === null) {
+              if (this.flowzList[finx].processList[data[tName]._state].count > 0) {
+                this.flowzList[finx].processList[data[tName]._state].count--
+              }
+              if (this.flowzList[finx].count > 0) {
+                this.flowzList[finx].count--
+              }
+            }
+          } else {
+            let inx = _.findIndex(this.dataClaim, (o) => { return o.id === data[tName].id })
+            this.dataClaim.splice(inx, 1)
+            this.dataTotalC = this.dataTotalC - 1
+          }
+        }
+      },
+      _removed (data) {
+        // let keys = Object.keys(data)
+        // for (let tName of keys) {
+        //   if (data[tName]._currentStatus) {
+        //     let finx = _.findIndex(this.flowzList, {id: tName.replace(/_/g, '-')})
+        //     if (finx !== -1) {
+        //       if (this.flowzList[finx].processList[data[tName]._state].count > 0) {
+        //         this.flowzList[finx].processList[data[tName]._state].count--
+        //       }
+        //       if (this.flowzList[finx].count > 0) {
+        //         this.flowzList[finx].count--
+        //       }
+        //     }
+        //   }
+        // }
       }
     }
   }
