@@ -116,7 +116,6 @@ export default {
         templateName: this.templateName,
         date: new Date()
       }
-      console.log(saveemailTemplateObj)
       saveemailTemplate.post(saveemailTemplateObj)
       .then((res) => {
         this.$Message.success('Email Template Saved.')
@@ -140,7 +139,6 @@ export default {
     remove (params) {
       saveemailTemplate.delete(params.row.id)
       .then((res) => {
-        console.log(res)
         this.$Message.success('Template deleted.')
       })
       .catch((err) => {
@@ -206,17 +204,13 @@ export default {
   feathers: {
     'emailtemplate': {
       created (data) {
-        console.log('created', data)
         this.data6.push(data)
       },
       updated (data) {
-        console.log('updated', data)
         let inx = _.findIndex(this.data6, (o) => { return o.id === data.id })
-        console.log(inx)
         this.data6[inx] = data
       },
       removed (data) {
-        console.log('removed', data)
         this.data6.splice(data.id, 1)
       }
     }

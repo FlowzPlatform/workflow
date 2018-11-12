@@ -169,7 +169,6 @@ export default {
             return f.status === 'inputRequired'
           }).result('true').value()
           item.inputRemain = count !== undefined ? count : 0
-          // console.log('this.flowzinstanceList', this.flowzinstanceList)
         })
       }
       // await this.getInputRequired()
@@ -178,7 +177,6 @@ export default {
     changePage (newValue) {
       this.current = newValue
       this.init()
-      // console.log('newValue', newValue)
     },
     setCount (id, index) {
       flowzinstanceModel.get({
@@ -201,7 +199,6 @@ export default {
       })
     },
     handleRowClick (data) {
-      // console.log('row', data.id)
       this.$store.state.activeFlow = null
       this.$store.state.activeFlow = data.id
       this.$store.state.sidenavtoggle = true
@@ -214,7 +211,6 @@ export default {
   feathers: {
     'flowz': {
       created (data) {
-        // console.log('Created :: ', data)
         if (data.id !== undefined) {
           data.inputRemain = 0
           if (this.flowzList.data.length < this.$store.state.limitPage) {
@@ -224,12 +220,10 @@ export default {
         }
       },
       updated (data) {
-        // console.log('Updated :: ', data)
         if (data.id !== undefined) {
           data.inputRemain = -1
           // data._expanded = true
           let getIndex = _.findIndex(this.flowzList.data, {id: data.id})
-          // console.log('getIndex  ', getIndex)
           if (getIndex !== undefined && getIndex > 0) {
             this.flowzList.data.splice(getIndex, 1)
             this.flowzList.data.splice(getIndex, 0, data)
@@ -238,11 +232,9 @@ export default {
         }
       },
       removed (data) {
-        // console.log('Deleted :: ', data)
         if (data.id !== undefined) {
           // data.inputRemain = -1
           let getIndex = _.findIndex(this.flowzList.data, {id: data.id})
-          // console.log('getIndex  ', getIndex)
           if (getIndex !== undefined && getIndex >= 0) {
             this.flowzList.data.splice(getIndex, 1)
             // this.flowzList.data.splice(getIndex, 0, data)
@@ -253,7 +245,6 @@ export default {
             if (this.current !== 1) {
               this.current--
             }
-            // console.log('this.current', this.current)
             this.init()
           }
         }
@@ -261,7 +252,6 @@ export default {
     },
     'flowz-instance': {
       created (data) {
-        // console.log('flowz-instance created:: ')
       },
       updated (data) {
         if (!this.flowzinstanceList[data.fid] || _.indexOf(data.allowedusers, this.$store.state.user.email) === -1) {
@@ -287,12 +277,10 @@ export default {
             }).countBy(f => {
               return f.status === 'inputRequired'
             }).result('true').value()
-            // console.log(data.fid, count)
             item._expanded = true
             item.inputRemain = count !== undefined ? count : 0
           }
         }
-        // console.log('this.flowzinstanceList', this.flowzinstanceList)
         // if (data.fid !== undefined) {
         //   let checkIndex = _.findIndex(this.flowzList.data, {id: data.fid})
         //   if (checkIndex !== undefined && checkIndex > -1) {
@@ -303,7 +291,6 @@ export default {
         //     if (sobj !== undefined && sobj.hasOwnProperty('status') && sobj.status === 'inputRequired') {
         //       found = true
         //     }
-        //     console.log('found:: ', found)
         //     if (found) {
         //       this.flowzList.data[checkIndex].inputRemain += 1
         //     }
@@ -311,7 +298,6 @@ export default {
         // }
       },
       removed (data) {
-        // console.log('flowz-instance removed:: ', data)
         if (!this.flowzinstanceList[data.fid]) {
           return
         }
@@ -335,7 +321,6 @@ export default {
             }).countBy(f => {
               return f.status === 'inputRequired'
             }).result('true').value()
-            // console.log(data.fid, count)
             item.inputRemain = count !== undefined ? count : 0
           }
         }

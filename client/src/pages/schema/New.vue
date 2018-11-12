@@ -560,7 +560,6 @@ export default {
           } else {
             schemaModal.put(this.formSchema.id, this.formSchema)
             .then(response => {
-              // console.log(response)
               this.$Message.success('Schema updated..!')
               this.loading = false
               this.$router.go(-1)

@@ -24,7 +24,6 @@ class Service {
   async updateStatus (data, params) {
     let stageId = (new Buffer(data.targetid,'base64')).toString('ascii');
     // data.taskid = stageId
-    // console.log('data >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', data)
     let id = data.id
     let targetId = stageId
     let currentId = data.stateid
@@ -55,7 +54,6 @@ class Service {
   }
 
   async create (data, params) {
-    console.log(data, params);
     if (Array.isArray(data)) {
       return Promise.all(data.map(current => this.create(current, params)));
     }

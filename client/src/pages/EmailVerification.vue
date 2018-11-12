@@ -83,9 +83,9 @@ export default {
               userGroup: '1'
             }
             modelUser.post(userInfo).then(response => {
-              if (response) {
-                console.log(response)
-              }
+              // if (response) {
+              //   console.log(response)
+              // }
             }).catch(e => {
               console.log(e)
             })

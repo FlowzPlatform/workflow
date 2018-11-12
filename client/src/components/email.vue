@@ -191,7 +191,6 @@ import schemaModel from '@/api/schema'
           var _res = response.data
           var obj = {}
 
-          // console.log("res.entity: ", _res.entity)
           // obj.id = self.getGuid();
           // obj.database = _res.database
           // obj.Schemaid = _res._id
@@ -284,7 +283,6 @@ import schemaModel from '@/api/schema'
           <body><div class=\"container\">
           ` + htmlContent +`
           <br> <h4>Comment: ${this.formSchemaInstance.data.comment}</h4><br></div></body></html>`
-              console.log('this.formSchemaInstance.data', this.formSchemaInstance.data)
           sendmailModal.post(this.formSchemaInstance.data[0])
           .then((res)=>{
             this.loading = false

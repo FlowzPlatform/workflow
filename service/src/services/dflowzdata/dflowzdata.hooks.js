@@ -46,7 +46,6 @@ module.exports = {
 
 // autogenetator function --> only apply at outer schema contains autogenerator
 async function functionAutoGenerater(hook, field) {
-  console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
   let mdata = hook.data
   hook.service.service.options.name = hook.params.headers.ftablename;
   hook.service.service.table = hook.service.rDB.table(hook.params.headers.ftablename);
@@ -101,7 +100,6 @@ let beforeFind = function (hook) {
     }
   }
   if (query.$group !== undefined && query.$search !== undefined) {
-    // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
     hook.service.service.options.name = hook.params.headers.ftablename;
     hook.service.service.table = hook.service.rDB.table(hook.params.headers.ftablename);
     let value = hook.params.query.$group
@@ -112,7 +110,6 @@ let beforeFind = function (hook) {
     hook.params.rethinkdb = query.filter(function(doc) {
       return doc.coerceTo('string').match('(?i)' + search);
     }).group(value).ungroup()
-    // console.log('hook.params.rethinkdb', hook.params.rethinkdb)
   } else if (query.$group !== undefined) {
     hook.service.service.options.name = hook.params.headers.ftablename;
     hook.service.service.table = hook.service.rDB.table(hook.params.headers.ftablename);
@@ -138,15 +135,12 @@ let beforeFind = function (hook) {
 
 async function beforeCreate (hook) {
   try {
-    // console.log('before create ================================', hook.params, hook.data)
     hook.params.done = true
     if (hook.params.headers.ftablename !== undefined && hook.data._state !== undefined) {
       let regex = /_/g
       let tName = hook.params.headers.ftablename.replace(regex, '-')
       return hook.app.service('flowz').get(tName).then(res => {
-        // console.log('res.......', res.schema)
         return hook.app.service('schema').get(res.schema).then(async schemares => {
-          // console.log('schemares', schemares)
           let isAutoGenerator = false
           let field = {}
           for (let ent of schemares.entity) {
@@ -157,7 +151,6 @@ async function beforeCreate (hook) {
           }
           hook.data._currentStatus = true
           if (res.processList[hook.data._state].type === 'endevent') {
-            // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
             hook.data._currentStatus = false
           }
           hook.data._createdAt = new Date().toISOString()
@@ -176,23 +169,16 @@ async function beforeCreate (hook) {
             hook.data._creatorid = (hook.params.userPackageDetails ? hook.params.userPackageDetails._id : '')
           }
           if (res.processList[hook.data._state].type === 'exclusivegateway') {
-            // console.log('???????????????????????????????????????????????????')
             let gatewayObj = res.processList[hook.data._state]
-            // console.log('gatewayObj', gatewayObj)
             if (gatewayObj['var_name'] !== undefined && gatewayObj['var_name'] !== '' && gatewayObj.condition !== undefined && gatewayObj.condition !== '') {
               if (hook.data.hasOwnProperty(gatewayObj['var_name'])) {
-                // console.log('hook.data', hook.data[gatewayObj['var_name']])
                 if (gatewayObj.condition == '=') {
-                  // console.log('')
                  let targetIndex = _.findIndex(gatewayObj.target, {label: hook.data[gatewayObj['var_name']]})
-                 // console.log('targetIndex', targetIndex)
                  if (targetIndex !== -1) {
-                  // console.log('hook.data', hook.data, hook.params)
                   // hook.data._previous =
                   hook.params.isEGateway = true
                   hook.data._currentStatus = false
                   // hook.data._next = null
-                  // console.log('gatewayObj.target[targetIndex].id', gatewayObj.target[targetIndex].id)
                   hook.params.isEGatewayTarget = gatewayObj.target[targetIndex].id
                  }
                 }
@@ -201,10 +187,8 @@ async function beforeCreate (hook) {
           }
           if (isAutoGenerator && hook.data._state === res.first) {
             // ---------------------------------------------
-            console.log('................', hook.data._state)
             hook.result = await functionAutoGenerater(hook, field)
             hook.data = hook.result
-            // console.log('hook.result ', hook.result )
           }
           return hook;
         }).catch(err => {
@@ -239,7 +223,6 @@ function afterCreate (hook) {
   // If first state found add another entry with nexttarget
 
   if (hook.params.done) { // to avoid called afterhook multiple times
-    // console.log('*********************************************')
 
 
     if (hook.params.first !== undefined) {
@@ -260,9 +243,7 @@ function afterCreate (hook) {
         });
       })
     } else {
-      // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', hook.result.id)
       hook.params.headers.normalpatch = true
-      // console.log('hook.data._previous', hook.data._previous)
       if (hook.params.isEGateway !== undefined) {
         return hook.app.service(hook.path).patch(hook.data._previous, {
           _next: hook.result.id,
@@ -270,19 +251,15 @@ function afterCreate (hook) {
         }, hook.params).then(resp => {
 
           hook.data._nextTarget = hook.params.isEGatewayTarget
-          // hook.data._previous = hook.result.id
           delete hook.params.first
           delete hook.params.isEGateway
           delete hook.params.isEGatewayTarget
-          // delete hook.data.id
-          // console.log(':::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::;', hook.data)
           let params = Object.assign({}, hook.params)
 
           delete params.headers.normalpatch
 
           return hook.app.service(hook.path).patch(hook.result.id, hook.data, params).then(res => {
             // hook.params.headers.normalpatch = true
-            // console.log('hook.data._previous', hook.data._previous)
             // return hook.app.service(hook.path).patch(hook.data._previous, {
             //   _next: hook.result.id,
             //   _completedAt: new Date().toISOString()
@@ -315,7 +292,6 @@ function afterCreate (hook) {
       // })
 
       // if (hook.params.isEGateway !== undefined) {
-      //   // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>..', hook.params, hook.data,  hook.result.id)
       //   // hook.data._state = hook.data._nextTarget
       //   hook.data._nextTarget = hook.params.isEGatewayTarget
       //   // hook.data._previous = hook.result.id
@@ -323,11 +299,9 @@ function afterCreate (hook) {
       //   delete hook.params.isEGateway
       //   delete hook.params.isEGatewayTarget
       //   // delete hook.data.id
-      //   console.log(':::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::;', hook.data)
       //   delete hook.params.headers.normalpatch
       //   return hook.app.service(hook.path).patch(hook.result.id, hook.data, hook.params).then(res => {
       //     // hook.params.headers.normalpatch = true
-      //     // console.log('hook.data._previous', hook.data._previous)
       //     // return hook.app.service(hook.path).patch(hook.data._previous, {
       //     //   _next: hook.result.id,
       //     //   _completedAt: new Date().toISOString()
@@ -336,7 +310,6 @@ function afterCreate (hook) {
       //     // })
       //     return hook;
       //   }).catch(err => {
-      //     console.log('err', err)
       //     throw new errors.BadRequest('Error', {
       //       errors: { message: err.toString() }
       //     });
@@ -351,7 +324,6 @@ function afterCreate (hook) {
 } // end afterCreate function
 
 function beforePatch (hook) {
-  // console.log('beforePatch ============================beforePatch=>>>>>>>>>>>>>>>>>>>>', hook.params, hook.id, hook.data)
   hook.params.done1 = true
   if (hook.params.headers.ftablename !== undefined) {
       if (hook.params.headers.normalpatch !== undefined) {
@@ -368,7 +340,6 @@ function beforePatch (hook) {
             // hook.data._userId = ''
             // hook.data._claimUser = ''
             hook.data._completedAt = new Date().toISOString()
-            // console.log('before patchOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO', hook.data)
             return hook;
           }).catch(err => {
             console.log('err', err)
@@ -393,12 +364,9 @@ function beforePatch (hook) {
 }
 
 function afterPatch (hook) {
-  // console.log('================================ afterPatch', hook.id, hook.params.headers.normalpatch)
   if (hook.params.headers.normalpatch !== undefined) {
-    // console.log('..................................... ', hook.params.headers.normalpatch)
   } else {
     if (hook.params.done1) {
-      // console.log('111111111111111111111111111111111111111111111111111111111111111111', hook.params)
       delete hook.params.done1
       return hook.app.service(hook.path).get(hook.id, hook.params).then(resp => {
         hook.data._state = hook.data._nextTarget
@@ -412,7 +380,6 @@ function afterPatch (hook) {
         hook.data._next = null
         hook.data._uuid = resp._uuid
         delete hook.data.id
-        // console.log('???????????????????????????????????????????????????????????????//', hook.data)
         return hook.app.service(hook.path).create(hook.data, hook.params).then(res => {
           return hook;
         }).catch(err => {

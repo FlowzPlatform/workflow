@@ -101,7 +101,6 @@ export default {
   methods: {
     async getRecord (item) {
       let currentObj = this.flowzData.processList[item.currentStatus]
-      // console.log('currentObj: ', currentObj)
       let values = {
         id: this.flowzData.schema,
         item: item,
@@ -145,7 +144,6 @@ export default {
         }
       },
       updated (data) {
-        // console.log('Data: ', data)
         let self = this
         if (data.fid === this.$route.params.id) {
           if (this.$route.params.stateid) {
@@ -166,7 +164,6 @@ export default {
         }
       },
       removed (data) {
-        // console.log('Data: ', data)
         let self = this
         let inx = _.findIndex(this.instanceEntries, {id: data.id})
         if (inx !== -1) {

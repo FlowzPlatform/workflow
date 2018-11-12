@@ -51,9 +51,6 @@ function beforeFind (hook) {
   const query = hook.service.createQuery(hook.params.query);
       
   // const searchString = "my search string";
-  // console.log('__________________________________________________')
-  // console.log('hook.service', hook.app.services.flowzdata.table)
-  // console.log('__________________________________________________')
   // ----------------------------- || Get Last Record Data || --------------------------
   // hook.params.rethinkdb = query.outerJoin(hook.app.services.flowzdata.table ,function(instance,data){
   //   return instance.hasFields('stageReference').and(
@@ -77,8 +74,6 @@ function beforeFind (hook) {
   //     })   
   //   })
   // })
-  // console.log('__________________________________________________')
-  // console.log('hook.params.rethinkdb', hook.params.rethinkdb)
 }
 
 function beforeUpdate (hook) {
@@ -92,7 +87,6 @@ function beforePatch (hook) {
 }
 // let fdataid = ''
 function beforeCreate (hook) {
-  // console.log('Hook: ', hook)
   hook.params.data = hook.data.data
   delete hook.data.data
   hook.data.claimUser = ''
@@ -119,7 +113,6 @@ function beforeCreate (hook) {
   //       if (startObj !== 0) {
   //         // let nextTargetObj = getNextTarget(res.processList, startObj.target[0].id);
   //         let nextTargetObj = res.processList[startObj.target[0].id];
-  //         // console.log('nextTargetObj', nextTargetObj)
   //         hook.data.currentStatus = nextTargetObj.id;
   //         hook.data.mainStatus = 'inprocess';
   //         hook.data.stageReference = [];
@@ -136,7 +129,6 @@ function beforeCreate (hook) {
   //       });
   //     }
   //   }).catch(err => {
-  //     console.log('err', err)
   //     throw new errors.BadRequest('Error', {
   //       errors: { message: err.toString() }
   //     });
@@ -145,11 +137,9 @@ function beforeCreate (hook) {
 };
 
 function afterCreate (hook) {
-  // console.log('&&&&&&&&&&&&&&&&&&&&&&Hook.data.result: ', hook.result)
   if (hook.params.hasOwnProperty('data')) {
     let id = hook.params.data.id
     delete hook.params.data.id
-    // console.log("hook.app.service('flowzdata'", hook.app.service('flowzdata').create({abc:'xyz'}))
     return hook.app.service('flowzdata').create({
       id: id,
       data: hook.params.data,
@@ -159,7 +149,6 @@ function afterCreate (hook) {
     }, hook.params).then(res => {
       return hook
     }).catch(err => {
-      console.log('err', err)
       throw new errors.BadRequest('Error', {
         errors: { message: err.toString() }
       });

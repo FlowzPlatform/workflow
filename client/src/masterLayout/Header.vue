@@ -118,7 +118,6 @@
         return !this.$store.state.sidenavpin || (!this.$store.state.sidenavtoggle)
       },
       getUserName () {
-        // console.log('this.$store.state.user', this.$store.state.user)
         if (this.$store.state.user) {
           let name = this.$store.state.user.fullname || ''
           if (name === '' && this.$store.state.user.email) {
@@ -178,7 +177,6 @@
           this.$store.commit('SET_ROLE', 2)
           this.$router.push('/')
         }
-        // console.log('done')
         // this.$router.push('/')
         // this.$store.dispatch('getFlowzdata')
       }

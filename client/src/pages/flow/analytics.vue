@@ -155,7 +155,6 @@ export default {
                 },
                 on: {
                   'on-change': (value) => {
-                    // console.log('show', value)
                     this.anotherBinding[params.index].show = value
                   }
                 }
@@ -174,9 +173,7 @@ export default {
                 },
                 on: {
                   'on-change': (value) => {
-                    // console.log('show', value)
                     this.configuration.fields[params.index].firstColumn = value
-                    // console.log('this.configuration.fields[params.index]: ', this.configuration.fields[params.index])
                     this.anotherBinding[params.index].firstColumn = value
                     for (let i = 0; i < this.anotherBinding.length; i++) {
                       if (i !== params.index) {
@@ -205,7 +202,6 @@ export default {
                 },
                 on: {
                   'keyup': (event) => {
-                    // console.log('value', event.target.value, event.keyCode)
                     if (event.target.value && event.target.value !== null && event.keyCode === 13) {
                       if (event.target.value <= 0) {
                         this.anotherBinding[params.index].width = 150
@@ -343,7 +339,6 @@ export default {
       }
       let query = this.searchQuery
       let sort = this.selectedSortBy
-      // console.log('query', query, sort)
       this.dataLoading = true
       this.tableLoading = true
 
@@ -374,7 +369,6 @@ export default {
       }
       if (this.selectedFilterBy !== null && this.selectedFilterBy !== undefined) {
         if (this.selectedFilterBy === 'customRange') {
-          console.log('Custom Range Found', this.enteredDateRange)
           if (this.enteredDateRange.length >= 1) {
             if (this.enteredDateRange[0] !== '' && this.enteredDateRange[1] !== '') {
               params['_createdAt[$gte]'] = this.enteredDateRange[0].toISOString()
@@ -383,7 +377,6 @@ export default {
           }
         } else {
           let dateRange = this.getFilterDate(this.selectedFilterBy)
-          // console.log('Normal Range Found', this.selectedFilterBy, $lte, new Date().toISOString())
           params['_createdAt[$gte]'] = dateRange
         }
       }
@@ -396,7 +389,6 @@ export default {
       }
       dflowzdata.get(null, params, heads)
       .then(res => {
-        // console.log('res: ', res)
         if (res.data.data.length > 0) {
           this.total = res.data.total
           let tableDataArr = []
@@ -408,14 +400,10 @@ export default {
             tableDataArr.push(value)
           }
           // let groupedData = _.groupBy(res.data.data, (o) => { return o._uuid })
-          // console.log('Grouped Data: ', groupedData)
           // // let tableGroupedArray = []
           // for (let item in groupedData) {
-          //   console.log('Item: ', item)
           //   let value = groupedData[item]
-          //   console.log('Value: ', value)
           // }
-          // console.log('tableGroupedArray: ', tableGroupedArray)
           this.tableData = tableDataArr
           // this.colviewData = tableDataArr
           // this.colviewData = tableDataArr
@@ -441,7 +429,6 @@ export default {
         this.$Loading.error()
         this.dataLoading = false
         this.tableLoading = false
-        console.log('error', e)
         this.bLoading = false
         if (e.response.data.message) {
           this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
@@ -494,7 +481,6 @@ export default {
 
       let cols = []
       // let colviewData = []
-      // console.log('res.data.processList: ', res.data.processList)
       let listing = this.getByOrder(this.flowzData.processList)
       for (let col of listing) {
         if (col.type !== 'startevent' && col.type !== 'endevent' && col.type !== 'exclusivegateway') {
@@ -507,7 +493,6 @@ export default {
           })
         }
       }
-      // console.log('cols: ', cols)
       this.anotherBinding = _.cloneDeep(cols)
       this.configuration.fields = _.cloneDeep(cols)
 
@@ -537,7 +522,6 @@ export default {
 
       dflowzdata.get(null, paramsToSend, heads)
       .then(res => {
-        // console.log('res: ', res)
         this.total = res.data.total
         let tableDataArr = []
         for (let item of res.data.data) {
@@ -548,14 +532,10 @@ export default {
           tableDataArr.push(value)
         }
         // let groupedData = _.groupBy(res.data.data, (o) => { return o._uuid })
-        // console.log('Grouped Data: ', groupedData)
         // // let tableGroupedArray = []
         // for (let item in groupedData) {
-        //   console.log('Item: ', item)
         //   let value = groupedData[item]
-        //   console.log('Value: ', value)
         // }
-        // console.log('tableGroupedArray: ', tableGroupedArray)
         this.tableData = tableDataArr
         // this.colviewData = tableDataArr
         for (let inst in tableDataArr) {
@@ -572,12 +552,10 @@ export default {
             }
           }
         }
-        // console.log('this.colviewData', this.colviewData)
         this.tableLoading = false
       }).catch(e => {
         this.tableLoading = false
         this.$Loading.error()
-        console.log('error', e)
         this.bLoading = false
         if (e.response.data.message) {
           this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
@@ -604,9 +582,7 @@ export default {
       //         // flowzdataModal.get().then(res => {
 
       //         // }).catch(e => {
-      //         //   console.log('e', e)
       //         // })
-      //         // console.log('colviewData.stageReference ', item, task)
       //         let dataExist = _.find(item.stageReference, {StageName: task.id})
       //         if (!isfirst) {
       //           task.first = false
@@ -615,7 +591,6 @@ export default {
       //         } else {
       //           task.className = 'notfirst'
       //         }
-      //         // console.log('dataExist: ', dataExist)
       //         let m = {
       //           id: item.id,
       //           task: task.name || task.id,
@@ -638,7 +613,6 @@ export default {
       //   this.tableLoading = false
       // }).catch(err => {
       //   this.tableLoading = false
-      //   console.log('Erro: ', err)
       // })
     },
     async init () {
@@ -774,7 +748,6 @@ export default {
         key = '_uuid'
         title = 'ID'
       }
-      // console.log('OBJ: ', obj)
       cols.push({
         title: title,
         key: key,
@@ -827,7 +800,6 @@ export default {
         key: '_state',
         width: 150,
         render: (h, params) => {
-          // console.log('%%%%%%%%%%%%%%%%%%%%%%%params.row._state%%%%%%%%%%%%%%%%%%: ', params)
           if (this.flowzData.processList[params.row._state].name && this.flowzData.processList[params.row._state].name !== '') {
             return h('span', this.flowzData.processList[params.row._state].name)
           } else {
@@ -887,16 +859,10 @@ export default {
       return cols
     },
     mainColumns () {
-      // console.log('mainColumns')
       let tableCols = _.filter(this.configuration.fields, {show: true})
       for (let item of tableCols) {
         item.render = (h, params) => {
-          // console.log('params.column: ')
-          // console.log('Item: ', item)
-          // console.log('Params: ', params)
-          // console.log('item.key: ', item.key)
           let obj = _.find(params.row.states, {_state: item.key})
-          // console.log('obj: ', obj)
           if (obj) {
             let finalValue = {
               obj: obj,
@@ -905,7 +871,6 @@ export default {
             }
 
             if (obj._currentStatus === true) {
-              // console.log('Oject Date: ', obj._currentStatus)
               finalValue.isCurrentTask = true
               finalValue.isCompletedTask = false
             } else if (obj._currentStatus === false) {
@@ -915,10 +880,8 @@ export default {
               // axios.get(config.userdetails + obj.userId)
               // .then((response) => {
               //   finalValue.obj['userDetails'] = response.data.data[0]
-              //   // console.log('user details: ', obj['userDetails'])
               // })
               // .catch((error) => {
-              //   console.log(error)
               // })
             }
             // if (obj) {
@@ -927,7 +890,6 @@ export default {
             //   finalValue.isCompletedTask = true
             // } else {
             //   if (item.key === params.row.currentStatus) {
-            //     // console.log('params.row.stageReference.length: ', params.row.stageReference[(params.row.stageReference.length - 1)])
             //     // obj = params.row.stageReference[(params.row.stageReference.length - 1)]
             //     finalValue.obj = params.row.stageReference[(params.row.stageReference.length - 1)]
             //     finalValue.isCurrentTask = true
@@ -938,7 +900,6 @@ export default {
             //     finalValue.isCompletedTask = false
             //   }
             // }
-            // console.log('finalValue: ', finalValue)
             return h(CellRender, {
               props: {
                 item: finalValue,
@@ -955,7 +916,6 @@ export default {
         width: 270,
         fixed: 'left',
         render: (h, params) => {
-          // console.log('Params: ', params.row)
           let findInProcessIndex = _.findIndex(params.row.states, function (o) { return o._currentStatus === true })
           if (findInProcessIndex !== -1) {
             return h('div', [
@@ -1047,7 +1007,6 @@ export default {
         }
       })
 
-        // console.log('table cols: ', tableCols)
       return tableCols
     }
     //   this.colviewCols = []
@@ -1090,16 +1049,13 @@ export default {
   feathers: {
     'dflowzdata': {
       _created (data) {
-        // console.log('================created==============', data)
         let keys = Object.keys(data)
         for (let tName of keys) {
           if (tName === this.$route.params.id.replace(/-/g, '_')) {
             if (this.tableData.length < this.limit) {
-              // console.log('data[tName]._uuid: ', data[tName]._uuid)
               let findIndex = _.findIndex(this.tableData, (o) => { return o._uuid === data[tName]._uuid })
               // let findIndexCol = _.findIndex(this.colviewData, (o) => { return o._uuid === data[tName]._uuid })
               let findIndexCol = _.findLastIndex(this.colviewData, (o) => { return o._uuid === data[tName]._uuid })
-              // console.log('findIndex: ', findIndex)
               if (findIndex === -1) {
                 let value = {
                   _uuid: data[tName]._uuid,
@@ -1107,14 +1063,10 @@ export default {
                 }
 
                 value.states.push(data[tName])
-                // console.log('value: ', value)
                 this.tableData.push(value)
                 data[tName]['_first'] = true
                 this.colviewData.push(data[tName])
               } else {
-                // console.log('Index Found: ', findIndex, findIndexCol)
-                // console.log('ThisTableData: ', this.tableData[findIndex])
-                // console.log('this coldata: ', this.colviewData[findIndexCol])
                 this.tableData[findIndex].states.push(data[tName])
                 this.colviewData.splice((findIndexCol + 1), 0, data[tName])
               }
