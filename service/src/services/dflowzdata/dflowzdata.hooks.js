@@ -64,7 +64,7 @@ async function functionAutoGenerater(hook, field) {
         }),
     1)
 
-  mdata[field.name] = 
+  mdata[field.name] =
     hook.service.options.r.expr(field.property.prefix).add(
       hook.service.options.r.branch(
         hook.service.service.table.isEmpty().not()
@@ -130,7 +130,7 @@ let beforeFind = function (hook) {
     hook.params.rethinkdb = query.filter(function(doc) {
       return doc.coerceTo('string').match('(?i)' + value);
     })
-  } 
+  }
   // else if (query.$subscriptionId !== undefined && query.$userId !== undefined) {
 
   // }
@@ -188,7 +188,7 @@ async function beforeCreate (hook) {
                  // console.log('targetIndex', targetIndex)
                  if (targetIndex !== -1) {
                   // console.log('hook.data', hook.data, hook.params)
-                  // hook.data._previous = 
+                  // hook.data._previous =
                   hook.params.isEGateway = true
                   hook.data._currentStatus = false
                   // hook.data._next = null
@@ -203,6 +203,7 @@ async function beforeCreate (hook) {
             // ---------------------------------------------
             console.log('................', hook.data._state)
             hook.result = await functionAutoGenerater(hook, field)
+            hook.data = hook.result
             // console.log('hook.result ', hook.result )
           }
           return hook;
@@ -239,7 +240,7 @@ function afterCreate (hook) {
 
   if (hook.params.done) { // to avoid called afterhook multiple times
     // console.log('*********************************************')
-    
+
 
     if (hook.params.first !== undefined) {
       hook.data._state = hook.data._nextTarget
@@ -267,7 +268,7 @@ function afterCreate (hook) {
           _next: hook.result.id,
           _completedAt: new Date().toISOString()
         }, hook.params).then(resp => {
-          
+
           hook.data._nextTarget = hook.params.isEGatewayTarget
           // hook.data._previous = hook.result.id
           delete hook.params.first
@@ -278,7 +279,7 @@ function afterCreate (hook) {
           let params = Object.assign({}, hook.params)
 
           delete params.headers.normalpatch
-          
+
           return hook.app.service(hook.path).patch(hook.result.id, hook.data, params).then(res => {
             // hook.params.headers.normalpatch = true
             // console.log('hook.data._previous', hook.data._previous)
@@ -297,7 +298,7 @@ function afterCreate (hook) {
           })
 
           return hook
-        })  
+        })
       } else {
         return hook.app.service(hook.path).patch(hook.data._previous, {
           _next: hook.result.id,
@@ -312,7 +313,7 @@ function afterCreate (hook) {
       // }, hook.params).then(resp => {
       //   return hook
       // })
-      
+
       // if (hook.params.isEGateway !== undefined) {
       //   // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>..', hook.params, hook.data,  hook.result.id)
       //   // hook.data._state = hook.data._nextTarget
@@ -341,13 +342,13 @@ function afterCreate (hook) {
       //     });
       //   })
       // }
-    
+
     }
 
   }
-        
 
-} // end afterCreate function 
+
+} // end afterCreate function
 
 function beforePatch (hook) {
   // console.log('beforePatch ============================beforePatch=>>>>>>>>>>>>>>>>>>>>', hook.params, hook.id, hook.data)
@@ -429,6 +430,3 @@ function afterPatch (hook) {
     }
   }
 }
-
-
-
