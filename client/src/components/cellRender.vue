@@ -114,7 +114,6 @@ export default {
     cancel () {
     },
     classObject (item) {
-      // console.log('item: ', item)
       if (item.isCurrentTask === true && item.isCompletedTask === false) {
         return { 'currentTask': true }
       } else if (item.isCurrentTask === false && item.isCompletedTask === true) {
@@ -128,8 +127,6 @@ export default {
       return ('Started at: ' + moment(item).format('MMMM Do YYYY, h:mm:ss a'))
     },
     getAgoStatus (item) {
-      // console.log('Item Date: ', item)
-      // console.log('moment(item).fromNow(): ', moment(item).fromNow())
       return moment(item).fromNow()
       // return moment(item).format('MMMM Do YYYY, h:mm:ss a')
     },
@@ -184,7 +181,6 @@ export default {
       }
     },
     getUserHoverDetails (item) {
-      // console.log('Item: ', item)
       if (item.fullname && item.email && item.role) {
         return ('Name: ' + item.fullname + '\nEmail: ' + item.email + '\nRole: ' + item.role)
       } else {

@@ -20,5 +20,4 @@ module.exports = function () {
   const service = app.service('dflowzdata');
   service.watch = false;
   service.hooks(hooks);
-  // console.log('=======',Object.keys(app.services),'=========');
 };

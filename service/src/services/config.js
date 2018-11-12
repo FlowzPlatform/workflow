@@ -1,6 +1,5 @@
 const config = require('config');
 const fs = require('fs');
-// console.log('USER', config.get('rdb_user').trim());
 let ssl = process.env.cert ? { ca: fs.readFileSync(__dirname + process.env.cert) } : null
 let rauth = process.env.rauth ? process.env.rauth : null
 var rethinkdb = {

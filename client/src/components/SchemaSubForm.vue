@@ -414,7 +414,6 @@ export default {
       return arrObj
     },
     getObject (eIndex, dataIndex, fname, ftype) {
-      // console.log('get obj called: ', dataIndex)
       var obj = {}
       obj.data = this.schemainstance.data[dataIndex][fname]
       obj.entity = this.schemainstance.entity[eIndex].entity[0].entity

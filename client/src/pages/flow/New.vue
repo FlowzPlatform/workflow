@@ -191,7 +191,6 @@
                             target: this.getTargetId(m, jsonXML)
                           }
                         } else if (m.type === 'exclusivegateway' || m.type === 'complexgateway') {
-                          console.log(m)
                           this.flowObject.processList[m._id] = {
                             id: m._id,
                             name: m._name || '',
@@ -215,7 +214,6 @@
                   }
 
                   for (let startItems of this.flowObject.startId) {
-                    // console.log('startItems: ', startItems)
                     if (this.flowObject.processList[startItems].target.length > 0) {
                       this.flowObject.first = this.flowObject.processList[startItems].target[0].id
                       break
@@ -245,7 +243,6 @@
                     subscriptionNew.registeredAppModulesRole().then(resp => {
                       // let result = null
                       // if (this.flowObject.schema === this.oldFlow.schema) {
-                      //   console.log('...........')
                       // } else {
                       //   this.$Notice.warning({title: 'You\'ve change schema of <b>' + this.flowObject.name + '</b>', desc: '<a>Click Here</a> Set permissions', duration: 0})
                       // }
@@ -347,7 +344,6 @@
               camunda: camundaModdleDescriptor
             }
           })
-          // console.log('this.bpmnXML', this.bpmnXML)
           this.bpmnModeler.importXML(this.bpmnXML, function (err) {
             if (err) {
               console.error(err)
@@ -376,7 +372,6 @@
           }
           return _.map(event.outgoing, (targetMap) => {
             return _.chain(process.sequenceFlow).filter((ftr) => {
-              // console.log('ftr._id', ftr._id, targetMap)
               return ftr._id === targetMap.__text
             }).map((m) => {
               if (m._name !== undefined && m._name !== '') {

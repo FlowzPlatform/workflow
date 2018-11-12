@@ -42,7 +42,6 @@ class Service {
 }
 
 function sendmail (data, params) {
-  //  console.log(params)
   let smtpUser = user
   let smtpPassword = password
   let smtpHost = host
@@ -55,7 +54,6 @@ function sendmail (data, params) {
   if (params.headers.smtp_host) {
     smtpHost = params.headers.smtp_host
   }
-  // console.log('', smtpHost, smtpPassword, smtpUser)
   if (smtpHost !== '' && smtpHost !== undefined && smtpPassword !== '' && smtpPassword !== undefined && smtpHost !== '' && smtpHost !== undefined) {
     let SMTPServer = email.server.connect({
       user: smtpUser,
@@ -81,13 +79,11 @@ function sendmail (data, params) {
          ]
       }, function (err, message) {
         if (err) {
-          console.log('err', err)
           reject(err)
         }
         resolve({
           "success": "email sent successfully"
         })
-        // console.log(err || message); 
       })
     })
   } else {

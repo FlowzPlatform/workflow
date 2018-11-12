@@ -72,9 +72,7 @@ export default {
             // let lastLog = _.find(params.row.process_log, (f) => {
             //   return f.status === 'inputRequired'
             // })
-            // console.log('params', params.row)
             let getlastlog = _.chain(params.row.process_log).orderBy(['lastModified'], ['desc']).head().value()
-            // console.log('getlastlog', getlastlog)
             if (getlastlog !== undefined) {
               let aStatus = ''
               let _configuration = _.chain(params.row.processList).find(f => {
@@ -104,7 +102,6 @@ export default {
                 nativeOn: {
                   'click': (value) => {
                     this.$router.push('form/reply/' + params.row.id)
-                    // console.log('value', value)
                   }
                 }
               }, aStatus.toUpperCase())
@@ -146,7 +143,6 @@ export default {
     changePage (newValue) {
       this.current = newValue
       this.init()
-      // console.log('newValue', newValue)
     },
     getColor (status) {
       if (status === 'inputRequired') {

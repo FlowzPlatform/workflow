@@ -120,12 +120,10 @@
       //     let name = resultName.name
       //     resolve(name)
       //   })
-      //   // console.log('Name: ', JSON.stringify(name))
       //   // return name
       // },
       getAllPermissions: async function (appName, totalApps) {
         var self = this
-          // console.log('getAllPerm:', config.getAllPermissionsUrl+appName)
         await axios.get(config.getAllPermissionsUrl + appName, {
             // headers: {
             //   'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
@@ -156,14 +154,11 @@
       },
       getRoles: async function (newValue) {
         var self = this
-        // console.log('Subscription roles URL: ' + config.subscriptionUrl + 'register-roles?module=' + newValue)
         await axios.get(config.subscriptionUrl + 'register-roles?module=' + newValue, {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded;'
           }
         }).then(function (response) {
-            // console.log("Get all roles:",_.groupBy(response.data.data, 'module'));
-          // console.log('all roles:', response)
           if (response.data.data.length > 0) {
             self.isDone = tblData
             var arrRoles = _.groupBy(response.data.data, 'module')
@@ -174,7 +169,6 @@
                 sortField: 'name'
               }
               arrRoles[tblData].splice(0, 0, obj)
-              // console.log('arraData', arrRoles)
             }
             self.fields = arrRoles
             self.callTaskList(newValue)
@@ -185,8 +179,6 @@
         })
           .catch(function (error) {
             self.loading = false
-            // console.log(error.response.status)
-            // console.log('error: ', error)
             if (error.response.status === 500) {
               let msg = error.response.data.message.substr(error.response.data.message.indexOf(':') + 1)
               self.$Modal.warning({
@@ -228,21 +220,16 @@
         // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
         // },
         //  }).then(function (response) {
-        //     console.log("Get resources:",response.data.data);
         //     if(response.data.data.length > 0){
         //         let arrResources = _.groupBy(response.data.data, 'module');
         //         self.tableData = arrResources;
-        //         //console.log("Table rows:",Object.keys(self.tableData));
         //         for (var tblData in arrResources){
-        //             console.log("arrResources:",tblData)
         //             self.getAllPermissions(tblData, Object.keys(self.tableData).length)
         //         }
         // }
         // return response.data.data
         // })
         //     .catch(function (error) {
-        //     console.log("Get role permissions error:",error);
-        //     console.log(error);
         // })
         self.tableData = ['hi']
       },
@@ -293,7 +280,6 @@
               }
               // self.permissionsAll[index].access_value=accessVal
               // return parseInt(permission)
-              // console.log("Permiision update:--",self.permissionsAll[index].access_value)
             } else {
               let pValue = {
                 resourceId: updateValue.resourceId, // resourceid_action
@@ -302,7 +288,6 @@
                 access_value: updateValue.accessValue,
                 app: updateValue.app
               }
-                // console.log("Per Obj:--",pValue)
               self.permissionsAll.push(pValue)
             }
             self.showOverlay = false
