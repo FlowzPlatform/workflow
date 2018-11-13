@@ -44,8 +44,8 @@
                   <!-- <span v-if="$store.state.role === 1" style="float:right;" title="Create Instance" @click.prevent="createInstance(item)">
                     <i class="fa fa-plus"></i>
                   </span> -->
-                  <span v-if="$store.state.role === 1 || $store.state.role === 2" style="float:right;padding-right:5px;" title="Preview Progress" @click.prevent="viewProgress(item)">
-                    <i class="fa fa-line-chart"></i>
+                  <span v-if="$store.state.role === 1 || $store.state.role === 2" style="float:right;padding-right:5px;" title="Analytics" @click.prevent="viewProgress(item)">
+                    <Icon type="ios-analytics-outline" color="#fff" :size="20" />
                   </span>
               </template>
               <template

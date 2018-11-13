@@ -413,9 +413,12 @@
           new Promise((resolve, reject) => {
             schemaModel.get(null, {
               $paginate: false,
-              isdeleted: false
+              isdeleted: false,
+              subscriptionId: this.$store.state.subscription,
+              userId: this.$store.state.user._id
             }).then((response) => {
               response.data.splice(0, 0, { title: '---select---', id: 0 })
+              response.data = _.uniqBy(response.data, 'id')
               resolve(response.data)
             }).catch(error => {
               reject(error)
