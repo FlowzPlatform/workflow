@@ -399,7 +399,6 @@ export default {
       return date.toISOString()
     },
     searchData (query, sort) {
-      // console.log('query', query, sort)
       this.dataLoading = true
 
       // New Custom Dynamic FLowz Data call
@@ -422,7 +421,6 @@ export default {
       }
       if (query.filterBy !== null && query.filterBy !== undefined) {
         if (query.filterBy === 'customRange') {
-          console.log('Custom Range Found', query.customValue)
           if (query.customValue.length >= 1) {
             if (query.customValue[0] !== '' && query.customValue[1] !== '') {
               params['_createdAt[$gte]'] = query.customValue[0].toISOString()
@@ -431,7 +429,6 @@ export default {
           }
         } else if (query.filterBy !== '') {
           let dateRange = this.getFilterDate(query.filterBy)
-          // console.log('Normal Range Found', this.selectedFilterBy, $lte, new Date().toISOString())
           params['_createdAt[$gte]'] = dateRange
         }
       }
@@ -461,7 +458,6 @@ export default {
       }).catch(e => {
         this.$Loading.error()
         this.dataLoading = false
-        console.log('error', e)
         this.bLoading = false
         if (e.response.data.message) {
           this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
@@ -499,11 +495,9 @@ export default {
       //     this.$Loading.finish()
       //   }
       // }).catch(err => {
-      //   console.log('Error: ', err)
       // })
     },
     sortData (object) {
-      // console.log('object', object, query)
       this.searchData(null, object)
     },
     emailService (item) {
@@ -560,7 +554,7 @@ export default {
         var _res = response.data
         var obj = {}
 
-        for (let v of _res.entity) {
+        for (let [inx, v] of _res.entity.entries()) {
           if (v.customtype) {
             obj[v.name] = await self.getChildData(v.type)
           } else {
@@ -612,6 +606,8 @@ export default {
               }
             } else if (v.type === 'file') {
               obj[v.name] = []
+            } else if (v.type === 'autogenerator') {
+              obj[v.name] = v.property.prefix + (inx + 1)
             } else {
               if (v.property.defaultValue !== '') {
                 obj[v.name] = v.property.defaultValue
@@ -814,7 +810,6 @@ export default {
       let currentStateP = this.flowzData.processList[currentStageP]
       let permission = {}
       permission = currentStateP.permission
-      console.log(permission)
       for (let dobj of this.formSchemaInstance.data) {
         let flag = this.checkValidation(dobj, this.entity, permission)
         allcheck.push(flag)
@@ -848,7 +843,6 @@ export default {
           this.init()
         }).catch(e => {
           this.$Loading.error()
-          console.log('error', e)
           this.bLoading = false
           if (e.response.data.message) {
             this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
@@ -882,7 +876,6 @@ export default {
         if (this.isMultiple) {
           nextTargetId = this.flowData.processList[this.nextTarget.value]
         } else {
-          console.log('else condition: ')
           nextTargetId = this.flowData.processList[currentStageObject.target[0].id]
         }
         if (nextTargetId.type === 'sendproofmail') {
@@ -1056,7 +1049,6 @@ export default {
         this.isEmailDone = false
       }).catch(e => {
         this.$Loading.error()
-        console.log('error', e)
         this.bLoading = false
         this.email = false
         this.isEmailDone = false
@@ -1078,7 +1070,7 @@ export default {
               }
             } else {
               if (!v.property.optional) {
-                if (data[v.name] === '') {
+                if (data[v.name] === '' && v.type !== 'autogenerator') {
                   self.validErr.push({name: v.name, errmsg: 'Field is required.'})
                   self.validFlag = false
                 } else if (Array.isArray(data[v.name]) && data[v.name].length === 0) {
@@ -1166,7 +1158,7 @@ export default {
             }
           } else {
             if (!v.property.optional) {
-              if (data[v.name] === '') {
+              if (data[v.name] === '' && v.type !== 'autogenerator') {
                 self.validErr.push({name: v.name, errmsg: 'Field is required.'})
                 self.validFlag = false
               } else if (Array.isArray(data[v.name]) && data[v.name].length === 0) {
@@ -1357,7 +1349,6 @@ export default {
           '_state': this.$route.params.stateid
         }, heads)
         .then(res => {
-          // console.log('res.data.total', res.data.total)
           this.isFlowzLoaded = true
           this.dataTotal = res.data.total
           if (res.data.data.length > 0) {
@@ -1373,7 +1364,6 @@ export default {
           }
         }).catch(e => {
           this.$Loading.error()
-          console.log('error', e)
           this.bLoading = false
           if (e.response.data.message) {
             this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
@@ -1391,7 +1381,6 @@ export default {
           '_claimUser': ''
         }, heads)
         .then(res => {
-          // console.log('res.data.total', res.data)
           this.isFlowzLoaded = true
           this.dataTotalU = res.data.total
           if (res.data.data.length > 0) {
@@ -1406,7 +1395,6 @@ export default {
           }
         }).catch(e => {
           this.$Loading.error()
-          console.log('error', e)
           this.bLoading = false
           if (e.response.data.message) {
             this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
@@ -1436,7 +1424,6 @@ export default {
           }
         }).catch(e => {
           this.$Loading.error()
-          console.log('error', e)
           this.bLoading = false
           if (e.response.data.message) {
             this.$Notice.error({title: 'Error', desc: e.response.data.message.toString()})
@@ -1453,7 +1440,6 @@ export default {
       //   $skip: this.skip,
       //   $limit: this.limit
       // }).then(queryresp => {
-      //   // console.log('queryresp: ', queryresp)
       //   // this.entriesTotal = queryresp.data.data.length
       //   this.isFlowzLoaded = true
       //   this.dataTotal = queryresp.data.total
@@ -1511,13 +1497,11 @@ export default {
     this.init()
     // if (socket._callbacks['$' + this.$route.params.id.replace(/-/g, '_') + '_created'] === undefined) {
     //   socket.on(this.$route.params.id.replace(/-/g, '_') + '_created', (data) => {
-    //     console.log(data._currentStatus && data._state, this.$route.params.stateid)
     //     if (data._currentStatus && data._state === this.$route.params.stateid) {
     //       if (this.instanceEntries.length < this.entriesTotal) {
     //         this.instanceEntries.push(data)
     //         this.dataData = this.instanceEntries
     //       } else {
-    //         console.log('..........')
     //         this.dataTotal++
     //       }
     //     } else {
@@ -1536,21 +1520,15 @@ export default {
     //         this.dataData = this.instanceEntries
     //       }
     //     }
-    //     console.log(this.$store.state.role === 2, data)
     //     if (this.$store.state.role === 2 && data !== undefined) {
-    //       console.log('dataClaim', this.dataClaim)
-    //       console.log('dataClaim', data)
-    //       console.log('dataUnclaim', this.dataUnclaim)
     //       if (data._claimUser === '') {
     //         let inx = _.findIndex(this.dataUnclaim, (o) => { return o.id === data.id })
     //         this.dataUnclaim.splice(inx, 1)
     //         this.dataClaim.push(data)
-    //         console.log(inx)
     //       } else {
     //         let inx = _.findIndex(this.dataClaim, (o) => { return o.id === data.id })
     //         this.dataClaim.splice(inx, 1)
     //         this.dataUnclaim.push(data)
-    //         console.log(inx)
     //       }
     //     }
     //     let finx = _.findIndex(this.flowzList, {id: this.$route.params.id})
@@ -1612,13 +1590,11 @@ export default {
               let lastEntryId = data.stageReference[data.stageReference.length - 1].stageRecordId
               if (lastEntryId !== undefined) {
                 flowzdataModal.get(lastEntryId).then(res => {
-                  // console.log('Response fdata: ', res)
                   instanceObj['data'] = res.data.data
                   instanceObj['iid'] = data.id
                   // this.instanceEntries.push(instanceObj)
                   this.dataData.splice(inx, 1)
                   this.dataData.push(instanceObj)
-                  // console.log('Pushed data: ', this.instanceEntries, this.dataData)
                 })
               }
             } else {
@@ -1646,7 +1622,6 @@ export default {
     },
     'dflowzdata': {
       _created (data) {
-        // console.log('================created==============', data)
         let keys = Object.keys(data)
         for (let tName of keys) {
           if (tName === this.$route.params.id.replace(/-/g, '_')) {

@@ -114,7 +114,6 @@
                   },
                   on: {
                     click: () => {
-                      // console.log('removed')
                       this.handleRemove(params.index)
                     }
                   }

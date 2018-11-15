@@ -38,10 +38,6 @@ module.exports = {
 };
 
 function beforeCreate (hook) {
-  // console.log('_______________________________________________________________: ')
-  // console.log('Hook: ', hook)
-  // console.log('_______________________________________________________________: ')
-
   hook.data.createdAt = new Date().toISOString();
   hook.params.isdone = true;
   if (hook.data.hasOwnProperty('nextTarget')) {
@@ -55,16 +51,11 @@ function afterCreate (hook) {
     hook.params.query = {};
     // hook.params.query.$select = ['json'];
     const query = Object.assign({}, hook.params.query);
-    // console.log('++++++++++++++++++++++++++++++++++++++++++++++++++++++')
-    // console.log('hook.params', hook.params)
-    // console.log('++++++++++++++++++++++++++++++++++++++++++++++++++++++')
     return hook.app.service('flowz').get(hook.data.fid, {query}).then(res => {
       // let cuurentObj = _.find(res.json.processList, {id: hook.data.state});
       let cuurentObj = res.processList[hook.data.state];
-      // console.log('________________________________________________cuurentObj', cuurentObj)
       // let nextTargetObj = getNextTarget(res.json.processList, cuurentObj.target[0].id);
       let nextTargetObj = res.processList[cuurentObj.target[0].id];
-      // console.log('________________________________________________nextTargetObj', nextTargetObj)
       return hook.app.service('finstance').get(hook.data.iid).then(finstRes => {
         let mdata = {
           currentStatus: nextTargetObj.id,
@@ -74,12 +65,10 @@ function afterCreate (hook) {
           mdata.currentStatus = hook.params.nextTarget;
         }
         // if (mdata.stageReference.length > 0) {
-        //   // console.log(cuurentObj.id, mdata.stageReference[mdata.stageReference.length - 1].StageName)
         //   // if (mdata.stageReference[mdata.stageReference.length - 1].StageName === cuurentObj.id) {
         //   mdata.stageReference[mdata.stageReference.length - 1].completedAt = new Date().toISOString()
         //   // }
         // }
-        // console.log('&&&&&&&&&&&&&&&&&&%%%%%%%%%%%%%%%%: ', finstRes)
         let referenceObj = {
           StageName: finstRes.currentStatus,
           stageRecordId: hook.result.id,
@@ -104,12 +93,9 @@ function afterCreate (hook) {
         if (nextTargetObj.type === 'endevent') {
           mdata.mainStatus = 'completed';
         }
-        console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',
-          hook.params)
         return hook.app.service('finstance').patch(hook.data.iid, mdata, hook.params).then(pRes => {
           return hook;
         }).catch(err => {
-          console.log('_________________________________________________________________________________________________________', err.message)
           throw new errors.BadRequest('Error', {
             errors: { message: err.message }
           });

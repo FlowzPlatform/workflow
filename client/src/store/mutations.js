@@ -19,7 +19,6 @@ export default {
     state.flowz = flowz
   },
   SET_MAPTEMP (state, data) {
-    // console.log(_.find(state.mappingTemp, { 'producer': data.producer }))
     var status = _.find(state.mappingTemp, { 'producer': data.producer })
     if (status !== undefined) {
       var inx = _.findIndex(state.mappingTemp, { 'producer': data.producer })

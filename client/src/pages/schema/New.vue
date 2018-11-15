@@ -186,6 +186,9 @@
                                                 <Option v-for="item in dateList" :value="item.value" :key="item.value">{{ item.label }}</Option>
                                             </Select>
                                           </Form-item>
+                                          <Form-item v-if="activatedProperty(index,'prefix')" label="Prefix" :label-width="80" class="no-margin">
+                                            <Input size="small" v-model="item.property.prefix"></Input>
+                                          </Form-item>
                                         </div>
                                       </Poptip>
                                     </div>
@@ -365,7 +368,8 @@ export default {
               options: [],
               IsArray: false,
               isMultiple: true,
-              dateformatselect: ''
+              dateformatselect: '',
+              prefix: ''
             },
             notes: ''
           }
@@ -419,6 +423,10 @@ export default {
         {
           value: 'currenttime',
           label: 'Current Time'
+        },
+        {
+          value: 'autogenerator',
+          label: 'Auto Generator'
         }
       ],
       cutomtypes: [],
@@ -489,7 +497,8 @@ export default {
                 options: [],
                 IsArray: false,
                 isMultiple: true,
-                dateformatselect: ''
+                dateformatselect: '',
+                prefix: ''
               },
               notes: ''
             }
@@ -551,7 +560,6 @@ export default {
           } else {
             schemaModal.put(this.formSchema.id, this.formSchema)
             .then(response => {
-              // console.log(response)
               this.$Message.success('Schema updated..!')
               this.loading = false
               this.$router.go(-1)
@@ -586,7 +594,8 @@ export default {
               options: [],
               IsArray: false,
               isMultiple: true,
-              dateformatselect: ''
+              dateformatselect: '',
+              prefix: ''
             },
             notes: ''
           }
@@ -616,7 +625,8 @@ export default {
           options: [],
           IsArray: '',
           isMultiple: true,
-          dateformatselect: ''
+          dateformatselect: '',
+          prefix: ''
         },
         notes: ''
       })
@@ -644,7 +654,8 @@ export default {
         'dropdown': ['options', 'defaultValue', 'placeholder', 'optional'],
         'file': ['optional', 'isMultiple'],
         'currentuser': ['optional'],
-        'currenttime': ['optional', 'dateformat']
+        'currenttime': ['optional', 'dateformat'],
+        'autogenerator': ['optional', 'prefix']
 
       }
       if (typePropertys[this.formSchema.entity[index].type] === undefined) {
