@@ -97,7 +97,6 @@ export default {
     async changeRole () {
       let check
       for (let i = 0; i < this.userList.length; i++) {
-        // console.log(this.userList[i])
         await api.put(this.userList[i].id, this.userList[i])
         .then(res => {
           check = 1

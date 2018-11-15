@@ -213,7 +213,6 @@ export default {
             let resource = await this.getModuleResource(item.id)
             let roles = await this.getModuleRoles(item.id)
             let permissions = await this.getModulePermissions(item.id)
-            // console.log('', {resource}, {roles}, {permissions})
             if (resource !== undefined && roles !== undefined && permissions !== undefined) {
               let role = item.role
               let fRoleIndex = _.findIndex(roles.data.data, {role: role})
@@ -331,7 +330,6 @@ export default {
   },
   mounted () {
     this.init()
-    // console.log(this.$feathers)
   },
   beforeDestroy () {
     this.$feathers.services.dflowzdata.removeAllListeners('_created')
@@ -349,7 +347,6 @@ export default {
         this.init()
       },
       removed (data) {
-        // console.log('Removed Data: ', data)
         if (this.$store.state.role === 1) {
           // this.$store.state.flowz = []
           // this.init()
@@ -360,7 +357,6 @@ export default {
     },
     'dflowzdata': {
       _created (data) {
-        // console.log('================created==============')
         // alert('Created' + Object.keys(data))
         let keys = Object.keys(data)
         for (let tName of keys) {
@@ -376,7 +372,6 @@ export default {
       _updated (data) {
       },
       _patched (data) {
-        // console.log('==============patched============')
         // alert('Patched' + Object.keys(data))
         let keys = Object.keys(data)
         for (let tName of keys) {
@@ -392,7 +387,6 @@ export default {
         }
       },
       _removed (data) {
-        // console.log('==============patched============', data)
         let keys = Object.keys(data)
         for (let tName of keys) {
           if (data[tName]._currentStatus) {

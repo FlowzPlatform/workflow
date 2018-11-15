@@ -94,7 +94,7 @@
                                         <Select v-if="field.type == 'dropdown'" v-model="schemainstance.data[index][field.name]" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name">
                                             <Option v-for="dpd in field.property.options" :value="dpd" :key="dpd">{{ dpd }}</Option>
                                         </Select>
-
+                                        <div  v-if="field.type == 'autogenerator'">{{schemainstance.data[index][field.name]}}</div>
                                         <Checkbox v-if="field.type == 'boolean'" v-model="schemainstance.data[index][field.name]"></Checkbox>
                                         <!-- <dynamicinput :type="(field.type) ? field.type : null" :bindmodel="(schemainstance.data[index][field.name]) ? schemainstance.data[index][field.name] : null " :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name" :min="(field.property.min > 0) ? field.property.min : -Infinity" :max="(field.property.max > 0) ? field.property.max : Infinity" :options="(field.property.options) ? field.property.options : null" :field="field"></dynamicinput> -->
                                     </Col>
@@ -194,7 +194,8 @@
                                     <Select v-if="field.type == 'dropdown'" v-model="schemainstance.data[index][field.name]" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name">
                                         <Option v-for="dpd in field.property.options" :value="dpd" :key="dpd">{{ dpd }}</Option>
                                     </Select>
-
+                                    <!-- <Input v-model="schemainstance.data[index][field.name]" type="text" :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name"/> -->
+                                    <div  v-if="field.type == 'autogenerator'">{{schemainstance.data[index][field.name]}}</div>
                                     <Checkbox v-if="field.type == 'boolean'" v-model="schemainstance.data[index][field.name]"></Checkbox>
                                     <!-- <dynamicinput :type="(field.type) ? field.type : null" :bindmodel="(schemainstance.data[index][field.name]) ? schemainstance.data[index][field.name] : null " :placeholder="(field.property.placeholder !== '') ? field.property.placeholder : field.name" :min="(field.property.min > 0) ? field.property.min : -Infinity" :max="(field.property.max > 0) ? field.property.max : Infinity" :options="(field.property.options) ? field.property.options : null" :field="field"></dynamicinput> -->
                                 </Col>
@@ -394,6 +395,8 @@ export default {
                 }
               } else if (v.type === 'file') {
                 obj[v.name] = []
+              } else if (v.type === 'autogenerator') {
+                obj[v.name] = v.property.prefix + (arrObj.length + 1)
               } else {
                 if (v.property.defaultValue !== '') {
                   obj[v.name] = v.property.defaultValue
@@ -411,7 +414,6 @@ export default {
       return arrObj
     },
     getObject (eIndex, dataIndex, fname, ftype) {
-      // console.log('get obj called: ', dataIndex)
       var obj = {}
       obj.data = this.schemainstance.data[dataIndex][fname]
       obj.entity = this.schemainstance.entity[eIndex].entity[0].entity
@@ -493,6 +495,8 @@ export default {
             }
           } else if (v.type === 'file') {
             obj[v.name] = []
+          } else if (v.type === 'autogenerator') {
+            obj[v.name] = v.property.prefix + (this.schemainstance.data[dataIndex][fname].length + 1)
           } else {
             if (v.property.defaultValue !== '') {
               obj[v.name] = v.property.defaultValue
@@ -579,6 +583,13 @@ export default {
         content: '<p>Are you sure you want to delete?</p>',
         onOk: () => {
           this.schemainstance.data.splice(index, 1)
+          for (let ent of this.schemainstance.entity) {
+            if (ent.type === 'autogenerator') {
+              for (let [inx, obj] of this.schemainstance.data.entries()) {
+                obj[ent.name] = ent.property.prefix + (inx + 1)
+              }
+            }
+          }
         },
         onCancel: () => {}
       })

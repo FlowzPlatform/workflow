@@ -36,9 +36,7 @@ module.exports = {
 
 
 function beforeFind(hook) {
-  console.log('hook.params.rethinkdb****************************************', hook.params.rethinkdb)
   let query = {};
-  // console.log('__________________________________________________')
   if (hook.params.query.hasOwnProperty('$all')) {
     delete hook.params.query.$all
     
@@ -53,7 +51,6 @@ function beforeFind(hook) {
       //     data('id').eq(instance('stageReference').nth(-1).getField('stageRecordId'))
       //   ))
       // })
-      console.log('hook.params.rethinkdb', hook.params.rethinkdb)
       // hook.params.rethinkdb = query.hasFields('stageReference').filter(function(mdoc) {
       //   return mdoc("stageReference").count().gt(0)
       // }).map(function(item) {
@@ -96,6 +93,4 @@ function beforeFind(hook) {
     }).without({"right": {"id": true}})
     .zip()
   }
-  // console.log('__________________________________________________')
-  // console.log('hook.params.rethinkdb', hook.params.rethinkdb)
 }

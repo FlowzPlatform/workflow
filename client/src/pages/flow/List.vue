@@ -522,7 +522,6 @@ export default {
   feathers: {
     'flowz': {
       created (data) {
-        // console.log(this.limit)
         if (this.total < this.limit) {
           this.flowzList.push(data)
         } else {
@@ -537,7 +536,6 @@ export default {
         }
       },
       removed (data) {
-        // console.log('Removed Data: ', data)
         if (this.$store.state.role === 1) {
           // this.$store.state.flowz = []
           // this.init()
@@ -633,7 +631,6 @@ export default {
       this.$Loading.start()
       let subId = []
       let userData = this.$store.state.user.package
-      // console.log(userData)
       for (var key in userData) {
         if (userData.hasOwnProperty(key)) {
           if (userData[key].role === 'admin') {
@@ -763,7 +760,6 @@ export default {
     },
     getAllPermissions: async function (appName, totalApps) {
       var self = this
-        // console.log('getAllPerm:', config.getAllPermissionsUrl+appName)
       await axios.get(config.getAllPermissionsUrl + appName, {
           // headers: {
           //   'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
@@ -847,18 +843,14 @@ export default {
           'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
         }
       }).then(async function (response) {
-        // console.log('Response: ', response.data.data)
         let actionsArray = response.data.data
-        // console.log('processList: ', self.selectedFlowObject.processList)
         let processListArray = self.selectedFlowObject.processList
         let sortedArray = []
         for (let item of actionsArray) {
-          // console.log('Item: ', item, processListArray[self.titleCase(item.service)])
           if (processListArray[self.titleCase(item.service)] === undefined) {
             let realName = _.findKey(processListArray, function (value, key) {
               return key.toLowerCase() === item.service.toLowerCase()
             })
-            // console.log('item', realName)
             item['order'] = processListArray[realName].order
           } else {
             // item['order']
@@ -872,7 +864,6 @@ export default {
         // self.tableData = ['hi']
         self.tableData = await _.extend(self.tableData, arrResources)
         // for (let k = 0; k < self.tableData.length; k++) {
-        //   console.log('task id: ', self.tableData[k])
         // }
         self.loadingPermisions = false
       }).catch(function (error) {
@@ -888,7 +879,6 @@ export default {
         //     let name = res.name
         //     self.tableData[tblData][i]['serviceName'] = name
         //   }).catch(err => {
-        //     console.log(err)
         //   })
         // }
         await self.getAllPermissions(tblData, Object.keys(self.tableData).length)
@@ -941,7 +931,6 @@ export default {
             }
             // self.permissionsAll[index].access_value=accessVal
             // return parseInt(permission)
-            // console.log("Permiision update:--",self.permissionsAll[index].access_value)
           } else {
             let pValue = {
               resourceId: updateValue.resourceId, // resourceid_action
@@ -950,7 +939,6 @@ export default {
               access_value: updateValue.accessValue,
               app: updateValue.app
             }
-              // console.log("Per Obj:--",pValue)
             self.permissionsAll.push(pValue)
           }
           self.showOverlay = false
