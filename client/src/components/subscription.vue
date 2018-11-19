@@ -1,6 +1,6 @@
 <template>
   <div class="subscription">
-    <Select v-model="subid" style="width:200px" @on-change="handleChange" filterable>
+    <Select v-model="subid" style="min-width:300px" @on-change="handleChange" filterable>
         <Option v-for="(item, key, inx) in packages" :value="key" :key="inx">{{ item.name }}</Option>
     </Select>
   </div>  

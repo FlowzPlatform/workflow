@@ -75,6 +75,14 @@
                 <Menu-item name="4">
                   <i @click="hardRefresh" class="fa fa-refresh" aria-hidden="true" title="Hard Refresh"></i>
                 </Menu-item>
+                <Menu-item name="6" v-if="getRole == 1">
+                  <router-link to="/admin/flow/new">
+                    <Tooltip content="New Workflow">
+                      <i class="fa fa-plus" aria-hidden="true"></i>
+                    </Tooltip>
+                    <span class="text">New Workflow</span>
+                  </router-link>
+                </Menu-item>
                 <Submenu name="5">
                   <template slot="title">
                     <Icon type="person" :size="16"></Icon>
