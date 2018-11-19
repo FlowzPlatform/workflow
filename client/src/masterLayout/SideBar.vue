@@ -177,8 +177,8 @@
                   <!-- </template> -->
                 </MenuItem>
               </Submenu>
-              <MenuItem :name="index +'-1'" @click.prevent="showSecurityDialog(item)">
-                <span v-if="$store.state.role === 1" style="padding-right:5px;" title="Set Permission">
+              <MenuItem :name="index +'-1'">
+                <span v-if="$store.state.role === 1" style="padding-right:5px;" title="Set Permission" @click.prevent="showSecurityDialog(item)">
                   <Icon type="settings" style="margin-right:0px;padding:0px;"/> Set Permission
                 </span>
               </MenuItem>
