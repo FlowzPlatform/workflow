@@ -49,7 +49,10 @@ async function functionAutoGenerater(hook, field) {
   let mdata = hook.data
   hook.service.service.options.name = hook.params.headers.ftablename;
   hook.service.service.table = hook.service.rDB.table(hook.params.headers.ftablename);
-
+  let startValue = 1
+  if (field.property.startValue >= startValue) {
+    startValue = field.property.startValue;
+  }
   mdata._autoVal =
     hook.service.options.r.branch(
       hook.service.service.table.isEmpty().not()
@@ -61,7 +64,7 @@ async function functionAutoGenerater(hook, field) {
         .do(function(doc){
           return doc('_autoVal').add(1)
         }),
-    1)
+    startValue)
 
   mdata[field.name] =
     hook.service.options.r.expr(field.property.prefix).add(
@@ -75,7 +78,7 @@ async function functionAutoGenerater(hook, field) {
           .do(function(doc){
             return doc('_autoVal').add(1).coerceTo('string')
           }),
-      hook.service.options.r.expr(1).coerceTo('string'))
+      hook.service.options.r.expr(startValue).coerceTo('string'))
     )
 
   let abc = await hook.service.service.table
