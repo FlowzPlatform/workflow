@@ -315,6 +315,9 @@ export default {
                   size: 'large',
                   icon: 'ios-personadd'
                 },
+                domProps: {
+                  title: 'Invite User'
+                },
                 style: {
                   marginRight: '3px',
                   padding: '0px',
@@ -331,6 +334,9 @@ export default {
                 props: {
                   type: 'text',
                   size: 'large'
+                },
+                domProps: {
+                  title: 'Permission Dialog'
                 },
                 style: {
                   marginRight: '3px',
@@ -614,7 +620,6 @@ export default {
     },
     async getHistory () {
       axios.get(subscriptionUrl + 'subscription-invitation', {
-        // axios.get('http://172.16.230.86:3030/subscription-invitation', {
         headers: {
           'Authorization': this.$store.state.token
         },

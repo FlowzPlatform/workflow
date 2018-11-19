@@ -16,13 +16,16 @@
               <div id="js-canvas" style="width: 100%;height: calc(100vh - 110px);position: relative;"></div>
             </SplitArea>
             <SplitArea :size="20" :minSize="200">
-              <Tooltip content="Save" placement="left" class="upload-icon">
+              <Tooltip content="Save" placement="bottom" class="upload-icon">
                 <a v-if="!btnLoading" @click="handleSubmit">
                   <i class="fa fa-floppy-o"></i>
                 </a>
                 <a v-if="btnLoading">
                   <i class="fa fa-spinner fa-spin"></i>
                 </a>
+              </Tooltip>
+              <Tooltip content="Back" placement="bottom" class="upload-icon">
+                <a @click="$router.go(-1)"><i class="fa fa-chevron-circle-left"></i></a>
               </Tooltip>
               <div id="js-properties-panel"></div>
             </SplitArea>
@@ -497,6 +500,7 @@
     top: 11px;
     z-index: 2;
     right: 16px;
+    margin-right: 16px;
     font-size: 20px;
     float: right;
   }

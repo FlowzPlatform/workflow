@@ -1,5 +1,5 @@
 <template>
-  <div class="dashboard">
+  <div class="f-dashboard">
     <!-- Dashboard {{$store.state.role}} -->
     <div v-if="$store.state.role === 1">
 
