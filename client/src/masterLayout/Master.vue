@@ -4,9 +4,11 @@
       <i-col v-if="$store.state.sidenavtoggle" :span="5" :style="styles">
         <f-sidebar></f-sidebar>
       </i-col>
-      <i-col :span="contentSpan" style="z-index:1">
-         <f-header></f-header>
-         <div class="f-layout-content">
+      <i-col :span="24">
+        <f-header></f-header>
+      </i-col>
+      <i-col :span="contentSpan" style="z-index:1" :offset="contentOffset">
+        <div class="f-layout-content">
           <div class="f-layout-content-main">
             <router-view></router-view>
           </div>
@@ -41,6 +43,9 @@ export default {
     },
     contentSpan () {
       return this.$store.state.sidenavtoggle && this.$store.state.sidenavpin ? 19 : 24
+    },
+    contentOffset () {
+      return this.$store.state.sidenavtoggle && this.$store.state.sidenavpin ? 5 : 0
     }
   },
   methods: {

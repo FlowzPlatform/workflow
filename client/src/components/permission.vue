@@ -57,7 +57,8 @@ export default {
         })
         flowzModal.patch(this.$route.params.id, {processList: this.flowzdata.processList}).then(res => {
           this.$Notice.success({title: 'Succesfully Saved'})
-          this.$router.push('/admin/flow')
+          // this.$router.push('/admin/flow')
+          this.$router.go(-1)
           this.buttonLoading = false
         }).catch(e => {
           this.buttonLoading = false
@@ -66,7 +67,7 @@ export default {
       }
     },
     handleCancel () {
-      this.$router.push('/admin/flow')
+      this.$router.go(-1)
     },
     init (id) {
       this.tableLoading = true

@@ -18,14 +18,14 @@
 
           <!-- <Button class="settingsBtn" icon="ios-settings"></Button> -->
           <div class="settingsBtn">
-            <Tooltip content="Settings">
-              <Button shape="circle" type="info" @click="isModel = !isModel"><i class="fa fa-cog"></i></Button>
-            </Tooltip>
               <div style="float:right; margin-left:5px;">
                 <ButtonGroup shape="circle">
                   <Button title="Overview" icon="ios-keypad" type="primary" @click="viewChange(1)"></Button>
                   <Button title="Data View" icon="navicon-round" type="primary" @click="viewChange(2)"></Button>
                 </ButtonGroup>
+                <!-- <Tooltip content="Layout Settings"> -->
+                  <Button shape="circle" type="primary" title="Layout Settings" @click="isModel = !isModel"><i class="fa fa-cog"></i></Button>
+                <!-- </Tooltip> -->
               </div>
           </div>
 
@@ -75,7 +75,7 @@
     <!-- Configurations Modal -->
     <Modal
         v-model="isModel"
-        title="Set Configurations"
+        title="Layout Settings"
         @on-ok="ok"
         @on-cancel="cancel">
         <p>
@@ -88,7 +88,7 @@
       <!-- <Table height="690" border :columns="mainColumns()" :data="tableData"></Table> -->
       <Table :loading="tableLoading" v-if="schemaId !== null" border :columns="mainColumns" :data="tableData"></Table>
       <Row style="margin-top: 4px; float: right">
-        <Page placement="top" :total="total" :current="cpage" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize"></Page>
+        <Page placement="top" :total="total" :current="cpage" :page-size="limit" show-sizer @on-change="handlePage" @on-page-size-change="handlePagesize" />
       </Row>
     </div>
     <div v-show="columnview">

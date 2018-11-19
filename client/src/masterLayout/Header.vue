@@ -10,12 +10,12 @@
   }
 </style>
 <template>
-    <Menu mode="horizontal" :theme="'primary'">
+    <Menu mode="horizontal" :theme="'primary'" style="position: fixed; width:100%;">
         <Row type="flex">
-        <Col :span="1" v-if="toggeleEnable">
+        <Col :span="1"> <!-- Dynamic Rendering v-if="toggeleEnable" --> 
             <Row type="flex" justify="end" align="middle">
-              <span @click="$store.state.sidenavtoggle = !$store.state.sidenavtoggle">
-                <Icon type="navicon-round" :size="32" style="line-height: inherit;cursor:pointer"></Icon>
+              <span @click="$store.state.sidenavtoggle = !$store.state.sidenavtoggle, spinIcon = spinIcon == 'navicon-close' ? 'navicon-open' : 'navicon-close' ">
+                <Icon :class="spinIcon" type="navicon-round" color="#fff" :size="32" style="line-height: inherit;cursor:pointer"></Icon>
               </span>
             </Row>
         </Col>
@@ -26,82 +26,99 @@
               </a>
             </div>
         </i-col>
-        <i-col :span="calculateLength">
-            <Row type="flex" justify="end">
-                <div class="layout-nav">
-                    <!-- <Menu-item name="1">
-                      <router-link to="/">
-                        Home
-                      </router-link>
-                    </Menu-item> -->
-                    <Menu-item name="4" v-if="getRole == 1">
-                        <router-link to="/admin/emailtemplate">
-                          <Tooltip content="Email Template">
-                            <Icon type="email" :size="14"></Icon>
-                          </Tooltip>
-                            
-                            <span class="text">Email Template</span>
-                        </router-link>
-                    </Menu-item>
-                    <Menu-item name="2" v-if="getRole == 1">
-                        <router-link to="/admin/schema">
-                          <Tooltip content="Schema">
-                            <Icon type="filing" :size="14"></Icon>
-                          </Tooltip>
-                            <span class="text">Schema</span>
-                        </router-link>
-                    </Menu-item>
-                    <Menu-item name="3" v-if="getRole == 1">
-                        <router-link to="/admin/flow">
-                          <Tooltip content="Flow">
-                            <Icon type="network" :size="14"></Icon>
-                          </Tooltip>
-                            <span class="text">Flow</span>
-                        </router-link>
-                    </Menu-item>
-                    <!-- <Menu-item name="4" v-if="getRole == 1">
-                        <router-link to="/admin/DbSettings">
-                            <Icon type="gear-b" :size="14"></Icon>
-                            Db-settings
-                        </router-link>
-                    </Menu-item> -->
-                    <Menu-item name="1-1">
-                      <subscription :value="$store.state.subscription" :token="$store.state.token" @on-change="handleChange"></subscription>
-                    </Menu-item>
-                    <Menu-item name="5">
-                      <Submenu name="2">
-                        <template slot="title">
-                          <Icon type="person" :size="16"></Icon>
-                          {{getUserName}}
-                        </template>
-                        <Menu-item name="1-1"  v-if="getRole == 1">
-                            <router-link to="/admin/bpmn-plugin">
-                                <i class="fa fa-plug"></i>
-                                Plugins
-                            </router-link>
-                        </Menu-item>
-                        <Menu-item name="2-1">
-                            <a @click="handleRemove">
-                                <Icon type="ios-locked-outline" :size="16"></Icon>
-                                Logout
-                            </a>
-                        </Menu-item>
-                    </Submenu>
-                    </Menu-item>
-                    <Menu-item name="5">
-                      <i @click="hardRefresh" class="fa fa-refresh" aria-hidden="true" title="hard refresh"></i>
-                    </Menu-item>
-                </div>
-                </Row>
+        <i-col :span="19"> <!-- For Dynamic value use: calculateLength -->
+          <Row type="flex" justify="space-between">
+            <i-col>
+              <div class="layout-nav">
+                <!-- <Menu-item name="1">
+                  <router-link to="/">
+                    Home
+                  </router-link>
+                </Menu-item> -->
+                <Menu-item name="1" v-if="getRole == 1">
+                  <router-link to="/admin/emailtemplate">
+                    <Tooltip content="Email Template">
+                      <Icon type="email" :size="14"></Icon>
+                    </Tooltip>
+                      <span class="text">Email Template</span>
+                  </router-link>
+                </Menu-item>
+                <Menu-item name="2" v-if="getRole == 1">
+                    <router-link to="/admin/schema">
+                      <Tooltip content="Schema">
+                        <Icon type="filing" :size="14"></Icon>
+                      </Tooltip>
+                        <span class="text">Schema</span>
+                    </router-link>
+                </Menu-item>
+                <!-- <Menu-item name="3" v-if="getRole == 1">
+                    <router-link to="/admin/flow">
+                      <Tooltip content="Flow">
+                        <Icon type="network" :size="14"></Icon>
+                      </Tooltip>
+                        <span class="text">Flow</span>
+                    </router-link>
+                </Menu-item> -->
+                <!-- <Menu-item name="4" v-if="getRole == 1">
+                    <router-link to="/admin/DbSettings">
+                        <Icon type="gear-b" :size="14"></Icon>
+                        Db-settings
+                    </router-link>
+                </Menu-item> -->
+              </div>
+            </i-col>
+            <i-col>
+              <div class="layout-nav">
+                <Menu-item name="3">
+                  <subscription :value="$store.state.subscription" :token="$store.state.token" @on-change="handleChange"></subscription>
+                </Menu-item>
+                <Menu-item name="4">
+                  <i @click="hardRefresh" class="fa fa-refresh" aria-hidden="true" title="Hard Refresh"></i>
+                </Menu-item>
+                <Submenu name="5">
+                  <template slot="title">
+                    <Icon type="person" :size="16"></Icon>
+                    {{getUserName}}
+                  </template>
+                  <Menu-item name="5-1"  v-if="getRole == 1">
+                    <router-link to="/admin/bpmn-plugin">
+                      <i class="fa fa-plug"></i>
+                      Plugins
+                    </router-link>
+                  </Menu-item>
+                  <Menu-item name="5-2">
+                    <a @click="handleRemove">
+                      <Icon type="ios-locked-outline" :size="16"></Icon>
+                      Logout
+                    </a>
+                  </Menu-item>
+                </Submenu>
+                <Menu-item name="6" v-if="getRole == 1">
+                  <router-link to="/admin/flow/new">
+                    <Tooltip content="New Workflow">
+                      <i class="fa fa-plus" aria-hidden="true"></i>
+                    </Tooltip>
+                    <span class="text">New Workflow</span>
+                  </router-link>
+                </Menu-item>
+              </div>
+            </i-col>
+          </Row>
         </i-col>
-        </Row>
+      </Row>
     </Menu>
 </template>
 <script>
   import psl from 'psl'
   export default {
     components: {
+      'f-sidebar': (resolve) => { require(['./SideBar'], resolve) },
       subscription: (resolve) => { require(['@/components/subscription'], resolve) }
+    },
+    data () {
+      return {
+        spinIcon: 'navicon-open'
+      }
     },
     computed: {
       getRole () {
