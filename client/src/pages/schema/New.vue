@@ -189,6 +189,9 @@
                                           <Form-item v-if="activatedProperty(index,'prefix')" label="Prefix" :label-width="80" class="no-margin">
                                             <Input size="small" v-model="item.property.prefix"></Input>
                                           </Form-item>
+                                          <Form-item v-if="activatedProperty(index,'startValue')" label="Start Value" :label-width="80" class="no-margin">
+                                            <Input-number size="small" v-model="item.property.startValue"></Input-number>
+                                          </Form-item>
                                         </div>
                                       </Poptip>
                                     </div>
@@ -369,7 +372,8 @@ export default {
               IsArray: false,
               isMultiple: true,
               dateformatselect: '',
-              prefix: ''
+              prefix: '',
+              startValue: ''
             },
             notes: ''
           }
@@ -655,8 +659,7 @@ export default {
         'file': ['optional', 'isMultiple'],
         'currentuser': ['optional'],
         'currenttime': ['optional', 'dateformat'],
-        'autogenerator': ['optional', 'prefix']
-
+        'autogenerator': ['optional', 'prefix', 'startValue']
       }
       if (typePropertys[this.formSchema.entity[index].type] === undefined) {
         return ['IsArray'].indexOf(property) >= 0
